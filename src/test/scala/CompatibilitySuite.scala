@@ -2,7 +2,7 @@ import java.io.{ByteArrayOutputStream, FileNotFoundException, PrintStream}
 
 import com.qubole.sparklens.TestUtils
 import com.qubole.sparklens.app.ReporterApp
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Ignore}
 
 import scala.util.control.Breaks._
 
