@@ -7,9 +7,9 @@ name: Scala CI
 
 on:
   push:
-    branches: [ "master", "spark-2.4" ]
+    branches: [ "master", "develop" ]
   pull_request:
-    branches: [ "master", "spark-2.4" ]
+    branches: [ "master", "develop" ]
 
 permissions:
   contents: read
