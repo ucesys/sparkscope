@@ -29,3 +29,13 @@ services:
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
       - SPARK_USER=spark
+    ports:
+      - '18080:18080'
+    command: >
+      sh -c "mkdir /tmp/spark-events &&
+             echo 'AFTER MKDIR' &&
+             start-history-server.sh &
+             echo 'AFTER HISTORY SERVER' &&
+             /opt/bitnami/scripts/spark/run.sh"
+    volumes:
+      - ./lib/:/tmp/jars
