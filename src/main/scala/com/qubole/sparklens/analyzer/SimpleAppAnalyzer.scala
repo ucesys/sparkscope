@@ -30,6 +30,12 @@ class SimpleAppAnalyzer extends  AppAnalyzer {
     val ac = appContext.filterByStartAndEndTime(startTime, endTime)
     val out = new mutable.StringBuilder()
 
+    out.println("           ____              __    ____")
+    out.println("          / __/__  ___ _____/ /__ / __/_ ___  ___  ___")
+    out.println("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
+    out.println("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
+    out.println("           /_/                             /_/ ")
+
     out.println("\nPrinting application meterics. These metrics are collected at " +
       "task-level granularity and aggregated across the app (all tasks, stages, and jobs).\n")
     ac.appMetrics.print("Application Metrics", out)

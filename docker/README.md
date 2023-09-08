@@ -4,7 +4,7 @@
 
 Download sparklens, spark-examples, http-mime jars(http-mime needed to test email generation feature) 
 ```
-mkdir lib
+mkdir -p docker/lib
 curl https://repo1.maven.org/maven2/org/apache/spark/spark-examples_2.10/1.1.1/spark-examples_2.10-1.1.1.jar --output ./docker/lib/spark-examples_2.10-1.1.1.jar
 curl https://repos.spark-packages.org/qubole/sparklens/0.3.2-s_2.11/sparklens-0.3.2-s_2.11.jar --output ./docker/lib/sparklens-0.3.2-s_2.11.jar
 curl https://repo1.maven.org/maven2/org/apache/httpcomponents/httpmime/4.5.14/httpmime-4.5.14.jar --output ./docker/lib/httpmime-4.5.14.jar
@@ -14,7 +14,7 @@ curl https://repo1.maven.org/maven2/org/apache/httpcomponents/httpmime/4.5.14/ht
 
 Start spark master and worker containers. Worker container also contains spark history server.
 ```
-docker compose -f docker/spark-2.4.6-docker-compose.yml up
+docker-compose -f docker/spark-2.4.6-docker-compose.yml up
 ```
 Check Master and Spark History server UI:
 - [Master UI:](http://localhost:8080/)   
@@ -29,14 +29,18 @@ docker exec -it spark-worker bash
 Run sample application
 ```
 spark-submit \
---jars /tmp/jars/sparklens-0.3.2-s_2.11.jar \
+--jars /tmp/jars/sparkscope_2.11-0.3.2.jar  \
 --class org.apache.spark.examples.SparkPi \
 --master spark://spark-master:7077 \
 --conf spark.extraListeners=com.qubole.sparklens.QuboleJobListener \
 --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=/tmp/spark-events \
-/tmp/jars/spark-examples_2.10-1.1.1.jar 1000
+--conf spark.metrics.conf=/tmp/metrics.properties \
+--conf spark.executor.instances=3 \
+--conf spark.executor.cores=1 \
+--conf spark.executor.memory=900m \
+/tmp/jars/spark-examples_2.10-1.1.1.jar 2000
 ```
 
 Sparklens report should be generated to stdout

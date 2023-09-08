@@ -1,4 +1,4 @@
-name := "sparklens"
+name := "sparkscope"
 organization := "com.qubole"
 
 scalaVersion := "2.11.8"
