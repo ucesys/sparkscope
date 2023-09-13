@@ -97,7 +97,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf) extends  AppAnalyzer {
     }
 
     joinedExecutorMetrics.foreach { joinedExecutorMetrics =>
-      out.println(s"[SparkScope] Displaying merged metrics for executor=${joinedExecutorMetrics.executorId}\n")
+      out.println(s"\n[SparkScope] Displaying merged metrics for executor=${joinedExecutorMetrics.executorId}")
       out.println(joinedExecutorMetrics.metrics)
     }
 
