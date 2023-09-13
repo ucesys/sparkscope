@@ -154,9 +154,8 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf) extends  AppAnalyzer {
 
   def addExecIdColumn(metricsStr: String, executorId: Int, delimeter: String): String = {
     val rows =  metricsStr.split("\n")
-    val header = rows.head + delimeter + "executorId"
-    val values = rows.tail.map(row => row + delimeter + executorId)
+    val header = "executorId" + delimeter + rows.head
+    val values = rows.tail.map(row => executorId + delimeter + row)
     (Seq(header) ++ values).mkString("\n")
   }
-
 }
