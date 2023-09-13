@@ -74,8 +74,9 @@ trait AppAnalyzer {
 }
 
 object AppAnalyzer {
+  val list = new ListBuffer[AppAnalyzer]
   def startAnalyzers(appContext: AppContext): Unit = {
-    val list = new ListBuffer[AppAnalyzer]
+
     list += new SimpleAppAnalyzer
     list += new HostTimelineAnalyzer
     list += new ExecutorTimelineAnalyzer
@@ -84,7 +85,7 @@ object AppAnalyzer {
     list += new EfficiencyStatisticsAnalyzer
     list += new ExecutorWallclockAnalyzer
     list += new StageSkewAnalyzer
-
+// TODO Add ExecutorMetricsAnalyzer
 
     list.foreach( x => {
       try {

@@ -176,6 +176,8 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
       stageMap,
       stageIDToJobID)
 
+    AppAnalyzer.list += new ExecutorMetricsAnalyzer(sparkConf)
+
     asyncReportingEnabled(sparkConf) match {
       case true => {
         println("Reporting disabled. Will save sparklens data file for later use.")

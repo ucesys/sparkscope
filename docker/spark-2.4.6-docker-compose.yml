@@ -31,6 +31,7 @@ services:
       - SPARK_USER=spark
     ports:
       - '18080:18080'
+      - '8090:8090'
     command: >
       sh -c "mkdir /tmp/spark-events &&
              echo 'AFTER MKDIR' &&
