@@ -27,7 +27,13 @@ import java.net.URI
 import java.util.Properties
 import scala.collection.mutable
 
+case class CSVMetric(name: String, csvFileStr: String)
+case class CSVExecutorMetrics(executorId: Int, metrics: Seq[CSVMetric])
+
+case class CSVExecutorJoinedMetrics(executorId: Int, metrics: String)
+
 class ExecutorMetricsAnalyzer(sparkConf: SparkConf) extends  AppAnalyzer {
+
 
   def analyze(appContext: AppContext, startTime: Long, endTime: Long): String = {
     val ac = appContext.filterByStartAndEndTime(startTime, endTime)
@@ -71,13 +77,28 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf) extends  AppAnalyzer {
     // 4
     val metrics = Seq("jvm.total.used", "jvm.total.max", "jvm.heap.usage", "jvm.heap.used", "jvm.non-heap.usage", "jvm.non-heap.used")
 
-    metrics.foreach{ metric =>
-      for (executorId <- 0 until ac.executorMap.size) {
+
+    val executorCsvMetrics: Seq[CSVExecutorMetrics] = ( 0 until ac.executorMap.size).map { executorId =>
+       val csvMetrics = metrics.map { metric =>
         val metricsFilePath = s"${csvMetricsDir}/${appContext.appInfo.applicationID}.${executorId}.${metric}.csv"
-        val csvFileStr = readStr(metricsFilePath)
+        val csvFileStr = readStr(metricsFilePath).replace("value", metric)
         out.println(s"[SparkScope] Reading ${metric} metric for executor=${executorId} from " + metricsFilePath)
-        out.println(csvFileStr)
+        CSVMetric(metric, csvFileStr)
       }
+      CSVExecutorMetrics(executorId, csvMetrics)
+    }
+    executorCsvMetrics.foreach{ executorMetrics => executorMetrics.metrics.foreach{ metric =>
+      out.println(s"[SparkScope] Displaying ${metric.name} metric for executor=${executorMetrics.executorId}:")
+      out.println(metric.csvFileStr)
+    }}
+
+    val joinedExecutorMetrics: Seq[CSVExecutorJoinedMetrics] = executorCsvMetrics.map { executorMetrics =>
+      CSVExecutorJoinedMetrics(executorMetrics.executorId, joinCsvFiles(executorMetrics.metrics, ","))
+    }
+
+    joinedExecutorMetrics.foreach { joinedExecutorMetrics =>
+      out.println(s"[SparkScope] Displaying merged metrics for executor=${joinedExecutorMetrics.executorId}\n")
+      out.println(joinedExecutorMetrics.metrics)
     }
 
     out.toString()
@@ -91,4 +112,25 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf) extends  AppAnalyzer {
     fs.open(path).readFully(byteArray)
     (byteArray.map(_.toChar)).mkString
   }
+
+  def joinCsvFiles(executorCsvMetrics: Seq[CSVMetric], delimeter: String): String = {
+    var outMergedFileRows: Seq[String] = executorCsvMetrics.head.csvFileStr.split("\n")
+    val baselineTimeCol = outMergedFileRows.map(_.split(delimeter).toSeq.head)
+
+    executorCsvMetrics.tail.foreach { executorCsvMetric =>
+      val inMergedFileRows = executorCsvMetric.csvFileStr.split("\n")
+      val timeCol = inMergedFileRows.map(_.split(delimeter).toSeq.head)
+      val metricCol = inMergedFileRows.map(_.split(delimeter).toSeq.last)
+      if (baselineTimeCol.containsSlice(timeCol)) {
+        timeCol.foreach(println)
+      }
+      for (rowId <- 0 until outMergedFileRows.length) {
+        val mergedRow: String = outMergedFileRows(rowId).concat(delimeter).concat(metricCol(rowId))
+        outMergedFileRows = outMergedFileRows.updated(rowId, mergedRow)
+      }
+    }
+    val mergedCsvStr = outMergedFileRows.mkString("\n")
+    mergedCsvStr
+  }
+
 }
