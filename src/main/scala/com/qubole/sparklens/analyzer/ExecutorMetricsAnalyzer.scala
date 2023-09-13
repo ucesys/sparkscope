@@ -93,13 +93,26 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf) extends  AppAnalyzer {
     }}
 
     val joinedExecutorMetrics: Seq[CSVExecutorJoinedMetrics] = executorCsvMetrics.map { executorMetrics =>
-      CSVExecutorJoinedMetrics(executorMetrics.executorId, joinCsvFiles(executorMetrics.metrics, ","))
+      CSVExecutorJoinedMetrics(executorMetrics.executorId, joinCsvMetrics(executorMetrics.metrics, ","))
     }
 
     joinedExecutorMetrics.foreach { joinedExecutorMetrics =>
-      out.println(s"\n[SparkScope] Displaying merged metrics for executor=${joinedExecutorMetrics.executorId}")
+      out.println(s"\n[SparkScope] Displaying joined metrics for executor=${joinedExecutorMetrics.executorId}")
       out.println(joinedExecutorMetrics.metrics)
     }
+
+    val joinedExecutorMetricsWithExecId = joinedExecutorMetrics.map { joinedExecutorMetrics =>
+      addExecIdColumn(joinedExecutorMetrics.metrics, joinedExecutorMetrics.executorId, ",")
+    }
+
+    joinedExecutorMetricsWithExecId.foreach { joinedExecutorMetrics =>
+      out.println(s"\n[SparkScope] Displaying joined metrics with Executor Id for executor")
+      out.println(joinedExecutorMetrics)
+    }
+
+    val unionedCsvMetrics = unionCsvMetrics(joinedExecutorMetricsWithExecId)
+    out.println(s"\n[SparkScope] Displaying unioned metrics for all executors")
+    out.println(unionedCsvMetrics)
 
     out.toString()
   }
@@ -113,7 +126,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf) extends  AppAnalyzer {
     (byteArray.map(_.toChar)).mkString
   }
 
-  def joinCsvFiles(executorCsvMetrics: Seq[CSVMetric], delimeter: String): String = {
+  def joinCsvMetrics(executorCsvMetrics: Seq[CSVMetric], delimeter: String): String = {
     var outMergedFileRows: Seq[String] = executorCsvMetrics.head.csvFileStr.split("\n")
     val baselineTimeCol = outMergedFileRows.map(_.split(delimeter).toSeq.head)
 
@@ -131,6 +144,19 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf) extends  AppAnalyzer {
     }
     val mergedCsvStr = outMergedFileRows.mkString("\n")
     mergedCsvStr
+  }
+  
+  def unionCsvMetrics(joinedExecutorMetricsWithExecId: Seq[String]): String = {
+    // TODO CHECK HEADERS
+    val header = joinedExecutorMetricsWithExecId.head.split("\n").head
+    (Seq(header) ++ joinedExecutorMetricsWithExecId.flatMap(_.split("\n").tail)).mkString("\n")
+  }
+
+  def addExecIdColumn(metricsStr: String, executorId: Int, delimeter: String): String = {
+    val rows =  metricsStr.split("\n")
+    val header = rows.head + delimeter + "executorId"
+    val values = rows.tail.map(row => row + delimeter + executorId)
+    (Seq(header) ++ values).mkString("\n")
   }
 
 }
