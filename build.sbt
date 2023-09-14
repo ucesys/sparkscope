@@ -20,6 +20,9 @@ libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.6" % "p
 
 libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.5.6" % "provided"
 
+libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test
+
 test in assembly := {}
 
 testOptions in Test += Tests.Argument("-oF")

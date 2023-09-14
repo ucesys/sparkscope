@@ -18,10 +18,9 @@
 package com.qubole.sparklens
 
 import java.net.URI
-
 import com.qubole.sparklens.analyzer._
 import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
-import com.qubole.sparklens.helper.{EmailReportHelper, HDFSConfigHelper}
+import com.qubole.sparklens.helper.{CsvHadoopReader, EmailReportHelper, HDFSConfigHelper, HadoopPropertiesLoader, PropertiesLoader}
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkConf
@@ -176,7 +175,7 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
       stageMap,
       stageIDToJobID)
 
-    AppAnalyzer.list += new ExecutorMetricsAnalyzer(sparkConf)
+    AppAnalyzer.list += new ExecutorMetricsAnalyzer(sparkConf, new CsvHadoopReader, new HadoopPropertiesLoader)
 
     asyncReportingEnabled(sparkConf) match {
       case true => {
