@@ -103,17 +103,22 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       out.println(metrics)
     }
 
-
     var allExecutorsMetrics: DataFrame = executorsMetricsCombinedMapWithExecId.head match {
       case (_, b) => b
     }
 
-    executorsMetricsCombinedMapWithExecId.foreach { case (_, metrics) =>
+    executorsMetricsCombinedMapWithExecId.tail.foreach { case (_, metrics) =>
       allExecutorsMetrics = allExecutorsMetrics.union(metrics)
     }
     out.println(s"\n[SparkScope] Displaying merged metrics for all executors:")
     out.println(allExecutorsMetrics)
 
+    // Aggregations
+    out.println(s"\n[SparkScope] Displaying aggregations:")
+    val maxHeapUsed = allExecutorsMetrics.columns.find(_.name == "jvm.heap.used").map(_.toInt.max/ (1024*1024)).getOrElse(0)
+    val maxNonHeapUsed = allExecutorsMetrics.columns.find(_.name == "jvm.non-heap.used").map(_.toInt.max / (1024*1024)).getOrElse(0)
+    out.println(s"maxHeapUsed: ${maxHeapUsed}MB"  )
+    out.println(s"maxNonHeapUsed: ${maxNonHeapUsed}MB")
     out.toString
   }
 }

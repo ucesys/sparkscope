@@ -2,6 +2,9 @@ package com.qubole.sparklens.helper
 
 case class DataColumn(name: String, values: Seq[String]) {
     def size: Int = values.length
+    def toFloat: Seq[Float] = values.map(_.toFloat)
+    def toInt: Seq[Int] = values.map(_.toInt)
+//    def max: Float = this.toFloat.max
 }
 
 case class DataFrame(name: String, columns: Seq[DataColumn]) {
