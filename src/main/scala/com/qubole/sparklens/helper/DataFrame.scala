@@ -39,9 +39,15 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
 
     def mergeOn(onCol: String, other: DataFrame): DataFrame = {
         assert(this.columns.find(_.name == onCol) == other.columns.find(_.name == onCol) , "MergedOn tables must have the same values for the onColumn!")
-//        val colsSeq = this.columns ++ other.toRows).transpose
-//        val columns = (columnsNames zip colsSeq).map { case (name, values) => DataColumn(name, values) }
         DataFrame(this.name, this.columns ++ other.columns.filterNot(_.name == onCol))
+    }
+
+    def groupBySum(groupCol: String, aggCol: String): DataFrame = {
+        val groupColumn = this.columns.find(_.name==groupCol).get.values
+        val aggColumn = this.columns.find(_.name==aggCol).get.values
+        val grouped = groupColumn.zip(aggColumn).groupBy(x => x._1).map{case (groupCol, seq) => (groupCol, seq.map{case(groupCol, aggCol) => aggCol})}
+        val aggregated = grouped.map{case (groupCol, seq) => (groupCol, seq.map(_.toFloat).sum)}
+        DataFrame("groupBySum", columns = Seq(DataColumn(groupCol, aggregated.keys.toSeq), DataColumn(aggCol, aggregated.values.toSeq.map(x => f"${x}%.4f"))))
     }
 }
 

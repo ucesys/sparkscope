@@ -124,13 +124,27 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     out.println(s"\n[SparkScope] Displaying merged metrics for all executors:")
     out.println(allExecutorsMetrics)
 
+    // Series
+    val clusterHeapUsed = allExecutorsMetrics.groupBySum("t", JvmHeapUsed)
+    val clusterHeapMax = allExecutorsMetrics.groupBySum("t", JvmHeapMax)
+    val clusterNonHeapUsed= allExecutorsMetrics.groupBySum("t", JvmNonHeapUsed)
+
     // Aggregations
-    out.println(s"\n[SparkScope] Displaying summary:")
     val maxHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmHeapUsed).map(_.toInt.max/ (1024*1024)).getOrElse(0)
     val maxHeapUsagePerc = allExecutorsMetrics.columns.find(_.name == JvmHeapUsage).map(_.toFloat.max*100).getOrElse(0f).toDouble
     val maxNonHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmNonHeapUsed).map(_.toInt.max / (1024*1024)).getOrElse(0)
-    out.println(f"Max heap memory used by single executor: ${maxHeapUsed}MB(${maxHeapUsagePerc}%1.2f%%)")
-    out.println(s"Max non-heap memory used by single executor: ${maxNonHeapUsed}MB")
+    val avgHeapUsagePerc = allExecutorsMetrics.columns.find(_.name == JvmHeapUsage)
+      .map(col => col.toFloat.sum*100/col.values.length).getOrElse(0f).toDouble
+
+    out.println(clusterHeapUsed)
+    out.println(clusterHeapMax)
+    out.println(clusterNonHeapUsed)
+
+    out.println(s"\n[SparkScope] Displaying summary:")
+    out.println(f"Average Cluster heap memory utilization: ${avgHeapUsagePerc}%1.2f%%")
+    out.println(f"Max heap memory utilization by single executor: ${maxHeapUsed}MB(${maxHeapUsagePerc}%1.2f%%)")
+    out.println(s"Max non-heap memory utilization by single executor: ${maxNonHeapUsed}MB")
+
     out.toString
   }
 }
