@@ -3,7 +3,7 @@ package com.qubole.sparklens.helper
 case class DataColumn(name: String, values: Seq[String]) {
     def size: Int = values.length
     def toFloat: Seq[Float] = values.map(_.toFloat)
-    def toInt: Seq[Int] = values.map(_.toFloat.toInt)
+    def toLong: Seq[Long] = values.map(_.toFloat.toLong)
 //    def max: Float = this.toFloat.max
 }
 
