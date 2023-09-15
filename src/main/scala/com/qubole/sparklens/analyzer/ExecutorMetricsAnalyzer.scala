@@ -24,6 +24,18 @@ import org.apache.spark.SparkConf
 
 class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertiesLoader: PropertiesLoader) extends  AppAnalyzer {
 
+  val JvmHeapUsed = "jvm.heap.used" // in bytes
+  val JvmHeapUsage= "jvm.heap.usage" // equals used/max
+  val JvmHeapMax= "jvm.heap.max" // in bytes
+  val JvmNonHeapUsed = "jvm.non-heap.used" // in bytes
+  val JvmTotalUsed = "jvm.total.used"  // equals jvm.heap.used + jvm.non-heap.used
+//  val JvmNonHeapUsage = "jvm.non-heap.usage" // equals used/max, gives negative number because non-heap.max equals -1
+//  val JvmNonHeapMax= "jvm.non-heap.max" //  equals -1
+//  val JvmTotalMax = "jvm.total.max" // equals jvm.heap.max
+
+//  val JvmMetrics = Seq(JvmTotalUsed, JvmHeapUsed, JvmNonHeapUsed)
+  val JvmMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, JvmTotalUsed)
+
   def analyze(appContext: AppContext, startTime: Long, endTime: Long): String = {
     val ac = appContext.filterByStartAndEndTime(startTime, endTime)
     val out = new mutable.StringBuilder()
@@ -61,10 +73,9 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
 
     // 4
     //    val metricNames = Seq("jvm.total.used", "jvm.total.max", "jvm.heap.usage", "jvm.heap.used", "jvm.non-heap.usage", "jvm.non-heap.used")
-    val metricNames = Seq("jvm.total.used", "jvm.heap.used", "jvm.non-heap.used")
 
     val executorsMetricsMap: Map[Int, Seq[DataFrame]] = (0 until ac.executorMap.size).map { executorId =>
-      val metricTables: Seq[DataFrame] = metricNames.map { metric =>
+      val metricTables: Seq[DataFrame] = JvmMetrics.map { metric =>
         val metricsFilePath = s"${csvMetricsDir}/${appContext.appInfo.applicationID}.${executorId}.${metric}.csv"
         val csvFileStr = reader.read(metricsFilePath).replace("value", metric)
         out.println(s"[SparkScope] Reading ${metric} metric for executor=${executorId} from " + metricsFilePath)
@@ -114,11 +125,12 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     out.println(allExecutorsMetrics)
 
     // Aggregations
-    out.println(s"\n[SparkScope] Displaying aggregations:")
-    val maxHeapUsed = allExecutorsMetrics.columns.find(_.name == "jvm.heap.used").map(_.toInt.max/ (1024*1024)).getOrElse(0)
-    val maxNonHeapUsed = allExecutorsMetrics.columns.find(_.name == "jvm.non-heap.used").map(_.toInt.max / (1024*1024)).getOrElse(0)
-    out.println(s"maxHeapUsed: ${maxHeapUsed}MB"  )
-    out.println(s"maxNonHeapUsed: ${maxNonHeapUsed}MB")
+    out.println(s"\n[SparkScope] Displaying summary:")
+    val maxHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmHeapUsed).map(_.toInt.max/ (1024*1024)).getOrElse(0)
+    val maxHeapUsagePerc = allExecutorsMetrics.columns.find(_.name == JvmHeapUsage).map(_.toFloat.max*100).getOrElse(0f).toDouble
+    val maxNonHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmNonHeapUsed).map(_.toInt.max / (1024*1024)).getOrElse(0)
+    out.println(f"Max heap memory used by single executor: ${maxHeapUsed}MB(${maxHeapUsagePerc}%1.2f%%)")
+    out.println(s"Max non-heap memory used by single executor: ${maxNonHeapUsed}MB")
     out.toString
   }
 }

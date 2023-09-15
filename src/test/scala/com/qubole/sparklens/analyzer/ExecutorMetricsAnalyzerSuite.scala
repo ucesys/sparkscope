@@ -101,12 +101,18 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
     val csvReaderMock = stub[CsvReader]
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.total.used.csv").returns(jvmTotalExec0Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.used.csv").returns(jvmHeapExec0Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.usage.csv").returns(jvmHeapUsageExec0Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.max.csv").returns(jvmHeapMaxExec0Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.non-heap.used.csv").returns(jvmNonHeapExec0Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.total.used.csv").returns(jvmTotalExec1Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.used.csv").returns(jvmHeapExec1Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.usage.csv").returns(jvmHeapUsageExec1Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.max.csv").returns(jvmHeapMaxExec1Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.non-heap.used.csv").returns(jvmNonHeapExec1Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.total.used.csv").returns(jvmTotalExec2Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.heap.used.csv").returns(jvmHeapExec2Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.heap.usage.csv").returns(jvmHeapUsageExec2Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.heap.max.csv").returns(jvmHeapMaxExec2Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.non-heap.used.csv").returns(jvmNonHeapExec2Csv)
 
     val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, csvReaderMock, propertiesLoaderMock)
@@ -121,57 +127,93 @@ object ExecutorMetricsAnalyzerSuite {
   val metricsPropertiesPath = "path/to/metrics.properties"
   val csvMetricsPath = "/tmp/csv-metrics"
 
-  val jvmTotalExec0Csv =
+  val jvmTotalExec0Csv: String =
     """t,jvm.total.used
-      |1694711710,302305768
-      |1694711715,400292232
-      |1694711719,139839016""".stripMargin
+      |1694737416,302305768
+      |1694737421,400292232
+      |1694737424,139839016""".stripMargin
 
-  val jvmHeapExec0Csv =
+  val jvmHeapExec0Csv: String =
     """t,jvm.heap.used
-      |1694711710,250875544
-      |1694711715,349057656
-      |1694711719,86722064""".stripMargin
+      |1694737416,133453096
+      |1694737421,261379360
+      |1694737424,198144808""".stripMargin
 
-  val jvmNonHeapExec0Csv =
+  val jvmHeapUsageExec0Csv: String =
+    """t,jvm.heap.usage
+      |1694737416,0.15908848762512207
+      |1694737421,0.3115884780883789
+      |1694737424,0.23620701789855958""".stripMargin
+
+  val jvmHeapMaxExec0Csv: String =
+    """t,jvm.heap.max
+      |1694737416,838860800
+      |1694737421,838860800
+      |1694737424,838860800""".stripMargin
+
+  val jvmNonHeapExec0Csv: String =
     """t,jvm.non-heap.used
-      |1694711710,47505872
-      |1694711715,50600840
-      |1694711719,51593328""".stripMargin
+      |1694737416,47505872
+      |1694737421,50600840
+      |1694737424,51593328""".stripMargin
 
-  val jvmTotalExec1Csv =
+  val jvmTotalExec1Csv: String =
     """t,jvm.total.used
-      |1694711710,402305768
-      |1694711715,500292232
-      |1694711719,239839016""".stripMargin
+      |1694737416,402305768
+      |1694737421,500292232
+      |1694737424,239839016""".stripMargin
 
-  val jvmHeapExec1Csv =
+  val jvmHeapExec1Csv: String =
     """t,jvm.heap.used
-      |1694711710,350875544
-      |1694711715,449057656
-      |1694711719,186722064""".stripMargin
+      |1694737416,326353928
+      |1694737421,166876288
+      |1694737424,105890120""".stripMargin
 
-  val jvmNonHeapExec1Csv =
+  val jvmHeapUsageExec1Csv: String =
+    """t,jvm.heap.usage
+      |1694737416,0.38904419898986814
+      |1694737421,0.1989320373535156
+      |1694737424,0.12623085975646972""".stripMargin
+
+  val jvmHeapMaxExec1Csv: String =
+    """t,jvm.heap.max
+      |1694737416,838860800
+      |1694737421,838860800
+      |1694737424,838860800""".stripMargin
+
+  val jvmNonHeapExec1Csv: String =
     """t,jvm.non-heap.used
-      |1694711710,47505872
-      |1694711715,50600840
-      |1694711719,51593328""".stripMargin
+      |1694737416,47505872
+      |1694737421,50600840
+      |1694737424,51593328""".stripMargin
 
-  val jvmTotalExec2Csv =
+  val jvmTotalExec2Csv: String =
     """t,jvm.total.used
-      |1694711710,502305768
-      |1694711715,600292232
-      |1694711719,339839016""".stripMargin
+      |1694737416,502305768
+      |1694737421,600292232
+      |1694737424,339839016""".stripMargin
 
-  val jvmHeapExec2Csv =
+  val jvmHeapExec2Csv: String =
     """t,jvm.heap.used
-      |1694711710,450875544
-      |1694711715,549057656
-      |1694711719,286722064""".stripMargin
+      |1694737416,166876288
+      |1694737421,326353928
+      |1694737424,105890120""".stripMargin
 
-  val jvmNonHeapExec2Csv =
+  val jvmHeapUsageExec2Csv: String =
+    """t,jvm.heap.usage
+      |1694737416,0.1989320373535156
+      |1694737421,0.38904419898986814
+      |1694737424,0.12623085975646972""".stripMargin
+
+  val jvmHeapMaxExec2Csv: String =
+    """t,jvm.heap.max
+      |1694737416,838860800
+      |1694737421,838860800
+      |1694737424,838860800""".stripMargin
+
+  val jvmNonHeapExec2Csv: String =
     """t,jvm.non-heap.used
-      |1694711710,47505872
-      |1694711715,50600840
-      |1694711719,51593328""".stripMargin
+      |1694737416,47505872
+      |1694737421,50600840
+      |1694737424,51593328""".stripMargin
 }
