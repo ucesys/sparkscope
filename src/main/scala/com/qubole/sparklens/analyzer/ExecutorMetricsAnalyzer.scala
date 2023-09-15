@@ -127,7 +127,9 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     // Series
     val clusterHeapUsed = allExecutorsMetrics.groupBySum("t", JvmHeapUsed)
     val clusterHeapMax = allExecutorsMetrics.groupBySum("t", JvmHeapMax)
-    val clusterNonHeapUsed= allExecutorsMetrics.groupBySum("t", JvmNonHeapUsed)
+    val clusterNonHeapUsed = allExecutorsMetrics.groupBySum("t", JvmNonHeapUsed)
+    val clusterHeapUsage = allExecutorsMetrics.groupByAvg("t", JvmHeapUsage)
+//    val clusterHeapUsage = allExecutorsMetrics.groupByAvg("t", JvmHeapUsage)
 
     // Aggregations
     val maxHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmHeapUsed).map(_.toInt.max/ (1024*1024)).getOrElse(0)
@@ -135,16 +137,29 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val maxNonHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmNonHeapUsed).map(_.toInt.max / (1024*1024)).getOrElse(0)
     val avgHeapUsagePerc = allExecutorsMetrics.columns.find(_.name == JvmHeapUsage)
       .map(col => col.toFloat.sum*100/col.values.length).getOrElse(0f).toDouble
+    val avgHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmHeapUsed)
+      .map(col => col.toInt.sum / (col.values.length*1024*1024)).getOrElse(0)
+    val avgNonHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmNonHeapUsed)
+      .map(col => col.toInt.sum / (col.values.length * 1024 * 1024)).getOrElse(0)
+    val maxClusterHeapUsed = clusterHeapUsed.columns.find(_.name == JvmHeapUsed).map(_.toInt.max/ (1024*1024)).getOrElse(0)
+    val maxClusterHeapUsagePerc = clusterHeapUsage.columns.find(_.name == JvmHeapUsage).map(_.toFloat.max*100).getOrElse(0f).toDouble
+    val avgClusterHeapUsed = clusterHeapUsed.columns.find(_.name == JvmHeapUsed)
+      .map(col => col.toInt.sum / (col.values.length * 1024 * 1024)).getOrElse(0)
 
     out.println(clusterHeapUsed)
     out.println(clusterHeapMax)
     out.println(clusterNonHeapUsed)
+    out.println(clusterHeapUsage)
 
-    out.println(s"\n[SparkScope] Displaying summary:")
-    out.println(f"Average Cluster heap memory utilization: ${avgHeapUsagePerc}%1.2f%%")
-    out.println(f"Max heap memory utilization by single executor: ${maxHeapUsed}MB(${maxHeapUsagePerc}%1.2f%%)")
-    out.println(s"Max non-heap memory utilization by single executor: ${maxNonHeapUsed}MB")
+    out.println(s"\n[SparkScope] Cluster stats:")
+    out.println(f"Average Cluster heap memory utilization: ${avgHeapUsagePerc}%1.2f%% / ${avgClusterHeapUsed}MB")
+    out.println(f"Max Cluster heap memory utilization: ${maxClusterHeapUsagePerc}%1.2f%% / ${maxClusterHeapUsed}MB")
 
+    out.println(s"\n[SparkScope] Executor stats:")
+    out.println(f"Max heap memory utilization by executor: ${maxHeapUsed}MB(${maxHeapUsagePerc}%1.2f%%)")
+    out.println(f"Average heap memory utilization by executor: ${avgHeapUsed}MB(${avgHeapUsagePerc}%1.2f%%)")
+    out.println(s"Max non-heap memory utilization by executor: ${maxNonHeapUsed}MB")
+    out.println(f"Average non-heap memory utilization by executor: ${avgNonHeapUsed}MB")
     out.toString
   }
 }

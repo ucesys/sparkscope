@@ -3,7 +3,7 @@ package com.qubole.sparklens.helper
 case class DataColumn(name: String, values: Seq[String]) {
     def size: Int = values.length
     def toFloat: Seq[Float] = values.map(_.toFloat)
-    def toInt: Seq[Int] = values.map(_.toInt)
+    def toInt: Seq[Int] = values.map(_.toFloat.toInt)
 //    def max: Float = this.toFloat.max
 }
 
@@ -47,6 +47,14 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
         val aggColumn = this.columns.find(_.name==aggCol).get.values
         val grouped = groupColumn.zip(aggColumn).groupBy(x => x._1).map{case (groupCol, seq) => (groupCol, seq.map{case(groupCol, aggCol) => aggCol})}
         val aggregated = grouped.map{case (groupCol, seq) => (groupCol, seq.map(_.toFloat).sum)}
+        DataFrame("groupBySum", columns = Seq(DataColumn(groupCol, aggregated.keys.toSeq), DataColumn(aggCol, aggregated.values.toSeq.map(x => f"${x}%.4f"))))
+    }
+
+    def groupByAvg(groupCol: String, aggCol: String): DataFrame = {
+        val groupColumn = this.columns.find(_.name == groupCol).get.values
+        val aggColumn = this.columns.find(_.name == aggCol).get.values
+        val grouped = groupColumn.zip(aggColumn).groupBy(x => x._1).map { case (groupCol, seq) => (groupCol, seq.map { case (groupCol, aggCol) => aggCol }) }
+        val aggregated = grouped.map { case (groupCol, seq) => (groupCol, seq.map(_.toFloat).sum / seq.length) }
         DataFrame("groupBySum", columns = Seq(DataColumn(groupCol, aggregated.keys.toSeq), DataColumn(aggCol, aggregated.values.toSeq.map(x => f"${x}%.4f"))))
     }
 }
