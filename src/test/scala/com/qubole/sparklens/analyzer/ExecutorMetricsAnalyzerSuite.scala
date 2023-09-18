@@ -99,6 +99,11 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
     (propertiesLoaderMock.load _).when(metricsPropertiesPath).returns(properties)
 
     val csvReaderMock = stub[CsvReader]
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.total.used.csv").returns(jvmTotalDriverCsv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(jvmNonHeapDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.total.used.csv").returns(jvmTotalExec0Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.used.csv").returns(jvmHeapExec0Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.usage.csv").returns(jvmHeapUsageExec0Csv)
@@ -126,6 +131,41 @@ object ExecutorMetricsAnalyzerSuite {
   final val appId = "123456789_0001"
   val metricsPropertiesPath = "path/to/metrics.properties"
   val csvMetricsPath = "/tmp/csv-metrics"
+
+  val jvmTotalDriverCsv: String =
+    """t,jvm.total.used
+      |1694737411,312305768
+      |1694737416,302305768
+      |1694737421,400292232
+      |1694737424,139839016""".stripMargin
+
+  val jvmHeapDriverCsv: String =
+    """t,jvm.heap.used
+      |1694737411,142305768
+      |1694737416,133453096
+      |1694737421,261379360
+      |1694737424,198144808""".stripMargin
+
+  val jvmHeapUsageDriverCsv: String =
+    """t,jvm.heap.usage
+      |1694737411,0.16908848762512207
+      |1694737416,0.15908848762512207
+      |1694737421,0.3115884780883789
+      |1694737424,0.23620701789855958""".stripMargin
+
+  val jvmHeapMaxDriverCsv: String =
+    """t,jvm.heap.max
+      |1694737411,838860800
+      |1694737416,838860800
+      |1694737421,838860800
+      |1694737424,838860800""".stripMargin
+
+  val jvmNonHeapDriverCsv: String =
+    """t,jvm.non-heap.used
+      |1694737411,50600840
+      |1694737416,47505872
+      |1694737421,50600840
+      |1694737424,51593328""".stripMargin
 
   val jvmTotalExec0Csv: String =
     """t,jvm.total.used

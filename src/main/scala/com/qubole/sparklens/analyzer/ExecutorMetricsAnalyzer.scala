@@ -76,6 +76,15 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     // 4
     //    val metricNames = Seq("jvm.total.used", "jvm.total.max", "jvm.heap.usage", "jvm.heap.used", "jvm.non-heap.usage", "jvm.non-heap.used")
 
+    out.println("[SparkScope] Reading driver metrics...")
+    val driverMetrics: Seq[DataFrame] = JvmMetrics.map { metric =>
+        val metricsFilePath = s"${csvMetricsDir}/${appContext.appInfo.applicationID}.driver.${metric}.csv"
+        val csvFileStr = reader.read(metricsFilePath).replace("value", metric)
+        out.println(s"[SparkScope] Reading ${metric} metric for driver from " + metricsFilePath)
+        DataFrame.fromCsv(metric, csvFileStr, ",")
+      }
+
+    out.println("[SparkScope] Reading executor metrics...")
     val executorsMetricsMap: Map[Int, Seq[DataFrame]] = (0 until ac.executorMap.size).map { executorId =>
       val metricTables: Seq[DataFrame] = JvmMetrics.map { metric =>
         val metricsFilePath = s"${csvMetricsDir}/${appContext.appInfo.applicationID}.${executorId}.${metric}.csv"
@@ -85,6 +94,19 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       }
       (executorId, metricTables)
     }.toMap
+
+    driverMetrics.foreach { metric =>
+      out.println(s"\n[SparkScope] Displaying ${metric.name} metric for driver:")
+      out.println(metric)
+    }
+
+    var driverMetricsMerged: DataFrame = driverMetrics.head
+    driverMetrics.tail.foreach { metric =>
+      driverMetricsMerged = driverMetricsMerged.mergeOn("t", metric)
+    }
+
+    out.println(s"\n[SparkScope] Displaying merged metrics for driver:")
+    out.println(driverMetricsMerged)
 
     executorsMetricsMap.foreach { case (executorId, metrics) =>
       metrics.foreach { metric =>
@@ -126,13 +148,21 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     out.println(s"\n[SparkScope] Displaying merged metrics for all executors:")
     out.println(allExecutorsMetrics)
 
-    // Series
+    // Driver metrics
+    val maxHeapUsedDriver = driverMetricsMerged.select(JvmHeapUsed).max.toLong/ (1024*1024)
+    val maxHeapUsageDriverPerc = driverMetricsMerged.select(JvmHeapUsage).max  * 100
+    val avgHeapUsedDriver = driverMetricsMerged.select(JvmHeapUsed).avg.toLong / (1024*1024)
+    val avgHeapUsageDriverPerc = driverMetricsMerged.select(JvmHeapUsage).avg * 100
+    val maxNonHeapUsedDriver = driverMetricsMerged.select(JvmNonHeapUsed).max.toLong / (1024*1024)
+    val avgNonHeapUsedDriver = driverMetricsMerged.select(JvmNonHeapUsed).avg.toLong / (1024*1024)
+
+    // Executor metrics Series
     val clusterHeapUsed = allExecutorsMetrics.groupBy("t", JvmHeapUsed).sum
     val clusterHeapMax = allExecutorsMetrics.groupBy("t", JvmHeapMax).sum
     val clusterNonHeapUsed = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).sum
     val clusterHeapUsage = allExecutorsMetrics.groupBy("t", JvmHeapUsage).avg
 
-    // Aggregations
+    // Executor metrics Aggregations
     val maxHeapUsed = allExecutorsMetrics.select(JvmHeapUsed).max / (1024*1024)
     val maxHeapUsagePerc = allExecutorsMetrics.select(JvmHeapUsage).max * 100
     val maxNonHeapUsed = allExecutorsMetrics.select(JvmNonHeapUsed).max.toLong / (1024*1024)
@@ -162,10 +192,10 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     out.println(f"Average non-heap memory utilization by executor: ${avgNonHeapUsed}MB")
 
     out.println(s"\n[SparkScope] Driver stats:")
-    out.println(f"Max heap memory utilization by driver: ${maxHeapUsed}MB(${maxHeapUsagePerc}%1.2f%%)")
-    out.println(f"Average heap memory utilization by driver: ${avgHeapUsed}MB(${avgHeapUsagePerc}%1.2f%%)")
-    out.println(s"Max non-heap memory utilization by driver: ${maxNonHeapUsed}MB")
-    out.println(f"Average non-heap memory utilization by driver: ${avgNonHeapUsed}MB")
+    out.println(f"Max heap memory utilization by driver: ${maxHeapUsedDriver}MB(${maxHeapUsageDriverPerc}%1.2f%%)")
+    out.println(f"Average heap memory utilization by driver: ${avgHeapUsedDriver}MB(${avgHeapUsageDriverPerc}%1.2f%%)")
+    out.println(s"Max non-heap memory utilization by driver: ${maxNonHeapUsedDriver}MB")
+    out.println(f"Average non-heap memory utilization by driver: ${avgNonHeapUsedDriver}MB")
 
     val endTimeMillis = System.currentTimeMillis()
     val durationSeconds = (endTimeMillis - startTimeMillis)*1f / 1000f
