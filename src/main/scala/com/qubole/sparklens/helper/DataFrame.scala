@@ -6,7 +6,8 @@ case class DataColumn(name: String, values: Seq[String]) {
     def toLong: Seq[Long] = values.map(_.toFloat.toLong)
     def toDouble: Seq[Double] = values.map(_.toDouble)
     def sum: Double = this.toDouble.sum
-//    def max: Float = this.toFloat.max
+    def max: Double = this.toDouble.max
+    def avg: Double = this.toDouble.sum / values.length
 }
 
 case class GroupByResult(groupCol: String, aggCol: String, result: Map[String, Seq[String]]) {
@@ -35,6 +36,9 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
     def toRows: Seq[Seq[String]] = columns.map(_.values).transpose
 
     def toRowsWithHeader: Seq[Seq[String]] = Seq(columnsNames) ++ this.toRows
+
+    def select(column: String): DataColumn = this.columns.find(_.name == column).get
+    def select(subColumns: Seq[String]): DataFrame = DataFrame(this.name, this.columns.filter(col => subColumns.contains(col.name)))
 
     def toCsv(delimeter: String): String = this.toRowsWithHeader.map(_.mkString(delimeter)).mkString("\n")
     override def toString(): String = this.toCsv(",")

@@ -133,19 +133,18 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val clusterHeapUsage = allExecutorsMetrics.groupBy("t", JvmHeapUsage).avg
 
     // Aggregations
-    val maxHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmHeapUsed).map(_.toLong.max/ (1024*1024)).getOrElse(0)
-    val maxHeapUsagePerc = allExecutorsMetrics.columns.find(_.name == JvmHeapUsage).map(_.toFloat.max*100).getOrElse(0f).toDouble
-    val maxNonHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmNonHeapUsed).map(_.toLong.max / (1024*1024)).getOrElse(0)
-    val avgHeapUsagePerc = allExecutorsMetrics.columns.find(_.name == JvmHeapUsage)
-      .map(col => col.toFloat.sum*100/col.values.length).getOrElse(0f).toDouble
-    val avgHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmHeapUsed)
-      .map(col => col.toLong.sum / (col.values.length*1024*1024)).getOrElse(0)
-    val avgNonHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmNonHeapUsed)
-      .map(col => col.toLong.sum / (col.values.length * 1024 * 1024)).getOrElse(0)
-    val maxClusterHeapUsed = clusterHeapUsed.columns.find(_.name == JvmHeapUsed).map(_.toLong.max/ (1024*1024)).getOrElse(0)
-    val maxClusterHeapUsagePerc = clusterHeapUsage.columns.find(_.name == JvmHeapUsage).map(_.toFloat.max*100).getOrElse(0f).toDouble
-    val avgClusterHeapUsed = clusterHeapUsed.columns.find(_.name == JvmHeapUsed)
-      .map(col => col.toLong.sum / (col.values.length * 1024 * 1024)).getOrElse(0)
+    val maxHeapUsed = allExecutorsMetrics.select(JvmHeapUsed).max / (1024*1024)
+    val maxHeapUsagePerc = allExecutorsMetrics.select(JvmHeapUsage).max * 100
+    val maxNonHeapUsed = allExecutorsMetrics.select(JvmNonHeapUsed).max.toLong / (1024*1024)
+
+    val avgHeapUsagePerc = allExecutorsMetrics.select(JvmHeapUsage).avg * 100
+    val avgHeapUsed = allExecutorsMetrics.select(JvmHeapUsed).avg.toLong / (1024*1024)
+    val avgNonHeapUsed = allExecutorsMetrics.select(JvmNonHeapUsed).avg.toLong / (1024*1024)
+
+    val maxClusterHeapUsed = clusterHeapUsed.select(JvmHeapUsed).max.toLong / (1024*1024)
+    val maxClusterHeapUsagePerc = clusterHeapUsage.select(JvmHeapUsage).max * 100
+
+    val avgClusterHeapUsed = clusterHeapUsed.select(JvmHeapUsed).avg.toLong / (1024*1024)
 
     out.println(clusterHeapUsed)
     out.println(clusterHeapMax)
