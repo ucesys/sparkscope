@@ -4,7 +4,25 @@ case class DataColumn(name: String, values: Seq[String]) {
     def size: Int = values.length
     def toFloat: Seq[Float] = values.map(_.toFloat)
     def toLong: Seq[Long] = values.map(_.toFloat.toLong)
+    def toDouble: Seq[Double] = values.map(_.toDouble)
+    def sum: Double = this.toDouble.sum
 //    def max: Float = this.toFloat.max
+}
+
+case class GroupByResult(groupCol: String, aggCol: String, result: Map[String, Seq[String]]) {
+    def sum: DataFrame = {
+        val aggregated = this.result.map { case (groupCol, aggCol) => (groupCol, aggCol.map(_.toDouble).sum) }
+        toDataFrame(s"groupBy${groupCol}.avg(${aggCol})", aggregated)
+    }
+
+    def avg: DataFrame = {
+        val aggregated = this.result.map { case (groupCol, seq) => (groupCol, seq.map(_.toDouble).sum / seq.length) }
+        toDataFrame(s"groupBy${groupCol}.avg(${aggCol})", aggregated)
+    }
+
+    def toDataFrame(name: String, aggResult: Map[String, Double]): DataFrame = {
+        DataFrame(name, columns = Seq(DataColumn(groupCol, aggResult.keys.toSeq), DataColumn(aggCol, aggResult.values.toSeq.map(x => f"${x}%.4f"))))
+    }
 }
 
 case class DataFrame(name: String, columns: Seq[DataColumn]) {
@@ -42,20 +60,12 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
         DataFrame(this.name, this.columns ++ other.columns.filterNot(_.name == onCol))
     }
 
-    def groupBySum(groupCol: String, aggCol: String): DataFrame = {
-        val groupColumn = this.columns.find(_.name==groupCol).get.values
-        val aggColumn = this.columns.find(_.name==aggCol).get.values
-        val grouped = groupColumn.zip(aggColumn).groupBy(x => x._1).map{case (groupCol, seq) => (groupCol, seq.map{case(groupCol, aggCol) => aggCol})}
-        val aggregated = grouped.map{case (groupCol, seq) => (groupCol, seq.map(_.toFloat).sum)}
-        DataFrame("groupBySum", columns = Seq(DataColumn(groupCol, aggregated.keys.toSeq), DataColumn(aggCol, aggregated.values.toSeq.map(x => f"${x}%.4f"))))
-    }
-
-    def groupByAvg(groupCol: String, aggCol: String): DataFrame = {
+    def groupBy(groupCol: String, aggCol: String): GroupByResult = {
         val groupColumn = this.columns.find(_.name == groupCol).get.values
         val aggColumn = this.columns.find(_.name == aggCol).get.values
-        val grouped = groupColumn.zip(aggColumn).groupBy(x => x._1).map { case (groupCol, seq) => (groupCol, seq.map { case (groupCol, aggCol) => aggCol }) }
-        val aggregated = grouped.map { case (groupCol, seq) => (groupCol, seq.map(_.toFloat).sum / seq.length) }
-        DataFrame("groupBySum", columns = Seq(DataColumn(groupCol, aggregated.keys.toSeq), DataColumn(aggCol, aggregated.values.toSeq.map(x => f"${x}%.4f"))))
+        val grouped = groupColumn.zip(aggColumn).groupBy(x => x._1)
+          .map { case (groupCol, seq) => (groupCol, seq.map { case (_, aggCol) => aggCol }) }
+        GroupByResult(groupCol, aggCol, grouped)
     }
 }
 

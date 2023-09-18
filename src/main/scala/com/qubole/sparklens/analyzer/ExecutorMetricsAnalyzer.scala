@@ -127,10 +127,10 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     out.println(allExecutorsMetrics)
 
     // Series
-    val clusterHeapUsed = allExecutorsMetrics.groupBySum("t", JvmHeapUsed)
-    val clusterHeapMax = allExecutorsMetrics.groupBySum("t", JvmHeapMax)
-    val clusterNonHeapUsed = allExecutorsMetrics.groupBySum("t", JvmNonHeapUsed)
-    val clusterHeapUsage = allExecutorsMetrics.groupByAvg("t", JvmHeapUsage)
+    val clusterHeapUsed = allExecutorsMetrics.groupBy("t", JvmHeapUsed).sum
+    val clusterHeapMax = allExecutorsMetrics.groupBy("t", JvmHeapMax).sum
+    val clusterNonHeapUsed = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).sum
+    val clusterHeapUsage = allExecutorsMetrics.groupBy("t", JvmHeapUsage).avg
 
     // Aggregations
     val maxHeapUsed = allExecutorsMetrics.columns.find(_.name == JvmHeapUsed).map(_.toLong.max/ (1024*1024)).getOrElse(0)
