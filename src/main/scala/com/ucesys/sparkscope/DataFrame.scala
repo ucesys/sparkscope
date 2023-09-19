@@ -17,6 +17,16 @@ case class GroupByResult(groupCol: String, aggCol: String, result: Map[String, S
         toDataFrame(s"groupBy${groupCol}.avg(${aggCol})", aggregated)
     }
 
+    def max: DataFrame = {
+        val aggregated = this.result.map { case (groupCol, aggCol) => (groupCol, aggCol.map(_.toDouble).max) }
+        toDataFrame(s"groupBy${groupCol}.avg(${aggCol})", aggregated)
+    }
+
+    def min: DataFrame = {
+        val aggregated = this.result.map { case (groupCol, aggCol) => (groupCol, aggCol.map(_.toDouble).min) }
+        toDataFrame(s"groupBy${groupCol}.avg(${aggCol})", aggregated)
+    }
+
     def avg: DataFrame = {
         val aggregated = this.result.map { case (groupCol, seq) => (groupCol, seq.map(_.toDouble).sum / seq.length) }
         toDataFrame(s"groupBy${groupCol}.avg(${aggCol})", aggregated)

@@ -167,6 +167,11 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val clusterNonHeapUsed = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).sum
     val clusterHeapUsage = allExecutorsMetrics.groupBy("t", JvmHeapUsage).avg
 
+    val executorHeapUsedMax = allExecutorsMetrics.groupBy("t", JvmHeapUsed).max
+    val executorHeapUsedMin = allExecutorsMetrics.groupBy("t", JvmHeapUsed).min
+    val executorHeapUsedAvg = allExecutorsMetrics.groupBy("t", JvmHeapUsed).avg
+    val executorHeapAllocation = allExecutorsMetrics.groupBy("t", JvmHeapMax).max
+
     out.println(clusterHeapUsed)
     out.println(clusterHeapMax)
     out.println(clusterNonHeapUsed)
@@ -208,7 +213,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
 
     val html = out.toString.replace("\n", "<br>\n")
     val fileWriter = new FileWriter("report.html")
-    val template = scala.io.Source.fromFile("report.html.template").mkString
+    val template = scala.io.Source.fromFile("report-template.html").mkString
 
     val rendered = template
       .replace("<APP-ID>", ac.appInfo.applicationID)
@@ -217,7 +222,17 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       .replace("${chart.jvm.cluster.heap.max}", clusterHeapMax.select("jvm.heap.max").div(1024*1024).mkString(","))
       .replace(
         "${chart.jvm.cluster.heap.timestamps}",
-        clusterHeapMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
+        clusterHeapMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+      )
+      .replace(
+      "${chart.jvm.executor.heap.timestamps}",
+        clusterHeapMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+      )
+      .replace("${chart.jvm.executor.heap.max}", executorHeapUsedMax.select("jvm.heap.used").div(1024*1024).mkString(","))
+      .replace("${chart.jvm.executor.heap.min}", executorHeapUsedMin.select("jvm.heap.used").div(1024*1024).mkString(","))
+      .replace("${chart.jvm.executor.heap.avg}", executorHeapUsedAvg.select("jvm.heap.used").div(1024*1024).mkString(","))
+      .replace("${chart.jvm.executor.heap.allocation}", executorHeapAllocation.select("jvm.heap.max").div(1024*1024).mkString(","))
+
     fileWriter.write(rendered)
     fileWriter.close()
 
