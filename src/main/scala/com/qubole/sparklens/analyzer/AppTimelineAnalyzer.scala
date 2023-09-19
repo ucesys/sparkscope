@@ -31,6 +31,7 @@ class AppTimelineAnalyzer extends  AppAnalyzer {
   def analyze(appContext: AppContext, startTime: Long, endTime: Long): String = {
     val ac = appContext.filterByStartAndEndTime(startTime, endTime)
     val out = new mutable.StringBuilder()
+    out.println("------------------------------AppTimelineAnalyzer------------------------------------")
     out.println("\nPrinting Application timeline \n")
     val jobids = ac.jobMap.keySet.toBuffer.sortWith( _ < _ )
     out.append(s"${pt(startTime)} app started \n")

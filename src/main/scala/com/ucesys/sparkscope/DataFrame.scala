@@ -1,4 +1,4 @@
-package com.qubole.sparklens.helper
+package com.ucesys.sparkscope
 
 case class DataColumn(name: String, values: Seq[String]) {
     def size: Int = values.length

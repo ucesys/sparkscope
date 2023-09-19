@@ -33,6 +33,8 @@ class JobOverlapAnalyzer extends  AppAnalyzer {
     val printDetailedReport = true
     val ac = appContext.filterByStartAndEndTime(startTime, endTime)
     val out = new mutable.StringBuilder()
+    out.println("------------------------------JobOverlapAnalyzer------------------------------------")
+
     out.println ("\nChecking for job overlap...\n")
 
     var lastEndTime:Long  = 0
@@ -88,6 +90,7 @@ class JobOverlapAnalyzer extends  AppAnalyzer {
       out.println ("\nNo overlapping jobgroups found. Good\n")
     }
     out.println("\n")
+
     out.toString()
   }
 

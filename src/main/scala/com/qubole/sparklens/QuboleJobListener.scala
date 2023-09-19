@@ -20,8 +20,10 @@ package com.qubole.sparklens
 import java.net.URI
 import com.qubole.sparklens.analyzer._
 import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
-import com.qubole.sparklens.helper.{CsvHadoopReader, EmailReportHelper, HDFSConfigHelper, HadoopPropertiesLoader, PropertiesLoader}
+import com.qubole.sparklens.helper.{EmailReportHelper, HDFSConfigHelper}
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
+import com.ucesys.sparkscope.ExecutorMetricsAnalyzer
+import com.ucesys.sparkscope.io.{CsvHadoopReader, HadoopPropertiesLoader, PropertiesLoader}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._

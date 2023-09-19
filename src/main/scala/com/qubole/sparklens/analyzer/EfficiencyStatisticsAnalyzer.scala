@@ -79,6 +79,7 @@ class EfficiencyStatisticsAnalyzer extends  AppAnalyzer {
 
     val driverTimeJobBased = appTotalTime - jobTime
     val driverComputeMillisWastedJobBased  = driverTimeJobBased * totalCores
+    out.println("------------------------------EfficiencyStatisticsAnalyzer------------------------------------")
 
     out.println(f""" Time spent in Driver vs Executors
               | Driver WallClock Time    ${pd(driverTimeJobBased)}   ${driverTimeJobBased*100/appTotalTime.toFloat}%3.2f%%
@@ -132,6 +133,7 @@ class EfficiencyStatisticsAnalyzer extends  AppAnalyzer {
          | OneCoreComputeHours wasted Total                ${driverWastedPercentOverAll+executorWastedPercentOverAll}%3.2f%%
          |
        """.stripMargin)
+
 
     out.toString()
   }

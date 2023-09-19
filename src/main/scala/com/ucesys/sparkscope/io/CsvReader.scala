@@ -1,4 +1,4 @@
-package com.qubole.sparklens.helper
+package com.ucesys.sparkscope.io
 
 trait CsvReader {
   def read(path: String): String

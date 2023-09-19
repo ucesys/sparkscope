@@ -20,8 +20,10 @@ package com.qubole.sparklens.analyzer
 
 import com.qubole.sparklens.analyzer.ExecutorMetricsAnalyzerSuite._
 import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
-import com.qubole.sparklens.helper.{CsvReader, JobOverlapHelper, PropertiesLoader}
+import com.qubole.sparklens.helper.JobOverlapHelper
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
+import com.ucesys.sparkscope.ExecutorMetricsAnalyzer
+import com.ucesys.sparkscope.io.{CsvReader, PropertiesLoader}
 import org.apache.spark.SparkConf
 //import org.scalatest.FunSuite
 import org.scalatest.funsuite.AnyFunSuite

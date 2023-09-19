@@ -1,5 +1,6 @@
-package com.qubole.sparklens.helper
+package com.ucesys.sparkscope.io
 
+import com.qubole.sparklens.helper.HDFSConfigHelper
 import org.apache.hadoop.fs.{FileSystem, Path}
 
 import java.net.URI
