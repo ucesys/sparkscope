@@ -166,6 +166,11 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val clusterNonHeapUsed = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).sum
     val clusterHeapUsage = allExecutorsMetrics.groupBy("t", JvmHeapUsage).avg
 
+    out.println(clusterHeapUsed)
+    out.println(clusterHeapMax)
+    out.println(clusterNonHeapUsed)
+    out.println(clusterHeapUsage)
+
     // Executor metrics Aggregations
     val maxHeapUsed = allExecutorsMetrics.select(JvmHeapUsed).max / (1024*1024)
     val maxHeapUsagePerc = allExecutorsMetrics.select(JvmHeapUsage).max * 100
@@ -179,11 +184,6 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val maxClusterHeapUsagePerc = clusterHeapUsage.select(JvmHeapUsage).max * 100
 
     val avgClusterHeapUsed = clusterHeapUsed.select(JvmHeapUsed).avg.toLong / (1024*1024)
-
-    out.println(clusterHeapUsed)
-    out.println(clusterHeapMax)
-    out.println(clusterNonHeapUsed)
-    out.println(clusterHeapUsage)
 
     out.println(s"\n[SparkScope] Cluster stats:")
     out.println(f"Average Cluster heap memory utilization: ${avgHeapUsagePerc}%1.2f%% / ${avgClusterHeapUsed}MB")
@@ -242,7 +242,13 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
 //    val path = Paths.get("report.html.template")
     val template = scala.io.Source.fromFile("report.html.template").mkString
 
-    val rendered = template.replace("<APP-ID>", ac.appInfo.applicationID).replace("<REPORT-BODY>", html)
+    val rendered = template
+      .replace("<APP-ID>", ac.appInfo.applicationID)
+      .replace("<REPORT-BODY>", html)
+      .replace("${chart.jvm.cluster.heap.current}", clusterHeapUsed.select("jvm.heap.used").div(1024*1024).mkString(","))
+      .replace("${chart.jvm.cluster.heap.max}", clusterHeapMax.select("jvm.heap.max").div(1024*1024).mkString(","))
+      .replace("${chart.jvm.cluster.heap.timestamps}", clusterHeapMax.select("t").values.mkString(","))
+
     fileWriter.write(rendered)
     fileWriter.close()
 

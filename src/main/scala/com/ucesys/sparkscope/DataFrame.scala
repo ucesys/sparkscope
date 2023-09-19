@@ -5,6 +5,7 @@ case class DataColumn(name: String, values: Seq[String]) {
     def toFloat: Seq[Float] = values.map(_.toFloat)
     def toLong: Seq[Long] = values.map(_.toFloat.toLong)
     def toDouble: Seq[Double] = values.map(_.toDouble)
+    def div(divBy: Long): Seq[Double] = values.map(_.toDouble / divBy)
     def sum: Double = this.toDouble.sum
     def max: Double = this.toDouble.max
     def avg: Double = this.toDouble.sum / values.length
