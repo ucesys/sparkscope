@@ -4,19 +4,28 @@
     <meta charset="UTF-8">
     <title>SparkScope report: <APP-ID> </title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <style>
+        canvas{
+            border:10px solid white;
+        }
+        .row{
+            display: flex
+        }
+    </style>
 </head>
 <body>
 
 <h1>SparkScope report for application id: ${applicationId} </h1>
 <h1>Charts</h1>
 <div>
-<canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+<canvas id="myChart" style="width:120%;max-width:780px"></canvas>
 </div>
-<div>
-<canvas id="clusterHeapUsage" style="width:100%;max-width:700px"></canvas>
-</div>
-<div>
-    <canvas id="clusterHeapUsagePerc" style="width:100%;max-width:700px"></canvas>
+<!--<div>-->
+<!--<canvas id="clusterHeapUsage" style="width:100%;max-width:700px"></canvas>-->
+<!--</div>-->
+<div  class="row">
+    <div><canvas id="clusterHeapUsagePerc" style="width:230%;max-width:1000px"></canvas></div>
+    <div><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
 </div>
 <script>
     var ctx = document.getElementById('clusterHeapUsagePerc').getContext('2d');
