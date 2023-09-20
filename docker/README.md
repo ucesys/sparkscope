@@ -37,14 +37,33 @@ spark-submit \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=/tmp/spark-events \
 --conf spark.metrics.conf=/tmp/metrics.properties \
---conf spark.executor.instances=3 \
 --conf spark.executor.cores=1 \
 --conf spark.executor.memory=900m \
-/tmp/jars/spark-examples_2.10-1.1.1.jar 2000
+--conf spark.executor.instances=4 \
+/tmp/jars/spark-examples_2.10-1.1.1.jar 5000
 ```
 
 Sparklens report should be generated to stdout
 
+Run with dynamic allocation
+```
+spark-submit \
+--jars /tmp/jars/sparkscope_2.11-0.3.2.jar  \
+--class org.apache.spark.examples.SparkPi \
+--master spark://spark-master:7077 \
+--conf spark.extraListeners=com.qubole.sparklens.QuboleJobListener \
+--conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \
+--conf spark.eventLog.enabled=true \
+--conf spark.eventLog.dir=/tmp/spark-events \
+--conf spark.metrics.conf=/tmp/metrics.properties \
+--conf spark.executor.cores=1 \
+--conf spark.executor.memory=900m \
+--conf spark.dynamicAllocation.enabled=false \
+--conf spark.dynamicAllocation.minExecutors=1 \
+--conf spark.dynamicAllocation.maxExecutors=4 \
+--conf spark.dynamicAllocation.schedulerBacklogTimeout=5s \
+/tmp/jars/spark-examples_2.10-1.1.1.jar 5000
+```
 *Run with email generation(fails due to qubole sparklens endpoint being down)  
 
 ```

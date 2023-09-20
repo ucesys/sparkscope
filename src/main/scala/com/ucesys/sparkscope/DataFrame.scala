@@ -82,6 +82,13 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
           .map { case (groupCol, seq) => (groupCol, seq.map { case (_, aggCol) => aggCol }) }
         GroupByResult(groupCol, aggCol, grouped)
     }
+
+    def sortBy(col: String): DataFrame = {
+        val sortCol: DataColumn = this.select(col)
+        val sortedRows = (sortCol.values zip this.toRows).sortBy(_._1).map{case (_, row) => row}
+        val sortedCols = (this.columnsNames zip sortedRows.transpose).map{case (name, col) => DataColumn(name, col)}
+        DataFrame(this.name, sortedCols)
+    }
 }
 
 object DataFrame {

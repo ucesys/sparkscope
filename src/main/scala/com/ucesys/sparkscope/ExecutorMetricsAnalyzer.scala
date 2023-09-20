@@ -152,16 +152,16 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val avgNonHeapUsedDriver = driverMetricsMerged.select(JvmNonHeapUsed).avg.toLong / BytesInMB
 
     // Executor metrics Series
-    val clusterHeapUsed = allExecutorsMetrics.groupBy("t", JvmHeapUsed).sum
-    val clusterHeapMax = allExecutorsMetrics.groupBy("t", JvmHeapMax).sum
-    val clusterNonHeapUsed = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).sum
-    val clusterHeapUsage = allExecutorsMetrics.groupBy("t", JvmHeapUsage).avg
+    val clusterHeapUsed = allExecutorsMetrics.groupBy("t", JvmHeapUsed).sum.sortBy("t")
+    val clusterHeapMax = allExecutorsMetrics.groupBy("t", JvmHeapMax).sum.sortBy("t")
+    val clusterNonHeapUsed = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).sum.sortBy("t")
+    val clusterHeapUsage = allExecutorsMetrics.groupBy("t", JvmHeapUsage).avg.sortBy("t")
 
     val executorMetrics = ExecutorMetrics(
-      heapUsedMax = allExecutorsMetrics.groupBy("t", JvmHeapUsed).max,
-      heapUsedMin = allExecutorsMetrics.groupBy("t", JvmHeapUsed).min,
-      heapUsedAvg = allExecutorsMetrics.groupBy("t", JvmHeapUsed).avg,
-      heapAllocation = allExecutorsMetrics.groupBy("t", JvmHeapMax).max
+      heapUsedMax = allExecutorsMetrics.groupBy("t", JvmHeapUsed).max.sortBy("t"),
+      heapUsedMin = allExecutorsMetrics.groupBy("t", JvmHeapUsed).min.sortBy("t"),
+      heapUsedAvg = allExecutorsMetrics.groupBy("t", JvmHeapUsed).avg.sortBy("t"),
+      heapAllocation = allExecutorsMetrics.groupBy("t", JvmHeapMax).max.sortBy("t")
     )
     val clusterMetrics = ClusterMetrics(heapMax = clusterHeapMax, heapUsed = clusterHeapUsed)
 
