@@ -110,7 +110,53 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       }
     }
 
-    val executorsMetricsCombinedMap: Map[Int, DataFrame] = executorsMetricsMap.map { case (executorId, metrics) =>
+    // Interpolating executor metrics
+    val allTimestamps = executorsMetricsMap.flatMap { case (_, metrics) =>
+      metrics.flatMap(metric => metric.select("t").values.map(_.toLong))
+    }.toSet.toSeq.sorted
+    log.println(s"\n[SparkScope] Displaying timestamps for all executors:")
+    log.println(allTimestamps)
+
+    val executorsMetricsMapInterpolated = executorsMetricsMap.map { case (executorId, metricsSeq) =>
+      val metricsInterpolated: Seq[DataFrame] = metricsSeq.map(metrics => {
+        val localTimestamps = metrics.columns.head.values.map(_.toLong)
+        val missingTimestamps = allTimestamps.filterNot(localTimestamps.contains)
+        val missingTimestampsInRange = missingTimestamps.filter(ts => ts > localTimestamps.min && ts < localTimestamps.max)
+
+        val metricsZipped =  (metrics.columns.head.values.map(_.toLong) zip metrics.columns.last.values)
+
+        val interpolatedRows: Seq[(Long, String)] = missingTimestampsInRange.flatMap(missingTimestamp => {
+          val interpolatedValue = metricsZipped.sliding(2)
+            .flatMap { case Seq((prevTs, prevVal), (nextTs, nextVal)) =>
+              val interpolatedValue: Option[(Long, String)] = missingTimestamp match {
+                case ts if (ts > prevTs && ts < nextTs) => Some((ts, prevVal))
+                case _ => None
+              }
+              interpolatedValue
+            }.toSeq.headOption
+          interpolatedValue
+        })
+
+        val missingTsDF = DataFrame("missingTs",
+          Seq(
+            DataColumn(metrics.columns.head.name, interpolatedRows.map{case (ts, _) => ts.toString}),
+            DataColumn(metrics.columns.last.name, interpolatedRows.map{case (_, value) => value})
+          ))
+
+        val metricsWithNewTs = metrics.union(missingTsDF).sortBy("t")
+        metricsWithNewTs
+      })
+      (executorId, metricsInterpolated)
+    }
+
+    executorsMetricsMapInterpolated.foreach { case (executorId, metrics) =>
+      metrics.foreach { metric =>
+        log.println(s"\n[SparkScope] Displaying interpolated ${metric.name} metric for executor=${executorId}:")
+        log.println(metric)
+      }
+    }
+
+    val executorsMetricsCombinedMap: Map[Int, DataFrame] = executorsMetricsMapInterpolated.map { case (executorId, metrics) =>
       var mergedMetrics = metrics.head
       metrics.tail.foreach { metric =>
         mergedMetrics = mergedMetrics.mergeOn("t", metric)
@@ -204,8 +250,6 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val endTimeMillis = System.currentTimeMillis()
     val durationSeconds = (endTimeMillis - startTimeMillis) * 1f / 1000f
     log.println(s"\n[SparkScope] SparkScope analysis took ${durationSeconds}s")
-
-//    sparkSign.toString + log.toString + summary.toString
 
     SparkScopeResult(
       applicationId = ac.appInfo.applicationID,

@@ -13,6 +13,8 @@ spAppendScalaVersion := true
 
 
 libraryDependencies += "org.apache.spark" %% "spark-core" % sparkVersion.value % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "provided"
+
 
 libraryDependencies +=  "org.apache.hadoop" % "hadoop-client" % "2.6.5" % "provided"
 

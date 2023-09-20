@@ -16,25 +16,18 @@
 * limitations under the License.
 */
 
-package com.qubole.sparklens.analyzer
+package com.ucesys.sparkscope
 
-import com.qubole.sparklens.analyzer.ExecutorMetricsAnalyzerSuite._
 import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.qubole.sparklens.helper.JobOverlapHelper
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
-import com.ucesys.sparkscope.ExecutorMetricsAnalyzer
+import com.ucesys.sparkscope.ExecutorMetricsAnalyzerSuite._
 import com.ucesys.sparkscope.io.{CsvReader, HtmlReportRenderer, PropertiesLoader}
 import org.apache.spark.SparkConf
-//import org.scalatest.FunSuite
 import org.scalatest.funsuite.AnyFunSuite
-//import org.scalatest.mock.EasyMockSugar.mock
-//import org.scalatest.mock.MockitoSugar.mock
 
 import java.util.Properties
-//import org.scalatest.mock.EasyMockSugar.mock
 import org.scalamock.scalatest.MockFactory
-//import org.scalamock.function._
-//import org.scalamock.clazz.Mock
 
 import scala.collection.mutable
 
@@ -236,31 +229,26 @@ object ExecutorMetricsAnalyzerSuite {
 
   val jvmTotalExec2Csv: String =
     """t,jvm.total.used
-      |1694737416,502305768
-      |1694737421,600292232
+      |1694737422,600292232
       |1694737424,339839016""".stripMargin
 
   val jvmHeapExec2Csv: String =
     """t,jvm.heap.used
-      |1694737416,166876288
-      |1694737421,326353928
+      |1694737422,326353928
       |1694737424,105890120""".stripMargin
 
   val jvmHeapUsageExec2Csv: String =
     """t,jvm.heap.usage
-      |1694737416,0.1989320373535156
-      |1694737421,0.38904419898986814
+      |1694737422,0.38904419898986814
       |1694737424,0.12623085975646972""".stripMargin
 
   val jvmHeapMaxExec2Csv: String =
     """t,jvm.heap.max
-      |1694737416,838860800
-      |1694737421,838860800
+      |1694737422,838860800
       |1694737424,838860800""".stripMargin
 
   val jvmNonHeapExec2Csv: String =
     """t,jvm.non-heap.used
-      |1694737416,47505872
-      |1694737421,50600840
+      |1694737422,50600840
       |1694737424,51593328""".stripMargin
 }

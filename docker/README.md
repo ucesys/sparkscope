@@ -30,7 +30,6 @@ Run sample application
 ```
 spark-submit \
 --jars /tmp/jars/sparkscope_2.11-0.3.2.jar  \
---class org.apache.spark.examples.SparkPi \
 --master spark://spark-master:7077 \
 --conf spark.extraListeners=com.qubole.sparklens.QuboleJobListener \
 --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \
@@ -40,6 +39,7 @@ spark-submit \
 --conf spark.executor.cores=1 \
 --conf spark.executor.memory=900m \
 --conf spark.executor.instances=4 \
+--class org.apache.spark.examples.SparkPi \
 /tmp/jars/spark-examples_2.10-1.1.1.jar 5000
 ```
 
@@ -49,7 +49,6 @@ Run with dynamic allocation
 ```
 spark-submit \
 --jars /tmp/jars/sparkscope_2.11-0.3.2.jar  \
---class org.apache.spark.examples.SparkPi \
 --master spark://spark-master:7077 \
 --conf spark.extraListeners=com.qubole.sparklens.QuboleJobListener \
 --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \
@@ -58,10 +57,11 @@ spark-submit \
 --conf spark.metrics.conf=/tmp/metrics.properties \
 --conf spark.executor.cores=1 \
 --conf spark.executor.memory=900m \
---conf spark.dynamicAllocation.enabled=false \
+--conf spark.dynamicAllocation.enabled=true \
 --conf spark.dynamicAllocation.minExecutors=1 \
 --conf spark.dynamicAllocation.maxExecutors=4 \
 --conf spark.dynamicAllocation.schedulerBacklogTimeout=5s \
+--class org.apache.spark.examples.SparkPi \
 /tmp/jars/spark-examples_2.10-1.1.1.jar 5000
 ```
 *Run with email generation(fails due to qubole sparklens endpoint being down)  
