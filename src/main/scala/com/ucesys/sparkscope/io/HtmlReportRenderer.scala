@@ -6,23 +6,24 @@ import com.ucesys.sparkscope.SparkScopeResult
 import java.io.{FileWriter, InputStream}
 import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
-import scala.io.Source
 
 object HtmlReportRenderer {
   def render(result: SparkScopeResult, outputDir: String): Unit = {
     val summaryHtml = result.summary.replace("\n", "<br>\n")
     val logsHtml = result.logs.replace("\n", "<br>\n")
-//    val url = getClass.getResource("report-template.html")
-//    val template = Source.fromURL(url).mkString
-//    val template = Source.fromFile("report-template.html").mkString
     val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
-    val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString
+    val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
 
 
     val rendered = template
       .replace("${applicationId}", result.applicationId)
       .replace("${summary}", summaryHtml)
       .replace("${logs}", logsHtml)
+      .replace("${chart.jvm.cluster.heap.usage}", result.clusterMetrics.heapUsage.select("jvm.heap.usage").values.mkString(","))
+      .replace(
+        "${chart.jvm.cluster.heap.usage.timestamps}",
+        result.clusterMetrics.heapUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+      )
       .replace("${chart.jvm.cluster.heap.used}", result.clusterMetrics.heapUsed.select("jvm.heap.used").div(BytesInMB).mkString(","))
       .replace("${chart.jvm.cluster.heap.max}", result.clusterMetrics.heapMax.select("jvm.heap.max").div(BytesInMB).mkString(","))
       .replace(

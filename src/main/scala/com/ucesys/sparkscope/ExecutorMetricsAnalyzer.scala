@@ -34,7 +34,8 @@ case class ExecutorMetrics(heapUsedMax: DataFrame,
                            heapUsedAvg: DataFrame,
                            heapAllocation: DataFrame)
 case class ClusterMetrics(heapMax: DataFrame,
-                          heapUsed: DataFrame)
+                          heapUsed: DataFrame,
+                          heapUsage: DataFrame)
 class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertiesLoader: PropertiesLoader) {
 
   def analyze(appContext: AppContext): SparkScopeResult = {
@@ -209,7 +210,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       heapUsedAvg = allExecutorsMetrics.groupBy("t", JvmHeapUsed).avg.sortBy("t"),
       heapAllocation = allExecutorsMetrics.groupBy("t", JvmHeapMax).max.sortBy("t")
     )
-    val clusterMetrics = ClusterMetrics(heapMax = clusterHeapMax, heapUsed = clusterHeapUsed)
+    val clusterMetrics = ClusterMetrics(heapMax = clusterHeapMax, heapUsed = clusterHeapUsed, heapUsage = clusterHeapUsage)
 
     log.println(s"\n[SparkScope] Displaying cluster metrics(aggregated for all executors)")
     log.println(clusterHeapUsed)

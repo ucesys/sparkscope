@@ -15,6 +15,32 @@
 <div>
 <canvas id="clusterHeapUsage" style="width:100%;max-width:700px"></canvas>
 </div>
+<div>
+    <canvas id="clusterHeapUsagePerc" style="width:100%;max-width:700px"></canvas>
+</div>
+<script>
+    var ctx = document.getElementById('clusterHeapUsagePerc').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.cluster.heap.usage.timestamps}],
+         datasets: [{
+             data: [${chart.jvm.cluster.heap.usage}],
+             label: "Total Cluster Heap Utilization[%]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Cluster Heap Utilization Percentage",
+        },
+      }
+     });
+</script>
 <script>
     var ctx = document.getElementById('myChart').getContext('2d');
    var myChart = new Chart(ctx, {
@@ -23,25 +49,25 @@
          labels: [${chart.jvm.executor.heap.timestamps}],
          datasets: [{
              data: [${chart.jvm.executor.heap.allocation}],
-             label: "Executor JVM Heap Allocation[MB]",
+             label: "heap size[MB]",
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
            }, {
              data: [${chart.jvm.executor.heap.max}],
-             label: "Executor max JVM Heap Usage[MB]",
+             label: "max usage[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: false,
            }, {
              data: [${chart.jvm.executor.heap.avg}],
-             label: "Executor avg JVM Heap Usage[MB]",
+             label: "avg usage[MB]",
              borderColor: "#ffa500",
              backgroundColor:"#ffc04d",
              fill: false,
            }, {
              data: [${chart.jvm.executor.heap.min}],
-             label: "Executor min JVM Heap Usage[MB]",
+             label: "min usage[MB]",
              borderColor: "#c45850",
              backgroundColor:"#d78f89",
              fill: false,
@@ -51,7 +77,7 @@
       options: {
         title: {
           display: true,
-          text: "Executor Heap Usage",
+          text: "Executor Heap Utilization",
         },
       }
      });
@@ -64,23 +90,23 @@
          labels: [${chart.jvm.cluster.heap.timestamps}],
          datasets: [{
              data: [${chart.jvm.cluster.heap.max}],
-             label: "Cluster JVM Heap Allocation[MB]",
+             label: "Cluster Heap Size[MB]",
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
            }, {
              data: [${chart.jvm.cluster.heap.used}],
-             label: "Cluster JVM Heap Usage[MB]",
+             label: "Cluster Heap usage[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
-             fill: false,
+             fill: true,
            }
          ]
        },
       options: {
         title: {
           display: true,
-          text: "Cluster Heap Usage",
+          text: "Cluster Heap Utilization in bytes",
         },
       }
      });
