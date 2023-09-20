@@ -6,8 +6,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 </head>
 <body>
-<h1>SparkScope report </h1>
-<h2>application id: <APP-ID> </h2>
+
+<h1>SparkScope report for application id: ${applicationId} </h1>
+<h1>Charts</h1>
 <div>
 <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
 </div>
@@ -84,7 +85,9 @@
       }
      });
 </script>
-
- <REPORT-BODY>
+<h1>Summary</h1>
+ ${summary}
+<h1>Logs</h1>
+ ${logs}
 </body>
 </html>
