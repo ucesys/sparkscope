@@ -45,7 +45,7 @@ spark-submit \
 
 Sparklens report should be generated to stdout
 
-Run with dynamic allocation
+Run with limited max executor/cores for Spark Standalone(dynamic allocation doesn't work)
 ```
 spark-submit \
 --jars /tmp/jars/sparkscope_2.11-0.3.2.jar  \
@@ -57,10 +57,8 @@ spark-submit \
 --conf spark.metrics.conf=/tmp/metrics.properties \
 --conf spark.executor.cores=1 \
 --conf spark.executor.memory=900m \
---conf spark.dynamicAllocation.enabled=true \
---conf spark.dynamicAllocation.minExecutors=1 \
---conf spark.dynamicAllocation.maxExecutors=4 \
---conf spark.dynamicAllocation.schedulerBacklogTimeout=5s \
+--conf spark.executor.instances=2 \
+--conf spark.cores.max=2 \
 --class org.apache.spark.examples.SparkPi \
 /tmp/jars/spark-examples_2.10-1.1.1.jar 5000
 ```
