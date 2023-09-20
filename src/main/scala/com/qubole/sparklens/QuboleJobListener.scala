@@ -23,7 +23,7 @@ import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInf
 import com.qubole.sparklens.helper.{EmailReportHelper, HDFSConfigHelper}
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.ExecutorMetricsAnalyzer
-import com.ucesys.sparkscope.io.{CsvHadoopReader, HadoopPropertiesLoader, PropertiesLoader}
+import com.ucesys.sparkscope.io.{CsvHadoopReader, HadoopPropertiesLoader, HtmlReportRenderer, PropertiesLoader}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
@@ -177,7 +177,18 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
       stageMap,
       stageIDToJobID)
 
-    AppAnalyzer.list += new ExecutorMetricsAnalyzer(sparkConf, new CsvHadoopReader, new HadoopPropertiesLoader)
+    val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, new CsvHadoopReader, new HadoopPropertiesLoader)
+    val sparkScopeResult = executorMetricsAnalyzer.analyze(appContext)
+
+    println("           ____              __    ____")
+    println("          / __/__  ___ _____/ /__ / __/_ ___  ___  ___")
+    println("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
+    println("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
+    println("           /_/                             /_/ ")
+    println(sparkScopeResult.logs + sparkScopeResult.summary)
+
+    val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
+    HtmlReportRenderer.render(sparkScopeResult, htmlReportDir)
 
     asyncReportingEnabled(sparkConf) match {
       case true => {

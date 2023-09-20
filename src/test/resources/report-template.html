@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SparkScope report: <APP-ID> </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+</head>
+<body>
+
+<h1>SparkScope report for application id: ${applicationId} </h1>
+<h1>Charts</h1>
+<div>
+<canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+</div>
+<div>
+<canvas id="clusterHeapUsage" style="width:100%;max-width:700px"></canvas>
+</div>
+<script>
+    var ctx = document.getElementById('myChart').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.executor.heap.timestamps}],
+         datasets: [{
+             data: [${chart.jvm.executor.heap.allocation}],
+             label: "Executor JVM Heap Allocation[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+           }, {
+             data: [${chart.jvm.executor.heap.max}],
+             label: "Executor max JVM Heap Usage[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: false,
+           }, {
+             data: [${chart.jvm.executor.heap.avg}],
+             label: "Executor avg JVM Heap Usage[MB]",
+             borderColor: "#ffa500",
+             backgroundColor:"#ffc04d",
+             fill: false,
+           }, {
+             data: [${chart.jvm.executor.heap.min}],
+             label: "Executor min JVM Heap Usage[MB]",
+             borderColor: "#c45850",
+             backgroundColor:"#d78f89",
+             fill: false,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Executor Heap Usage",
+        },
+      }
+     });
+</script>
+<script>
+    var ctx = document.getElementById('clusterHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.cluster.heap.timestamps}],
+         datasets: [{
+             data: [${chart.jvm.cluster.heap.max}],
+             label: "Cluster JVM Heap Allocation[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+           }, {
+             data: [${chart.jvm.cluster.heap.used}],
+             label: "Cluster JVM Heap Usage[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: false,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Cluster Heap Usage",
+        },
+      }
+     });
+</script>
+<h1>Summary</h1>
+ ${summary}
+<h1>Logs</h1>
+ ${logs}
+</body>
+</html>

@@ -23,7 +23,7 @@ import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInf
 import com.qubole.sparklens.helper.JobOverlapHelper
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.ExecutorMetricsAnalyzer
-import com.ucesys.sparkscope.io.{CsvReader, PropertiesLoader}
+import com.ucesys.sparkscope.io.{CsvReader, HtmlReportRenderer, PropertiesLoader}
 import org.apache.spark.SparkConf
 //import org.scalatest.FunSuite
 import org.scalatest.funsuite.AnyFunSuite
@@ -124,7 +124,12 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
 
     val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, csvReaderMock, propertiesLoaderMock)
     val out = executorMetricsAnalyzer.analyze(ac)
+
+    HtmlReportRenderer.render(out, "./")
+
     println(out)
+
+
     assert(jobTime == 10, "Parallel Jobs are not being considered while computing the time spent in jobs")
   }
 }

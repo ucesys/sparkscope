@@ -19,38 +19,30 @@ package com.ucesys.sparkscope
 
 import com.qubole.sparklens.analyzer.AppAnalyzer
 import com.qubole.sparklens.common.AppContext
+import com.ucesys.sparkscope.ExecutorMetricsAnalyzer._
 import com.ucesys.sparkscope.io.{CsvHadoopReader, CsvReader, PropertiesLoader}
 import org.apache.spark.SparkConf
 
-import java.io.FileWriter
-import java.time.LocalDateTime.ofEpochSecond
-import java.time.ZoneOffset.UTC
 import scala.collection.mutable
+case class SparkScopeResult(applicationId: String,
+                            executorMetrics: ExecutorMetrics,
+                            clusterMetrics: ClusterMetrics,
+                            summary: String,
+                            logs: String)
+case class ExecutorMetrics(heapUsedMax: DataFrame,
+                           heapUsedMin: DataFrame,
+                           heapUsedAvg: DataFrame,
+                           heapAllocation: DataFrame)
+case class ClusterMetrics(heapMax: DataFrame,
+                          heapUsed: DataFrame)
+class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertiesLoader: PropertiesLoader) {
 
-class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertiesLoader: PropertiesLoader) extends  AppAnalyzer {
-
-  val JvmHeapUsed = "jvm.heap.used" // in bytes
-  val JvmHeapUsage= "jvm.heap.usage" // equals used/max
-  val JvmHeapMax= "jvm.heap.max" // in bytes
-  val JvmNonHeapUsed = "jvm.non-heap.used" // in bytes
-  val JvmTotalUsed = "jvm.total.used"  // equals jvm.heap.used + jvm.non-heap.used
-  val bytesInMB: Long = 1024*1024
-
-//  val JvmMetrics = Seq(JvmTotalUsed, JvmHeapUsed, JvmNonHeapUsed)
-  val JvmMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, JvmTotalUsed)
-
-  def analyze(appContext: AppContext, startTime: Long, endTime: Long): String = {
+  def analyze(appContext: AppContext): SparkScopeResult = {
     val startTimeMillis = System.currentTimeMillis()
 
-    val ac = appContext.filterByStartAndEndTime(startTime, endTime)
+    val ac = appContext.filterByStartAndEndTime(appContext.appInfo.startTime, appContext.appInfo.endTime)
     val log = new mutable.StringBuilder()
-    val sparkSign = new mutable.StringBuilder()
     val summary = new mutable.StringBuilder()
-    sparkSign.println("           ____              __    ____")
-    sparkSign.println("          / __/__  ___ _____/ /__ / __/_ ___  ___  ___")
-    sparkSign.println("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
-    sparkSign.println("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
-    sparkSign.println("           /_/                             /_/ ")
 
     // TODO
     //    1. Find metrics.properties path:
@@ -78,7 +70,6 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     log.println("[SparkScope] Trying to read csv metrics from " + csvMetricsDir)
 
     // 4
-    //    val metricNames = Seq("jvm.total.used", "jvm.total.max", "jvm.heap.usage", "jvm.heap.used", "jvm.non-heap.usage", "jvm.non-heap.used")
 
     log.println("[SparkScope] Reading driver metrics...")
     val driverMetrics: Seq[DataFrame] = JvmMetrics.map { metric =>
@@ -153,12 +144,12 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     log.println(allExecutorsMetrics)
 
     // Driver metrics
-    val maxHeapUsedDriver = driverMetricsMerged.select(JvmHeapUsed).max.toLong / bytesInMB
+    val maxHeapUsedDriver = driverMetricsMerged.select(JvmHeapUsed).max.toLong / BytesInMB
     val maxHeapUsageDriverPerc = driverMetricsMerged.select(JvmHeapUsage).max  * 100
-    val avgHeapUsedDriver = driverMetricsMerged.select(JvmHeapUsed).avg.toLong / bytesInMB
+    val avgHeapUsedDriver = driverMetricsMerged.select(JvmHeapUsed).avg.toLong / BytesInMB
     val avgHeapUsageDriverPerc = driverMetricsMerged.select(JvmHeapUsage).avg * 100
-    val maxNonHeapUsedDriver = driverMetricsMerged.select(JvmNonHeapUsed).max.toLong / bytesInMB
-    val avgNonHeapUsedDriver = driverMetricsMerged.select(JvmNonHeapUsed).avg.toLong / bytesInMB
+    val maxNonHeapUsedDriver = driverMetricsMerged.select(JvmNonHeapUsed).max.toLong / BytesInMB
+    val avgNonHeapUsedDriver = driverMetricsMerged.select(JvmNonHeapUsed).avg.toLong / BytesInMB
 
     // Executor metrics Series
     val clusterHeapUsed = allExecutorsMetrics.groupBy("t", JvmHeapUsed).sum
@@ -166,10 +157,13 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val clusterNonHeapUsed = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).sum
     val clusterHeapUsage = allExecutorsMetrics.groupBy("t", JvmHeapUsage).avg
 
-    val executorHeapUsedMax = allExecutorsMetrics.groupBy("t", JvmHeapUsed).max
-    val executorHeapUsedMin = allExecutorsMetrics.groupBy("t", JvmHeapUsed).min
-    val executorHeapUsedAvg = allExecutorsMetrics.groupBy("t", JvmHeapUsed).avg
-    val executorHeapAllocation = allExecutorsMetrics.groupBy("t", JvmHeapMax).max
+    val executorMetrics = ExecutorMetrics(
+      heapUsedMax = allExecutorsMetrics.groupBy("t", JvmHeapUsed).max,
+      heapUsedMin = allExecutorsMetrics.groupBy("t", JvmHeapUsed).min,
+      heapUsedAvg = allExecutorsMetrics.groupBy("t", JvmHeapUsed).avg,
+      heapAllocation = allExecutorsMetrics.groupBy("t", JvmHeapMax).max
+    )
+    val clusterMetrics = ClusterMetrics(heapMax = clusterHeapMax, heapUsed = clusterHeapUsed)
 
     log.println(s"\n[SparkScope] Displaying cluster metrics(aggregated for all executors)")
     log.println(clusterHeapUsed)
@@ -178,18 +172,18 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     log.println(clusterHeapUsage)
 
     // Executor metrics Aggregations
-    val maxHeapUsed = allExecutorsMetrics.select(JvmHeapUsed).max.toLong / bytesInMB
+    val maxHeapUsed = allExecutorsMetrics.select(JvmHeapUsed).max.toLong / BytesInMB
     val maxHeapUsagePerc = allExecutorsMetrics.select(JvmHeapUsage).max * 100
-    val maxNonHeapUsed = allExecutorsMetrics.select(JvmNonHeapUsed).max.toLong / bytesInMB
+    val maxNonHeapUsed = allExecutorsMetrics.select(JvmNonHeapUsed).max.toLong / BytesInMB
 
     val avgHeapUsagePerc = allExecutorsMetrics.select(JvmHeapUsage).avg * 100
-    val avgHeapUsed = allExecutorsMetrics.select(JvmHeapUsed).avg.toLong / bytesInMB
-    val avgNonHeapUsed = allExecutorsMetrics.select(JvmNonHeapUsed).avg.toLong / bytesInMB
+    val avgHeapUsed = allExecutorsMetrics.select(JvmHeapUsed).avg.toLong / BytesInMB
+    val avgNonHeapUsed = allExecutorsMetrics.select(JvmNonHeapUsed).avg.toLong / BytesInMB
 
-    val maxClusterHeapUsed = clusterHeapUsed.select(JvmHeapUsed).max.toLong / bytesInMB
+    val maxClusterHeapUsed = clusterHeapUsed.select(JvmHeapUsed).max.toLong / BytesInMB
     val maxClusterHeapUsagePerc = clusterHeapUsage.select(JvmHeapUsage).max * 100
 
-    val avgClusterHeapUsed = clusterHeapUsed.select(JvmHeapUsed).avg.toLong / bytesInMB
+    val avgClusterHeapUsed = clusterHeapUsed.select(JvmHeapUsed).avg.toLong / BytesInMB
 
     summary.println(s"Cluster stats:")
     summary.println(f"Average Cluster heap memory utilization: ${avgHeapUsagePerc}%1.2f%% / ${avgClusterHeapUsed}MB")
@@ -207,37 +201,37 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     summary.println(s"Max non-heap memory utilization by driver: ${maxNonHeapUsedDriver}MB")
     summary.println(f"Average non-heap memory utilization by driver: ${avgNonHeapUsedDriver}MB")
 
-    val summaryHtml = summary.toString.replace("\n", "<br>\n")
-    val logsHtml = log.toString.replace("\n", "<br>\n")
-    val fileWriter = new FileWriter("report.html")
-    val template = scala.io.Source.fromFile("report-template.html").mkString
-
-    val rendered = template
-      .replace("${applicationId}", ac.appInfo.applicationID)
-      .replace("${summary}", summaryHtml)
-      .replace("${logs}", logsHtml)
-      .replace("${chart.jvm.cluster.heap.current}", clusterHeapUsed.select("jvm.heap.used").div(bytesInMB).mkString(","))
-      .replace("${chart.jvm.cluster.heap.max}", clusterHeapMax.select("jvm.heap.max").div(bytesInMB).mkString(","))
-      .replace(
-        "${chart.jvm.cluster.heap.timestamps}",
-        clusterHeapMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-      )
-      .replace(
-      "${chart.jvm.executor.heap.timestamps}",
-        clusterHeapMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-      )
-      .replace("${chart.jvm.executor.heap.max}", executorHeapUsedMax.select("jvm.heap.used").div(bytesInMB).mkString(","))
-      .replace("${chart.jvm.executor.heap.min}", executorHeapUsedMin.select("jvm.heap.used").div(bytesInMB).mkString(","))
-      .replace("${chart.jvm.executor.heap.avg}", executorHeapUsedAvg.select("jvm.heap.used").div(bytesInMB).mkString(","))
-      .replace("${chart.jvm.executor.heap.allocation}", executorHeapAllocation.select("jvm.heap.max").div(bytesInMB).mkString(","))
-
-    fileWriter.write(rendered)
-    fileWriter.close()
-
     val endTimeMillis = System.currentTimeMillis()
     val durationSeconds = (endTimeMillis - startTimeMillis) * 1f / 1000f
     log.println(s"\n[SparkScope] SparkScope analysis took ${durationSeconds}s")
 
-    sparkSign.toString + log.toString + summary.toString
+//    sparkSign.toString + log.toString + summary.toString
+
+    SparkScopeResult(
+      applicationId = ac.appInfo.applicationID,
+      executorMetrics = executorMetrics,
+      clusterMetrics = clusterMetrics,
+      summary = summary.toString,
+      logs=log.toString
+    )
   }
+
+  implicit class StringBuilderExtensions(sb: StringBuilder) {
+    def println(x: Any): StringBuilder = {
+      sb.append(x).append("\n")
+    }
+  }
+}
+
+object ExecutorMetricsAnalyzer {
+  val BytesInMB: Long = 1024*1024
+
+  val JvmHeapUsed = "jvm.heap.used" // in bytes
+  val JvmHeapUsage = "jvm.heap.usage" // equals used/max
+  val JvmHeapMax = "jvm.heap.max" // in bytes
+  val JvmNonHeapUsed = "jvm.non-heap.used" // in bytes
+  val JvmTotalUsed = "jvm.total.used" // equals jvm.heap.used + jvm.non-heap.used
+
+  val JvmMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, JvmTotalUsed)
+
 }
