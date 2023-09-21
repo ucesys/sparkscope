@@ -14,7 +14,6 @@ object HtmlReportRenderer {
 
     val rendered = template
       .replace("${applicationId}", result.applicationId)
-      .replace("${summary}", result.summary)
       .replace("${logs}", result.logs)
       .replace("${sparklens}", sparklensResults.mkString("\n"))
       .replace("${chart.jvm.cluster.heap.usage}", result.clusterMetrics.heapUsage.select("jvm.heap.usage").values.mkString(","))
@@ -44,10 +43,33 @@ object HtmlReportRenderer {
       .replace("${chart.jvm.executor.non-heap.min}", result.executorMetrics.nonHeapUsedMin.select("jvm.non-heap.used").div(BytesInMB).mkString(","))
       .replace("${chart.jvm.executor.non-heap.avg}", result.executorMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).mkString(","))
 
+    val renderedStats = renderStats(rendered, result)
     val outputPath = outputDir + result.applicationId + ".html"
     val fileWriter = new FileWriter(outputPath)
-    fileWriter.write(rendered)
+    fileWriter.write(renderedStats)
     fileWriter.close()
     println(s"Wrote HTML report file to ${outputPath}")
+  }
+
+  def renderStats(template: String, result: SparkScopeResult): String = {
+    template
+      .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterStats.avgHeapPerc}%1.2f")
+      .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterStats.maxHeapPerc}%1.2f")
+      .replace("${stats.cluster.heap.avg}", result.stats.clusterStats.avgHeap.toString)
+      .replace("${stats.cluster.heap.max}", result.stats.clusterStats.maxHeap.toString)
+
+      .replace("${stats.executor.heap.max}", result.stats.executorStats.maxHeap.toString)
+      .replace("${stats.executor.heap.max.perc}", f"${result.stats.executorStats.maxHeapPerc}%1.2f")
+      .replace("${stats.executor.heap.avg}", result.stats.executorStats.avgHeap.toString)
+      .replace("${stats.executor.heap.avg.perc}", f"${result.stats.executorStats.avgHeapPerc}%1.2f")
+      .replace("${stats.executor.non-heap.avg}", result.stats.executorStats.avgNonHeap.toString)
+      .replace("${stats.executor.non-heap.max}", result.stats.executorStats.maxNonHeap.toString)
+
+      .replace("${stats.driver.heap.max}", result.stats.driverStats.maxHeap.toString)
+      .replace("${stats.driver.heap.max.perc}", f"${result.stats.driverStats.maxHeapPerc}%1.2f")
+      .replace("${stats.driver.heap.avg}", result.stats.driverStats.avgHeap.toString)
+      .replace("${stats.driver.heap.avg.perc}", f"${result.stats.driverStats.avgHeapPerc}%1.2f")
+      .replace("${stats.driver.non-heap.avg}", result.stats.driverStats.avgNonHeap.toString)
+      .replace("${stats.driver.non-heap.max}", result.stats.driverStats.maxNonHeap.toString)
   }
 }

@@ -27,6 +27,7 @@ import scala.collection.mutable
 case class SparkScopeResult(applicationId: String,
                             executorMetrics: ExecutorMetrics,
                             clusterMetrics: ClusterMetrics,
+                            stats: Statistics,
                             summary: String,
                             logs: String)
 case class ExecutorMetrics(heapUsedMax: DataFrame,
@@ -36,6 +37,11 @@ case class ExecutorMetrics(heapUsedMax: DataFrame,
                            nonHeapUsedMax: DataFrame,
                            nonHeapUsedMin: DataFrame,
                            nonHeapUsedAvg: DataFrame)
+case class Statistics(clusterStats: ClusterStats, executorStats: ExecutorStats, driverStats: DriverStats)
+case class ClusterStats(maxHeap: Long, avgHeap: Long, maxHeapPerc: Double, avgHeapPerc: Double)
+case class ExecutorStats(maxHeap: Long, maxHeapPerc: Double, avgHeap: Long, avgHeapPerc: Double, avgNonHeap: Long, maxNonHeap: Long)
+case class DriverStats(maxHeap: Long, maxHeapPerc: Double, avgHeap: Long, avgHeapPerc: Double, avgNonHeap: Long, maxNonHeap: Long)
+
 case class ClusterMetrics(heapMax: DataFrame,
                           heapUsed: DataFrame,
                           heapUsage: DataFrame)
@@ -262,7 +268,31 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       executorMetrics = executorMetrics,
       clusterMetrics = clusterMetrics,
       summary = summary.toString,
-      logs=log.toString
+      logs=log.toString,
+      stats = Statistics(
+        clusterStats = ClusterStats(
+          maxHeap = maxClusterHeapUsed,
+          maxHeapPerc = maxClusterHeapUsagePerc,
+          avgHeap = avgClusterHeapUsed,
+          avgHeapPerc = avgHeapUsagePerc
+        ),
+        executorStats = ExecutorStats(
+          maxHeap = maxHeapUsed,
+          maxHeapPerc = maxHeapUsagePerc,
+          maxNonHeap = maxNonHeapUsed,
+          avgHeap = avgHeapUsed,
+          avgHeapPerc = avgHeapUsagePerc,
+          avgNonHeap = avgNonHeapUsed
+        ),
+        driverStats = DriverStats(
+          maxHeap = maxHeapUsedDriver,
+          maxHeapPerc = maxHeapUsageDriverPerc,
+          maxNonHeap = maxNonHeapUsedDriver,
+          avgHeap = avgHeapUsedDriver,
+          avgHeapPerc = avgHeapUsageDriverPerc,
+          avgNonHeap = avgNonHeapUsedDriver
+        )
+      )
     )
   }
 
