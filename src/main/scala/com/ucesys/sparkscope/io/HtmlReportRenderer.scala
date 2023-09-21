@@ -16,6 +16,19 @@ object HtmlReportRenderer {
       .replace("${applicationId}", result.applicationId)
       .replace("${logs}", result.logs)
       .replace("${sparklens}", sparklensResults.mkString("\n"))
+
+    val renderedCharts = renderCharts(rendered, result)
+    val renderedStats = renderStats(renderedCharts, result)
+
+    val outputPath = outputDir + result.applicationId + ".html"
+    val fileWriter = new FileWriter(outputPath)
+    fileWriter.write(renderedStats)
+    fileWriter.close()
+    println(s"Wrote HTML report file to ${outputPath}")
+  }
+
+  def renderCharts(template: String, result: SparkScopeResult): String = {
+    template
       .replace("${chart.jvm.cluster.heap.usage}", result.clusterMetrics.heapUsage.select("jvm.heap.usage").values.mkString(","))
       .replace(
         "${chart.jvm.cluster.heap.usage.timestamps}",
@@ -42,13 +55,6 @@ object HtmlReportRenderer {
       .replace("${chart.jvm.executor.non-heap.max}", result.executorMetrics.nonHeapUsedMax.select("jvm.non-heap.used").div(BytesInMB).mkString(","))
       .replace("${chart.jvm.executor.non-heap.min}", result.executorMetrics.nonHeapUsedMin.select("jvm.non-heap.used").div(BytesInMB).mkString(","))
       .replace("${chart.jvm.executor.non-heap.avg}", result.executorMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).mkString(","))
-
-    val renderedStats = renderStats(rendered, result)
-    val outputPath = outputDir + result.applicationId + ".html"
-    val fileWriter = new FileWriter(outputPath)
-    fileWriter.write(renderedStats)
-    fileWriter.close()
-    println(s"Wrote HTML report file to ${outputPath}")
   }
 
   def renderStats(template: String, result: SparkScopeResult): String = {
