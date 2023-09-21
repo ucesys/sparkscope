@@ -7,7 +7,7 @@ import java.io.{FileWriter, InputStream}
 import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 
-object HtmlReportRenderer {
+object HtmlReportGenerator {
   def render(result: SparkScopeResult, outputDir: String, sparklensResults: Seq[String]): Unit = {
     val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
     val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")

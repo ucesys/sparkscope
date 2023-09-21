@@ -22,7 +22,7 @@ import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInf
 import com.qubole.sparklens.helper.JobOverlapHelper
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.ExecutorMetricsAnalyzerSuite._
-import com.ucesys.sparkscope.io.{CsvReader, HtmlReportRenderer, PropertiesLoader}
+import com.ucesys.sparkscope.io.{CsvReader, HtmlReportGenerator, PropertiesLoader}
 import org.apache.spark.SparkConf
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -118,7 +118,7 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
     val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, csvReaderMock, propertiesLoaderMock)
     val out = executorMetricsAnalyzer.analyze(ac)
 
-    HtmlReportRenderer.render(out, "./", Seq("Executor Timeline", "Sparkscope text"))
+    HtmlReportGenerator.render(out, "./", Seq("Executor Timeline", "Sparkscope text"))
 
     println(out)
 

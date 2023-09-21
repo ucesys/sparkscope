@@ -23,7 +23,7 @@ import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInf
 import com.qubole.sparklens.helper.{EmailReportHelper, HDFSConfigHelper}
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.ExecutorMetricsAnalyzer
-import com.ucesys.sparkscope.io.{CsvHadoopReader, HadoopPropertiesLoader, HtmlReportRenderer, PropertiesLoader}
+import com.ucesys.sparkscope.io.{CsvHadoopReader, HadoopPropertiesLoader, HtmlReportGenerator, PropertiesLoader}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
@@ -202,7 +202,7 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
         sparklensResults.foreach(println)
 
         val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
-        HtmlReportRenderer.render(sparkScopeResult, htmlReportDir, sparklensResults)
+        HtmlReportGenerator.render(sparkScopeResult, htmlReportDir, sparklensResults)
       }
     }
   }
