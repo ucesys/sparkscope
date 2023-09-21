@@ -32,7 +32,10 @@ case class SparkScopeResult(applicationId: String,
 case class ExecutorMetrics(heapUsedMax: DataFrame,
                            heapUsedMin: DataFrame,
                            heapUsedAvg: DataFrame,
-                           heapAllocation: DataFrame)
+                           heapAllocation: DataFrame,
+                           nonHeapUsedMax: DataFrame,
+                           nonHeapUsedMin: DataFrame,
+                           nonHeapUsedAvg: DataFrame)
 case class ClusterMetrics(heapMax: DataFrame,
                           heapUsed: DataFrame,
                           heapUsage: DataFrame)
@@ -207,7 +210,10 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       heapUsedMax = allExecutorsMetrics.groupBy("t", JvmHeapUsed).max.sortBy("t"),
       heapUsedMin = allExecutorsMetrics.groupBy("t", JvmHeapUsed).min.sortBy("t"),
       heapUsedAvg = allExecutorsMetrics.groupBy("t", JvmHeapUsed).avg.sortBy("t"),
-      heapAllocation = allExecutorsMetrics.groupBy("t", JvmHeapMax).max.sortBy("t")
+      heapAllocation = allExecutorsMetrics.groupBy("t", JvmHeapMax).max.sortBy("t"),
+      nonHeapUsedMax = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).max.sortBy("t"),
+      nonHeapUsedMin = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).min.sortBy("t"),
+      nonHeapUsedAvg = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).avg.sortBy("t")
     )
     val clusterMetrics = ClusterMetrics(heapMax = clusterHeapMax, heapUsed = clusterHeapUsed, heapUsage = clusterHeapUsage)
 

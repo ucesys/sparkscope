@@ -25,8 +25,12 @@
 </div>
 <h1>SparkScope report for application id: ${applicationId} </h1>
 <h1>Charts</h1>
-<div>
-<canvas id="myChart" style="width:120%;max-width:780px"></canvas>
+<!--<div>-->
+<!--<canvas id="myChart" style="width:120%;max-width:780px"></canvas>-->
+<!--</div>-->
+<div  class="row">
+    <div><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
 </div>
 <!--<div>-->
 <!--<canvas id="clusterHeapUsage" style="width:100%;max-width:700px"></canvas>-->
@@ -35,31 +39,9 @@
     <div><canvas id="clusterHeapUsagePerc" style="width:230%;max-width:1000px"></canvas></div>
     <div><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
 </div>
+
 <script>
-    var ctx = document.getElementById('clusterHeapUsagePerc').getContext('2d');
-   var myChart = new Chart(ctx, {
-       type: 'line',
-       data: {
-         labels: [${chart.jvm.cluster.heap.usage.timestamps}],
-         datasets: [{
-             data: [${chart.jvm.cluster.heap.usage}],
-             label: "Total Cluster Heap Utilization[%]",
-             borderColor: "#3e95cd",
-             backgroundColor: "#7bb6dd",
-             fill: true,
-           }
-         ]
-       },
-      options: {
-        title: {
-          display: true,
-          text: "Cluster Heap Utilization Percentage",
-        },
-      }
-     });
-</script>
-<script>
-    var ctx = document.getElementById('myChart').getContext('2d');
+    var ctx = document.getElementById('executorHeap').getContext('2d');
    var myChart = new Chart(ctx, {
        type: 'line',
        data: {
@@ -95,6 +77,66 @@
         title: {
           display: true,
           text: "Executor Heap Utilization",
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('executorNonHeap').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.executor.non-heap.timestamps}],
+         datasets: [{
+             data: [${chart.jvm.executor.non-heap.max}],
+             label: "max usage[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: false,
+           }, {
+             data: [${chart.jvm.executor.non-heap.avg}],
+             label: "avg usage[MB]",
+             borderColor: "#ffa500",
+             backgroundColor:"#ffc04d",
+             fill: false,
+           }, {
+             data: [${chart.jvm.executor.non-heap.min}],
+             label: "min usage[MB]",
+             borderColor: "#c45850",
+             backgroundColor:"#d78f89",
+             fill: false,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Executor Non-Heap Utilization",
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('clusterHeapUsagePerc').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.cluster.heap.usage.timestamps}],
+         datasets: [{
+             data: [${chart.jvm.cluster.heap.usage}],
+             label: "Total Cluster Heap Utilization[%]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Cluster Heap Utilization Percentage",
         },
       }
      });
