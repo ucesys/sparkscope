@@ -34,8 +34,8 @@ object HtmlReportGenerator {
         "${chart.jvm.cluster.heap.usage.timestamps}",
         result.clusterMetrics.heapUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.cluster.heap.used}", result.clusterMetrics.heapUsed.select("jvm.heap.used").div(BytesInMB).mkString(","))
-      .replace("${chart.jvm.cluster.heap.max}", result.clusterMetrics.heapMax.select("jvm.heap.max").div(BytesInMB).mkString(","))
+      .replace("${chart.jvm.cluster.heap.used}", result.clusterMetrics.heapUsed.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.cluster.heap.max}", result.clusterMetrics.heapMax.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
       .replace(
         "${chart.jvm.cluster.heap.timestamps}",
         result.clusterMetrics.heapUsed.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
@@ -44,17 +44,17 @@ object HtmlReportGenerator {
         "${chart.jvm.executor.heap.timestamps}",
         result.executorMetrics.heapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.executor.heap.max}", result.executorMetrics.heapUsedMax.select("jvm.heap.used").div(BytesInMB).mkString(","))
-      .replace("${chart.jvm.executor.heap.min}", result.executorMetrics.heapUsedMin.select("jvm.heap.used").div(BytesInMB).mkString(","))
-      .replace("${chart.jvm.executor.heap.avg}", result.executorMetrics.heapUsedAvg.select("jvm.heap.used").div(BytesInMB).mkString(","))
-      .replace("${chart.jvm.executor.heap.allocation}", result.executorMetrics.heapAllocation.select("jvm.heap.max").div(BytesInMB).mkString(","))
+      .replace("${chart.jvm.executor.heap.max}", result.executorMetrics.heapUsedMax.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.heap.min}", result.executorMetrics.heapUsedMin.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.heap.avg}", result.executorMetrics.heapUsedAvg.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.heap.allocation}", result.executorMetrics.heapAllocation.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
       .replace(
         "${chart.jvm.executor.non-heap.timestamps}",
         result.executorMetrics.nonHeapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.executor.non-heap.max}", result.executorMetrics.nonHeapUsedMax.select("jvm.non-heap.used").div(BytesInMB).mkString(","))
-      .replace("${chart.jvm.executor.non-heap.min}", result.executorMetrics.nonHeapUsedMin.select("jvm.non-heap.used").div(BytesInMB).mkString(","))
-      .replace("${chart.jvm.executor.non-heap.avg}", result.executorMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).mkString(","))
+      .replace("${chart.jvm.executor.non-heap.max}", result.executorMetrics.nonHeapUsedMax.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.non-heap.min}", result.executorMetrics.nonHeapUsedMin.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.non-heap.avg}", result.executorMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
   }
 
   def renderStats(template: String, result: SparkScopeResult): String = {
@@ -64,6 +64,8 @@ object HtmlReportGenerator {
 //      .replace("${stats.cluster.heap.avg}", result.stats.clusterStats.avgHeap.toString)
 //      .replace("${stats.cluster.heap.max}", result.stats.clusterStats.maxHeap.toString)
       .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterStats.avgHeapPerc}%1.2f")
+      .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterStats.totalCpuUtil}%1.2f")
+
 
       .replace("${stats.executor.heap.max}", result.stats.executorStats.maxHeap.toString)
       .replace("${stats.executor.heap.max.perc}", f"${result.stats.executorStats.maxHeapPerc}%1.2f")

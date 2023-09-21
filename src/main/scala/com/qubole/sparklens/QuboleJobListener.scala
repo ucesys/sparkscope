@@ -177,16 +177,6 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
       stageMap,
       stageIDToJobID)
 
-    val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, new CsvHadoopReader, new HadoopPropertiesLoader)
-    val sparkScopeResult = executorMetricsAnalyzer.analyze(appContext)
-
-    println("           ____              __    ____")
-    println("          / __/__  ___ _____/ /__ / __/_ ___  ___  ___")
-    println("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
-    println("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
-    println("           /_/                             /_/ ")
-    println(sparkScopeResult.logs + sparkScopeResult.summary)
-
     asyncReportingEnabled(sparkConf) match {
       case true => {
         println("Reporting disabled. Will save sparklens data file for later use.")
@@ -198,8 +188,24 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
         } else {
           EmailReportHelper.generateReport(appContext.toString(), sparkConf)
         }
+        val startTimeMillis = System.currentTimeMillis()
         val sparklensResults = AppAnalyzer.startAnalyzers(appContext)
+        val endTimeMillis = System.currentTimeMillis()
+        val durationSeconds = (endTimeMillis - startTimeMillis) * 1f / 1000f
         sparklensResults.foreach(println)
+        println(s"\nSparklens analysis took ${durationSeconds}s")
+
+        // Sleeping for 1 sec in case csv metrics are still being dumped
+        Thread.sleep(1000)
+        val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, new CsvHadoopReader, new HadoopPropertiesLoader)
+        val sparkScopeResult = executorMetricsAnalyzer.analyze(appContext)
+
+        println("           ____              __    ____")
+        println("          / __/__  ___ _____/ /__ / __/_ ___  ___  ___")
+        println("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
+        println("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
+        println("           /_/                             /_/ ")
+        println(sparkScopeResult.logs + sparkScopeResult.summary)
 
         val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
         HtmlReportGenerator.render(sparkScopeResult, htmlReportDir, sparklensResults)

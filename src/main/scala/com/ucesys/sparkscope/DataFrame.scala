@@ -1,14 +1,23 @@
 package com.ucesys.sparkscope
 
+import java.time.LocalDateTime.ofEpochSecond
+import java.time.ZoneOffset.UTC
+
 case class DataColumn(name: String, values: Seq[String]) {
     def size: Int = values.length
     def toFloat: Seq[Float] = values.map(_.toFloat)
     def toLong: Seq[Long] = values.map(_.toFloat.toLong)
     def toDouble: Seq[Double] = values.map(_.toDouble)
-    def div(divBy: Long): Seq[Double] = values.map(_.toDouble / divBy)
+//    def div(divBy: Long): Seq[Double] = values.map(_.toDouble / divBy)
+    def div(divBy: Long): DataColumn = DataColumn(this.name, values.map(elem => (elem.toDouble / divBy).toString))
+    def div(other: DataColumn): DataColumn = {
+        val dividedValues =(this.values zip other.values).map{case (x, y) => (x.toDouble / y.toDouble).toString}
+        DataColumn(s"${this.name}DivBy${other.name}", dividedValues)
+    }
     def sum: Double = this.toDouble.sum
     def max: Double = this.toDouble.max
     def avg: Double = this.toDouble.sum / values.length
+    def tsToDt: DataColumn = DataColumn("dt", values.map(ts => ofEpochSecond(ts.toLong, 0, UTC).toString))
 }
 
 case class GroupByResult(groupCol: String, aggCol: String, result: Map[String, Seq[String]]) {
@@ -70,7 +79,9 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
     }
 
     def mergeOn(onCol: String, other: DataFrame): DataFrame = {
-        assert(this.columns.find(_.name == onCol) == other.columns.find(_.name == onCol) , "MergedOn tables must have the same values for the onColumn!")
+        val left = this.columns.find(_.name == onCol)
+        val right = other.columns.find(_.name == onCol)
+        assert(left ==  right, s"MergedOn failed for tables(${this.name}, ${other.name}) must have the same values for the onColumn! \nLeft: ${left}\nRight: ${right}")
         DataFrame(this.name, this.columns ++ other.columns.filterNot(_.name == onCol))
     }
 
@@ -96,6 +107,9 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
 }
 
 object DataFrame {
+    def apply(column: DataColumn): DataFrame = {
+        DataFrame(column.name, Seq(column))
+    }
     def fromCsv(name: String, csvStr: String, delimeter: String): DataFrame = {
         val rows = csvStr.split("\n")
         val header = rows.head.split(delimeter)
