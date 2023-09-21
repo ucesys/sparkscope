@@ -8,17 +8,19 @@ import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 
 object HtmlReportRenderer {
-  def render(result: SparkScopeResult, outputDir: String): Unit = {
+  def render(result: SparkScopeResult, outputDir: String, sparklensResults: Seq[String]): Unit = {
     val summaryHtml = result.summary.replace("\n", "<br>\n")
     val logsHtml = result.logs.replace("\n", "<br>\n")
+    val sparklensOutputHtml = sparklensResults.mkString("\n").replace("\n", "<br>\n")
+
     val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
     val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
-
 
     val rendered = template
       .replace("${applicationId}", result.applicationId)
       .replace("${summary}", summaryHtml)
       .replace("${logs}", logsHtml)
+      .replace("${sparklens}", sparklensOutputHtml)
       .replace("${chart.jvm.cluster.heap.usage}", result.clusterMetrics.heapUsage.select("jvm.heap.usage").values.mkString(","))
       .replace(
         "${chart.jvm.cluster.heap.usage.timestamps}",

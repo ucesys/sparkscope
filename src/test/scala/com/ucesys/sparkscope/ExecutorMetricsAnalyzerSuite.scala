@@ -118,10 +118,9 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
     val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, csvReaderMock, propertiesLoaderMock)
     val out = executorMetricsAnalyzer.analyze(ac)
 
-    HtmlReportRenderer.render(out, "./")
+    HtmlReportRenderer.render(out, "./", Seq("Executor Timeline", "Sparkscope text"))
 
     println(out)
-
 
     assert(jobTime == 10, "Parallel Jobs are not being considered while computing the time spent in jobs")
   }
@@ -230,25 +229,30 @@ object ExecutorMetricsAnalyzerSuite {
   val jvmTotalExec2Csv: String =
     """t,jvm.total.used
       |1694737422,600292232
+      |1694737424,400292232
       |1694737424,339839016""".stripMargin
 
   val jvmHeapExec2Csv: String =
     """t,jvm.heap.used
       |1694737422,326353928
+      |1694737424,226353928
       |1694737424,105890120""".stripMargin
 
   val jvmHeapUsageExec2Csv: String =
     """t,jvm.heap.usage
       |1694737422,0.38904419898986814
+      |1694737424,0.18904419898986814
       |1694737424,0.12623085975646972""".stripMargin
 
   val jvmHeapMaxExec2Csv: String =
     """t,jvm.heap.max
       |1694737422,838860800
+      |1694737424,838860800
       |1694737424,838860800""".stripMargin
 
   val jvmNonHeapExec2Csv: String =
     """t,jvm.non-heap.used
       |1694737422,50600840
+      |1694737424,52593328
       |1694737424,51593328""".stripMargin
 }

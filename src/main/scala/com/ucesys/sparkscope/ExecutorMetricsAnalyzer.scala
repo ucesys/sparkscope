@@ -71,7 +71,6 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     log.println("[SparkScope] Trying to read csv metrics from " + csvMetricsDir)
 
     // 4
-
     log.println("[SparkScope] Reading driver metrics...")
     val driverMetrics: Seq[DataFrame] = JvmMetrics.map { metric =>
         val metricsFilePath = s"${csvMetricsDir}/${appContext.appInfo.applicationID}.driver.${metric}.csv"
@@ -86,7 +85,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
         val metricsFilePath = s"${csvMetricsDir}/${appContext.appInfo.applicationID}.${executorId}.${metric}.csv"
         val csvFileStr = reader.read(metricsFilePath).replace("value", metric)
         log.println(s"[SparkScope] Reading ${metric} metric for executor=${executorId} from " + metricsFilePath)
-        DataFrame.fromCsv(metric, csvFileStr, ",")
+        DataFrame.fromCsv(metric, csvFileStr, ",").distinct("t").sortBy("t")
       }
       (executorId, metricTables)
     }.toMap

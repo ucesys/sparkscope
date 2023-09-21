@@ -65,9 +65,8 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
 
     def union(other: DataFrame): DataFrame = {
         assert(this.columns.map(_.name) == other.columns.map(_.name), "Unioned tables must have the same columns!")
-        val colsSeq = (this.toRows ++ other.toRows).transpose
-        val columns = (columnsNames zip colsSeq).map{case (name, values) => DataColumn(name, values)}
-        DataFrame(this.name, columns)
+        val rows = (this.toRows ++ other.toRows)
+        DataFrame.fromRows(this.name, this.columnsNames, rows)
     }
 
     def mergeOn(onCol: String, other: DataFrame): DataFrame = {
@@ -86,20 +85,27 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
     def sortBy(col: String): DataFrame = {
         val sortCol: DataColumn = this.select(col)
         val sortedRows = (sortCol.values zip this.toRows).sortBy(_._1).map{case (_, row) => row}
-        val sortedCols = (this.columnsNames zip sortedRows.transpose).map{case (name, col) => DataColumn(name, col)}
-        DataFrame(this.name, sortedCols)
+        DataFrame.fromRows(this.name, this.columnsNames, sortedRows)
+    }
+
+    def distinct(col: String): DataFrame = {
+        val dinstinctCol = this.select(col)
+        val rows = (dinstinctCol.values zip this.toRows).groupBy(_._1).map{case (key, value) => value.head._2}.toSeq
+        DataFrame.fromRows(this.name, this.columnsNames, rows)
     }
 }
 
 object DataFrame {
-//    def apply(name: String, columns: Seq[DataColumn]): DataFrame = {
-//        new DataFrame(name, columns)
-//    }
     def fromCsv(name: String, csvStr: String, delimeter: String): DataFrame = {
         val rows = csvStr.split("\n")
         val header = rows.head.split(delimeter)
         val columnsSeq = rows.tail.map(_.split(delimeter)).transpose
         val columns = (header zip columnsSeq).map{case (name, values) => DataColumn(name, values)}
+        DataFrame(name, columns)
+    }
+
+    def fromRows(name: String, columnNames: Seq[String], rows: Seq[Seq[String]]): DataFrame = {
+        val columns = (columnNames zip rows.transpose).map { case (name, col) => DataColumn(name, col) }
         DataFrame(name, columns)
     }
 }

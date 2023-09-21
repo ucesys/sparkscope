@@ -75,8 +75,7 @@ trait AppAnalyzer {
 
 object AppAnalyzer {
   val list = new ListBuffer[AppAnalyzer]
-  def startAnalyzers(appContext: AppContext): Unit = {
-
+  def startAnalyzers(appContext: AppContext): Seq[String] = {
     list += new SimpleAppAnalyzer
     list += new HostTimelineAnalyzer
     list += new ExecutorTimelineAnalyzer
@@ -87,17 +86,18 @@ object AppAnalyzer {
     list += new StageSkewAnalyzer
 // TODO Add ExecutorMetricsAnalyzer
 
-    list.foreach( x => {
+    val results: Seq[String] = list.flatMap( x => {
       try {
-        val output = x.analyze(appContext)
-        println(output)
+        Some(x.analyze(appContext))
       } catch {
         case e:Throwable => {
           println(s"Failed in Analyzer ${x.getClass.getSimpleName}")
           e.printStackTrace()
+          None
         }
       }
     })
+    results
   }
 
 }

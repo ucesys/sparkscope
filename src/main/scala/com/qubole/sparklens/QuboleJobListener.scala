@@ -187,9 +187,6 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
     println("           /_/                             /_/ ")
     println(sparkScopeResult.logs + sparkScopeResult.summary)
 
-    val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
-    HtmlReportRenderer.render(sparkScopeResult, htmlReportDir)
-
     asyncReportingEnabled(sparkConf) match {
       case true => {
         println("Reporting disabled. Will save sparklens data file for later use.")
@@ -201,7 +198,11 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
         } else {
           EmailReportHelper.generateReport(appContext.toString(), sparkConf)
         }
-        AppAnalyzer.startAnalyzers(appContext)
+        val sparklensResults = AppAnalyzer.startAnalyzers(appContext)
+        sparklensResults.foreach(println)
+
+        val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
+        HtmlReportRenderer.render(sparkScopeResult, htmlReportDir, sparklensResults)
       }
     }
   }
