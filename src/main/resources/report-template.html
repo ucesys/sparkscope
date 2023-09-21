@@ -103,26 +103,26 @@
     <table class="styled-table" style="float: left;">
         <thead>
         <tr>
-            <th>Cluster Stats</th>
+            <th>Application Stats</th>
             <th></th>
         </tr>
         </thead>
         <tbody>
         <tr>
-            <td>Avg Cluster heap memory utilization percentage</td>
+            <td>Total heap utilization of application</td>
             <td>${stats.cluster.heap.avg.perc}%</td>
         </tr>
         <tr>
-            <td>Max Cluster heap memory utilization percentage</td>
+            <td>Peak heap utilization of application</td>
             <td>${stats.cluster.heap.max.perc}%</td>
         </tr>
         <tr>
-            <td>Avg Cluster heap memory utilization in bytes</td>
-            <td>${stats.cluster.heap.avg}MB</td>
+            <td>Total heap waste of application</td>
+            <td>${stats.cluster.heap.waste.perc}%</td>
         </tr>
         <tr>
-            <td>Max Cluster heap memory utilization in bytes</td>
-            <td>${stats.cluster.heap.max}MB</td>
+            <td>TODO</td>
+            <td>TODO</td>
         </tr>
         <!-- and so on... -->
         </tbody>
@@ -141,7 +141,7 @@
             <td>${stats.executor.heap.avg}MB(${stats.executor.heap.avg.perc}%)</td>
         </tr>
         <tr>
-            <td>Max heap usage among executors</td>
+            <td>Peak heap usage among executors</td>
             <td>${stats.executor.heap.max}MB(${stats.executor.heap.max.perc}%)</td>
         </tr>
         <tr>
@@ -149,7 +149,7 @@
             <td>${stats.executor.non-heap.avg}MB</td>
         </tr>
         <tr>
-            <td>Max non-heap usage among executors</td>
+            <td>Peak non-heap usage among executors</td>
             <td>${stats.executor.non-heap.max}MB</td>
         </tr>
         <!-- and so on... -->
@@ -169,7 +169,7 @@
             <td>${stats.driver.heap.avg}MB(${stats.driver.heap.avg.perc}%)</td>
         </tr>
         <tr>
-            <td>Max driver heap usage</td>
+            <td>Peak driver heap usage</td>
             <td>${stats.driver.heap.max}MB(${stats.driver.heap.max.perc}%)</td>
         </tr>
         <tr>
@@ -177,7 +177,7 @@
             <td>${stats.driver.non-heap.avg}MB</td>
         </tr>
         <tr>
-            <td>Max driver non-heap usage</td>
+            <td>Peak driver non-heap usage</td>
             <td>${stats.driver.non-heap.max}MB</td>
         </tr>
         <!-- and so on... -->
@@ -194,14 +194,14 @@
 <div  class="row" style="clear: both;"> </div>
 <h1>Charts</h1>
 
-<div  class="row" >
-    <div><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
-    <div><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
-</div>
-
 <div  class="row">
     <div><canvas id="clusterHeapUsagePerc" style="width:230%;max-width:1000px"></canvas></div>
     <div><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+</div>
+
+<div  class="row" >
+    <div><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
 </div>
 
 <script>
@@ -241,6 +241,7 @@
         title: {
           display: true,
           text: "Executor Heap Utilization",
+          fontSize: 16
         },
       }
      });
@@ -277,6 +278,7 @@
         title: {
           display: true,
           text: "Executor Non-Heap Utilization",
+          fontSize: 16
         },
       }
      });
@@ -290,7 +292,7 @@
          labels: [${chart.jvm.cluster.heap.usage.timestamps}],
          datasets: [{
              data: [${chart.jvm.cluster.heap.usage}],
-             label: "Total Cluster Heap Utilization[%]",
+             label: "Heap Utilization[%]",
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: true,
@@ -300,7 +302,8 @@
       options: {
         title: {
           display: true,
-          text: "Cluster Heap Utilization Percentage",
+          text: "Application Heap Utilization Percentage",
+          fontSize: 16
         },
       }
      });
@@ -313,13 +316,13 @@
          labels: [${chart.jvm.cluster.heap.timestamps}],
          datasets: [{
              data: [${chart.jvm.cluster.heap.max}],
-             label: "Cluster Heap Size[MB]",
+             label: "Application Heap Size[MB]",
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
            }, {
              data: [${chart.jvm.cluster.heap.used}],
-             label: "Cluster Heap usage[MB]",
+             label: "Application Heap usage[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
@@ -329,7 +332,8 @@
       options: {
         title: {
           display: true,
-          text: "Cluster Heap Utilization in bytes",
+          text: "Application Heap Usage",
+          fontSize: 16
         },
       }
      });

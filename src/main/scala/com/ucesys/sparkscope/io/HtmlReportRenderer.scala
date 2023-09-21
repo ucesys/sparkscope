@@ -55,8 +55,9 @@ object HtmlReportRenderer {
     template
       .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterStats.avgHeapPerc}%1.2f")
       .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterStats.maxHeapPerc}%1.2f")
-      .replace("${stats.cluster.heap.avg}", result.stats.clusterStats.avgHeap.toString)
-      .replace("${stats.cluster.heap.max}", result.stats.clusterStats.maxHeap.toString)
+//      .replace("${stats.cluster.heap.avg}", result.stats.clusterStats.avgHeap.toString)
+//      .replace("${stats.cluster.heap.max}", result.stats.clusterStats.maxHeap.toString)
+      .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterStats.avgHeapPerc}%1.2f")
 
       .replace("${stats.executor.heap.max}", result.stats.executorStats.maxHeap.toString)
       .replace("${stats.executor.heap.max.perc}", f"${result.stats.executorStats.maxHeapPerc}%1.2f")
