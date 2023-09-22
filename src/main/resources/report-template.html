@@ -98,8 +98,36 @@
      /_/                             /_/
 </pre>
 </div>
-<h1>SparkScope report for application id: ${applicationId} </h1>
+<!--<h1>SparkScope report for application id: ${applicationId} </h1>-->
 <div>
+    <table class="styled-table" style="float: left;">
+        <thead>
+        <tr>
+            <th>Application Info</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Application Id</td>
+            <td>${appInfo.applicationId}</td>
+        </tr>
+        <tr>
+            <td>Application Start</td>
+            <td>${appInfo.start}</td>
+        </tr>
+        <tr>
+            <td>Application End</td>
+            <td>${appInfo.end}</td>
+        </tr>
+        <tr>
+            <td>Application Duration</td>
+            <td>${appInfo.duration}</td>
+        </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+
     <table class="styled-table" style="float: left;">
         <thead>
         <tr>

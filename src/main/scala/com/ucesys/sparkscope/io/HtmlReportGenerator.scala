@@ -6,21 +6,30 @@ import com.ucesys.sparkscope.SparkScopeResult
 import java.io.{FileWriter, InputStream}
 import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
-
+import scala.concurrent.duration._
 object HtmlReportGenerator {
   def render(result: SparkScopeResult, outputDir: String, sparklensResults: Seq[String]): Unit = {
     val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
     val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
+    val duration = (result.appInfo.endTime-result.appInfo.startTime).milliseconds
+    val durationStr = duration match {
+      case duration if duration < 1.minutes => s"${duration.toSeconds.toString}s"
+      case duration if duration < 1.hours => s"${duration.toMinutes%60}min ${duration.toSeconds%60}s"
+      case _ => s"${duration.toHours}h ${duration.toMinutes%60}min ${duration.toSeconds%60}s"
+    }
 
     val rendered = template
-      .replace("${applicationId}", result.applicationId)
+      .replace("${appInfo.applicationId}", result.appInfo.applicationID)
+      .replace("${appInfo.start}", ofEpochSecond(result.appInfo.startTime/1000, 0, UTC).toString)
+      .replace("${appInfo.end}", ofEpochSecond(result.appInfo.endTime/1000, 0, UTC).toString)
+      .replace("${appInfo.duration}", durationStr)
       .replace("${logs}", result.logs)
       .replace("${sparklens}", sparklensResults.mkString("\n"))
 
     val renderedCharts = renderCharts(rendered, result)
     val renderedStats = renderStats(renderedCharts, result)
 
-    val outputPath = outputDir + result.applicationId + ".html"
+    val outputPath = outputDir + result.appInfo.applicationID + ".html"
     val fileWriter = new FileWriter(outputPath)
     fileWriter.write(renderedStats)
     fileWriter.close()
@@ -66,11 +75,8 @@ object HtmlReportGenerator {
     template
       .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterStats.avgHeapPerc}%1.2f")
       .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterStats.maxHeapPerc}%1.2f")
-//      .replace("${stats.cluster.heap.avg}", result.stats.clusterStats.avgHeap.toString)
-//      .replace("${stats.cluster.heap.max}", result.stats.clusterStats.maxHeap.toString)
       .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterStats.avgHeapPerc}%1.2f")
       .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterStats.totalCpuUtil}%1.2f")
-
 
       .replace("${stats.executor.heap.max}", result.stats.executorStats.maxHeap.toString)
       .replace("${stats.executor.heap.max.perc}", f"${result.stats.executorStats.maxHeapPerc}%1.2f")

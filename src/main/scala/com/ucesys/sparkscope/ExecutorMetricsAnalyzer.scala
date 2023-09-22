@@ -18,15 +18,15 @@
 package com.ucesys.sparkscope
 
 import com.qubole.sparklens.analyzer.AppAnalyzer
-import com.qubole.sparklens.common.AppContext
+import com.qubole.sparklens.common.{AppContext, ApplicationInfo}
 import com.ucesys.sparkscope.ExecutorMetricsAnalyzer._
 import com.ucesys.sparkscope.io.{CsvHadoopReader, CsvReader, PropertiesLoader}
 import org.apache.spark.SparkConf
-import java.time.ZoneOffset.UTC
 
+import java.time.ZoneOffset.UTC
 import java.time.LocalDateTime.ofEpochSecond
 import scala.collection.mutable
-case class SparkScopeResult(applicationId: String,
+case class SparkScopeResult(appInfo: ApplicationInfo,
                             executorMetrics: ExecutorMetrics,
                             clusterMetrics: ClusterMetrics,
                             stats: Statistics,
@@ -313,7 +313,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     log.println(s"\n[SparkScope] SparkScope analysis took ${durationSeconds}s")
 
     SparkScopeResult(
-      applicationId = ac.appInfo.applicationID,
+      appInfo = ac.appInfo,
       executorMetrics = executorMetrics,
       clusterMetrics = clusterMetrics,
       summary = summary.toString,

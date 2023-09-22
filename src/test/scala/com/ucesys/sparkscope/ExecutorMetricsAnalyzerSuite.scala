@@ -74,18 +74,12 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
     executor1Timespan.setEndTime(1694737424000L)
     executor2Timespan.setStartTime(1694737422000L)
     executor2Timespan.setEndTime(1694737424000L)
-//    executor0Timespan.setStartTime(1695324183276L)
-//    executor0Timespan.setEndTime(1695324219234L)
-//    executor1Timespan.setStartTime(1695324183489L)
-//    executor1Timespan.setEndTime(1695324219234L)
-//    executor2Timespan.setStartTime(1695324183485L)
-//    executor2Timespan.setEndTime(1695324219234L)
     executorMap.put("0", executor0Timespan)
     executorMap.put("1", executor1Timespan)
     executorMap.put("2", executor2Timespan)
 
     new AppContext(
-      new ApplicationInfo(appId),
+      new ApplicationInfo(appId, 1694731316000L,1694737424000L),
       new AggregateMetrics(),
       mutable.HashMap[String, HostTimeSpan](),
       executorMap,
@@ -151,7 +145,7 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
 }
 
 object ExecutorMetricsAnalyzerSuite {
-  final val appId = "123456789_0001"
+  final val appId = "app-20230101010819-test"
   val metricsPropertiesPath = "path/to/metrics.properties"
   val csvMetricsPath = "/tmp/csv-metrics"
 
