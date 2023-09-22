@@ -76,13 +76,24 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
     // TODO VALIDATE TRANSPOSE
     def toRows: Seq[Seq[String]] = columns.map(_.values).transpose
 
-    def toRowsWithHeader: Seq[Seq[String]] = Seq(columnsNames) ++ this.toRows
+    def toRowsWithHeader: Seq[Seq[String]] = Seq(this.columnsNames) ++ this.toRows
 
     def select(column: String): DataColumn = this.columns.find(_.name == column).get
     def select(subColumns: Seq[String]): DataFrame = DataFrame(this.name, this.columns.filter(col => subColumns.contains(col.name)))
 
     def toCsv(delimeter: String): String = this.toRowsWithHeader.map(_.mkString(delimeter)).mkString("\n")
-    override def toString(): String = this.toCsv(",")
+    override def toString(): String = {
+        val paddedCols = this.columns.map { col =>
+            val colWithName = Seq(col.name) ++ col.values
+            val maxStrLength = colWithName.map(_.length).max
+            val borderStr = Seq.fill(maxStrLength)("-").mkString
+            val colWithNameWithBorder = Seq(borderStr, col.name, borderStr) ++ col.values ++ Seq(borderStr)
+            val paddedValues = colWithNameWithBorder.map{ str => str + Seq.fill(maxStrLength-str.length)(" ").mkString}
+            DataColumn(col.name, paddedValues)
+        }
+        DataFrame(this.name, paddedCols).toRows.map(_.mkString("|", "|", "|")).mkString("\n")
+    }
+
 
     def addColumn(newColumn: DataColumn): DataFrame = {
         assert(this.numRows == newColumn.size, "New Columns needs to have the same amount of rows!")
