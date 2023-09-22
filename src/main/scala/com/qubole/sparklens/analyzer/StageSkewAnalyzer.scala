@@ -38,7 +38,6 @@ class StageSkewAnalyzer extends  AppAnalyzer {
     out.toString()
   }
 
-
   def bytesToString(size: Long): String = {
     val TB = 1L << 40
     val GB = 1L << 30

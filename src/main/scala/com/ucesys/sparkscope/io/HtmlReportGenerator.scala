@@ -26,6 +26,7 @@ object HtmlReportGenerator {
       .replace("${logs}", result.logs)
       .replace("${sparkConf}", result.sparkConf.getAll.map{case (key, value) => s"${key}: ${value}"}.mkString("\n"))
       .replace("${sparklens}", sparklensResults.mkString("\n"))
+//      .replace("${version}", getClass.getPackage.getImplementationVersion)
 
     val renderedCharts = renderCharts(rendered, result)
     val renderedStats = renderStats(renderedCharts, result)
