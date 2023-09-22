@@ -26,6 +26,7 @@ import scala.concurrent.duration._
 
 case class SparkScopeResult(appInfo: ApplicationInfo,
                             executorMetrics: ExecutorMetrics,
+                            driverMetrics: DataFrame,
                             clusterMetrics: ClusterMetrics,
                             resourceWasteMetrics: ResourceWasteMetrics,
                             stats: Statistics,
@@ -341,6 +342,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       executorMetrics = executorMetrics,
       clusterMetrics = clusterMetrics,
       summary = summary.toString,
+      driverMetrics=driverMetricsMerged,
       logs=log.toString,
       sparkConf = sparkConf,
       resourceWasteMetrics = resourceWasteMetrics,

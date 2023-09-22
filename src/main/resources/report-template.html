@@ -235,12 +235,13 @@
     <div ><canvas id="clusterHeapUsagePerc" style="width:230%;max-width:1000px"></canvas></div>
 </div>
 <div  class="row">
-    <div ><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
     <div><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div ><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
 </div>
 
 <div  class="row" >
-    <div style="margin-left: 380px;"><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div ><canvas id="driverHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
 </div>
 
 <script>
@@ -305,7 +306,38 @@
       options: {
         title: {
           display: true,
-          text: "Executor Heap Utilization",
+          text: "Executor Heap Usage",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('driverHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.driver.heap.timestamps}],
+         datasets: [{
+             data: [${chart.jvm.driver.heap.size}],
+             label: "heap size[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+           }, {
+             data: [${chart.jvm.driver.heap.used}],
+             label: "heap usage[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Driver Heap Usage",
           fontSize: 16
         },
       }
@@ -342,7 +374,7 @@
       options: {
         title: {
           display: true,
-          text: "Executor Non-Heap Utilization",
+          text: "Executor Non-Heap Usage",
           fontSize: 16
         },
       }

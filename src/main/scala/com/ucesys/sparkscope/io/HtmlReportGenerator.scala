@@ -71,6 +71,12 @@ object HtmlReportGenerator {
       .replace("${chart.jvm.executor.non-heap.max}", result.executorMetrics.nonHeapUsedMax.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
       .replace("${chart.jvm.executor.non-heap.min}", result.executorMetrics.nonHeapUsedMin.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
       .replace("${chart.jvm.executor.non-heap.avg}", result.executorMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace(
+        "${chart.jvm.driver.heap.timestamps}",
+        result.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+      )
+      .replace("${chart.jvm.driver.heap.size}", result.driverMetrics.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.driver.heap.used}", result.driverMetrics.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
   }
 
   def renderStats(template: String, result: SparkScopeResult): String = {
