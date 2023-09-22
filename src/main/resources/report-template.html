@@ -13,17 +13,19 @@
         }
         /* Style the button that is used to open and close the collapsible content */
         .collapsible {
-          background-color: white;
+          background-color: #999;
           color: black;
           cursor: pointer;
           padding: 0px;
-          width: 17%;
-          border: none;
+          width: 14%;
+          border: solid 1px;
           text-align: left;
           outline: none;
-          font-size: 32px;
-          font-family: georgia,garamond,serif;
+          font-size: 22px;
+<!--          font-family: georgia,garamond,serif;-->
+          border-radius: 20px;
           font-weight: bold;
+          text-align: center;
         }
 
         /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
@@ -220,7 +222,6 @@
 <!--</pre>-->
 <!--</div>-->
 <div  class="row" style="clear: both;"> </div>
-<h1>Charts</h1>
 <div  class="row">
     <div><canvas id="cpuUtilization" style="width:230%;max-width:1000px;"></canvas></div>
     <div ><canvas id="clusterHeapUsagePerc" style="width:230%;max-width:1000px"></canvas></div>
@@ -408,6 +409,15 @@ ${sparklens}
 <div class="content">
 <pre>
 ${logs}
+</pre>
+</div>
+
+<br><br>
+
+<button type="button" class="collapsible">View Spark Config  </button>
+<div class="content">
+<pre>
+${sparkConf}
 </pre>
 </div>
 

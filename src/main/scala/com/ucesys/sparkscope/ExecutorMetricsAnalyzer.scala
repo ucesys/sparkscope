@@ -17,20 +17,17 @@
 */
 package com.ucesys.sparkscope
 
-import com.qubole.sparklens.analyzer.AppAnalyzer
 import com.qubole.sparklens.common.{AppContext, ApplicationInfo}
 import com.ucesys.sparkscope.ExecutorMetricsAnalyzer._
-import com.ucesys.sparkscope.io.{CsvHadoopReader, CsvReader, PropertiesLoader}
+import com.ucesys.sparkscope.io.{CsvReader, PropertiesLoader}
 import org.apache.spark.SparkConf
-
-import java.time.ZoneOffset.UTC
-import java.time.LocalDateTime.ofEpochSecond
 import scala.collection.mutable
 case class SparkScopeResult(appInfo: ApplicationInfo,
                             executorMetrics: ExecutorMetrics,
                             clusterMetrics: ClusterMetrics,
                             stats: Statistics,
                             summary: String,
+                            sparkConf: SparkConf,
                             logs: String)
 case class ExecutorMetrics(heapUsedMax: DataFrame,
                            heapUsedMin: DataFrame,
@@ -318,6 +315,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       clusterMetrics = clusterMetrics,
       summary = summary.toString,
       logs=log.toString,
+      sparkConf = sparkConf,
       stats = Statistics(
         clusterStats = ClusterStats(
           maxHeap = maxClusterHeapUsed,
