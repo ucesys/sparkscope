@@ -75,10 +75,12 @@ object HtmlReportGenerator {
 
   def renderStats(template: String, result: SparkScopeResult): String = {
     template
-      .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterStats.avgHeapPerc}%1.2f")
+      .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterStats.avgHeapPerc*100}%1.2f")
       .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterStats.maxHeapPerc}%1.2f")
-      .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterStats.avgHeapPerc}%1.2f")
-      .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterStats.totalCpuUtil}%1.2f")
+      .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterStats.avgHeapPerc*100}%1.2f")
+      .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterStats.totalCpuUtil*100}%1.2f")
+      .replace("${resource.waste.heap}", f"${result.resourceWasteMetrics.heapGbHoursWasted}%1.4f")
+      .replace("${resource.waste.cpu}", f"${result.resourceWasteMetrics.coreHoursWasted}%1.4f")
 
       .replace("${stats.executor.heap.max}", result.stats.executorStats.maxHeap.toString)
       .replace("${stats.executor.heap.max.perc}", f"${result.stats.executorStats.maxHeapPerc}%1.2f")
