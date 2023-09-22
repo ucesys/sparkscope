@@ -1,73 +1,4 @@
-package com.ucesys.sparkscope
-
-import java.time.LocalDateTime.ofEpochSecond
-import java.time.ZoneOffset.UTC
-
-case class DataColumn(name: String, values: Seq[String]) {
-    def size: Int = values.length
-    def toFloat: Seq[Float] = values.map(_.toFloat)
-    def toLong: Seq[Long] = values.map(_.toFloat.toLong)
-    def toDouble: Seq[Double] = values.map(_.toDouble)
-//    def div(divBy: Long): Seq[Double] = values.map(_.toDouble / divBy)
-    def div(divBy: Long): DataColumn = DataColumn(this.name, values.map(elem => (elem.toDouble / divBy).toString))
-    def div(other: DataColumn): DataColumn = {
-        val dividedValues =(this.values zip other.values).map{
-            case (x, y) if (y.toDouble == 0) => "0"
-            case (x, y) => (x.toDouble / y.toDouble).toString
-        }
-        DataColumn(s"${this.name}DivBy${other.name}", dividedValues)
-    }
-    def mul(mulBy: Long): DataColumn = DataColumn(this.name, values.map(elem => (elem.toDouble * mulBy).toString))
-
-    def mul(other: DataColumn): DataColumn = {
-        val multipliedValues = (this.values zip other.values).map { case (x, y) => (x.toDouble * y.toDouble).toString }
-        DataColumn(s"${this.name}MulBy${other.name}", multipliedValues)
-    }
-    def sub(other: DataColumn): DataColumn = {
-        val subtractedValues = (this.values zip other.values).map { case (x, y) => (x.toDouble - y.toDouble).toString }
-        DataColumn(s"${this.name}Sub${other.name}", subtractedValues)
-    }
-    def sum: Double = this.toDouble.sum
-    def max: Double = this.toDouble.max
-    def avg: Double = this.toDouble.sum / values.length
-    def tsToDt: DataColumn = DataColumn("dt", values.map(ts => ofEpochSecond(ts.toLong, 0, UTC).toString))
-    def lag: DataColumn = DataColumn(s"${name}Lag", Seq(values.head) ++ values.init)
-
-    def rename(newName: String): DataColumn = this.copy(name=newName)
-
-    override def toString: String = (Seq(name) ++ values.map(x => f"${x.toDouble}%.4f")).mkString("\n")
-}
-
-case class GroupByResult(groupCol: String, aggColName: String, result: Map[String, Seq[String]]) {
-    def sum: DataFrame = {
-        val aggregated = this.result.map { case (groupCol, aggCol) => (groupCol, aggCol.map(_.toDouble).sum) }
-        toDataFrame(s"groupBy${groupCol}.avg(${aggColName})", aggregated)
-    }
-
-    def max: DataFrame = {
-        val aggregated = this.result.map { case (groupCol, aggCol) => (groupCol, aggCol.map(_.toDouble).max) }
-        toDataFrame(s"groupBy${groupCol}.avg(${aggColName})", aggregated)
-    }
-
-    def min: DataFrame = {
-        val aggregated = this.result.map { case (groupCol, aggCol) => (groupCol, aggCol.map(_.toDouble).min) }
-        toDataFrame(s"groupBy${groupCol}.avg(${aggColName})", aggregated)
-    }
-
-    def avg: DataFrame = {
-        val aggregated = this.result.map { case (groupCol, seq) => (groupCol, seq.map(_.toDouble).sum / seq.length) }
-        toDataFrame(s"groupBy${groupCol}.avg(${aggColName})", aggregated)
-    }
-
-    def count: DataFrame = {
-        val aggregated = this.result.map { case (groupCol, seq) => (groupCol, seq.length.toDouble) }
-        DataFrame(s"groupBy${groupCol}.cnt", columns = Seq(DataColumn(groupCol, aggregated.keys.toSeq), DataColumn("cnt", aggregated.values.toSeq.map(x => f"${x}%.4f"))))
-    }
-
-    def toDataFrame(name: String, aggResult: Map[String, Double]): DataFrame = {
-        DataFrame(name, columns = Seq(DataColumn(groupCol, aggResult.keys.toSeq), DataColumn(aggColName, aggResult.values.toSeq.map(x => f"${x}%.4f"))))
-    }
-}
+package com.ucesys.sparkscope.data
 
 case class DataFrame(name: String, columns: Seq[DataColumn]) {
     def numCols: Int = columns.length
@@ -75,7 +6,6 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
 
     def columnsNames: Seq[String] = columns.map(_.name)
 
-    // TODO VALIDATE TRANSPOSE
     def toRows: Seq[Seq[String]] = columns.map(_.values).transpose
 
     def toRowsWithHeader: Seq[Seq[String]] = Seq(this.columnsNames) ++ this.toRows

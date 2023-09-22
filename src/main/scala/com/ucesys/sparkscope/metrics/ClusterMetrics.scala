@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.metrics
 
-import com.ucesys.sparkscope.DataFrame
+import com.ucesys.sparkscope.data.DataFrame
 
 case class ClusterMetrics(heapMax: DataFrame, heapUsed: DataFrame, heapUsage: DataFrame, cpuUsage: DataFrame) {
   override def toString: String = {

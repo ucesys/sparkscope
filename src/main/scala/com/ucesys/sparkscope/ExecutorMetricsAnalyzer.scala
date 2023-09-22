@@ -21,6 +21,7 @@ import com.qubole.sparklens.common.AppContext.getExecutorCores
 import com.qubole.sparklens.common.{AppContext, ApplicationInfo}
 import com.qubole.sparklens.timespan.ExecutorTimeSpan
 import com.ucesys.sparkscope.ExecutorMetricsAnalyzer._
+import com.ucesys.sparkscope.data.{DataColumn, DataFrame}
 import com.ucesys.sparkscope.io.{CsvReader, PropertiesLoader}
 import com.ucesys.sparkscope.metrics.{ClusterMetrics, ClusterStats, DriverStats, ExecutorStats, ResourceWasteMetrics}
 import org.apache.spark.SparkConf
