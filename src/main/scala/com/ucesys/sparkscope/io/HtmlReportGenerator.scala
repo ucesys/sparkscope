@@ -8,7 +8,7 @@ import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
 object HtmlReportGenerator {
-  def render(result: SparkScopeResult, outputDir: String, sparklensResults: Seq[String]): Unit = {
+  def generateHtml(result: SparkScopeResult, outputDir: String, sparklensResults: Seq[String]): Unit = {
     val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
     val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
     val duration = (result.appInfo.endTime-result.appInfo.startTime).milliseconds

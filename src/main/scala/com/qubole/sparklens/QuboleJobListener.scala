@@ -208,7 +208,7 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
         println(sparkScopeResult.logs + sparkScopeResult.summary)
 
         val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
-        HtmlReportGenerator.render(sparkScopeResult, htmlReportDir, sparklensResults)
+        HtmlReportGenerator.generateHtml(sparkScopeResult, htmlReportDir, sparklensResults)
       }
     }
   }
