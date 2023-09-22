@@ -99,11 +99,6 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       (executorId, metricTables)
     }.toMap
 
-    driverMetrics.foreach { metric =>
-      log.println(s"\n[SparkScope] Displaying ${metric.name} metric for driver:")
-      log.println(metric)
-    }
-
     var driverMetricsMerged: DataFrame = driverMetrics.head
     driverMetrics.tail.foreach { metric =>
       driverMetricsMerged = driverMetricsMerged.mergeOn("t", metric)
@@ -203,9 +198,10 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val clusterHeapUsage = allExecutorsMetrics.groupBy("t", JvmHeapUsage).avg.sortBy("t")
     val clusterCpuTime = allExecutorsMetrics.groupBy("t", CpuTime).sum.sortBy("t")
 
-    val clusterUsageDf = calculateClusterCpuUsage(allExecutorsMetrics)
+    val executorCores = getExecutorCores(ac)
+    val clusterUsageDf = calculateClusterCpuUsage(allExecutorsMetrics, executorCores)
+    val totalCpuUtil: Double = clusterCpuTime.select(CpuTime).max / (combinedExecutorUptime * executorCores * MilliSecondsInSec)
     log.println(clusterUsageDf)
-
 
     val clusterMetrics = ClusterMetrics(heapMax = clusterHeapMax, heapUsed = clusterHeapUsed, heapUsage = clusterHeapUsage, clusterUsageDf)
     log.println(clusterMetrics)
@@ -224,7 +220,6 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
 
     val avgClusterHeapUsed = clusterHeapUsed.select(JvmHeapUsed).avg.toLong / BytesInMB
 
-    val totalCpuUtil: Double = clusterCpuTime.select(CpuTime).max / (combinedExecutorUptime * MilliSecondsInSec)
 
     val clusterStats = ClusterStats(
         maxHeap = maxClusterHeapUsed,
@@ -263,7 +258,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val combinedExecutorUptimeSecs = combinedExecutorUptime.milliseconds.toSeconds
 
     val resourceWasteMetrics = ResourceWasteMetrics(
-      executorCores = getExecutorCores(ac),
+      executorCores = executorCores,
       combinedExecutorUptimeSecs = combinedExecutorUptimeSecs,
       cpuUtil = totalCpuUtil,
       heapUtil = avgHeapUsagePerc,
@@ -284,7 +279,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     )
   }
 
-  private def calculateClusterCpuUsage(allExecutorsMetrics: DataFrame): DataFrame = {
+  private def calculateClusterCpuUsage(allExecutorsMetrics: DataFrame, executorCores: Int): DataFrame = {
     val clusterCpuTimeDf = allExecutorsMetrics.groupBy("t", CpuTime).sum.sortBy("t")
     val clusterCpuTime = clusterCpuTimeDf.select(CpuTime).div(NanoSecondsInSec).rename("cpuTime")
     val clusterCpuTimeLag = clusterCpuTime.lag
@@ -292,7 +287,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val timeLag = clusterCpuTimeDf.select("t").lag
     val timeElapsed = clusterCpuTimeDf.select("t").sub(timeLag)
     val numExecutors = allExecutorsMetrics.groupBy("t", CpuTime).count.sortBy("t")
-    val combinedTimeElapsed = timeElapsed.mul(numExecutors.select("cnt"))
+    val combinedTimeElapsed = timeElapsed.mul(numExecutors.select("cnt")).mul(executorCores)
     val clusterUsage = clusterCpuTimeDiff.div(combinedTimeElapsed)
 
     val clusterUsageDf = DataFrame(
@@ -300,10 +295,10 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       Seq(
         clusterCpuTimeDf.select("t"),
         timeElapsed.rename("dt"),
+        combinedTimeElapsed.rename("dt*executorCnt*coresPerExec"),
         clusterCpuTime,
         clusterCpuTimeDiff.rename("cpuTimeDiff"),
         numExecutors.select("cnt").rename("executorCnt"),
-        combinedTimeElapsed.rename("dt*executorCnt"),
         clusterUsage.rename("cpuUsage")
       ))
     clusterUsageDf

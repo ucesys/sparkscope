@@ -17,6 +17,8 @@ case class DataColumn(name: String, values: Seq[String]) {
         }
         DataColumn(s"${this.name}DivBy${other.name}", dividedValues)
     }
+    def mul(mulBy: Long): DataColumn = DataColumn(this.name, values.map(elem => (elem.toDouble * mulBy).toString))
+
     def mul(other: DataColumn): DataColumn = {
         val multipliedValues = (this.values zip other.values).map { case (x, y) => (x.toDouble * y.toDouble).toString }
         DataColumn(s"${this.name}MulBy${other.name}", multipliedValues)
