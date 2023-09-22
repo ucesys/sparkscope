@@ -138,8 +138,6 @@ class EfficiencyStatisticsAnalyzer extends  AppAnalyzer {
          | OneCoreComputeHours wasted Total                ${driverWastedPercentOverAll+executorWastedPercentOverAll}%3.2f%%
          |
        """.stripMargin)
-
-
     out.toString()
   }
 }

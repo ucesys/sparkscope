@@ -68,12 +68,18 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
     val executor0Timespan = new ExecutorTimeSpan("0", "0", 1)
     val executor1Timespan = new ExecutorTimeSpan("1", "0", 1)
     val executor2Timespan = new ExecutorTimeSpan("2", "0", 1)
-    executor0Timespan.setStartTime(1695324183276L)
-    executor0Timespan.setEndTime(1695324219234L)
-    executor1Timespan.setStartTime(1695324183489L)
-    executor1Timespan.setEndTime(1695324219234L)
-    executor2Timespan.setStartTime(1695324183485L)
-    executor2Timespan.setEndTime(1695324219234L)
+    executor0Timespan.setStartTime(1694737416000L)
+    executor0Timespan.setEndTime(1694737424000L)
+    executor1Timespan.setStartTime(1694737416000L)
+    executor1Timespan.setEndTime(1694737424000L)
+    executor2Timespan.setStartTime(1694737422000L)
+    executor2Timespan.setEndTime(1694737424000L)
+//    executor0Timespan.setStartTime(1695324183276L)
+//    executor0Timespan.setEndTime(1695324219234L)
+//    executor1Timespan.setStartTime(1695324183489L)
+//    executor1Timespan.setEndTime(1695324219234L)
+//    executor2Timespan.setStartTime(1695324183485L)
+//    executor2Timespan.setEndTime(1695324219234L)
     executorMap.put("0", executor0Timespan)
     executorMap.put("1", executor1Timespan)
     executorMap.put("2", executor2Timespan)
@@ -217,8 +223,8 @@ object ExecutorMetricsAnalyzerSuite {
   val cpuTime0Csv: String =
     """t,count
       |1694737416,1495215972
-      |1694737421,5133728967
-      |1694737424,8533728967""".stripMargin
+      |1694737421,3133728967
+      |1694737424,5533728967""".stripMargin
 
   val runTime0Csv: String =
     """t,count
@@ -259,9 +265,9 @@ object ExecutorMetricsAnalyzerSuite {
 
   val cpuTime1Csv: String =
     """t,count
-      |1694737416,2495215972
-      |1694737421,6133728967
-      |1694737424,10533728967""".stripMargin
+      |1694737416,1895215972
+      |1694737421,3433728967
+      |1694737424,6533728967""".stripMargin
 
   val runTime1Csv: String =
     """t,count
@@ -302,9 +308,9 @@ object ExecutorMetricsAnalyzerSuite {
 
   val cpuTime2Csv: String =
     """t,count
-      |1694737422,2495215972
-      |1694737424,6133728967
-      |1694737424,6533728967""".stripMargin
+      |1694737422,995215972
+      |1694737424,253728967
+      |1694737424,2633728967""".stripMargin
 
   val runTime2Csv: String =
     """t,count

@@ -193,7 +193,9 @@
 <!--</div>-->
 <div  class="row" style="clear: both;"> </div>
 <h1>Charts</h1>
-
+<div  class="row">
+    <div><canvas id="cpuUtilization" style="width:230%;max-width:1000px"></canvas></div>
+</div>
 <div  class="row">
     <div><canvas id="clusterHeapUsagePerc" style="width:230%;max-width:1000px"></canvas></div>
     <div><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
@@ -203,6 +205,31 @@
     <div><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
     <div><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
 </div>
+
+<script>
+    var ctx = document.getElementById('cpuUtilization').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.cluster.cpu.usage.timestamps}],
+         datasets: [{
+             data: [${chart.cluster.cpu.usage}],
+             label: "CPU Utilization[%]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Application CPU Utilization",
+          fontSize: 16
+        },
+      }
+     });
+</script>
 
 <script>
     var ctx = document.getElementById('executorHeap').getContext('2d');
@@ -302,7 +329,7 @@
       options: {
         title: {
           display: true,
-          text: "Application Heap Utilization Percentage",
+          text: "Application Heap Utilization",
           fontSize: 16
         },
       }

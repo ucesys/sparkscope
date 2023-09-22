@@ -195,8 +195,8 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
         sparklensResults.foreach(println)
         println(s"\nSparklens analysis took ${durationSeconds}s")
 
-        // Sleeping for 1 sec in case csv metrics are still being dumped
-        Thread.sleep(1000)
+        // Sleeping for 5 sec in case csv metrics are still being dumped
+        Thread.sleep(5000)
         val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, new CsvHadoopReader, new HadoopPropertiesLoader)
         val sparkScopeResult = executorMetricsAnalyzer.analyze(appContext)
 
