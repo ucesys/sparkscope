@@ -19,6 +19,7 @@ package com.ucesys.sparkscope
 
 import com.qubole.sparklens.common.AppContext.getExecutorCores
 import com.qubole.sparklens.common.{AppContext, ApplicationInfo}
+import com.qubole.sparklens.timespan.ExecutorTimeSpan
 import com.ucesys.sparkscope.ExecutorMetricsAnalyzer._
 import com.ucesys.sparkscope.io.{CsvReader, PropertiesLoader}
 import com.ucesys.sparkscope.metrics.{ClusterMetrics, ClusterStats, DriverStats, ExecutorStats, ResourceWasteMetrics}
@@ -53,7 +54,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val ac = appContext.filterByStartAndEndTime(appContext.appInfo.startTime, appContext.appInfo.endTime)
     val log = new mutable.StringBuilder()
     val summary = new mutable.StringBuilder()
-
+val abc = ac.executorMap
     // TODO
     //    1. Find metrics.properties path:
     //      1.1 Check if spark conf contains spark.metrics.conf property
@@ -130,7 +131,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
     val combinedExecutorUptime = startEndTimes.map { case (id, (start, end, duration)) => duration }.sum
     log.println(s"combinedExecutorUptime: ${combinedExecutorUptime}")
 
-    val executorsMetricsMapInterpolated = interpolateExecutorMetrics(executorsMetricsMap)
+    val executorsMetricsMapInterpolated = interpolateExecutorMetrics(ac.executorMap, executorsMetricsMap)
 
     executorsMetricsMapInterpolated.foreach { case (executorId, metrics) =>
       metrics.foreach { metric =>
@@ -200,7 +201,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
 
     val executorCores = getExecutorCores(ac)
     val clusterUsageDf = calculateClusterCpuUsage(allExecutorsMetrics, executorCores)
-    val totalCpuUtil: Double = clusterCpuTime.select(CpuTime).max / (combinedExecutorUptime * executorCores * MilliSecondsInSec)
+    val totalCpuUtil: Double = clusterCpuTime.select(CpuTime).max / (combinedExecutorUptime * executorCores * NanoSecondsInMilliSec)
     log.println(clusterUsageDf)
 
     val clusterMetrics = ClusterMetrics(heapMax = clusterHeapMax, heapUsed = clusterHeapUsed, heapUsage = clusterHeapUsage, clusterUsageDf)
@@ -303,7 +304,8 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
       ))
     clusterUsageDf
   }
-  private def interpolateExecutorMetrics(executorsMetricsMap: Map[Int, Seq[DataFrame]]): Map[Int, Seq[DataFrame]] = {
+  private def interpolateExecutorMetrics(executorMap: mutable.HashMap[String, ExecutorTimeSpan],
+                                         executorsMetricsMap: Map[Int, Seq[DataFrame]]): Map[Int, Seq[DataFrame]] = {
 /*    Interpolating executor metrics to align their timestamps for aggregations
 
             RAW                      INTERPOLATED
@@ -321,11 +323,29 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, reader: CsvReader, propertie
                                     1695358665,200
 */
 
-    val allTimestamps = executorsMetricsMap.flatMap { case (_, metrics) =>
+    val executorsMetricsMapWithZeroRows: Map[Int, Seq[DataFrame]] = executorsMetricsMap.map { case (id, metrics) =>
+      val metricsWithZeroRows = metrics.map{ metric =>
+
+        val executorStartTime =executorMap(id.toString).startTime / MilliSecondsInSec
+
+         val columnsWithZeroCells = metric.columns.map{ col =>
+           val colWithZeroCell: DataColumn = col.name match {
+             case "t" => col.copy(values=Seq(executorStartTime.toString) ++ col.values)
+             case "jvm.heap.max" => col.copy(values=Seq(col.values.head) ++ col.values)
+             case _ => col.copy(values=(Seq("0") ++ col.values))
+           }
+           colWithZeroCell
+        }
+        metric.copy(columns = columnsWithZeroCells)
+      }
+      (id, metricsWithZeroRows)
+    }
+
+    val allTimestamps = executorsMetricsMapWithZeroRows.flatMap { case (_, metrics) =>
       metrics.flatMap(metric => metric.select("t").values.map(_.toLong))
     }.toSet.toSeq.sorted
 
-    executorsMetricsMap.map { case (executorId, metricsSeq) =>
+    executorsMetricsMapWithZeroRows.map { case (executorId, metricsSeq) =>
       val metricsInterpolated: Seq[DataFrame] = metricsSeq.map(metrics => {
         val localTimestamps = metrics.columns.head.values.map(_.toLong)
         val missingTimestamps = allTimestamps.filterNot(localTimestamps.contains)
@@ -376,7 +396,8 @@ object ExecutorMetricsAnalyzer {
   private val BytesInGB: Long = 1024L*1024L*1024L
 
   private val NanoSecondsInSec: Long = 1000000000
-  private val MilliSecondsInSec: Long = 1000000
+  private val NanoSecondsInMilliSec: Long = 1000000
+  private val MilliSecondsInSec: Long = 1000
 
   private val JvmHeapUsed = "jvm.heap.used" // in bytes
   private val JvmHeapUsage = "jvm.heap.usage" // equals used/max
