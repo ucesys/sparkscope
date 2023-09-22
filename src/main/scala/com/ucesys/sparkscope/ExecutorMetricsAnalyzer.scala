@@ -401,10 +401,8 @@ object ExecutorMetricsAnalyzer {
   private val JvmHeapUsage = "jvm.heap.usage" // equals used/max
   private val JvmHeapMax = "jvm.heap.max" // in bytes
   private val JvmNonHeapUsed = "jvm.non-heap.used" // in bytes
-  private val JvmTotalUsed = "jvm.total.used" // equals jvm.heap.used + jvm.non-heap.used
   private val CpuTime = "executor.cpuTime" // CPU time computing tasks in nanoseconds
-  private val RunTime = "executor.runTime" // total time computing tasks in nanoseconds
 
-  private val ExecutorCsvMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, JvmTotalUsed, CpuTime, RunTime)
-  private val DriverCsvMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, JvmTotalUsed)
+  private val ExecutorCsvMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, CpuTime)
+  private val DriverCsvMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed)
 }
