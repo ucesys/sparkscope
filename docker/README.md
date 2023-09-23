@@ -29,7 +29,7 @@ docker exec -it spark-worker bash
 Run sample application
 ```
 spark-submit \
---jars /tmp/jars/sparkscope_2.11-0.3.2.jar  \
+--jars /tmp/jars/sparkscope_2.11-0.1.0.jar  \
 --master spark://spark-master:7077 \
 --conf spark.extraListeners=com.qubole.sparklens.QuboleJobListener \
 --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \
@@ -48,7 +48,7 @@ Sparklens report should be generated to stdout
 Run with limited max executor/cores for Spark Standalone(dynamic allocation doesn't work)
 ```
 spark-submit \
---jars /tmp/jars/sparkscope_2.11-0.3.2.jar  \
+--jars /tmp/jars/sparkscope_2.11-0.1.0.jar  \
 --master spark://spark-master:7077 \
 --conf spark.extraListeners=com.qubole.sparklens.QuboleJobListener \
 --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \

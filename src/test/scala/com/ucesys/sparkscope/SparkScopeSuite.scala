@@ -26,7 +26,7 @@ import java.nio.file.{Files, Paths}
 
 class SparkScopeSuite extends AnyFunSuite with MockFactory {
 
-  test("ExecutorMetricsAnalyzerSuite") {
+  test("SparkScope end2end test") {
     val ac = createDummyAppContext()
 
     val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, TestHelpers.getCsvReaderMock, TestHelpers.getPropertiesLoaderMock())

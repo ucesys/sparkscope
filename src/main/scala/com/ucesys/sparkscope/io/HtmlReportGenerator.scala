@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.ExecutorMetricsAnalyzer.BytesInMB
-import com.ucesys.sparkscope.SparkScopeResult
+import com.ucesys.sparkscope.metrics.SparkScopeResult
 
 import java.io.{FileWriter, InputStream}
 import java.time.LocalDateTime.ofEpochSecond
@@ -40,53 +40,51 @@ object HtmlReportGenerator {
 
   def renderCharts(template: String, result: SparkScopeResult): String = {
     template
-      .replace("${chart.cluster.cpu.usage}", result.clusterMetrics.cpuUsage.select("cpuUsage").values.mkString(","))
+      .replace("${chart.cluster.cpu.usage}", result.metrics.clusterCPUMetrics.clusterUsageDf.select("cpuUsage").values.mkString(","))
       .replace(
         "${chart.cluster.cpu.usage.timestamps}",
-        result.clusterMetrics.cpuUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        result.metrics.clusterCPUMetrics.clusterCpuTime.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.cluster.heap.usage}", result.clusterMetrics.heapUsage.select("jvm.heap.usage").values.mkString(","))
+      .replace("${chart.jvm.cluster.heap.usage}", result.metrics.clusterMemoryMetrics.heapUsage.select("jvm.heap.usage").values.mkString(","))
       .replace(
         "${chart.jvm.cluster.heap.usage.timestamps}",
-        result.clusterMetrics.heapUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        result.metrics.clusterMemoryMetrics.heapUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.cluster.heap.used}", result.clusterMetrics.heapUsed.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
-      .replace("${chart.jvm.cluster.heap.max}", result.clusterMetrics.heapMax.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.cluster.heap.used}", result.metrics.clusterMemoryMetrics.heapUsed.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.cluster.heap.max}", result.metrics.clusterMemoryMetrics.heapMax.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
       .replace(
         "${chart.jvm.cluster.heap.timestamps}",
-        result.clusterMetrics.heapUsed.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        result.metrics.clusterMemoryMetrics.heapUsed.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
       .replace(
         "${chart.jvm.executor.heap.timestamps}",
-        result.executorMetrics.heapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        result.metrics.executorMemoryMetrics.heapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.executor.heap.max}", result.executorMetrics.heapUsedMax.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
-      .replace("${chart.jvm.executor.heap.min}", result.executorMetrics.heapUsedMin.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
-      .replace("${chart.jvm.executor.heap.avg}", result.executorMetrics.heapUsedAvg.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
-      .replace("${chart.jvm.executor.heap.allocation}", result.executorMetrics.heapAllocation.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.heap.max}", result.metrics.executorMemoryMetrics.heapUsedMax.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.heap.avg}", result.metrics.executorMemoryMetrics.heapUsedAvg.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.heap.allocation}", result.metrics.executorMemoryMetrics.heapAllocation.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
       .replace(
         "${chart.jvm.executor.non-heap.timestamps}",
-        result.executorMetrics.nonHeapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        result.metrics.executorMemoryMetrics.nonHeapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.executor.non-heap.max}", result.executorMetrics.nonHeapUsedMax.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
-      .replace("${chart.jvm.executor.non-heap.min}", result.executorMetrics.nonHeapUsedMin.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
-      .replace("${chart.jvm.executor.non-heap.avg}", result.executorMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.non-heap.max}", result.metrics.executorMemoryMetrics.nonHeapUsedMax.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.executor.non-heap.avg}", result.metrics.executorMemoryMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
       .replace(
         "${chart.jvm.driver.heap.timestamps}",
-        result.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        result.metrics.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.driver.heap.size}", result.driverMetrics.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
-      .replace("${chart.jvm.driver.heap.used}", result.driverMetrics.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.driver.heap.size}", result.metrics.driverMetrics.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
+      .replace("${chart.jvm.driver.heap.used}", result.metrics.driverMetrics.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
   }
 
   def renderStats(template: String, result: SparkScopeResult): String = {
     template
-      .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterStats.avgHeapPerc*100}%1.2f")
-      .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterStats.maxHeapPerc}%1.2f")
-      .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterStats.avgHeapPerc*100}%1.2f")
-      .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterStats.totalCpuUtil*100}%1.2f")
-      .replace("${resource.waste.heap}", f"${result.resourceWasteMetrics.heapGbHoursWasted}%1.4f")
-      .replace("${resource.waste.cpu}", f"${result.resourceWasteMetrics.coreHoursWasted}%1.4f")
+      .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterMemoryStats.avgHeapPerc*100}%1.2f")
+      .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterMemoryStats.maxHeapPerc}%1.2f")
+      .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterMemoryStats.avgHeapPerc*100}%1.2f")
+      .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterCPUStats.cpuUtil*100}%1.2f")
+      .replace("${resource.waste.heap}", f"${result.stats.clusterMemoryStats.heapGbHoursWasted}%1.4f")
+      .replace("${resource.waste.cpu}", f"${result.stats.clusterCPUStats.coreHoursWasted}%1.4f")
 
       .replace("${stats.executor.heap.max}", result.stats.executorStats.maxHeap.toString)
       .replace("${stats.executor.heap.max.perc}", f"${result.stats.executorStats.maxHeapPerc}%1.2f")

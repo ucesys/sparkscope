@@ -19,7 +19,7 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers.{EndTime, StartTime, appId, createDummyAppContext, getPropertiesLoaderMock, sparkConf}
-import com.ucesys.sparkscope.metrics.{ClusterStats, DriverStats, ExecutorStats, ResourceWasteMetrics}
+import com.ucesys.sparkscope.metrics._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalamock.scalatest.MockFactory
 
@@ -37,9 +37,43 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
     assert(result.appInfo.startTime == StartTime)
     assert(result.appInfo.endTime == EndTime)
 
-    assert(result.stats.executorStats == ExecutorStats(352,44.028958320617676,204,0.25616775787085827,44,48))
-    assert(result.stats.clusterStats == ClusterStats(840,614,41.65,0.25616775787085827,0.5731543695694444))
-    assert(result.stats.driverStats == DriverStats(315,34.650217943437674,261,28.73646085899713,66,69))
-    assert(result.resourceWasteMetrics == ResourceWasteMetrics(0.04,0.022926174782777777,0.03125,0.008005242433464321,144,0.5731543695694444,0.25616775787085827,0.78125,1))
+    assert(result.stats.driverStats == DriverMemoryStats(
+      heapSize = 910,
+      maxHeap = 315,
+      maxHeapPerc = 34.650217943437674,
+      avgHeap = 261,
+      avgHeapPerc = 28.73646085899713,
+      avgNonHeap = 66,
+      maxNonHeap = 69
+    ))
+
+    assert(result.stats.executorStats == ExecutorMemoryStats(
+      heapSize = 800,
+      maxHeap = 352,
+      maxHeapPerc = 44.028958320617676,
+      avgHeap = 204,
+      avgHeapPerc = 0.25554119351460397,
+      avgNonHeap = 43,
+      maxNonHeap = 48
+    ))
+
+    assert(result.stats.clusterMemoryStats == ClusterMemoryStats(
+      maxHeap = 840,
+      avgHeap = 632,
+      maxHeapPerc = 41.65,
+      avgHeapPerc = 0.25554119351460397,
+      executorTimeSecs=152,
+      heapGbHoursAllocated=0.03298611111111111,
+      heapGbHoursWasted=0.008429310202738674,
+      executorHeapSizeInGb=0.78125
+    ))
+
+    assert(result.stats.clusterCPUStats == ClusterCPUStats(
+      cpuUtil = 0.5429883501184211,
+      coreHoursAllocated = 0.042222222222222223,
+      coreHoursWasted = 0.022926174782777777,
+      executorTimeSecs = 152,
+      executorCores = 1
+    ))
   }
 }

@@ -188,16 +188,17 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
         } else {
           EmailReportHelper.generateReport(appContext.toString(), sparkConf)
         }
-        val startTimeMillis = System.currentTimeMillis()
+        val startSparkLens = System.currentTimeMillis()
         val sparklensResults = AppAnalyzer.startAnalyzers(appContext)
-        val endTimeMillis = System.currentTimeMillis()
-        val durationSeconds = (endTimeMillis - startTimeMillis) * 1f / 1000f
+        val durationSparkLens = (System.currentTimeMillis() - startSparkLens) * 1f / 1000f
         sparklensResults.foreach(println)
-        println(s"\nSparklens analysis took ${durationSeconds}s")
+        println(s"\nSparklens analysis took ${durationSparkLens}s")
 
         // Sleeping for 5 sec in case csv metrics are still being dumped
         Thread.sleep(5000)
         val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, new CsvHadoopReader, new HadoopPropertiesLoader)
+
+        val sparkScopeStart = System.currentTimeMillis()
         val sparkScopeResult = executorMetricsAnalyzer.analyze(appContext)
 
         println("           ____              __    ____")
@@ -206,6 +207,9 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
         println("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
         println("           /_/                             /_/ ")
         println(sparkScopeResult.logs + sparkScopeResult.summary)
+
+        val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
+        println(s"\n[SparkScope] SparkScope analysis took ${durationSparkScope}s")
 
         val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
         HtmlReportGenerator.generateHtml(sparkScopeResult, htmlReportDir, sparklensResults)
