@@ -2,10 +2,11 @@ package com.ucesys.sparkscope
 
 import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
-import com.ucesys.sparkscope.io.{CsvReader, PropertiesLoader}
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, PropertiesLoader}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
+
 import java.util.Properties
 import scala.collection.mutable
 
@@ -360,8 +361,8 @@ object TestHelpers extends AnyFunSuite with MockFactory {
       mutable.HashMap[Int, Long]())
   }
 
-  def getCsvReaderMock: CsvReader = {
-    val csvReaderMock = stub[CsvReader]
+  def getCsvReaderMock: CsvHadoopReader = {
+    val csvReaderMock = stub[CsvHadoopReader]
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
@@ -390,6 +391,8 @@ object TestHelpers extends AnyFunSuite with MockFactory {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.heap.max.csv").returns(jvmHeapMaxExec3Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.non-heap.used.csv").returns(jvmNonHeapExec3Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.executor.cpuTime.csv").returns(cpuTime3Csv)
+
+
     csvReaderMock
   }
 

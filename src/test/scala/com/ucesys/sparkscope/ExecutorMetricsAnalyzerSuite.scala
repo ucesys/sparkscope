@@ -19,6 +19,7 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers.{EndTime, StartTime, appId, createDummyAppContext, getPropertiesLoaderMock, sparkConf}
+import com.ucesys.sparkscope.io.CsvHadoopMetricsLoader
 import com.ucesys.sparkscope.metrics._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalamock.scalatest.MockFactory
@@ -28,7 +29,8 @@ class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
   test("ExecutorMetricsAnalyzerSuite") {
     val ac = createDummyAppContext()
 
-    val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, TestHelpers.getCsvReaderMock, getPropertiesLoaderMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(TestHelpers.getCsvReaderMock, ac, sparkConf, getPropertiesLoaderMock)
+    val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, metricsLoader)
     val result = executorMetricsAnalyzer.analyze(ac)
 
     assert(result.sparkConf == sparkConf)

@@ -2,10 +2,9 @@ package com.ucesys.sparkscope.io
 
 import com.qubole.sparklens.helper.HDFSConfigHelper
 import org.apache.hadoop.fs.{FileSystem, Path}
-
 import java.net.URI
 
-class CsvHadoopReader extends CsvReader {
+class CsvHadoopReader() {
   def read(pathStr: String): String = {
       val fs = FileSystem.get(new URI(pathStr), HDFSConfigHelper.getHadoopConf(None))
       val path = new Path(pathStr)

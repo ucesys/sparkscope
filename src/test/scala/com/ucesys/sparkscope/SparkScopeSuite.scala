@@ -18,10 +18,11 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.TestHelpers.{createDummyAppContext, sparkConf}
-import com.ucesys.sparkscope.io.HtmlReportGenerator
+import com.ucesys.sparkscope.TestHelpers.{createDummyAppContext, getPropertiesLoaderMock, sparkConf}
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HtmlReportGenerator}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
+
 import java.nio.file.{Files, Paths}
 
 class SparkScopeSuite extends AnyFunSuite with MockFactory {
@@ -29,7 +30,8 @@ class SparkScopeSuite extends AnyFunSuite with MockFactory {
   test("SparkScope end2end test") {
     val ac = createDummyAppContext()
 
-    val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, TestHelpers.getCsvReaderMock, TestHelpers.getPropertiesLoaderMock())
+    val metricsLoader = new CsvHadoopMetricsLoader(TestHelpers.getCsvReaderMock, ac, sparkConf, getPropertiesLoaderMock)
+    val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, metricsLoader)
     val result = executorMetricsAnalyzer.analyze(ac)
 
     HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"))
