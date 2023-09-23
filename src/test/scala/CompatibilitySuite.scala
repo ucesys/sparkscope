@@ -1,7 +1,7 @@
 import java.io.{ByteArrayOutputStream, FileNotFoundException, PrintStream}
 
-import com.qubole.sparklens.TestUtils
-import com.qubole.sparklens.app.ReporterApp
+import com.ucesys.sparklens.TestUtils
+import com.ucesys.sparklens.app.ReporterApp
 import org.scalatest.{FunSuite, Ignore}
 
 import scala.util.control.Breaks._

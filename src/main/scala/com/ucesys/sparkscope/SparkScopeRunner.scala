@@ -17,7 +17,7 @@
 */
 package com.ucesys.sparkscope
 
-import com.qubole.sparklens.common.AppContext
+import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, DriverExecutorMetrics, HadoopPropertiesLoader, HtmlReportGenerator, MetricsLoader}
 import org.apache.spark.SparkConf
 

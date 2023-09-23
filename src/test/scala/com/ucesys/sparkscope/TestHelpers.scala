@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope
 
-import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
-import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
+import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
+import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.io.{CsvHadoopReader, PropertiesLoader}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory

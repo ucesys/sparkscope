@@ -3,7 +3,7 @@ organization := "com.qubole"
 
 scalaVersion := "2.11.8"
 
-spName := "qubole/sparklens"
+spName := "ucesys/sparkscope"
 
 sparkVersion := "2.0.0"
 
@@ -39,29 +39,3 @@ publishMavenStyle := true
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".sbtcredentials")
-
-
-pomExtra :=
-  <url>https://github.com/qubole/sparklens</url>
-  <scm>
-    <url>git@github.com:qubole/sparklens.git</url>
-    <connection>scm:git:git@github.com:qubole/sparklens.git</connection>
-  </scm>
-  <developers>
-    <developer>
-      <id>iamrohit</id>
-      <name>Rohit Karlupia</name>
-      <url>https://github.com/iamrohit</url>
-    </developer>
-    <developer>
-      <id>beriaanirudh</id>
-      <name>Anirudh Beria</name>
-      <url>https://github.com/beriaanirudh</url>
-    </developer>
-    <developer>
-      <id>mayurdb</id>
-      <name>Mayur Bhosale</name>
-      <url>https://github.com/mayurdb</url>
-    </developer>
-  </developers>
-
