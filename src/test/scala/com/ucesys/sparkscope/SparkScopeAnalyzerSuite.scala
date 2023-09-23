@@ -18,21 +18,28 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.TestHelpers.{EndTime, StartTime, appId, createDummyAppContext, getPropertiesLoaderMock, sparkConf}
-import com.ucesys.sparkscope.io.CsvHadoopMetricsLoader
+import com.ucesys.sparkscope.TestHelpers.{EndTime, StartTime, appId, createDummyAppContext, getPropertiesLoaderMock, mockcorrectMetrics, sparkConf}
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader}
 import com.ucesys.sparkscope.metrics._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.GivenWhenThen
 
-class ExecutorMetricsAnalyzerSuite extends AnyFunSuite with MockFactory {
+class SparkScopeAnalyzerSuite extends AnyFunSuite with MockFactory with GivenWhenThen {
 
   test("ExecutorMetricsAnalyzerSuite") {
+    Given("SparkScopeAnalyzer and correct driver & executormetrics")
     val ac = createDummyAppContext()
+    // TODO Mock DriverExecutorMetrics object
+    val csvReaderMock = stub[CsvHadoopReader]
+    mockcorrectMetrics(csvReaderMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, ac, sparkConf, getPropertiesLoaderMock)
+    val sparkScopeAnalyzer = new SparkScopeAnalyzer(sparkConf)
 
-    val metricsLoader = new CsvHadoopMetricsLoader(TestHelpers.getCsvReaderMock, ac, sparkConf, getPropertiesLoaderMock)
-    val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(sparkConf, metricsLoader)
-    val result = executorMetricsAnalyzer.analyze(ac)
+    When("running parkScopeAnalyzer.analyze")
+    val result = sparkScopeAnalyzer.analyze(metricsLoader.load(), ac)
 
+    Then("SparkScopeResult should be returned with correct values")
     assert(result.sparkConf == sparkConf)
 
     assert(result.appInfo.applicationID == appId)

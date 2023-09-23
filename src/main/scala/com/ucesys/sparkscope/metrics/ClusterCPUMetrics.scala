@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.metrics
 
-import com.ucesys.sparkscope.ExecutorMetricsAnalyzer.{CpuTime, NanoSecondsInSec}
+import com.ucesys.sparkscope.SparkScopeAnalyzer.{CpuTime, NanoSecondsInSec}
 import com.ucesys.sparkscope.data.DataFrame
 
 case class ClusterCPUMetrics(clusterCpuTime: DataFrame, clusterUsageDf: DataFrame)

@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.metrics
 
-import com.ucesys.sparkscope.ExecutorMetricsAnalyzer._
+import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.DataFrame
 
 case class DriverMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Double, avgHeap: Long, avgHeapPerc: Double, avgNonHeap: Long, maxNonHeap: Long) {

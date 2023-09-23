@@ -2,7 +2,7 @@ package com.ucesys.sparkscope
 
 import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, PropertiesLoader}
+import com.ucesys.sparkscope.io.{CsvHadoopReader, PropertiesLoader}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
@@ -14,9 +14,13 @@ object TestHelpers extends AnyFunSuite with MockFactory {
   final val appId = "app-20230101010819-test"
   final val StartTime: Long = 1695358645000L
   final val EndTime: Long = 1695358700000L
-  val metricsPropertiesPath = "path/to/metrics.properties"
+  val MetricsPropertiesPath = "path/to/metrics.properties"
   val csvMetricsPath = "/tmp/csv-metrics"
-  val sparkConf = new SparkConf().set("spark.metrics.conf", metricsPropertiesPath)
+  val sparkConf = new SparkConf().set("spark.metrics.conf", MetricsPropertiesPath)
+
+  val emptyFileCsv: String =
+    """t,value
+      |1695358645,0""".stripMargin
 
   val jvmHeapDriverCsv: String =
     """t,value
@@ -361,8 +365,7 @@ object TestHelpers extends AnyFunSuite with MockFactory {
       mutable.HashMap[Int, Long]())
   }
 
-  def getCsvReaderMock: CsvHadoopReader = {
-    val csvReaderMock = stub[CsvHadoopReader]
+  def mockcorrectMetrics(csvReaderMock: CsvHadoopReader): CsvHadoopReader = {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
@@ -392,15 +395,22 @@ object TestHelpers extends AnyFunSuite with MockFactory {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.non-heap.used.csv").returns(jvmNonHeapExec3Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.executor.cpuTime.csv").returns(cpuTime3Csv)
 
-
     csvReaderMock
+  }
+
+  def mockIncorrectDriverMetrics(csvReader: CsvHadoopReader) = {
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(emptyFileCsv)
+    csvReader
   }
 
   def getPropertiesLoaderMock(): PropertiesLoader = {
     val propertiesLoaderMock = stub[PropertiesLoader]
     val properties = new Properties()
     properties.setProperty("*.sink.csv.directory", csvMetricsPath)
-    (propertiesLoaderMock.load _).when(metricsPropertiesPath).returns(properties)
+    (propertiesLoaderMock.load _).when(MetricsPropertiesPath).returns(properties)
     propertiesLoaderMock
   }
 }

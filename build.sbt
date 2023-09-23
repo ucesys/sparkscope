@@ -25,6 +25,8 @@ libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.5.6" % "pro
 
 libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test
+libraryDependencies += "com.google.guava" % "guava" % "30.0-jre" % Test
+
 
 test in assembly := {}
 

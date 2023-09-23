@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.metrics
 
-import com.ucesys.sparkscope.ExecutorMetricsAnalyzer._
+import com.ucesys.sparkscope.SparkScopeAnalyzer._
 
 case class ClusterMemoryStats(maxHeap: Long,
                               avgHeap: Long,

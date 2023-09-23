@@ -84,7 +84,6 @@ object AppAnalyzer {
     list += new EfficiencyStatisticsAnalyzer
     list += new ExecutorWallclockAnalyzer
     list += new StageSkewAnalyzer
-// TODO Add ExecutorMetricsAnalyzer
 
     val results: Seq[String] = list.flatMap( x => {
       try {

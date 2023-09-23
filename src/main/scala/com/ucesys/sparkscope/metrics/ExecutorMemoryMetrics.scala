@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.metrics
 
-import com.ucesys.sparkscope.ExecutorMetricsAnalyzer._
+import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.DataFrame
 
 case class ExecutorMemoryMetrics(heapUsedMax: DataFrame,

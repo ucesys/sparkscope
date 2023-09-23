@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.io
 
-import com.ucesys.sparkscope.ExecutorMetricsAnalyzer.BytesInMB
+import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 
 import java.io.{FileWriter, InputStream}

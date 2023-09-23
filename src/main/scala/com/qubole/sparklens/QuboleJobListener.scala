@@ -22,8 +22,8 @@ import com.qubole.sparklens.analyzer._
 import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.qubole.sparklens.helper.{EmailReportHelper, HDFSConfigHelper}
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
-import com.ucesys.sparkscope.ExecutorMetricsAnalyzer
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HadoopPropertiesLoader, HtmlReportGenerator, PropertiesLoader}
+import com.ucesys.sparkscope.SparkScopeRunner
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HadoopPropertiesLoader}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
@@ -194,28 +194,9 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
         sparklensResults.foreach(println)
         println(s"\nSparklens analysis took ${durationSparkLens}s")
 
-        // Sleeping for 5 sec in case csv metrics are still being dumped
-        Thread.sleep(5000)
-        val executorMetricsAnalyzer = new ExecutorMetricsAnalyzer(
-          sparkConf,
-          new CsvHadoopMetricsLoader(new CsvHadoopReader, appContext, sparkConf, new HadoopPropertiesLoader)
-        )
-
-        val sparkScopeStart = System.currentTimeMillis()
-        val sparkScopeResult = executorMetricsAnalyzer.analyze(appContext)
-
-        println("           ____              __    ____")
-        println("          / __/__  ___ _____/ /__ / __/_ ___  ___  ___")
-        println("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
-        println("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
-        println("           /_/                             /_/ ")
-        println(sparkScopeResult.logs)
-
-        val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
-        println(s"\n[SparkScope] SparkScope analysis took ${durationSparkScope}s")
-
-        val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
-        HtmlReportGenerator.generateHtml(sparkScopeResult, htmlReportDir, sparklensResults)
+        val metricsLoader = new CsvHadoopMetricsLoader(new CsvHadoopReader, appContext, sparkConf, new HadoopPropertiesLoader)
+        val sparkScopeRunner = new SparkScopeRunner(appContext, sparkConf, metricsLoader, sparklensResults)
+        sparkScopeRunner.run()
       }
     }
   }

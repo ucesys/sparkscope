@@ -20,9 +20,9 @@ package com.ucesys.sparkscope
 import com.qubole.sparklens.common.AppContext.getExecutorCores
 import com.qubole.sparklens.common.AppContext
 import com.qubole.sparklens.timespan.ExecutorTimeSpan
-import com.ucesys.sparkscope.ExecutorMetricsAnalyzer._
+import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.{DataColumn, DataFrame}
-import com.ucesys.sparkscope.io.{MetricsLoader}
+import com.ucesys.sparkscope.io.{DriverExecutorMetrics, MetricsLoader}
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.utils.Logger
 import org.apache.spark.SparkConf
@@ -30,12 +30,11 @@ import org.apache.spark.SparkConf
 import scala.collection.mutable
 import scala.concurrent.duration._
 
-class ExecutorMetricsAnalyzer(sparkConf: SparkConf, metricsLoader: MetricsLoader) {
+class SparkScopeAnalyzer(sparkConf: SparkConf) {
 
-  def analyze(appContext: AppContext): SparkScopeResult = {
+  def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: AppContext): SparkScopeResult = {
     val ac = appContext.filterByStartAndEndTime(appContext.appInfo.startTime, appContext.appInfo.endTime)
     val log = new Logger
-    val driverExecutorMetrics = metricsLoader.load()
 
     var driverMetricsMerged: DataFrame = driverExecutorMetrics.driverMetrics.head
     driverExecutorMetrics.driverMetrics.tail.foreach { metric =>
@@ -214,7 +213,7 @@ class ExecutorMetricsAnalyzer(sparkConf: SparkConf, metricsLoader: MetricsLoader
   }
 }
 
-object ExecutorMetricsAnalyzer {
+object SparkScopeAnalyzer {
   val BytesInMB: Long = 1024L*1024L
   val NanoSecondsInSec: Long = 1000000000
   private val MilliSecondsInSec: Long = 1000
