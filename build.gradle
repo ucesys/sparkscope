@@ -1,0 +1,23 @@
+plugins {
+    id 'scala'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.scala-lang:scala-library:2.11.8'
+
+    compileOnly 'org.apache.spark:spark-core_2.11:2.0.0'
+    compileOnly 'org.apache.spark:spark-sql_2.11:2.0.0'
+    compileOnly 'org.apache.hadoop:hadoop-client:2.6.5'
+    compileOnly 'org.apache.httpcomponents:httpclient:4.5.6'
+    compileOnly 'org.apache.httpcomponents:httpmime:4.5.6'
+
+    testCompileOnly 'org.apache.spark:spark-core_2.11:2.0.0'
+
+    testImplementation 'org.scalamock:scalamock_2.11:5.2.0'
+    testImplementation 'org.scalatest:scalatest_2.11:3.1.0'
+    testImplementation 'com.google.guava:guava:30.0-jre'
+}

@@ -3,8 +3,6 @@ organization := "com.qubole"
 
 scalaVersion := "2.11.8"
 
-//crossScalaVersions := Seq("2.10.6", "2.11.8")
-
 spName := "qubole/sparklens"
 
 sparkVersion := "2.0.0"
@@ -21,7 +19,6 @@ libraryDependencies +=  "org.apache.hadoop" % "hadoop-client" % "2.6.5" % "provi
 libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.6" % "provided"
 
 libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.5.6" % "provided"
-//libraryDependencies += "jfree" % "jfreechart" % "1.0.13"
 
 libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test

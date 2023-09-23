@@ -42,3 +42,8 @@ target/
 work/
 lib
 
+.gradle
+build
+gradle
+gradlew
+gradlew.bat
