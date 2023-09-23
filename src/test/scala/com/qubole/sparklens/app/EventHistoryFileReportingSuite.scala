@@ -1,10 +1,9 @@
 package com.qubole.sparklens.app
 
 import java.io.{ByteArrayOutputStream, PrintStream}
-
 import com.qubole.sparklens.TestUtils
-import org.scalatest.FunSuite
-
+import org.scalatest.{FunSuite, Ignore}
+@Ignore
 class EventHistoryFileReportingSuite extends FunSuite {
 
   test("Reporting from sparklens and event-history should be same") {

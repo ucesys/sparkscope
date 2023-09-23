@@ -34,6 +34,9 @@ class SparkScopeRunner(appContext: AppContext, sparkConf: SparkConf, metricsLoad
         val driverExecutorMetrics = metricsLoader.load()
         analyze(driverExecutorMetrics)
       }
+      case ex: Exception => {
+        println(s"${ex}, exiting...)")
+      }
     }
 
 
