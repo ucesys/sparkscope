@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.io
 
-import com.qubole.sparklens.helper.HDFSConfigHelper
+import com.ucesys.sparklens.helper.HDFSConfigHelper
 import org.apache.hadoop.fs.{FileSystem, Path}
 
 import java.io.InputStreamReader

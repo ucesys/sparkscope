@@ -5,7 +5,20 @@ SparkScope is a fork of sparklens which adds the following faetures:
 - executor/driver/cluster memory metrics
 - html report
 
-
+```agsl
+spark-submit \
+--jars /tmp/jars/sparkscope_2.11-0.1.0.jar  \
+--master spark://spark-master:7077 \
+--conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
+--conf spark.eventLog.enabled=true \
+--conf spark.eventLog.dir=/tmp/spark-events \
+--conf spark.metrics.conf=/tmp/metrics.properties \
+--conf spark.executor.cores=1 \
+--conf spark.executor.memory=900m \
+--conf spark.executor.instances=4 \
+--class org.apache.spark.examples.SparkPi \
+/tmp/jars/spark-examples_2.10-1.1.1.jar 5000
+```
 # SparkLens #
 Sparklens is a profiling tool for Spark with a built-in Spark scheduler simulator. Its primary goal is to make it easy 
 to understand the scalability limits of Spark applications. It helps in understanding how efficiently a given 
@@ -210,7 +223,7 @@ by the tool modest.
 1) Add this as the first cell
 
 ```
-import com.qubole.sparklens.QuboleNotebookListener
+import com.ucesys.sparklens.QuboleNotebookListener
 val QNL = new QuboleNotebookListener(sc.getConf)
 sc.addSparkListener(QNL)
 ```

@@ -17,9 +17,9 @@
 */
 package com.ucesys.sparkscope
 
-import com.qubole.sparklens.common.AppContext.getExecutorCores
-import com.qubole.sparklens.common.AppContext
-import com.qubole.sparklens.timespan.ExecutorTimeSpan
+import com.ucesys.sparklens.common.AppContext.getExecutorCores
+import com.ucesys.sparklens.common.AppContext
+import com.ucesys.sparklens.timespan.ExecutorTimeSpan
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.{DataColumn, DataFrame}
 import com.ucesys.sparkscope.io.{DriverExecutorMetrics, MetricsLoader}

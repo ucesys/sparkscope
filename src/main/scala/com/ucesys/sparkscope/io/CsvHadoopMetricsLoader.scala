@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.io
 
-import com.qubole.sparklens.common.AppContext
+import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMetrics}
 import com.ucesys.sparkscope.data.DataFrame
 import com.ucesys.sparkscope.utils.Logger

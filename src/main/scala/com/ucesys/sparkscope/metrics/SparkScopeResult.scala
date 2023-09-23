@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.metrics
 
-import com.qubole.sparklens.common.ApplicationInfo
+import com.ucesys.sparklens.common.ApplicationInfo
 import org.apache.spark.SparkConf
 
 case class SparkScopeResult(appInfo: ApplicationInfo,

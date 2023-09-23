@@ -31,7 +31,7 @@ Run sample application
 spark-submit \
 --jars /tmp/jars/sparkscope_2.11-0.1.0.jar  \
 --master spark://spark-master:7077 \
---conf spark.extraListeners=com.qubole.sparklens.QuboleJobListener \
+--conf spark.extraListeners=com.ucesys.sparklens.QuboleJobListener \
 --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=/tmp/spark-events \
@@ -50,7 +50,7 @@ Run with limited max executor/cores for Spark Standalone(dynamic allocation does
 spark-submit \
 --jars /tmp/jars/sparkscope_2.11-0.1.0.jar  \
 --master spark://spark-master:7077 \
---conf spark.extraListeners=com.qubole.sparklens.QuboleJobListener \
+--conf spark.extraListeners=com.ucesys.sparklens.QuboleJobListener \
 --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=/tmp/spark-events \
