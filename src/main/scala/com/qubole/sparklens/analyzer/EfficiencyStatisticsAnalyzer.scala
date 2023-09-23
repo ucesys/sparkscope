@@ -55,7 +55,6 @@ class EfficiencyStatisticsAnalyzer extends  AppAnalyzer {
         }
         ecores * (eendTime - estartTime)
       }).sum
-
     // some of the compute millis are lost when driver is doing some work
     // and has not assigned any work to the executors
     // We assume executors are only busy when one of the job is in progress
@@ -78,7 +77,14 @@ class EfficiencyStatisticsAnalyzer extends  AppAnalyzer {
     //Enough variables lets print some
 
     val driverTimeJobBased = appTotalTime - jobTime
+
+    out.println(s"executorCores: ${executorCores}, maxExecutors: ${maxExecutors}, totalCores: ${totalCores}")
+    out.println(s"jobTime: ${jobTime}, appTotalTime: ${appTotalTime}, driverTimeJobBased: ${driverTimeJobBased}")
+    out.println(s"inJobComputeMillisUsed: ${inJobComputeMillisUsed}, inJobComputeMillisAvailable: ${inJobComputeMillisAvailable}, appComputeMillisAvailable: ${appComputeMillisAvailable}")
+    out.println("Note: Sparklens assumes all executors are available for the whole job duration! This means that dynamic allocation is not included.")
+
     val driverComputeMillisWastedJobBased  = driverTimeJobBased * totalCores
+    out.println("------------------------------EfficiencyStatisticsAnalyzer------------------------------------")
 
     out.println(f""" Time spent in Driver vs Executors
               | Driver WallClock Time    ${pd(driverTimeJobBased)}   ${driverTimeJobBased*100/appTotalTime.toFloat}%3.2f%%
@@ -132,7 +138,6 @@ class EfficiencyStatisticsAnalyzer extends  AppAnalyzer {
          | OneCoreComputeHours wasted Total                ${driverWastedPercentOverAll+executorWastedPercentOverAll}%3.2f%%
          |
        """.stripMargin)
-
     out.toString()
   }
 }

@@ -32,6 +32,7 @@ class ExecutorWallclockAnalyzer extends  AppAnalyzer {
   def analyze(appContext: AppContext, startTime: Long, endTime: Long): String = {
     val ac = appContext.filterByStartAndEndTime(startTime, endTime)
     val out = new mutable.StringBuilder()
+    out.println("------------------------------ExecutorWallclockAnalyzer------------------------------------")
 
     val coresPerExecutor    =  AppContext.getExecutorCores(ac)
     val appExecutorCount    =  AppContext.getMaxConcurrent(ac.executorMap, ac).toInt
@@ -80,6 +81,7 @@ class ExecutorWallclockAnalyzer extends  AppAnalyzer {
         })
     }
     out.println("\n")
+
     out.toString()
   }
 

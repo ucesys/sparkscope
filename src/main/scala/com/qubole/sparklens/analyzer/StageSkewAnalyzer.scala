@@ -30,11 +30,13 @@ class StageSkewAnalyzer extends  AppAnalyzer {
   def analyze(appContext: AppContext, startTime: Long, endTime: Long): String = {
     val ac = appContext.filterByStartAndEndTime(startTime, endTime)
     val out = new mutable.StringBuilder()
+    out.println("------------------------------StageSkewAnalyzer------------------------------------")
+
     computePerStageEfficiencyStatistics(ac, out)
     checkForGCOrShuffleService(ac, out)
+
     out.toString()
   }
-
 
   def bytesToString(size: Long): String = {
     val TB = 1L << 40

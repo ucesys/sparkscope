@@ -18,11 +18,12 @@
 package com.qubole.sparklens
 
 import java.net.URI
-
 import com.qubole.sparklens.analyzer._
 import com.qubole.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.qubole.sparklens.helper.{EmailReportHelper, HDFSConfigHelper}
 import com.qubole.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
+import com.ucesys.sparkscope.SparkScopeRunner
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HadoopPropertiesLoader}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
@@ -187,7 +188,15 @@ class QuboleJobListener(sparkConf: SparkConf)  extends SparkListener {
         } else {
           EmailReportHelper.generateReport(appContext.toString(), sparkConf)
         }
-        AppAnalyzer.startAnalyzers(appContext)
+        val startSparkLens = System.currentTimeMillis()
+        val sparklensResults = AppAnalyzer.startAnalyzers(appContext)
+        val durationSparkLens = (System.currentTimeMillis() - startSparkLens) * 1f / 1000f
+        sparklensResults.foreach(println)
+        println(s"\nSparklens analysis took ${durationSparkLens}s")
+
+        val metricsLoader = new CsvHadoopMetricsLoader(new CsvHadoopReader, appContext, sparkConf, new HadoopPropertiesLoader)
+        val sparkScopeRunner = new SparkScopeRunner(appContext, sparkConf, metricsLoader, sparklensResults)
+        sparkScopeRunner.run()
       }
     }
   }

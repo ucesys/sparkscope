@@ -32,6 +32,8 @@ class StageOverlapAnalyzer extends  AppAnalyzer {
   def analyze(appContext: AppContext, startTime: Long, endTime: Long): String = {
     val ac = appContext.filterByStartAndEndTime(startTime, endTime)
     val out = new mutable.StringBuilder()
+    out.println("------------------------------StageOverlapAnalyzer------------------------------------")
+
     out.println ("\nChecking for stage overlap...\n")
     val conflictingStages = new mutable.ListBuffer[( Long, Int, Int)]
     val jobids = ac.jobMap.keySet.toBuffer.sortWith( _ < _ )
@@ -62,6 +64,7 @@ class StageOverlapAnalyzer extends  AppAnalyzer {
       out.println ("\nNo overlapping stages found. Good\n")
     }
     out.println("\n")
+
     out.toString()
   }
 }

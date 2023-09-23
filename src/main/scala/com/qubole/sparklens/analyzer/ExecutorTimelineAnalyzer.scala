@@ -31,6 +31,7 @@ class ExecutorTimelineAnalyzer extends  AppAnalyzer {
   def analyze(appContext: AppContext, startTime: Long, endTime: Long): String = {
     val ac = appContext.filterByStartAndEndTime(startTime, endTime)
     val out = new mutable.StringBuilder()
+    out.println("------------------------------ExecutorTimelineAnalyzer------------------------------------")
 
     out.println("\nPrinting executors timeline....\n")
     out.println(s"Total Executors ${ac.executorMap.size}, " +
@@ -59,6 +60,7 @@ class ExecutorTimelineAnalyzer extends  AppAnalyzer {
       })
 
     out.println("\nDone printing executors timeline...\n============================\n")
+
     out.toString()
   }
 }

@@ -13,12 +13,20 @@ spAppendScalaVersion := true
 
 
 libraryDependencies += "org.apache.spark" %% "spark-core" % sparkVersion.value % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "provided"
+
 
 libraryDependencies +=  "org.apache.hadoop" % "hadoop-client" % "2.6.5" % "provided"
 
 libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.6" % "provided"
 
 libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.5.6" % "provided"
+//libraryDependencies += "jfree" % "jfreechart" % "1.0.13"
+
+libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test
+libraryDependencies += "com.google.guava" % "guava" % "30.0-jre" % Test
+
 
 test in assembly := {}
 

@@ -74,8 +74,8 @@ trait AppAnalyzer {
 }
 
 object AppAnalyzer {
-  def startAnalyzers(appContext: AppContext): Unit = {
-    val list = new ListBuffer[AppAnalyzer]
+  val list = new ListBuffer[AppAnalyzer]
+  def startAnalyzers(appContext: AppContext): Seq[String] = {
     list += new SimpleAppAnalyzer
     list += new HostTimelineAnalyzer
     list += new ExecutorTimelineAnalyzer
@@ -85,18 +85,18 @@ object AppAnalyzer {
     list += new ExecutorWallclockAnalyzer
     list += new StageSkewAnalyzer
 
-
-    list.foreach( x => {
+    val results: Seq[String] = list.flatMap( x => {
       try {
-        val output = x.analyze(appContext)
-        println(output)
+        Some(x.analyze(appContext))
       } catch {
         case e:Throwable => {
           println(s"Failed in Analyzer ${x.getClass.getSimpleName}")
           e.printStackTrace()
+          None
         }
       }
     })
+    results
   }
 
 }
