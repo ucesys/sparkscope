@@ -21,11 +21,11 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.TestHelpers.{createDummyAppContext, getPropertiesLoaderMock, mockcorrectMetrics, sparkConf}
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HtmlReportGenerator}
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.FunSuite
 
 import java.nio.file.{Files, Paths}
 
-class SparkScopeSuite extends AnyFunSuite with MockFactory {
+class SparkScopeSuite extends FunSuite with MockFactory {
 
   test("SparkScope end2end test") {
     val ac = createDummyAppContext()

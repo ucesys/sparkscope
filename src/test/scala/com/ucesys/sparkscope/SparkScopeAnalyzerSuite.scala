@@ -21,11 +21,11 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.TestHelpers.{EndTime, StartTime, appId, createDummyAppContext, getPropertiesLoaderMock, mockcorrectMetrics, sparkConf}
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader}
 import com.ucesys.sparkscope.metrics._
-import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.FunSuite
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.GivenWhenThen
 
-class SparkScopeAnalyzerSuite extends AnyFunSuite with MockFactory with GivenWhenThen {
+class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenThen {
 
   test("ExecutorMetricsAnalyzerSuite") {
     Given("SparkScopeAnalyzer and correct driver & executormetrics")
