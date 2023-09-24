@@ -29,5 +29,5 @@ jobs:
         cache: 'maven'
     - name: Compile
       run: mvn compile
-    - name: Build and test
+    - name: Test and build jar
       run: mvn package
