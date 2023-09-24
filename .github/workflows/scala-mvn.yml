@@ -26,6 +26,6 @@ jobs:
       with:
         java-version: '8'
         distribution: 'temurin'
-        cache: 'mvn'
+        cache: 'maven'
     - name: Build and test
       run: mvn package
