@@ -22,13 +22,13 @@ import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMe
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HadoopPropertiesLoader, PropertiesLoader}
 import org.apache.spark.SparkConf
-import org.scalatest.funsuite.AnyFunSuite
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.GivenWhenThen
 import java.io.FileNotFoundException
 import java.util.Properties
+import org.scalatest.FunSuite
 
-class CsvHadoopMetricsLoaderSuite extends AnyFunSuite with MockFactory with GivenWhenThen {
+class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWhenThen {
     test("getMetricsPropertiesPath, spark.metrics.conf is unset, spark.home is set ") {
     Given("spark.metrics.conf unset in sparkConf")
     And("spark.home set in sparkConf")

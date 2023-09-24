@@ -5,12 +5,12 @@ import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpa
 import com.ucesys.sparkscope.io.{CsvHadoopReader, PropertiesLoader}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.FunSuite
 
 import java.util.Properties
 import scala.collection.mutable
 
-object TestHelpers extends AnyFunSuite with MockFactory {
+object TestHelpers extends FunSuite with MockFactory {
   final val appId = "app-20230101010819-test"
   final val StartTime: Long = 1695358645000L
   final val EndTime: Long = 1695358700000L
