@@ -2,9 +2,7 @@ package com.ucesys.sparklens.app
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 import com.ucesys.sparklens.TestUtils
-import com.ucesys.sparklens.TestUtils
-import org.scalatest.{FunSuite, Ignore}
-@Ignore
+import org.scalatest.FunSuite
 class EventHistoryFileReportingSuite extends FunSuite {
 
   test("Reporting from sparklens and event-history should be same") {
