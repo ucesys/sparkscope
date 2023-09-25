@@ -27,7 +27,7 @@ import org.scalatest.GivenWhenThen
 
 class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenThen {
 
-  test("ExecutorMetricsAnalyzerSuite") {
+  test("SparkScopeAnalyzerSuite") {
     Given("SparkScopeAnalyzer and correct driver & executormetrics")
     val ac = createDummyAppContext()
     // TODO Mock DriverExecutorMetrics object
@@ -61,7 +61,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
       maxHeap = 352,
       maxHeapPerc = 44.028958320617676,
       avgHeap = 204,
-      avgHeapPerc = 0.25554119351460397,
+      avgHeapPerc = 0.2555411935146038,
       avgNonHeap = 43,
       maxNonHeap = 48
     ))
@@ -70,10 +70,10 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
       maxHeap = 840,
       avgHeap = 632,
       maxHeapPerc = 41.65,
-      avgHeapPerc = 0.25554119351460397,
+      avgHeapPerc = 0.2555411935146038,
       executorTimeSecs=152,
       heapGbHoursAllocated=0.03298611111111111,
-      heapGbHoursWasted=0.008429310202738674,
+      heapGbHoursWasted=0.008429310202738667,
       executorHeapSizeInGb=0.78125
     ))
 

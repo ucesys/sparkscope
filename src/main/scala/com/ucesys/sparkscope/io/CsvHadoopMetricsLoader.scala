@@ -47,14 +47,14 @@ class CsvHadoopMetricsLoader(reader: CsvHadoopReader,
     }
 
     log.println("Reading executor metrics...")
-    val executorsMetricsMap: Map[Int, Seq[DataFrame]] = (0 until ac.executorMap.size).map { executorId =>
+    val executorsMetricsMap: Map[Int, Seq[DataFrame]] = ac.executorMap.map { case (executorId, _) =>
       val metricTables: Seq[DataFrame] = ExecutorCsvMetrics.map { metric =>
         val metricsFilePath = s"${executorMetricsDir.get}/${appContext.appInfo.applicationID}.${executorId}.${metric}.csv"
         val csvFileStr = reader.read(metricsFilePath).replace("value", metric).replace("count", metric)
         log.println(s"Reading ${metric} metric for executor=${executorId} from " + metricsFilePath)
         DataFrame.fromCsv(metric, csvFileStr, ",").distinct("t").sortBy("t")
       }
-      (executorId, metricTables)
+      (executorId.toInt, metricTables)
     }.toMap
 
     executorsMetricsMap.foreach{case (executorId, metrics) => {
