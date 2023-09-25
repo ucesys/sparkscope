@@ -2,7 +2,7 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
-import com.ucesys.sparkscope.io.{CsvHadoopReader, PropertiesLoader}
+import com.ucesys.sparkscope.io.{CsvHadoopReader, PropertiesLoader, PropertiesLoaderFactory}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
@@ -406,11 +406,23 @@ object TestHelpers extends FunSuite with MockFactory {
     csvReader
   }
 
-  def getPropertiesLoaderMock(): PropertiesLoader = {
+  def getPropertiesLoaderFactoryMock(loader: PropertiesLoader): PropertiesLoaderFactory = {
+    val propertiesLoaderFactoryMock = stub[PropertiesLoaderFactory]
+    (propertiesLoaderFactoryMock.getPropertiesLoader _).when(MetricsPropertiesPath).returns(loader)
+    propertiesLoaderFactoryMock
+  }
+
+  def getPropertiesLoaderFactoryMock(): PropertiesLoaderFactory = {
+    val propertiesLoaderFactoryMock = stub[PropertiesLoaderFactory]
+    (propertiesLoaderFactoryMock.getPropertiesLoader _).when(MetricsPropertiesPath).returns(getPropertiesLoaderMock)
+    propertiesLoaderFactoryMock
+  }
+
+  def getPropertiesLoaderMock: PropertiesLoader = {
     val propertiesLoaderMock = stub[PropertiesLoader]
     val properties = new Properties()
     properties.setProperty("*.sink.csv.directory", csvMetricsPath)
-    (propertiesLoaderMock.load _).when(MetricsPropertiesPath).returns(properties)
+    (propertiesLoaderMock.load _).when().returns(properties)
     propertiesLoaderMock
   }
 }

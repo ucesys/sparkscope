@@ -18,8 +18,8 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.TestHelpers.{EndTime, StartTime, appId, createDummyAppContext, getPropertiesLoaderMock, mockcorrectMetrics, sparkConf}
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader}
+import com.ucesys.sparkscope.TestHelpers.{EndTime, StartTime, appId, createDummyAppContext, getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, mockcorrectMetrics, sparkConf}
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.metrics._
 import org.scalatest.FunSuite
 import org.scalamock.scalatest.MockFactory
@@ -33,7 +33,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     // TODO Mock DriverExecutorMetrics object
     val csvReaderMock = stub[CsvHadoopReader]
     mockcorrectMetrics(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, ac, sparkConf, getPropertiesLoaderMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, ac, sparkConf, getPropertiesLoaderFactoryMock)
     val sparkScopeAnalyzer = new SparkScopeAnalyzer(sparkConf)
 
     When("running parkScopeAnalyzer.analyze")

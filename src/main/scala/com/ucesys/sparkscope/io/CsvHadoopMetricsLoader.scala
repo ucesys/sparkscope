@@ -9,7 +9,7 @@ import org.apache.spark.SparkConf
 class CsvHadoopMetricsLoader(reader: CsvHadoopReader,
                              appContext: AppContext,
                              sparkConf: SparkConf,
-                             propertiesLoader: PropertiesLoader) extends MetricsLoader {
+                             propertiesLoaderFactory: PropertiesLoaderFactory) extends MetricsLoader {
   val log = new Logger
 
 
@@ -24,7 +24,7 @@ class CsvHadoopMetricsLoader(reader: CsvHadoopReader,
 
     val metricsPropertiesPath = getMetricsPropertiesPath()
 
-    val prop = propertiesLoader.load(metricsPropertiesPath)
+    val prop = propertiesLoaderFactory.getPropertiesLoader(metricsPropertiesPath).load()
 
     val driverMetricsDir = Option(prop.getProperty("driver.sink.csv.directory", prop.getProperty("*.sink.csv.directory")))
     val executorMetricsDir = Option(prop.getProperty("executor.sink.csv.directory", prop.getProperty("*.sink.csv.directory")))

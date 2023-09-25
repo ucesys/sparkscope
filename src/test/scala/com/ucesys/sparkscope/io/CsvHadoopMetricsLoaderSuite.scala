@@ -20,10 +20,11 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMetrics}
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HadoopPropertiesLoader, PropertiesLoader}
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HadoopPropertiesLoader, PropertiesLoader, PropertiesLoaderFactory}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.GivenWhenThen
+
 import java.io.FileNotFoundException
 import java.util.Properties
 import org.scalatest.FunSuite
@@ -35,7 +36,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     val sparkHome = "/opt/spark"
     val sparkConf = new SparkConf().set("spark.home", sparkHome)
     val csvReaderMock = stub[CsvHadoopReader]
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderMock())
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
 
     When("calling getMetricsPropertiesPath")
     val metricsPropertiesPath = metricsLoader.getMetricsPropertiesPath()
@@ -48,7 +49,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     Given("spark.metrics.conf set in sparkConf")
     val sparkConf = new SparkConf().set("spark.metrics.conf", MetricsPropertiesPath)
     val csvReaderMock = stub[CsvHadoopReader]
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderMock())
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
 
     When("calling getMetricsPropertiesPath")
     val metricsPropertiesPath = metricsLoader.getMetricsPropertiesPath()
@@ -61,10 +62,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     Given("Incorrectly configured metrics properties path")
     val sparkConf = new SparkConf().set("spark.metrics.conf", "/bad/path/to/metrics.properties")
     val csvReaderMock = stub[CsvHadoopReader]
-
-    And("Executor sink is not configured")
-    val propertiesLoader = new HadoopPropertiesLoader
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, propertiesLoader)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, new PropertiesLoaderFactory)
 
     When("loading metrics")
     Then("CsvHadoopMetricsLoader should throw java.io.FileNotFoundException")
@@ -82,9 +80,9 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     val propertiesLoaderMock = stub[PropertiesLoader]
     val properties = new Properties()
     properties.setProperty("driver.sink.csv.directory", csvMetricsPath)
-    (propertiesLoaderMock.load _).when(MetricsPropertiesPath).returns(properties)
+    (propertiesLoaderMock.load _).when().returns(properties)
 
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, propertiesLoaderMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock(propertiesLoaderMock))
 
     When("loading metrics")
     Then("CsvHadoopMetricsLoader should throw NoSuchFieldException")
@@ -102,9 +100,9 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     val propertiesLoaderMock = stub[PropertiesLoader]
     val properties = new Properties()
     properties.setProperty("executor.sink.csv.directory", csvMetricsPath)
-    (propertiesLoaderMock.load _).when(MetricsPropertiesPath).returns(properties)
+    (propertiesLoaderMock.load _).when().returns(properties)
 
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, propertiesLoaderMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock(propertiesLoaderMock))
 
     When("loading metrics")
     Then("CsvHadoopMetricsLoader should throw NoSuchFieldException")
@@ -119,7 +117,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     And("Incorrect csv files")
     val csvReaderMock = stub[CsvHadoopReader]
     mockIncorrectDriverMetrics(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
 
     When("loading metrics")
     Then("CsvHadoopMetricsLoader should throw IllegalArgumentException")
@@ -134,7 +132,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     And("Correct csv files")
     val csvReaderMock = stub[CsvHadoopReader]
     mockcorrectMetrics(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
 
     When("loading metrics")
     val driverExecutorMetrics = metricsLoader.load()
