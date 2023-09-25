@@ -14,7 +14,6 @@ class CsvHadoopMetricsLoader(reader: CsvHadoopReader,
 
 
   def getMetricsPropertiesPath() = {
-    sparkConf.getAll.foreach(println)
     val sparkHome = sparkConf.get("spark.home", sys.env.getOrElse("SPARK_HOME", "./"))
     val defaultMetricsPropsPath = sparkHome + "/conf/metrics.properties"
     val metricsPropertiesPath = sparkConf.get("spark.metrics.conf", defaultMetricsPropsPath)
