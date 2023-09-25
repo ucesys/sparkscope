@@ -14,7 +14,7 @@ case class ClusterMemoryStats(maxHeap: Long,
     Seq(
       "\nCluster Memory stats: ",
       f"Average Cluster heap memory utilization: ${avgHeapPerc*100}%1.2f%% / ${avgHeap}MB",
-      f"Max Cluster heap memory utilization: ${maxHeapPerc}%1.2f%% / ${maxHeap}MB",
+      f"Max Cluster heap memory utilization: ${maxHeapPerc * 100}%1.2f%% / ${maxHeap}MB",
       f"heapGbHoursAllocated: ${this.heapGbHoursAllocated}%1.4f",
       s"heapGbHoursAllocated=(executorHeapSizeInGb(${this.executorHeapSizeInGb})*combinedExecutorUptimeInSec(${this.executorTimeSecs}s))/3600",
       f"heapGbHoursWasted: ${this.heapGbHoursWasted}%1.4f",
@@ -31,12 +31,12 @@ object ClusterMemoryStats {
     ClusterMemoryStats(
       maxHeap = clusterMetrics.heapUsed.select(JvmHeapUsed).max.toLong / BytesInMB,
       avgHeap = clusterMetrics.heapUsed.select(JvmHeapUsed).avg.toLong / BytesInMB,
-      maxHeapPerc = clusterMetrics.heapUsage.select(JvmHeapUsage).max * 100,
-      avgHeapPerc = executorStats.avgHeapPerc,
+      maxHeapPerc = f"${clusterMetrics.heapUsage.select(JvmHeapUsage).max}%1.5f".toDouble,
+      avgHeapPerc = f"${executorStats.avgHeapPerc}%1.5f".toDouble,
       executorTimeSecs = executorTimeSecs,
-      heapGbHoursAllocated = heapGbHoursAllocated,
-      heapGbHoursWasted = heapGbHoursAllocated * executorStats.avgHeapPerc,
-      executorHeapSizeInGb = executorHeapSizeInGb
+      heapGbHoursAllocated = f"${heapGbHoursAllocated}%1.5f".toDouble,
+      heapGbHoursWasted = f"${heapGbHoursAllocated * executorStats.avgHeapPerc}%1.5f".toDouble,
+      executorHeapSizeInGb = f"${executorHeapSizeInGb}%1.5f".toDouble
     )
   }
 }

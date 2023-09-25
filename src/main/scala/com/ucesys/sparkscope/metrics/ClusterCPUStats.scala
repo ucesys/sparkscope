@@ -27,11 +27,11 @@ object ClusterCPUStats {
     val coreHoursWasted = coreHoursAllocated * cpuUtil
 
     ClusterCPUStats(
-      cpuUtil = cpuUtil,
+      cpuUtil = f"${cpuUtil}%1.5f".toDouble,
+      coreHoursAllocated =  f"${coreHoursAllocated}%1.5f".toDouble,
+      coreHoursWasted =  f"${coreHoursWasted}%1.5f".toDouble,
       executorCores = executorCores,
-      executorTimeSecs = executorTimeSecs,
-      coreHoursAllocated = coreHoursAllocated,
-      coreHoursWasted = coreHoursWasted
+      executorTimeSecs = executorTimeSecs
     )
   }
 }

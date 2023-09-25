@@ -2,11 +2,14 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
-import com.ucesys.sparkscope.io.{CsvHadoopReader, PropertiesLoader, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.SparkScopeAnalyzer._
+import com.ucesys.sparkscope.data.DataFrame
+import com.ucesys.sparkscope.io.{CsvHadoopReader, DriverExecutorMetrics, PropertiesLoader, PropertiesLoaderFactory}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
 
+import java.io.FileNotFoundException
 import java.util.Properties
 import scala.collection.mutable
 
@@ -305,64 +308,77 @@ object TestHelpers extends FunSuite with MockFactory {
       |1695358696,5451002249
       |1695358697,6129593128""".stripMargin
 
-  def createDummyAppContext(): AppContext = {
+  val driverMetrics = Seq(
+    DataFrame.fromCsv("driver-heap-used", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed)),
+    DataFrame.fromCsv("driver-heap-max", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax)),
+    DataFrame.fromCsv("driver-heap-usage", jvmHeapUsageDriverCsv, ",", Seq("t", JvmHeapUsage)),
+    DataFrame.fromCsv("driver-non-heap", jvmNonHeapDriverCsv, ",", Seq("t", JvmNonHeapUsed))
+  )
 
-    val jobMap = new mutable.HashMap[Long, JobTimeSpan]
-    for (i <- 1 to 4) {
-      jobMap(i) = new JobTimeSpan(i)
-    }
+  val executorMetricsMap = Map(
+    1 -> Seq(
+      DataFrame.fromCsv("exec1-heap-used", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed)),
+      DataFrame.fromCsv("exec1-heap-max", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax)),
+      DataFrame.fromCsv("exec1-heap-usage", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage)),
+      DataFrame.fromCsv("exec1-non-heap", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed)),
+      DataFrame.fromCsv("exec1-cpu-time", cpuTime1Csv, ",", Seq("t", CpuTime))
+    ),
+    2 -> Seq(
+      DataFrame.fromCsv("exec2-heap-used", jvmHeapExec2Csv, ",", Seq("t", JvmHeapUsed)),
+      DataFrame.fromCsv("exec2-heap-max", jvmHeapMaxExec2Csv, ",", Seq("t", JvmHeapMax)),
+      DataFrame.fromCsv("exec2-heap-usage", jvmHeapUsageExec2Csv, ",", Seq("t", JvmHeapUsage)),
+      DataFrame.fromCsv("exec2-non-heap", jvmNonHeapExec2Csv, ",", Seq("t", JvmNonHeapUsed)),
+      DataFrame.fromCsv("exec2-cpu-time", cpuTime2Csv, ",", Seq("t", CpuTime))
+    ),
+    3 -> Seq(
+      DataFrame.fromCsv("exec3-heap-used", jvmHeapExec3Csv, ",", Seq("t", JvmHeapUsed)),
+      DataFrame.fromCsv("exec3-heap-max", jvmHeapMaxExec3Csv, ",", Seq("t", JvmHeapMax)),
+      DataFrame.fromCsv("exec3-heap-usage", jvmHeapUsageExec3Csv, ",", Seq("t", JvmHeapUsage)),
+      DataFrame.fromCsv("exec3-non-heap", jvmNonHeapExec3Csv, ",", Seq("t", JvmNonHeapUsed)),
+      DataFrame.fromCsv("exec3-cpu-time", cpuTime3Csv, ",", Seq("t", CpuTime))
+    ),
+    5 -> Seq(
+      DataFrame.fromCsv("exec5-heap-used", jvmHeapExec5Csv, ",", Seq("t", JvmHeapUsed)),
+      DataFrame.fromCsv("exec5-heap-max", jvmHeapMaxExec5Csv, ",", Seq("t", JvmHeapMax)),
+      DataFrame.fromCsv("exec5-heap-usage", jvmHeapUsageExec5Csv, ",", Seq("t", JvmHeapUsage)),
+      DataFrame.fromCsv("exec5-non-heap", jvmNonHeapExec5Csv, ",", Seq("t", JvmNonHeapUsed)),
+      DataFrame.fromCsv("exec5-cpu-time", cpuTime5Csv, ",", Seq("t", CpuTime))
+    )
+  )
 
-    val jobSQLExecIDMap = new mutable.HashMap[Long, Long]
-    val r = scala.util.Random
-    val sqlExecutionId = r.nextInt(10000)
-
-    // Let, Job 1, 2 and 3 have same sqlExecutionId
-    jobSQLExecIDMap(1) = sqlExecutionId
-    jobSQLExecIDMap(2) = sqlExecutionId
-    jobSQLExecIDMap(3) = sqlExecutionId
-    jobSQLExecIDMap(4) = r.nextInt(10000)
-
-    // Let, Job 2 and 3 are not running in parallel, even though they have same sqlExecutionId
-    val baseTime = 1L
-    jobMap(1).setStartTime(baseTime)
-    jobMap(1).setEndTime(baseTime + 5L)
-
-    jobMap(2).setStartTime(baseTime + 3L)
-    jobMap(2).setEndTime(baseTime + 6L)
-
-    jobMap(3).setStartTime(baseTime + 7L)
-    jobMap(3).setEndTime(baseTime + 9L)
-
-    jobMap(4).setStartTime(baseTime + 10L)
-    jobMap(4).setEndTime(baseTime + 12L)
-
-    val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap()
-    val executor1Timespan = new ExecutorTimeSpan("1", "0", 1)
-    val executor2Timespan = new ExecutorTimeSpan("2", "0", 1)
-    val executor3Timespan = new ExecutorTimeSpan("3", "0", 1)
-    val executor5Timespan = new ExecutorTimeSpan("5", "0", 1)
-    executor1Timespan.setStartTime(1695358645000L)
-    executor1Timespan.setEndTime(1695358700000L)
-    executor2Timespan.setStartTime(1695358645000L)
-    executor2Timespan.setEndTime(1695358700000L)
-    executor3Timespan.setStartTime(1695358671000L)
-    executor3Timespan.setEndTime(1695358700000L)
-    executor5Timespan.setStartTime(1695358687000L)
-    executor5Timespan.setEndTime(1695358700000L)
-    executorMap.put("1", executor1Timespan)
-    executorMap.put("2", executor2Timespan)
-    executorMap.put("3", executor3Timespan)
-    executorMap.put("5", executor5Timespan)
+  val DriverExecutorMetricsMock: DriverExecutorMetrics = DriverExecutorMetrics(
+    driverMetrics = driverMetrics,
+    executorMetricsMap = executorMetricsMap
+  )
+  def mockAppContext(): AppContext = {
+    val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
+      "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
+      "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
+      "3" -> ExecutorTimeSpan("3", "0", 1, 1695358671000L, 1695358700000L),
+      "5" -> ExecutorTimeSpan("5", "0", 1, 1695358687000L, 1695358700000L)
+    )
 
     new AppContext(
       new ApplicationInfo(appId, StartTime, EndTime),
       new AggregateMetrics(),
       mutable.HashMap[String, HostTimeSpan](),
       executorMap,
-      jobMap,
-      jobSQLExecIDMap,
+      new mutable.HashMap[Long, JobTimeSpan],
+      new mutable.HashMap[Long, Long],
       mutable.HashMap[Int, StageTimeSpan](),
       mutable.HashMap[Int, Long]())
+  }
+
+  def mockAppContextMissingExecutorMetrics() : AppContext = {
+    mockAppContext.copy(
+      executorMap = mutable.HashMap(
+        "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
+        "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
+        "3" -> ExecutorTimeSpan("3", "0", 1, 1695358671000L, 1695358700000L),
+        "5" -> ExecutorTimeSpan("5", "0", 1, 1695358687000L, 1695358700000L),
+        "6" -> ExecutorTimeSpan("6", "0", 1, 1695358687000L, 1695358700000L)
+      )
+    )
   }
 
   def mockcorrectMetrics(csvReaderMock: CsvHadoopReader): CsvHadoopReader = {
@@ -370,6 +386,8 @@ object TestHelpers extends FunSuite with MockFactory {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(jvmNonHeapDriverCsv)
+
+    // Starting from 1 on purpose
 
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.used.csv").returns(jvmHeapExec1Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.usage.csv").returns(jvmHeapUsageExec1Csv)
@@ -389,11 +407,18 @@ object TestHelpers extends FunSuite with MockFactory {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.non-heap.used.csv").returns(jvmNonHeapExec3Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.executor.cpuTime.csv").returns(cpuTime3Csv)
 
+    // Missing one ide on purpose so that order of executor ids is not assumed
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.jvm.heap.used.csv").returns(jvmHeapExec5Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.jvm.heap.usage.csv").returns(jvmHeapUsageExec5Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.jvm.heap.max.csv").returns(jvmHeapMaxExec5Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.jvm.non-heap.used.csv").returns(jvmNonHeapExec5Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.executor.cpuTime.csv").returns(cpuTime5Csv)
+
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.jvm.heap.used.csv").throws(new FileNotFoundException)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.jvm.heap.usage.csv").throws(new FileNotFoundException)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.jvm.heap.max.csv").throws(new FileNotFoundException)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.jvm.non-heap.used.csv").throws(new FileNotFoundException)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.executor.cpuTime.csv").throws(new FileNotFoundException)
 
     csvReaderMock
   }

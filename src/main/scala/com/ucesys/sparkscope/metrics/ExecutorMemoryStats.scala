@@ -8,8 +8,8 @@ case class ExecutorMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Doubl
     Seq(
       s"\nExecutor stats:",
       f"Executor heap size: ${heapSize}MB",
-      f"Max heap memory utilization by executor: ${maxHeap}MB(${maxHeapPerc}%1.2f%%)",
-      f"Average heap memory utilization by executor: ${avgHeap}MB(${avgHeapPerc}%1.2f%%)",
+      f"Max heap memory utilization by executor: ${maxHeap}MB(${maxHeapPerc * 100}%1.2f%%)",
+      f"Average heap memory utilization by executor: ${avgHeap}MB(${avgHeapPerc * 100}%1.2f%%)",
       s"Max non-heap memory utilization by executor: ${maxNonHeap}MB",
       f"Average non-heap memory utilization by executor: ${avgNonHeap}MB"
     ).mkString("\n")
@@ -22,10 +22,10 @@ object ExecutorMemoryStats {
     ExecutorMemoryStats(
       heapSize = allExecutorsMetrics.select(JvmHeapMax).max.toLong / BytesInMB,
       maxHeap = allExecutorsMetrics.select(JvmHeapUsed).max.toLong / BytesInMB,
-      maxHeapPerc = allExecutorsMetrics.select(JvmHeapUsage).max * 100,
+      maxHeapPerc = f"${allExecutorsMetrics.select(JvmHeapUsage).max}%1.5f".toDouble,
       maxNonHeap = allExecutorsMetrics.select(JvmNonHeapUsed).max.toLong / BytesInMB,
       avgHeap = allExecutorsMetrics.select(JvmHeapUsed).avg.toLong / BytesInMB,
-      avgHeapPerc = allExecutorsMetrics.select(JvmHeapUsage).avg,
+      avgHeapPerc =  f"${allExecutorsMetrics.select(JvmHeapUsage).avg}%1.5f".toDouble,
       avgNonHeap = allExecutorsMetrics.select(JvmNonHeapUsed).avg.toLong / BytesInMB
     )
   }

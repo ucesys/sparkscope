@@ -36,7 +36,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     val sparkHome = "/opt/spark"
     val sparkConf = new SparkConf().set("spark.home", sparkHome)
     val csvReaderMock = stub[CsvHadoopReader]
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, mockAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
 
     When("calling getMetricsPropertiesPath")
     val metricsPropertiesPath = metricsLoader.getMetricsPropertiesPath()
@@ -49,7 +49,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     Given("spark.metrics.conf set in sparkConf")
     val sparkConf = new SparkConf().set("spark.metrics.conf", MetricsPropertiesPath)
     val csvReaderMock = stub[CsvHadoopReader]
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, mockAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
 
     When("calling getMetricsPropertiesPath")
     val metricsPropertiesPath = metricsLoader.getMetricsPropertiesPath()
@@ -62,7 +62,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     Given("Incorrectly configured metrics properties path")
     val sparkConf = new SparkConf().set("spark.metrics.conf", "/bad/path/to/metrics.properties")
     val csvReaderMock = stub[CsvHadoopReader]
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, new PropertiesLoaderFactory)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, mockAppContext(), sparkConf, new PropertiesLoaderFactory)
 
     When("loading metrics")
     Then("CsvHadoopMetricsLoader should throw java.io.FileNotFoundException")
@@ -82,7 +82,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     properties.setProperty("driver.sink.csv.directory", csvMetricsPath)
     (propertiesLoaderMock.load _).when().returns(properties)
 
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock(propertiesLoaderMock))
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, mockAppContext(), sparkConf, getPropertiesLoaderFactoryMock(propertiesLoaderMock))
 
     When("loading metrics")
     Then("CsvHadoopMetricsLoader should throw NoSuchFieldException")
@@ -102,7 +102,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     properties.setProperty("executor.sink.csv.directory", csvMetricsPath)
     (propertiesLoaderMock.load _).when().returns(properties)
 
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock(propertiesLoaderMock))
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, mockAppContext(), sparkConf, getPropertiesLoaderFactoryMock(propertiesLoaderMock))
 
     When("loading metrics")
     Then("CsvHadoopMetricsLoader should throw NoSuchFieldException")
@@ -117,7 +117,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     And("Incorrect csv files")
     val csvReaderMock = stub[CsvHadoopReader]
     mockIncorrectDriverMetrics(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, mockAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
 
     When("loading metrics")
     Then("CsvHadoopMetricsLoader should throw IllegalArgumentException")
@@ -126,13 +126,13 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     }
   }
 
-  test("load, metrics.properties file exists, csv sink configured, rows are correct") {
+  test("Successful metrics load test") {
     Given("Correctly configured metrics properties path")
     val sparkConf = new SparkConf().set("spark.metrics.conf", MetricsPropertiesPath)
     And("Correct csv files")
     val csvReaderMock = stub[CsvHadoopReader]
     mockcorrectMetrics(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, createDummyAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, mockAppContext(), sparkConf, getPropertiesLoaderFactoryMock)
 
     When("loading metrics")
     val driverExecutorMetrics = metricsLoader.load()
@@ -142,5 +142,27 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     assert(driverExecutorMetrics.driverMetrics.length == DriverCsvMetrics.length)
     assert(driverExecutorMetrics.executorMetricsMap.size == 4)
     assert(driverExecutorMetrics.executorMetricsMap.head._2.length == ExecutorCsvMetrics.length)
+  }
+
+  test("Missing metrics load test") {
+    Given("Correctly configured metrics properties path")
+    val sparkConf = new SparkConf().set("spark.metrics.conf", MetricsPropertiesPath)
+
+    And("Csv metrics for 4 out of 5 executors(metrics for last executor are missing)")
+    val csvReaderMock = stub[CsvHadoopReader]
+    mockcorrectMetrics(csvReaderMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, mockAppContextMissingExecutorMetrics, sparkConf, getPropertiesLoaderFactoryMock)
+
+    When("loading metrics")
+    val driverExecutorMetrics = metricsLoader.load()
+
+    Then("Driver and Executor Metrics should be loaded")
+    assert(driverExecutorMetrics.driverMetrics.length == 4)
+    assert(driverExecutorMetrics.driverMetrics.length == DriverCsvMetrics.length)
+    assert(driverExecutorMetrics.executorMetricsMap.size == 4)
+    assert(driverExecutorMetrics.executorMetricsMap.head._2.length == ExecutorCsvMetrics.length)
+
+    And("Missing Executor Metrics should be skipped")
+    assert(driverExecutorMetrics.executorMetricsMap.get(6).isEmpty)
   }
 }

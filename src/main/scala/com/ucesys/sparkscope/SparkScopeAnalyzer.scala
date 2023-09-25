@@ -25,6 +25,7 @@ import com.ucesys.sparkscope.data.{DataColumn, DataFrame}
 import com.ucesys.sparkscope.io.{DriverExecutorMetrics, MetricsLoader}
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.utils.Logger
+import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.apache.spark.SparkConf
 
 import scala.collection.mutable
@@ -80,7 +81,8 @@ class SparkScopeAnalyzer(sparkConf: SparkConf) {
 
     // Executor Start, End, Duration
     val startEndTimes = getExecutorStartEndTimes(ac)
-    val combinedExecutorUptime = startEndTimes.map { case (_, (_, _, duration)) => duration }.sum
+    val startEndTimesWithMetrics = startEndTimes.filter{case (id, _) => driverExecutorMetrics.executorMetricsMap.contains(id.toInt)}
+    val combinedExecutorUptime = startEndTimesWithMetrics.map { case (_, (_, _, duration)) => duration }.sum
     val executorTimeSecs = combinedExecutorUptime.milliseconds.toSeconds
 
     // Metrics
@@ -115,7 +117,11 @@ class SparkScopeAnalyzer(sparkConf: SparkConf) {
         executorMemoryMetrics = executorMemoryMetrics, 
         clusterMemoryMetrics = clusterMemoryMetrics, 
         clusterCPUMetrics = clusterCPUMetrics
-      )
+      ),
+      warnings = MissingMetricsWarning(
+        allExecutors = ac.executorMap.map{case (id, _) => id.toInt}.toSeq,
+        withMetrics = driverExecutorMetrics.executorMetricsMap.map{case (id, _) => id}.toSeq
+      ).toSeq
     )
   }
   

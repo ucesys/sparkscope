@@ -43,6 +43,12 @@ class ExecutorTimeSpan(val executorID: String,
 }
 
 object ExecutorTimeSpan {
+  def apply(executorID: String, hostID: String, cores: Int, startTime: Long, endTime: Long): ExecutorTimeSpan = {
+    val timeSpan = new ExecutorTimeSpan(executorID, hostID, cores)
+    timeSpan.setStartTime(startTime)
+    timeSpan.setEndTime(endTime)
+    timeSpan
+  }
   def getTimeSpan(json: Map[String, JValue]): mutable.HashMap[String, ExecutorTimeSpan] = {
 
     implicit val formats = DefaultFormats
