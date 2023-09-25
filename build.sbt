@@ -5,7 +5,7 @@ scalaVersion := "2.11.8"
 
 spName := "ucesys/sparkscope"
 
-sparkVersion := "2.0.0"
+sparkVersion := "2.3.1"
 
 spAppendScalaVersion := true
 
@@ -13,11 +13,8 @@ spAppendScalaVersion := true
 libraryDependencies += "org.apache.spark" %% "spark-core" % sparkVersion.value % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "provided"
 
-
-libraryDependencies +=  "org.apache.hadoop" % "hadoop-client" % "2.6.5" % "provided"
-
+libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "2.6.5" % "provided"
 libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.6" % "provided"
-
 libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.5.6" % "provided"
 
 libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test

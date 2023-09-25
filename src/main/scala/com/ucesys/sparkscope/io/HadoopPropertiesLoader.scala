@@ -7,10 +7,10 @@ import java.io.InputStreamReader
 import java.net.URI
 import java.util.Properties
 
-class HadoopPropertiesLoader extends PropertiesLoader {
-  def load(propertiesPath: String): Properties = {
-    val fs = FileSystem.get(new URI(propertiesPath), HDFSConfigHelper.getHadoopConf(None))
-    val path = new Path(propertiesPath)
+class HadoopPropertiesLoader(propertiesPathStr: String) extends PropertiesLoader {
+  def load(): Properties = {
+    val fs = FileSystem.get(new URI(propertiesPathStr), HDFSConfigHelper.getHadoopConf(None))
+    val path = new Path(propertiesPathStr)
     val fis = new InputStreamReader(fs.open(path))
     val prop = new Properties()
     prop.load(fis)

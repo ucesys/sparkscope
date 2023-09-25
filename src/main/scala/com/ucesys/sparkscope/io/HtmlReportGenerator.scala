@@ -80,23 +80,23 @@ object HtmlReportGenerator {
   def renderStats(template: String, result: SparkScopeResult): String = {
     template
       .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterMemoryStats.avgHeapPerc*100}%1.2f")
-      .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterMemoryStats.maxHeapPerc}%1.2f")
+      .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterMemoryStats.maxHeapPerc*100}%1.2f")
       .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterMemoryStats.avgHeapPerc*100}%1.2f")
       .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterCPUStats.cpuUtil*100}%1.2f")
       .replace("${resource.waste.heap}", f"${result.stats.clusterMemoryStats.heapGbHoursWasted}%1.4f")
       .replace("${resource.waste.cpu}", f"${result.stats.clusterCPUStats.coreHoursWasted}%1.4f")
 
       .replace("${stats.executor.heap.max}", result.stats.executorStats.maxHeap.toString)
-      .replace("${stats.executor.heap.max.perc}", f"${result.stats.executorStats.maxHeapPerc}%1.2f")
+      .replace("${stats.executor.heap.max.perc}", f"${result.stats.executorStats.maxHeapPerc*100}%1.2f")
       .replace("${stats.executor.heap.avg}", result.stats.executorStats.avgHeap.toString)
-      .replace("${stats.executor.heap.avg.perc}", f"${result.stats.executorStats.avgHeapPerc}%1.2f")
+      .replace("${stats.executor.heap.avg.perc}", f"${result.stats.executorStats.avgHeapPerc*100}%1.2f")
       .replace("${stats.executor.non-heap.avg}", result.stats.executorStats.avgNonHeap.toString)
       .replace("${stats.executor.non-heap.max}", result.stats.executorStats.maxNonHeap.toString)
 
       .replace("${stats.driver.heap.max}", result.stats.driverStats.maxHeap.toString)
-      .replace("${stats.driver.heap.max.perc}", f"${result.stats.driverStats.maxHeapPerc}%1.2f")
+      .replace("${stats.driver.heap.max.perc}", f"${result.stats.driverStats.maxHeapPerc*100}%1.2f")
       .replace("${stats.driver.heap.avg}", result.stats.driverStats.avgHeap.toString)
-      .replace("${stats.driver.heap.avg.perc}", f"${result.stats.driverStats.avgHeapPerc}%1.2f")
+      .replace("${stats.driver.heap.avg.perc}", f"${result.stats.driverStats.avgHeapPerc*100}%1.2f")
       .replace("${stats.driver.non-heap.avg}", result.stats.driverStats.avgNonHeap.toString)
       .replace("${stats.driver.non-heap.max}", result.stats.driverStats.maxNonHeap.toString)
   }

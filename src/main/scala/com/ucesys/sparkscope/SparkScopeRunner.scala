@@ -18,10 +18,15 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, DriverExecutorMetrics, HadoopPropertiesLoader, HtmlReportGenerator, MetricsLoader}
+import com.ucesys.sparkscope.io.{DriverExecutorMetrics, HtmlReportGenerator, MetricsLoader}
+import com.ucesys.sparkscope.utils.Logger
 import org.apache.spark.SparkConf
 
+import java.io.FileNotFoundException
+
 class SparkScopeRunner(appContext: AppContext, sparkConf: SparkConf, metricsLoader: MetricsLoader, sparklensResults: Seq[String]) {
+
+  val log = new Logger
 
   def run(): Unit = {
     try {
@@ -29,32 +34,30 @@ class SparkScopeRunner(appContext: AppContext, sparkConf: SparkConf, metricsLoad
       analyze(driverExecutorMetrics)
     } catch {
       case ex: IllegalArgumentException => {
-        println(s"${ex}, retrying in 5 secs...")
+        log.error(s"${ex}, retrying in 5 secs...")
         Thread.sleep(5000)
         val driverExecutorMetrics = metricsLoader.load()
         analyze(driverExecutorMetrics)
       }
-      case ex: Exception => {
-        println(s"${ex}, exiting...)")
-      }
+      case ex: FileNotFoundException => log.error(s"${ex}, SparkScope will now exit.")
+      case ex: Exception =>  log.error(s"${ex}, Unexpected exception occurred, SparkScope will now exit.")
     }
-
-
   }
-  def analyze(driverExecutorMetrics: DriverExecutorMetrics) = {
+
+  def analyze(driverExecutorMetrics: DriverExecutorMetrics): Unit = {
     val executorMetricsAnalyzer = new SparkScopeAnalyzer(sparkConf)
     val sparkScopeStart = System.currentTimeMillis()
     val sparkScopeResult = executorMetricsAnalyzer.analyze(driverExecutorMetrics, appContext)
 
-    println("           ____              __    ____")
-    println("          / __/__  ___ _____/ /__ / __/_ ___  ___  ___")
-    println("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
-    println("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
-    println("           /_/                             /_/ ")
-    println(sparkScopeResult.logs)
+    log.info("           ____              __    ____")
+    log.info("          / __/__  ___ _____/ /__ / __/_ ___  ___  ___")
+    log.info("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
+    log.info("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
+    log.info("           /_/                             /_/ ")
+    log.info(sparkScopeResult.logs)
 
     val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
-    println(s"\n[SparkScope] SparkScope analysis took ${durationSparkScope}s")
+    log.info(s"SparkScope analysis took ${durationSparkScope}s")
 
     val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
     HtmlReportGenerator.generateHtml(sparkScopeResult, htmlReportDir, sparklensResults)

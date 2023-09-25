@@ -16,7 +16,7 @@ import org.xerial.snappy.SnappyInputStream
 
 
 object ReporterApp extends App {
-
+  println()
   val usage = "Need to specify sparklens data file\n" +
     "Of specify event-history file and also add \"source=history\" or \"source=sparklens\".\n" +
     "If \"source\" is not specified, sparklens is chosen by default."
