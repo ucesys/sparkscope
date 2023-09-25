@@ -5,6 +5,7 @@ import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpa
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.DataFrame
 import com.ucesys.sparkscope.io.{CsvHadoopReader, DriverExecutorMetrics, PropertiesLoader, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
@@ -350,6 +351,8 @@ object TestHelpers extends FunSuite with MockFactory {
     driverMetrics = driverMetrics,
     executorMetricsMap = executorMetricsMap
   )
+
+  val missingMetricsWarning = MissingMetricsWarning(Seq(1,2,3,4,5), Seq(1,2,3,5))
   def mockAppContext(): AppContext = {
     val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
       "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),

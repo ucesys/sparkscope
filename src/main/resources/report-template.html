@@ -88,6 +88,31 @@
       clear: both;
       display: table;
     }
+
+<!--    /* The alert message box */-->
+<!--    .alert {-->
+<!--      padding: 20px;-->
+<!--      background-color: #f44336; /* Red */-->
+<!--      color: white;-->
+<!--      margin-bottom: 15px;-->
+<!--    }-->
+
+<!--    /* The close button */-->
+<!--    .closebtn {-->
+<!--      margin-left: 15px;-->
+<!--      color: white;-->
+<!--      font-weight: bold;-->
+<!--      float: right;-->
+<!--      font-size: 22px;-->
+<!--      line-height: 20px;-->
+<!--      cursor: pointer;-->
+<!--      transition: 0.3s;-->
+<!--    }-->
+
+<!--    /* When moving the mouse over the close button */-->
+<!--    .closebtn:hover {-->
+<!--      color: black;-->
+<!--    }-->
     </style>
 </head>
 <body>
@@ -100,7 +125,14 @@
      /_/                             /_/      v0.1.0
 </pre>
 </div>
-<!--<h1>SparkScope report for application id: ${applicationId} </h1>-->
+<!--<div class="alert">-->
+<!--    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>-->
+<!--    THIS IS ALERT-->
+<!--</div>-->
+
+<div>
+    <pre style="color:red">${warnings}</pre>
+</div>
 <div>
     <table class="styled-table" style="float: left;">
         <thead>

@@ -24,6 +24,7 @@ object HtmlReportGenerator {
       .replace("${appInfo.end}", ofEpochSecond(result.appInfo.endTime/1000, 0, UTC).toString)
       .replace("${appInfo.duration}", durationStr)
       .replace("${logs}", result.logs)
+      .replace("${warnings}", result.warnings.mkString("\n"))
       .replace("${sparkConf}", result.sparkConf.getAll.map{case (key, value) => s"${key}: ${value}"}.mkString("\n"))
       .replace("${sparklens}", sparklensResults.mkString("\n"))
 //      .replace("${version}", getClass.getPackage.getImplementationVersion)
