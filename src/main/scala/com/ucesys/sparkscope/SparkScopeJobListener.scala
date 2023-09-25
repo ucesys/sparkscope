@@ -27,54 +27,49 @@ import org.apache.spark.scheduler._
 
 class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(sparkConf: SparkConf) {
 
-  override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
-    //println(s"Application ${appInfo.applicationID} ended at ${applicationEnd.time}")
-    appInfo.endTime = applicationEnd.time
+    override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
+        //println(s"Application ${appInfo.applicationID} ended at ${applicationEnd.time}")
+        appInfo.endTime = applicationEnd.time
 
-    //Set end times for the jobs for which onJobEnd event was missed
-    jobMap.foreach(x => {
-        if (jobMap(x._1).endTime == 0) {
-          //Lots of computations go wrong if we don't have
-          //application end time
-          //set it to end time of the stage that finished last
-          if (!x._2.stageMap.isEmpty) {
-            jobMap(x._1).setEndTime(x._2.stageMap.map(y => y._2.endTime).max)
-          }else {
-            //no stages? set it to endTime of the app
-            jobMap(x._1).setEndTime(appInfo.endTime)
-          }
-        }
-      })
-    val appContext = new AppContext(appInfo,
-      appMetrics,
-      hostMap,
-      executorMap,
-      jobMap,
-      jobSQLExecIDMap,
-      stageMap,
-      stageIDToJobID)
+        //Set end times for the jobs for which onJobEnd event was missed
+        jobMap.foreach(x => {
+            if (jobMap(x._1).endTime == 0) {
+                //Lots of computations go wrong if we don't have
+                //application end time
+                //set it to end time of the stage that finished last
+                if (!x._2.stageMap.isEmpty) {
+                    jobMap(x._1).setEndTime(x._2.stageMap.map(y => y._2.endTime).max)
+                }else {
+                    //no stages? set it to endTime of the app
+                    jobMap(x._1).setEndTime(appInfo.endTime)
+                }
+            }
+        })
 
-    asyncReportingEnabled(sparkConf) match {
-      case true => {
-        println("Reporting disabled. Will save sparklens data file for later use.")
-        dumpData(appContext)
-      }
-      case false => {
-        if (dumpDataEnabled(sparkConf)) {
-          dumpData(appContext)
-        } else {
-          EmailReportHelper.generateReport(appContext.toString(), sparkConf)
+        val appContext = new AppContext(
+            appInfo,
+            appMetrics,
+            hostMap,
+            executorMap,
+            jobMap,
+            jobSQLExecIDMap,
+            stageMap,
+            stageIDToJobID
+        )
+
+        val sparklensResults: Seq[String] =  try {
+          AppAnalyzer.startAnalyzers(appContext)
         }
-        val startSparkLens = System.currentTimeMillis()
-        val sparklensResults = AppAnalyzer.startAnalyzers(appContext)
-        val durationSparkLens = (System.currentTimeMillis() - startSparkLens) * 1f / 1000f
+
+        catch {
+          case ex: Exception => println("Sparklens has thrown an exception" + ex, ex)
+          Seq.empty
+        }
+
         sparklensResults.foreach(println)
-        println(s"\nSparklens analysis took ${durationSparkLens}s")
 
         val metricsLoader = new CsvHadoopMetricsLoader(new CsvHadoopReader, appContext, sparkConf, new HadoopPropertiesLoader)
         val sparkScopeRunner = new SparkScopeRunner(appContext, sparkConf, metricsLoader, sparklensResults)
         sparkScopeRunner.run()
-      }
     }
-  }
 }

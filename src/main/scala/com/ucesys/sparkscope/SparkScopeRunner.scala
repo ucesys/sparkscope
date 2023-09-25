@@ -21,6 +21,8 @@ import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, DriverExecutorMetrics, HadoopPropertiesLoader, HtmlReportGenerator, MetricsLoader}
 import org.apache.spark.SparkConf
 
+import java.io.FileNotFoundException
+
 class SparkScopeRunner(appContext: AppContext, sparkConf: SparkConf, metricsLoader: MetricsLoader, sparklensResults: Seq[String]) {
 
   def run(): Unit = {
@@ -29,16 +31,21 @@ class SparkScopeRunner(appContext: AppContext, sparkConf: SparkConf, metricsLoad
       analyze(driverExecutorMetrics)
     } catch {
       case ex: IllegalArgumentException => {
-        println(s"${ex}, retrying in 5 secs...")
+        println(s"[SparkScope]${ex}, retrying in 5 secs...")
+        Thread.sleep(5000)
+        val driverExecutorMetrics = metricsLoader.load()
+        analyze(driverExecutorMetrics)
+      }
+      case ex: FileNotFoundException => {
+        println(s"[SparkScope]${ex}, retrying in 5 secs...")
         Thread.sleep(5000)
         val driverExecutorMetrics = metricsLoader.load()
         analyze(driverExecutorMetrics)
       }
       case ex: Exception => {
-        println(s"${ex}, exiting...)")
+        println(s"[SparkScope]${ex}, exiting...)")
       }
     }
-
 
   }
   def analyze(driverExecutorMetrics: DriverExecutorMetrics) = {
