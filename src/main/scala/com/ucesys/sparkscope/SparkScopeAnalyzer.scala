@@ -25,7 +25,7 @@ import com.ucesys.sparkscope.data.{DataColumn, DataFrame}
 import com.ucesys.sparkscope.io.{DriverExecutorMetrics, MetricsLoader}
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.utils.Logger
-import com.ucesys.sparkscope.warning.MissingMetricsWarning
+import com.ucesys.sparkscope.warning.{CPUUtilWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
 import org.apache.spark.SparkConf
 
 import scala.collection.mutable
@@ -102,6 +102,16 @@ class SparkScopeAnalyzer(sparkConf: SparkConf) {
     log.println(clusterMemoryStats)
     log.println(clusterCPUStats)
 
+    // Warnings
+    val warnings: Seq[Option[Warning]] = Seq(
+      MissingMetricsWarning(
+        allExecutors = ac.executorMap.map { case (id, _) => id.toInt }.toSeq,
+        withMetrics = driverExecutorMetrics.executorMetricsMap.map { case (id, _) => id }.toSeq
+      ),
+      CPUUtilWarning(cpuUtil = clusterCPUStats.cpuUtil, coreHoursWasted = clusterCPUStats.coreHoursWasted, LowCPUUtilizationThreshold),
+      HeapUtilWarning(heapUtil = clusterMemoryStats.avgHeapPerc, heapGbHoursWasted = clusterMemoryStats.heapGbHoursWasted, LowHeapUtilizationThreshold)
+    )
+
     SparkScopeResult(
       appInfo = ac.appInfo,
       logs=log.toString,
@@ -118,10 +128,7 @@ class SparkScopeAnalyzer(sparkConf: SparkConf) {
         clusterMemoryMetrics = clusterMemoryMetrics, 
         clusterCPUMetrics = clusterCPUMetrics
       ),
-      warnings = MissingMetricsWarning(
-        allExecutors = ac.executorMap.map{case (id, _) => id.toInt}.toSeq,
-        withMetrics = driverExecutorMetrics.executorMetricsMap.map{case (id, _) => id}.toSeq
-      ).toSeq
+      warnings = warnings.flatten
     )
   }
   
@@ -223,6 +230,8 @@ object SparkScopeAnalyzer {
   val BytesInMB: Long = 1024L*1024L
   val NanoSecondsInSec: Long = 1000000000
   private val MilliSecondsInSec: Long = 1000
+  val LowCPUUtilizationThreshold: Float = 0.6f
+  val LowHeapUtilizationThreshold: Float = 0.6f
 
   val JvmHeapUsed = "jvm.heap.used" // in bytes
   val JvmHeapUsage = "jvm.heap.usage" // equals used/max

@@ -2,11 +2,11 @@ package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
 import com.ucesys.sparkscope.metrics.SparkScopeResult
-
 import java.io.{FileWriter, InputStream}
 import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
+
 object HtmlReportGenerator {
   def generateHtml(result: SparkScopeResult, outputDir: String, sparklensResults: Seq[String]): Unit = {
     val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
@@ -18,13 +18,18 @@ object HtmlReportGenerator {
       case _ => s"${duration.toHours}h ${duration.toMinutes%60}min ${duration.toSeconds%60}s"
     }
 
+    val warningsStr: String = result.warnings match {
+      case Seq() => ""
+      case warnings => "WARNINGS FOUND:\n" + warnings.mkString("\n")
+    }
+
     val rendered = template
       .replace("${appInfo.applicationId}", result.appInfo.applicationID)
       .replace("${appInfo.start}", ofEpochSecond(result.appInfo.startTime/1000, 0, UTC).toString)
       .replace("${appInfo.end}", ofEpochSecond(result.appInfo.endTime/1000, 0, UTC).toString)
       .replace("${appInfo.duration}", durationStr)
       .replace("${logs}", result.logs)
-      .replace("${warnings}", result.warnings.mkString("\n"))
+      .replace("${warnings}", warningsStr)
       .replace("${sparkConf}", result.sparkConf.getAll.map{case (key, value) => s"${key}: ${value}"}.mkString("\n"))
       .replace("${sparklens}", sparklensResults.mkString("\n"))
 //      .replace("${version}", getClass.getPackage.getImplementationVersion)

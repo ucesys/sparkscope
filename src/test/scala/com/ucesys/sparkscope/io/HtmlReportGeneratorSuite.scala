@@ -16,24 +16,35 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope
+package com.ucesys.sparkscope.io
 
-import com.ucesys.sparkscope.TestHelpers.{getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, missingMetricsWarning, mockAppContext, mockAppContextMissingExecutorMetrics, mockcorrectMetrics, sparkConf}
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HtmlReportGenerator, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.SparkScopeAnalyzer
+import com.ucesys.sparkscope.TestHelpers._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
 
 import java.nio.file.{Files, Paths}
 
-class SparkScopeSuite extends FunSuite with MockFactory {
+class HtmlReportGeneratorSuite extends FunSuite with MockFactory {
 
-  test("SparkScope end2end test") {
+  test("SparkScope end2end no warnings") {
     val ac = mockAppContext()
     val csvReaderMock = stub[CsvHadoopReader]
     mockcorrectMetrics(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, ac, sparkConf, getPropertiesLoaderFactoryMock)
     val executorMetricsAnalyzer = new SparkScopeAnalyzer(sparkConf)
-    val result = executorMetricsAnalyzer.analyze(metricsLoader.load(), ac)
+    val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
+
+    HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"))
+
+    assert(Files.exists(Paths.get("./" + result.appInfo.applicationID + ".html")))
+  }
+
+  test("SparkScope end2end with warnings") {
+    val ac = mockAppContextMissingExecutorMetrics()
+    val csvReaderMock = stub[CsvHadoopReader]
+    mockcorrectMetrics(csvReaderMock)
+    val executorMetricsAnalyzer = new SparkScopeAnalyzer(sparkConf)
+    val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
     HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"))
 

@@ -37,8 +37,8 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     When("running parkScopeAnalyzer.analyze")
     val result = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
-    Then("SparkScopeResult shouldn't contain any warnings")
-    assert(result.warnings.isEmpty)
+    Then("SparkScopeResult shouldn contain low CPU and low heap utilization warnings")
+    assert(result.warnings.length == 2)
 
     And("SparkScopeResult should be returned with correct values")
     assert(result.sparkConf == sparkConf)
@@ -98,6 +98,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     val result: SparkScopeResult = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
     Then("Result should contain a warning regarding missing executor metrics")
+    assert(result.warnings.length == 3)
     val missingMetricsWarning = result.warnings.head
     missingMetricsWarning mustBe a[MissingMetricsWarning]
     missingMetricsWarning.toString.contains("Missing metrics for 1 out of 5 executors")
