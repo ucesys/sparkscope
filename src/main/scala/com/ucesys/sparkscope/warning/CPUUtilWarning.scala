@@ -2,7 +2,7 @@ package com.ucesys.sparkscope.warning
 
 class CPUUtilWarning private(cpuUtil: Double, coreHoursWasted: Double) extends Warning {
     override def toString: String = {
-        f"• CPU utlization is LOW(${cpuUtil*100}%1.2f%%), ${coreHoursWasted} Core Hours Wasted."
+        f"CPU utlization is LOW(${cpuUtil*100}%1.2f%%), ${coreHoursWasted} Core Hours Wasted."
     }
 }
 

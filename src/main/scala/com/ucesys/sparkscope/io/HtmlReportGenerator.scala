@@ -20,7 +20,7 @@ object HtmlReportGenerator {
 
     val warningsStr: String = result.warnings match {
       case Seq() => ""
-      case warnings => "WARNINGS FOUND:\n" + warnings.mkString("\n")
+      case warnings => "WARNINGS FOUND:\n• " + warnings.mkString("\n• ")
     }
 
     val rendered = template
