@@ -39,7 +39,7 @@ object HtmlReportGenerator {
     val renderedCharts = renderCharts(rendered, result)
     val renderedStats = renderStats(renderedCharts, result)
 
-    val outputPath = outputDir + result.appInfo.applicationID + ".html"
+    val outputPath = s"${outputDir}/${result.appInfo.applicationID}.html"
     val fileWriter = new FileWriter(outputPath)
     fileWriter.write(renderedStats)
     fileWriter.close()

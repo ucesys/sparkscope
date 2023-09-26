@@ -19,8 +19,8 @@ object SparkScopeConfig {
         }
 
         new SparkScopeConfig(
-            driverMetricsDir = sparkConf.get( "spark.sparkscope.driver.metrics.dir", driverMetricsDirProps.get),
-            executorMetricsDir = sparkConf.get( "spark.sparkscope.executor.metrics.dir", executorMetricsDirProps.get),
+            driverMetricsDir = sparkConf.get( "spark.sparkscope.metrics.dir.driver ", driverMetricsDirProps.get),
+            executorMetricsDir = sparkConf.get( "spark.sparkscope.metrics.dir.executor", executorMetricsDirProps.get),
             htmlReportPath = sparkConf.get("spark.sparkscope.html.path", "/tmp/"),
             sparkConf = sparkConf
         )

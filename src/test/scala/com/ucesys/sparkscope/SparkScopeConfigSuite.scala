@@ -104,7 +104,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
 
   test("load driver csv metrics dir from properties") {
     Given("Incorrectly configured metrics properties path")
-    val sparkConfWithMetrics = sparkConf.set("spark.sparkscope.driver.metrics.dir", "/path/to/driver/metrics")
+    val sparkConfWithMetrics = sparkConf.set("spark.sparkscope.metrics.dir.driver ", "/path/to/driver/metrics")
     When("loading SparkScope config")
     val driverExecutorMetrics = SparkScopeConfig.load(sparkConfWithMetrics, getPropertiesLoaderFactoryMock)
 
@@ -114,7 +114,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
 
   test("load executor csv metrics dir from SparkConf") {
     Given("Incorrectly configured metrics properties path")
-    val sparkConfWithMetrics = sparkConf.set("spark.sparkscope.executor.metrics.dir", "/path/to/executor/metrics")
+    val sparkConfWithMetrics = sparkConf.set("spark.sparkscope.metrics.dir.executor", "/path/to/executor/metrics")
 
     When("loading SparkScope config")
     val driverExecutorMetrics = SparkScopeConfig.load(sparkConfWithMetrics, getPropertiesLoaderFactoryMock)
