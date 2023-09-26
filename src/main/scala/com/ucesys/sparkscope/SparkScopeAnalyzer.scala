@@ -26,12 +26,11 @@ import com.ucesys.sparkscope.io.{DriverExecutorMetrics, MetricsLoader}
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.utils.Logger
 import com.ucesys.sparkscope.warning.{CPUUtilWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
-import org.apache.spark.SparkConf
 
 import scala.collection.mutable
 import scala.concurrent.duration._
 
-class SparkScopeAnalyzer(sparkConf: SparkConf) {
+class SparkScopeAnalyzer {
 
   def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: AppContext): SparkScopeResult = {
     val ac = appContext.filterByStartAndEndTime(appContext.appInfo.startTime, appContext.appInfo.endTime)
@@ -115,7 +114,6 @@ class SparkScopeAnalyzer(sparkConf: SparkConf) {
     SparkScopeResult(
       appInfo = ac.appInfo,
       logs=log.toString,
-      sparkConf = sparkConf,
       stats = SparkScopeStats(
         driverStats = driverStats, 
         executorStats = executorStats,

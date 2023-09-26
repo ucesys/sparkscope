@@ -18,7 +18,7 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.TestHelpers.{getFileReaderFactoryMock, getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, missingMetricsWarning, mockAppContext, mockAppContextMissingExecutorMetrics, mockcorrectMetrics, sparkConf}
+import com.ucesys.sparkscope.TestHelpers.{getFileReaderFactoryMock, getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, missingMetricsWarning, mockAppContext, mockAppContextMissingExecutorMetrics, mockcorrectMetrics, sparkConf, sparkScopeConf}
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, HtmlReportGenerator, PropertiesLoaderFactory}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
@@ -31,11 +31,11 @@ class SparkScopeSuite extends FunSuite with MockFactory {
     val ac = mockAppContext()
     val csvReaderMock = stub[HadoopFileReader]
     mockcorrectMetrics(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkConf, getPropertiesLoaderFactoryMock)
-    val executorMetricsAnalyzer = new SparkScopeAnalyzer(sparkConf)
+    val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConf)
+    val executorMetricsAnalyzer = new SparkScopeAnalyzer
     val result = executorMetricsAnalyzer.analyze(metricsLoader.load(), ac)
 
-    HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"))
+    HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"), sparkConf)
 
     assert(Files.exists(Paths.get("./" + result.appInfo.applicationID + ".html")))
   }

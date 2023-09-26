@@ -24,28 +24,28 @@ import org.apache.spark.SparkConf
 
 import java.io.FileNotFoundException
 
-class SparkScopeRunner(appContext: AppContext, sparkConf: SparkConf, metricsLoader: MetricsLoader, sparklensResults: Seq[String]) {
+class SparkScopeRunner(appContext: AppContext, sparkScopeConf: SparkScopeConfig, metricsLoader: MetricsLoader, sparklensResults: Seq[String]) {
 
   val log = new Logger
 
   def run(): Unit = {
     try {
       val driverExecutorMetrics = metricsLoader.load()
-      analyze(driverExecutorMetrics)
+      analyze(sparkScopeConf, driverExecutorMetrics)
     } catch {
       case ex: IllegalArgumentException => {
         log.error(s"${ex}, retrying in 5 secs...")
         Thread.sleep(5000)
         val driverExecutorMetrics = metricsLoader.load()
-        analyze(driverExecutorMetrics)
+        analyze(sparkScopeConf, driverExecutorMetrics)
       }
       case ex: FileNotFoundException => log.error(s"SparkScope couldn't open a file. ${ex} SparkScope will now exit.")
       case ex: Exception =>  log.error(s"${ex}, Unexpected exception occurred, SparkScope will now exit.")
     }
   }
 
-  def analyze(driverExecutorMetrics: DriverExecutorMetrics): Unit = {
-    val executorMetricsAnalyzer = new SparkScopeAnalyzer(sparkConf)
+  def analyze(sparkScopeConf: SparkScopeConfig, driverExecutorMetrics: DriverExecutorMetrics): Unit = {
+    val executorMetricsAnalyzer = new SparkScopeAnalyzer
     val sparkScopeStart = System.currentTimeMillis()
     val sparkScopeResult = executorMetricsAnalyzer.analyze(driverExecutorMetrics, appContext)
 
@@ -59,7 +59,6 @@ class SparkScopeRunner(appContext: AppContext, sparkConf: SparkConf, metricsLoad
     val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
     log.info(s"SparkScope analysis took ${durationSparkScope}s")
 
-    val htmlReportDir = sparkConf.get("spark.sparkscope.html.path", "/tmp/")
-    HtmlReportGenerator.generateHtml(sparkScopeResult, htmlReportDir, sparklensResults)
+    HtmlReportGenerator.generateHtml(sparkScopeResult, sparkScopeConf.htmlReportPath, sparklensResults, sparkScopeConf.sparkConf)
   }
 }

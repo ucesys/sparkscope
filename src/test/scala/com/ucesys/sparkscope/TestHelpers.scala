@@ -20,8 +20,10 @@ object TestHelpers extends FunSuite with MockFactory {
   final val EndTime: Long = 1695358700000L
   val MetricsPropertiesPath = "path/to/metrics.properties"
   val csvMetricsPath = "/tmp/csv-metrics"
-  val sparkConf = new SparkConf().set("spark.metrics.conf", MetricsPropertiesPath)
-
+  val sparkConf = new SparkConf()
+      .set("spark.metrics.conf", MetricsPropertiesPath)
+      .set("spark.sparkscope.html.path", "/path/to/html/report")
+  val sparkScopeConf = SparkScopeConfig.load(sparkConf, getPropertiesLoaderFactoryMock)
   val emptyFileCsv: String =
     """t,value
       |1695358645,0""".stripMargin
