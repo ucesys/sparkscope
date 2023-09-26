@@ -26,15 +26,6 @@ SparkScope html report contains the following features:
 - Scala 2.11
 
 ## Csv Sink configuration
-
-| parameter                              |                                                                                                                                                |
-|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| spark.metrics.conf                     | path to metrics.properties with CSV sinks configuration                                                                                        |
-| spark.sparkscope.html.path             | path to which SparkScope html report will be saved                                                                                             |
-| spark.sparkscope.metrics.path.driver   | path to driver csv metrics, if unspecified property driver.sink.csv.directory or *.sink.csv.directory from metrics.properties will be used     |
-| spark.sparkscope.metrics.path.executor | path to executor csv metrics, if unspecified property executor.sink.csv.directory or *.sink.csv.directory from metrics.properties will be used |
-
-Sample metrics.properties:
 ```bash
 # Enable CsvSink for all instances by class name
 *.sink.csv.class=org.apache.spark.metrics.sink.CsvSink
