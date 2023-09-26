@@ -1,7 +1,6 @@
 package com.ucesys.sparkscope.io
 
 import java.io.FileInputStream
-import java.nio.file.{Files, Paths}
 import java.util.Properties
 
 class LocalPropertiesLoader(propertiesPathStr: String) extends PropertiesLoader {

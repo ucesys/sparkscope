@@ -500,10 +500,22 @@ object TestHelpers extends FunSuite with MockFactory {
   }
 
   def mockIncorrectDriverMetrics(csvReader: HadoopFileReader) = {
+
+    val driverNonHeapRows = jvmNonHeapDriverCsv.split("\n").toSeq
+    val jvmNonHeapRowsWithoutLast = driverNonHeapRows.filterNot(_ == driverNonHeapRows.last).mkString("\n")
     (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
     (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
     (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
-    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(emptyFileCsv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(jvmNonHeapRowsWithoutLast)
+
+    val executorCpuRows = cpuTime1Csv.split("\n").toSeq
+    val executorCpuRowsWithoutLast = executorCpuRows.filterNot(_ == executorCpuRows.last).mkString("\n")
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.used.csv").returns(jvmHeapExec1Csv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.usage.csv").returns(jvmHeapUsageExec1Csv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.max.csv").returns(jvmHeapMaxExec1Csv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.non-heap.used.csv").returns(jvmNonHeapExec1Csv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.executor.cpuTime.csv").returns(executorCpuRowsWithoutLast)
+
     csvReader
   }
 

@@ -25,8 +25,20 @@ class CsvHadoopMetricsLoader(readerFactory: FileReaderFactory,
     }
 
     if (driverMetrics.map(_.numRows).toSet.size > 1) {
-      throw new IllegalArgumentException(
-        s"csv files for driver have different rows amounts! Probably a process is still writing to csvs.")
+        log.warn(s"Csv files for driver have different rows amounts! Probably a process is still writing to csvs.")
+        log.warn(s"Removing extra rows from csv files.")
+    }
+
+    val driverMetricsAlignedSize = driverMetrics.map(_.numRows).min
+    if (driverMetrics.map(_.numRows).toSet.size > 1) {
+      log.warn(s"Csv files for driver have different rows amounts! Probably a process is still writing to csvs.")
+      log.warn(s"Removing extra rows from csv files.")
+    }
+    val driverMetricsAligned =  driverMetrics.map {
+      case metric if (metric.numRows == driverMetricsAlignedSize) => metric
+      case metric =>
+        log.warn(s"Csv files for driver have different rows amounts! Aligning ${metric.name}")
+        metric.dropNLastRows(metric.numRows-driverMetricsAlignedSize)
     }
 
     log.println("Reading executor metrics...")
@@ -52,13 +64,17 @@ class CsvHadoopMetricsLoader(readerFactory: FileReaderFactory,
 
     }.retain{case(_, opt) => opt.nonEmpty}.map{case(id, opt) => (id, opt.get)}.toMap
 
-    executorsMetricsMap.foreach{case (executorId, metrics) => {
-      if(metrics.map(_.numRows).toSet.size > 1) {
-        throw new IllegalArgumentException(
-          s"csv files for executorId=${executorId} have different rows amounts! Probably a process is still writing to csvs.")
+    val executorsMetricsMapAligned = executorsMetricsMap.map{case (executorId, metrics) => {
+      val executorMetricsAlignedSize = metrics.map(_.numRows).min
+      val metricsAligned = metrics.map {
+        case metric if (metric.numRows == executorMetricsAlignedSize) => metric
+        case metric =>
+          log.warn(s"Csv files for executorId=${executorId} have different rows amounts! Aligning ${metric.name}")
+          metric.dropNLastRows(metric.numRows-executorMetricsAlignedSize)
       }
+      (executorId, metricsAligned)
     }}
 
-    DriverExecutorMetrics(driverMetrics, executorsMetricsMap)
+    DriverExecutorMetrics(driverMetricsAligned, executorsMetricsMapAligned)
   }
 }

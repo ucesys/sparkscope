@@ -20,9 +20,9 @@ package com.ucesys.sparkscope
 import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparkscope.io.{DriverExecutorMetrics, HtmlReportGenerator, MetricsLoader}
 import com.ucesys.sparkscope.utils.Logger
-import org.apache.spark.SparkConf
 
 import java.io.FileNotFoundException
+import java.nio.file.NoSuchFileException
 
 class SparkScopeRunner(appContext: AppContext, sparkScopeConf: SparkScopeConfig, metricsLoader: MetricsLoader, sparklensResults: Seq[String]) {
 
@@ -33,13 +33,8 @@ class SparkScopeRunner(appContext: AppContext, sparkScopeConf: SparkScopeConfig,
       val driverExecutorMetrics = metricsLoader.load()
       analyze(sparkScopeConf, driverExecutorMetrics)
     } catch {
-      case ex: IllegalArgumentException => {
-        log.error(s"${ex}, retrying in 5 secs...")
-        Thread.sleep(5000)
-        val driverExecutorMetrics = metricsLoader.load()
-        analyze(sparkScopeConf, driverExecutorMetrics)
-      }
       case ex: FileNotFoundException => log.error(s"SparkScope couldn't open a file. ${ex} SparkScope will now exit.")
+      case ex: NoSuchFileException => log.error(s"SparkScope couldn't open a file. ${ex} SparkScope will now exit.")
       case ex: Exception =>  log.error(s"${ex}, Unexpected exception occurred, SparkScope will now exit.")
     }
   }

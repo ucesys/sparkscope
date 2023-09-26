@@ -31,17 +31,26 @@ import org.scalatest.FunSuite
 
 class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWhenThen {
   test("Incorrect csv files test") {
-    Given("Correctly configured metrics properties path")
-    val sparkConf = new SparkConf().set("spark.metrics.conf", MetricsPropertiesPath)
-    And("Incorrect csv files")
+    Given("Some csv metrics for driver and executor contain more rows than others")
     val csvReaderMock = stub[HadoopFileReader]
     mockIncorrectDriverMetrics(csvReaderMock)
     val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), mockAppContext(), sparkScopeConf)
 
     When("loading metrics")
-    Then("CsvHadoopMetricsLoader should throw IllegalArgumentException")
-    assertThrows[IllegalArgumentException] { // Result type: Assertion
-      val driverExecutorMetrics = metricsLoader.load()
+    val driverExecutorMetrics = metricsLoader.load()
+
+    Then("Driver and Executor Metrics should be loaded")
+    assert(driverExecutorMetrics.driverMetrics.length == DriverCsvMetrics.length)
+    assert(driverExecutorMetrics.executorMetricsMap(1).length == ExecutorCsvMetrics.length)
+
+    And("CsvHadoopMetricsLoader should ignore extra rows for driver metrics")
+    driverExecutorMetrics.driverMetrics.foreach{ metric =>
+      assert(metric.numRows == 12)
+    }
+
+    And("CsvHadoopMetricsLoader should ignore extra rows for executor metrics")
+    driverExecutorMetrics.executorMetricsMap(1).foreach { metric =>
+      assert(metric.numRows == 10)
     }
   }
 
