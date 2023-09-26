@@ -18,7 +18,7 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.TestHelpers.{getFileReaderFactoryMock, getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, missingMetricsWarning, mockAppContext, mockAppContextMissingExecutorMetrics, mockcorrectMetrics, sparkConf, sparkScopeConf}
+import com.ucesys.sparkscope.TestHelpers.{getFileReaderFactoryMock, getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, missingMetricsWarning, mockAppContext, mockAppContextMissingExecutorMetrics, mockAppContextWithDownscaling, mockMetricsWithDownscaling, mockcorrectMetrics, sparkConf, sparkScopeConf}
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, HtmlReportGenerator, PropertiesLoaderFactory}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
@@ -27,10 +27,23 @@ import java.nio.file.{Files, Paths}
 
 class SparkScopeSuite extends FunSuite with MockFactory {
 
-  test("SparkScope end2end test") {
+  test("SparkScope end2end executor upscaling test") {
     val ac = mockAppContext()
     val csvReaderMock = stub[HadoopFileReader]
     mockcorrectMetrics(csvReaderMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConf)
+    val executorMetricsAnalyzer = new SparkScopeAnalyzer
+    val result = executorMetricsAnalyzer.analyze(metricsLoader.load(), ac)
+
+    HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"), sparkConf)
+
+    assert(Files.exists(Paths.get("./" + result.appInfo.applicationID + ".html")))
+  }
+
+  test("SparkScope end2end executor upscaling and downscaling test") {
+    val ac = mockAppContextWithDownscaling()
+    val csvReaderMock = stub[HadoopFileReader]
+    mockMetricsWithDownscaling(csvReaderMock)
     val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConf)
     val executorMetricsAnalyzer = new SparkScopeAnalyzer
     val result = executorMetricsAnalyzer.analyze(metricsLoader.load(), ac)
