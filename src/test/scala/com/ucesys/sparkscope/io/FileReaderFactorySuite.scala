@@ -18,30 +18,24 @@
 
 package com.ucesys.sparkscope.io
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMetrics}
-import com.ucesys.sparkscope.TestHelpers._
-import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.MustMatchers.{a, convertToAnyMustWrapper}
 import org.scalatest.{FunSuite, GivenWhenThen}
 
-import java.io.FileNotFoundException
-import java.util.Properties
+class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThen {
 
-class PropertiesLoaderFactorySuite extends FunSuite with MockFactory with GivenWhenThen {
-
-  val propertiesLoaderFactory = new PropertiesLoaderFactory()
+  val fileReaderFactory = new FileReaderFactory
 
   test("maprfs://path") {
     Given("maprfs path")
     val paths = Seq("maprfs:///dir", "maprfs:/path/to/file.ext")
 
-    When("calling PropertiesLoaderFactory.getPropertiesLoader")
-    Then("HadoopPropertiesLoader should be returned")
+    When("calling FileReaderFactory.getFileReader")
+    Then("HadoopFileReader should be returned")
     paths.foreach {
       path => {
-        val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
-        propertiesLoader mustBe a[HadoopPropertiesLoader]
+        val fileReader = fileReaderFactory.getFileReader(path)
+        fileReader mustBe a[HadoopFileReader]
       }
     }
   }
@@ -50,12 +44,12 @@ class PropertiesLoaderFactorySuite extends FunSuite with MockFactory with GivenW
     Given("hdfs path")
     val paths = Seq("hdfs:///dir", "hdfs:/path/to/file.ext")
 
-    When("calling PropertiesLoaderFactory.getPropertiesLoader")
-    Then("HadoopPropertiesLoader should be returned")
+    When("calling FileReaderFactory.getFileReader")
+    Then("HadoopFileReader should be returned")
     paths.foreach {
       path => {
-        val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
-        propertiesLoader mustBe a[HadoopPropertiesLoader]
+        val fileReader = fileReaderFactory.getFileReader(path)
+        fileReader mustBe a[HadoopFileReader]
       }
     }
   }
@@ -64,12 +58,12 @@ class PropertiesLoaderFactorySuite extends FunSuite with MockFactory with GivenW
     Given("file:// path")
     val paths = Seq("file:///dir", "file:/path/to/file.ext")
 
-    When("calling PropertiesLoaderFactory.getPropertiesLoader")
-    Then("HadoopPropertiesLoader should be returned")
+    When("calling FileReaderFactory.getFileReader")
+    Then("HadoopFileReader should be returned")
     paths.foreach {
       path => {
-        val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
-        propertiesLoader mustBe a[HadoopPropertiesLoader]
+        val fileReader = fileReaderFactory.getFileReader(path)
+        fileReader mustBe a[HadoopFileReader]
       }
     }
   }
@@ -78,12 +72,12 @@ class PropertiesLoaderFactorySuite extends FunSuite with MockFactory with GivenW
     Given("non mapr/hdfs/file path")
     val paths = Seq("/absolute/path", "./relative/path", "/mapr/lookalike", "/hdfs/path", "/file/path")
 
-    When("calling PropertiesLoaderFactory.getPropertiesLoader")
-    Then("LocalPropertiesLoader should be returned")
+    When("calling FileReaderFactory.getFileReader")
+    Then("LocalFileReader should be returned")
     paths.foreach {
       path => {
-        val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
-        propertiesLoader mustBe a[LocalPropertiesLoader]
+        val fileReader = fileReaderFactory.getFileReader(path)
+        fileReader mustBe a[LocalFileReader]
       }
     }
   }

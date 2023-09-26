@@ -4,7 +4,7 @@ import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInf
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.DataFrame
-import com.ucesys.sparkscope.io.{CsvHadoopReader, DriverExecutorMetrics, PropertiesLoader, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.io.{DriverExecutorMetrics, FileReader, FileReaderFactory, HadoopFileReader, PropertiesLoader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
@@ -384,7 +384,7 @@ object TestHelpers extends FunSuite with MockFactory {
     )
   }
 
-  def mockcorrectMetrics(csvReaderMock: CsvHadoopReader): CsvHadoopReader = {
+  def mockcorrectMetrics(csvReaderMock: HadoopFileReader): HadoopFileReader = {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
@@ -426,7 +426,7 @@ object TestHelpers extends FunSuite with MockFactory {
     csvReaderMock
   }
 
-  def mockIncorrectDriverMetrics(csvReader: CsvHadoopReader) = {
+  def mockIncorrectDriverMetrics(csvReader: HadoopFileReader) = {
     (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
     (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
     (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
@@ -444,6 +444,12 @@ object TestHelpers extends FunSuite with MockFactory {
     val propertiesLoaderFactoryMock = stub[PropertiesLoaderFactory]
     (propertiesLoaderFactoryMock.getPropertiesLoader _).when(MetricsPropertiesPath).returns(getPropertiesLoaderMock)
     propertiesLoaderFactoryMock
+  }
+
+  def getFileReaderFactoryMock(reader: FileReader): FileReaderFactory = {
+    val fileReaderFactoryMock = stub[FileReaderFactory]
+    (fileReaderFactoryMock.getFileReader _).when(*).returns(reader)
+    fileReaderFactoryMock
   }
 
   def getPropertiesLoaderMock: PropertiesLoader = {

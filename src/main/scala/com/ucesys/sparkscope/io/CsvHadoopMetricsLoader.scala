@@ -6,7 +6,7 @@ import com.ucesys.sparkscope.data.DataFrame
 import com.ucesys.sparkscope.utils.Logger
 import org.apache.spark.SparkConf
 
-class CsvHadoopMetricsLoader(reader: CsvHadoopReader,
+class CsvHadoopMetricsLoader(readerFactory: FileReaderFactory,
                              appContext: AppContext,
                              sparkConf: SparkConf,
                              propertiesLoaderFactory: PropertiesLoaderFactory) extends MetricsLoader {
@@ -36,7 +36,7 @@ class CsvHadoopMetricsLoader(reader: CsvHadoopReader,
     log.println("Reading driver metrics...")
     val driverMetrics: Seq[DataFrame] = DriverCsvMetrics.map { metric =>
       val metricsFilePath = s"${driverMetricsDir.get}/${appContext.appInfo.applicationID}.driver.${metric}.csv"
-      val csvFileStr = reader.read(metricsFilePath).replace("value", metric)
+      val csvFileStr = readerFactory.getFileReader(metricsFilePath).read(metricsFilePath).replace("value", metric)
       log.println(s"Reading ${metric} metric for driver from " + metricsFilePath)
       DataFrame.fromCsv(metric, csvFileStr, ",")
     }
@@ -52,7 +52,7 @@ class CsvHadoopMetricsLoader(reader: CsvHadoopReader,
         val metricsFilePath = s"${executorMetricsDir.get}/${appContext.appInfo.applicationID}.${executorId}.${metric}.csv"
         log.println(s"Reading ${metric} metric for executor=${executorId} from " + metricsFilePath)
         val csvFileStrOpt = try {
-          Some(reader.read(metricsFilePath).replace("value", metric).replace("count", metric))
+          Some(readerFactory.getFileReader(metricsFilePath).read(metricsFilePath).replace("value", metric).replace("count", metric))
         }
         catch {
           case ex: Exception =>

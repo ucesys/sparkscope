@@ -18,8 +18,8 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.TestHelpers.{getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, missingMetricsWarning, mockAppContext, mockAppContextMissingExecutorMetrics, mockcorrectMetrics, sparkConf}
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HtmlReportGenerator, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.TestHelpers.{getFileReaderFactoryMock, getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, missingMetricsWarning, mockAppContext, mockAppContextMissingExecutorMetrics, mockcorrectMetrics, sparkConf}
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, HtmlReportGenerator, PropertiesLoaderFactory}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
 
@@ -29,9 +29,9 @@ class SparkScopeSuite extends FunSuite with MockFactory {
 
   test("SparkScope end2end test") {
     val ac = mockAppContext()
-    val csvReaderMock = stub[CsvHadoopReader]
+    val csvReaderMock = stub[HadoopFileReader]
     mockcorrectMetrics(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(csvReaderMock, ac, sparkConf, getPropertiesLoaderFactoryMock)
+    val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkConf, getPropertiesLoaderFactoryMock)
     val executorMetricsAnalyzer = new SparkScopeAnalyzer(sparkConf)
     val result = executorMetricsAnalyzer.analyze(metricsLoader.load(), ac)
 

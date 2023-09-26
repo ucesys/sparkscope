@@ -29,7 +29,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory {
 
   test("SparkScope end2end no warnings") {
     val ac = mockAppContext()
-    val csvReaderMock = stub[CsvHadoopReader]
+    val csvReaderMock = stub[HadoopFileReader]
     mockcorrectMetrics(csvReaderMock)
     val executorMetricsAnalyzer = new SparkScopeAnalyzer(sparkConf)
     val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
@@ -41,7 +41,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory {
 
   test("SparkScope end2end with warnings") {
     val ac = mockAppContextMissingExecutorMetrics()
-    val csvReaderMock = stub[CsvHadoopReader]
+    val csvReaderMock = stub[HadoopFileReader]
     mockcorrectMetrics(csvReaderMock)
     val executorMetricsAnalyzer = new SparkScopeAnalyzer(sparkConf)
     val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)
