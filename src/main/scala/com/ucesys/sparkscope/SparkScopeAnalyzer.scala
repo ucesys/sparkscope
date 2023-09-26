@@ -68,7 +68,7 @@ class SparkScopeAnalyzer {
       val clusterCpuTimeDiff = clusterCpuTime.sub(clusterCpuTimeLag)
       val timeLag = metrics.select("t").lag
       val timeElapsed = metrics.select("t").sub(timeLag)
-      val cpuUsage = clusterCpuTimeDiff.div(timeElapsed).rename(CpuUsage)
+      val cpuUsage = clusterCpuTimeDiff.div(timeElapsed).div(getExecutorCores(ac)).rename(CpuUsage)
       val metricsWithCpuUsage = metrics.addColumn(cpuUsage)
       (id, metricsWithCpuUsage)
     }

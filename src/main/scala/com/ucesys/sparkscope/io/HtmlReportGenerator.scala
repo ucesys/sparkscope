@@ -48,12 +48,12 @@ object HtmlReportGenerator {
 
   def renderCharts(template: String, result: SparkScopeResult): String = {
     template
-      .replace("${chart.cluster.cpu.usage}", result.metrics.clusterCPUMetrics.clusterCpuUsage.select("cpuUsage").values.mkString(","))
+      .replace("${chart.cluster.cpu.usage}", result.metrics.clusterCPUMetrics.clusterCpuUsage.select("cpuUsage").mul(100).values.mkString(","))
       .replace(
         "${chart.cluster.cpu.usage.timestamps}",
         result.metrics.clusterCPUMetrics.clusterCpuUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.cluster.heap.usage}", result.metrics.clusterMemoryMetrics.heapUsage.select("jvm.heap.usage").values.mkString(","))
+      .replace("${chart.jvm.cluster.heap.usage}", result.metrics.clusterMemoryMetrics.heapUsage.select("jvm.heap.usage").mul(100).values.mkString(","))
       .replace(
         "${chart.jvm.cluster.heap.usage.timestamps}",
         result.metrics.clusterMemoryMetrics.heapUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
