@@ -68,6 +68,10 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
         val rows = (dinstinctCol.values zip this.toRows).groupBy(_._1).map{case (key, value) => value.head._2}.toSeq
         DataFrame.fromRows(this.name, this.columnsNames, rows)
     }
+
+    def dropNLastRows(n: Int): DataFrame = {
+        DataFrame.fromRows(this.name, this.columnsNames, this.toRows.dropRight(n))
+    }
 }
 
 object DataFrame {

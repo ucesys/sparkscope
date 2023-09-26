@@ -21,7 +21,7 @@ import com.ucesys.sparklens.{QuboleJobListener, asyncReportingEnabled, dumpDataE
 import com.ucesys.sparklens.analyzer.AppAnalyzer
 import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparklens.helper.EmailReportHelper
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, CsvHadoopReader, HadoopPropertiesLoader, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, FileReaderFactory, HadoopFileReader, HadoopPropertiesLoader, PropertiesLoaderFactory}
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 
@@ -68,8 +68,9 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
 
         sparklensResults.foreach(println)
 
-        val metricsLoader = new CsvHadoopMetricsLoader(new CsvHadoopReader, appContext, sparkConf, new PropertiesLoaderFactory)
-        val sparkScopeRunner = new SparkScopeRunner(appContext, sparkConf, metricsLoader, sparklensResults)
+        val sparkScopeConf = SparkScopeConfig.load(sparkConf, new PropertiesLoaderFactory)
+        val metricsLoader = new CsvHadoopMetricsLoader(new FileReaderFactory, appContext, sparkScopeConf)
+        val sparkScopeRunner = new SparkScopeRunner(appContext, sparkScopeConf, metricsLoader, sparklensResults)
         sparkScopeRunner.run()
     }
 }

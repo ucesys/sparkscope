@@ -26,12 +26,11 @@ import com.ucesys.sparkscope.io.{DriverExecutorMetrics, MetricsLoader}
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.utils.Logger
 import com.ucesys.sparkscope.warning.{CPUUtilWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
-import org.apache.spark.SparkConf
 
 import scala.collection.mutable
 import scala.concurrent.duration._
 
-class SparkScopeAnalyzer(sparkConf: SparkConf) {
+class SparkScopeAnalyzer {
 
   def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: AppContext): SparkScopeResult = {
     val ac = appContext.filterByStartAndEndTime(appContext.appInfo.startTime, appContext.appInfo.endTime)
@@ -62,8 +61,20 @@ class SparkScopeAnalyzer(sparkConf: SparkConf) {
     }
     executorsMetricsCombinedMap.foreach { case (id, m) => log.println(s"\nMerged metrics for executor=${id}:\n${m}")}
 
+    // Add cpu usage for each executor
+    val executorsMetricsCombinedMapWithCpuUsage: Map[Int, DataFrame] = executorsMetricsCombinedMap.map { case (id, metrics) =>
+      val clusterCpuTime = metrics.select(CpuTime).div(NanoSecondsInSec)
+      val clusterCpuTimeLag = clusterCpuTime.lag
+      val clusterCpuTimeDiff = clusterCpuTime.sub(clusterCpuTimeLag)
+      val timeLag = metrics.select("t").lag
+      val timeElapsed = metrics.select("t").sub(timeLag)
+      val cpuUsage = clusterCpuTimeDiff.div(timeElapsed).rename(CpuUsage)
+      val metricsWithCpuUsage = metrics.addColumn(cpuUsage)
+      (id, metricsWithCpuUsage)
+    }
+
     // Add executorId column for later union
-    val executorsMetricsCombinedMapWithExecId: Map[Int, DataFrame] = executorsMetricsCombinedMap.map { case (id, metrics) =>
+    val executorsMetricsCombinedMapWithExecId: Map[Int, DataFrame] = executorsMetricsCombinedMapWithCpuUsage.map { case (id, metrics) =>
       val metricsWithExecId = metrics.addConstColumn("executorId", id.toString)
       (id, metricsWithExecId)
     }
@@ -88,9 +99,9 @@ class SparkScopeAnalyzer(sparkConf: SparkConf) {
     // Metrics
     val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics)
     val clusterMemoryMetrics = ClusterMemoryMetrics(allExecutorsMetrics)
-    val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics, getExecutorCores(ac))
+    val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics)
     log.println(clusterMemoryMetrics)
-    log.println(clusterCPUMetrics.clusterUsageDf)
+    log.println(clusterCPUMetrics.clusterCpuUsage)
 
     // Stats
     val driverStats = DriverMemoryStats(driverMetricsMerged)
@@ -115,7 +126,6 @@ class SparkScopeAnalyzer(sparkConf: SparkConf) {
     SparkScopeResult(
       appInfo = ac.appInfo,
       logs=log.toString,
-      sparkConf = sparkConf,
       stats = SparkScopeStats(
         driverStats = driverStats, 
         executorStats = executorStats,
@@ -238,6 +248,7 @@ object SparkScopeAnalyzer {
   val JvmHeapMax = "jvm.heap.max" // in bytes
   val JvmNonHeapUsed = "jvm.non-heap.used" // in bytes
   val CpuTime = "executor.cpuTime" // CPU time computing tasks in nanoseconds
+  val CpuUsage = "cpuUsage"
 
   val ExecutorCsvMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, CpuTime)
   val DriverCsvMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed)

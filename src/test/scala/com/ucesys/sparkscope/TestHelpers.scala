@@ -4,7 +4,7 @@ import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInf
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.DataFrame
-import com.ucesys.sparkscope.io.{CsvHadoopReader, DriverExecutorMetrics, PropertiesLoader, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.io.{DriverExecutorMetrics, FileReader, FileReaderFactory, HadoopFileReader, PropertiesLoader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
@@ -20,8 +20,10 @@ object TestHelpers extends FunSuite with MockFactory {
   final val EndTime: Long = 1695358700000L
   val MetricsPropertiesPath = "path/to/metrics.properties"
   val csvMetricsPath = "/tmp/csv-metrics"
-  val sparkConf = new SparkConf().set("spark.metrics.conf", MetricsPropertiesPath)
-
+  val sparkConf = new SparkConf()
+      .set("spark.metrics.conf", MetricsPropertiesPath)
+      .set("spark.sparkscope.html.path", "/path/to/html/report")
+  val sparkScopeConf = SparkScopeConfig.load(sparkConf, getPropertiesLoaderFactoryMock)
   val emptyFileCsv: String =
     """t,value
       |1695358645,0""".stripMargin
@@ -309,6 +311,46 @@ object TestHelpers extends FunSuite with MockFactory {
       |1695358696,5451002249
       |1695358697,6129593128""".stripMargin
 
+  val jvmHeapExec7Csv: String =
+    """t,value
+      |1695358691,199513160
+      |1695358696,249545504
+      |1695358701,255433896
+      |1695358706,249545504
+      |1695358711,255433896""".stripMargin
+
+  val jvmHeapUsageExec7Csv: String =
+    """t,value
+      |1695358691,0.2378382205963135
+      |1695358696,0.2974814224243164
+      |1695358701,0.30450093269348144
+      |1695358706,0.30450093269348144
+      |1695358711,0.2974814224243164""".stripMargin
+
+  val jvmHeapMaxExec7Csv: String =
+    """t,value
+      |1695358691,838860800
+      |1695358696,838860800
+      |1695358701,838860800
+      |1695358706,838860800
+      |1695358711,838860800""".stripMargin
+
+  val jvmNonHeapExec7Csv: String =
+    """t,value
+      |1695358691,47196664
+      |1695358696,50223304
+      |1695358701,49633008
+      |1695358706,50223304
+      |1695358711,49633008""".stripMargin
+
+  val cpuTime7Csv: String =
+    """t,count
+      |1695358691,1877412152
+      |1695358696,5451002249
+      |1695358701,8129593128
+      |1695358706,11129593128
+      |1695358711,14963300828""".stripMargin
+
   val driverMetrics = Seq(
     DataFrame.fromCsv("driver-heap-used", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed)),
     DataFrame.fromCsv("driver-heap-max", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax)),
@@ -384,7 +426,27 @@ object TestHelpers extends FunSuite with MockFactory {
     )
   }
 
-  def mockcorrectMetrics(csvReaderMock: CsvHadoopReader): CsvHadoopReader = {
+  def mockAppContextWithDownscaling(): AppContext = {
+    val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
+      "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
+      "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
+      "3" -> ExecutorTimeSpan("3", "0", 1, 1695358671000L, 1695358700000L),
+      "5" -> ExecutorTimeSpan("5", "0", 1, 1695358687000L, 1695358700000L),
+      "7" -> ExecutorTimeSpan("7", "0", 1, 1695358687000L, 1695358715000L)
+    )
+
+    new AppContext(
+      new ApplicationInfo(appId, StartTime, EndTime),
+      new AggregateMetrics(),
+      mutable.HashMap[String, HostTimeSpan](),
+      executorMap,
+      new mutable.HashMap[Long, JobTimeSpan],
+      new mutable.HashMap[Long, Long],
+      mutable.HashMap[Int, StageTimeSpan](),
+      mutable.HashMap[Int, Long]())
+  }
+
+  def mockcorrectMetrics(csvReaderMock: HadoopFileReader): HadoopFileReader = {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
@@ -426,11 +488,34 @@ object TestHelpers extends FunSuite with MockFactory {
     csvReaderMock
   }
 
-  def mockIncorrectDriverMetrics(csvReader: CsvHadoopReader) = {
+  def mockMetricsWithDownscaling(csvReaderMock: HadoopFileReader): HadoopFileReader = {
+    mockcorrectMetrics(csvReaderMock)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.heap.used.csv").returns(jvmHeapExec7Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.heap.usage.csv").returns(jvmHeapUsageExec7Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.heap.max.csv").returns(jvmHeapMaxExec7Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.non-heap.used.csv").returns(jvmNonHeapExec7Csv)
+    (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.executor.cpuTime.csv").returns(cpuTime7Csv)
+
+    csvReaderMock
+  }
+
+  def mockIncorrectDriverMetrics(csvReader: HadoopFileReader) = {
+
+    val driverNonHeapRows = jvmNonHeapDriverCsv.split("\n").toSeq
+    val jvmNonHeapRowsWithoutLast = driverNonHeapRows.filterNot(_ == driverNonHeapRows.last).mkString("\n")
     (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
     (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
     (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
-    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(emptyFileCsv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(jvmNonHeapRowsWithoutLast)
+
+    val executorCpuRows = cpuTime1Csv.split("\n").toSeq
+    val executorCpuRowsWithoutLast = executorCpuRows.filterNot(_ == executorCpuRows.last).mkString("\n")
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.used.csv").returns(jvmHeapExec1Csv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.usage.csv").returns(jvmHeapUsageExec1Csv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.max.csv").returns(jvmHeapMaxExec1Csv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.non-heap.used.csv").returns(jvmNonHeapExec1Csv)
+    (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.executor.cpuTime.csv").returns(executorCpuRowsWithoutLast)
+
     csvReader
   }
 
@@ -444,6 +529,12 @@ object TestHelpers extends FunSuite with MockFactory {
     val propertiesLoaderFactoryMock = stub[PropertiesLoaderFactory]
     (propertiesLoaderFactoryMock.getPropertiesLoader _).when(MetricsPropertiesPath).returns(getPropertiesLoaderMock)
     propertiesLoaderFactoryMock
+  }
+
+  def getFileReaderFactoryMock(reader: FileReader): FileReaderFactory = {
+    val fileReaderFactoryMock = stub[FileReaderFactory]
+    (fileReaderFactoryMock.getFileReader _).when(*).returns(reader)
+    fileReaderFactoryMock
   }
 
   def getPropertiesLoaderMock: PropertiesLoader = {
