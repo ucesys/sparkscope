@@ -49,10 +49,10 @@ class SparkScopeRunner(appContext: AppContext, sparkScopeConf: SparkScopeConfig,
     log.info("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
     log.info("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
     log.info("           /_/                             /_/ ")
-    log.info(sparkScopeResult.stats.executorStats)
-    log.info(sparkScopeResult.stats.driverStats)
-    log.info(sparkScopeResult.stats.clusterMemoryStats)
-    log.info(sparkScopeResult.stats.clusterCPUStats)
+    log.info("\n" + sparkScopeResult.stats.executorStats)
+    log.info("\n" + sparkScopeResult.stats.driverStats)
+    log.info("\n" + sparkScopeResult.stats.clusterMemoryStats)
+    log.info("\n" + sparkScopeResult.stats.clusterCPUStats)
 
     val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
     log.info(s"SparkScope analysis took ${durationSparkScope}s")
