@@ -26,6 +26,7 @@ SparkScope html report contains the following features:
 - Scala 2.11
 
 ## Csv Sink configuration
+metrics.properties configuration example
 ```bash
 # Enable CsvSink for all instances by class name
 *.sink.csv.class=org.apache.spark.metrics.sink.CsvSink
