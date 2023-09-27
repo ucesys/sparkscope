@@ -298,6 +298,17 @@
           text: "Application CPU Utilization",
           fontSize: 16
         },
+        scales: {
+            yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true,
+                        steps: 10,
+                        stepValue: 5,
+                        max: 100
+                    }
+                }]
+        },
       }
      });
 </script>
@@ -421,6 +432,17 @@
           display: true,
           text: "Application Heap Utilization",
           fontSize: 16
+        },
+        scales: {
+            yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true,
+                        steps: 10,
+                        stepValue: 5,
+                        max: 100
+                    }
+                }]
         },
       }
      });
