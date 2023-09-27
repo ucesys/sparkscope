@@ -2,7 +2,7 @@ package com.ucesys.sparkscope.warning
 
 class HeapUtilWarning private(heapUtil: Double, heapGbHoursWasted: Double) extends Warning {
     override def toString: String = {
-        f"Heap utlization is LOW(${heapUtil*100}%1.2f%%), ${heapGbHoursWasted} Heap GB Hours Wasted."
+        f"Heap utlization is LOW(${heapUtil*100}%1.2f%%), ${heapGbHoursWasted}%1.5f Heap GB Hours Wasted."
     }
 }
 
