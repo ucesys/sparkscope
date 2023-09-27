@@ -10,6 +10,7 @@
         }
         .row{
             display: flex;
+            width: 100%
         }
         /* Style the button that is used to open and close the collapsible content */
         .collapsible {
@@ -43,7 +44,10 @@
 
     .styled-table {
         border-collapse: collapse;
-        margin: 10px 10px;
+        margin-left: 1%;
+        margin-right: 1%;
+        float: left;
+        width: 19%;
         font-size: 0.7em;
         font-family: sans-serif;
         min-width: 200px;
@@ -152,8 +156,9 @@
 <div>
     <pre style="color:red">${warnings}</pre>
 </div>
+<br>
 <div>
-    <table class="styled-table" style="float: left;">
+    <table class="styled-table" style="float: left;margin-left:7%">
         <thead>
         <tr>
             <th>Application Info</th>
@@ -181,7 +186,7 @@
         </tbody>
     </table>
 
-    <table class="styled-table" style="float: left;">
+    <table class="styled-table" style="float: left">
         <thead>
         <tr>
             <th>Application Stats</th>
@@ -280,25 +285,25 @@
 <!--${summary}-->
 <!--</pre>-->
 <!--</div>-->
-<div  class="row" style="clear: both;"> </div>
-<div  class="row">
-    <div style="margin-left: 15px;"><canvas id="cpuUtilization" style="width:230%;max-width:1000px;"></canvas></div>
+<div style="clear: both;"> </div>
+<div  class="row" style="width:100%">
+    <div style="margin-left: 15px;width:45%"><canvas id="cpuUtilization"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application CPU Utilization</b> is sum of used CPUs across all executors divided by sum of allocated CPUs of all executors </span></div>
-    <div><canvas id="clusterHeapUsagePerc" style="width:230%;max-width:1000px"></canvas></div>
+    <div style="width:45%"><canvas id="clusterHeapUsagePerc"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Utilization</b> is sum of used heap across all executors divided by sum of heap sizes of all executors </span></div>
 
 </div>
 <div  class="row">
-    <div style="margin-left: 15px;"><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div style="margin-left: 15px;width:45%"><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average heap usage across all executors</span></div>
-    <div ><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div style="width:45%"><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Size</b> is sum of heap sizes of all executors </br> </br> <b>Application Heap Usage</b> is sum of used heap across all executors</span></div>
 </div>
 
 <div  class="row" >
-    <div style="margin-left: 15px;"><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div style="margin-left: 15px;width:45%"><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average non-heap usage across all executors</span></div>
-    <div ><canvas id="driverHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div style="width:45%"><canvas id="driverHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver heap usage vs heap size</span></div>
 </div>
 
