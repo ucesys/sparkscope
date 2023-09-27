@@ -21,36 +21,47 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.TestHelpers.{getFileReaderFactoryMock, getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, missingMetricsWarning, mockAppContext, mockAppContextMissingExecutorMetrics, mockAppContextWithDownscaling, mockMetricsWithDownscaling, mockcorrectMetrics, sparkConf, sparkScopeConf}
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, HtmlReportGenerator, PropertiesLoaderFactory}
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, GivenWhenThen}
 
 import java.nio.file.{Files, Paths}
 
-class SparkScopeSuite extends FunSuite with MockFactory {
+class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen {
 
-  test("SparkScope end2end executor upscaling test") {
+  test("SparkScopeRunner upscaling test") {
+    Given("Metrics for application which was upscaled")
     val ac = mockAppContext()
     val csvReaderMock = stub[HadoopFileReader]
     mockcorrectMetrics(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConf)
-    val executorMetricsAnalyzer = new SparkScopeAnalyzer
-    val result = executorMetricsAnalyzer.analyze(metricsLoader.load(), ac)
 
-    HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"), sparkConf)
+    And("SparkScopeConf with specified html report path")
+    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = "./")
+    val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
+    val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfHtmlReportPath, metricsLoader, Seq("Executor Timeline", "Sparkscope text"))
 
-    assert(Files.exists(Paths.get("./" + result.appInfo.applicationID + ".html")))
+    When("SparkScopeRunner.run")
+    sparkScopeRunner.run()
+
+    Then("Report should be generated")
+    assert(Files.exists(Paths.get("./" + ac.appInfo.applicationID + ".html")))
   }
 
-  test("SparkScope end2end executor upscaling and downscaling test") {
+
+  test("SparkScopeRunner upscaling and downscaling test") {
+    Given("Metrics for application which was upscaled and downscaled")
     val ac = mockAppContextWithDownscaling()
     val csvReaderMock = stub[HadoopFileReader]
     mockMetricsWithDownscaling(csvReaderMock)
-    val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConf)
-    val executorMetricsAnalyzer = new SparkScopeAnalyzer
-    val result = executorMetricsAnalyzer.analyze(metricsLoader.load(), ac)
 
-    HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"), sparkConf)
+    And("SparkScopeConf with specified html report path")
+    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = "./")
+    val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
+    val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfHtmlReportPath, metricsLoader, Seq("Executor Timeline", "Sparkscope text"))
 
-    assert(Files.exists(Paths.get("./" + result.appInfo.applicationID + ".html")))
+    When("SparkScopeRunner.run")
+    sparkScopeRunner.run()
+
+    Then("Report should be generated")
+    assert(Files.exists(Paths.get("./" + ac.appInfo.applicationID + ".html")))
   }
 }
 
