@@ -12,7 +12,7 @@ case class ClusterMemoryStats(maxHeap: Long,
                               executorHeapSizeInGb: Double) {
   override def toString: String = {
     Seq(
-      "\nCluster Memory stats: ",
+      "Cluster Memory stats: ",
       f"Average Cluster heap memory utilization: ${avgHeapPerc*100}%1.2f%% / ${avgHeap}MB",
       f"Max Cluster heap memory utilization: ${maxHeapPerc * 100}%1.2f%% / ${maxHeap}MB",
       f"heapGbHoursAllocated: ${this.heapGbHoursAllocated}%1.4f",

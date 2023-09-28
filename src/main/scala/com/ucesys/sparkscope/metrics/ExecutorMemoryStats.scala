@@ -6,7 +6,7 @@ import com.ucesys.sparkscope.data.DataFrame
 case class ExecutorMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Double, avgHeap: Long, avgHeapPerc: Double, avgNonHeap: Long, maxNonHeap: Long) {
   override def toString: String = {
     Seq(
-      s"\nExecutor stats:",
+      s"Executor stats:",
       f"Executor heap size: ${heapSize}MB",
       f"Max heap memory utilization by executor: ${maxHeap}MB(${maxHeapPerc * 100}%1.2f%%)",
       f"Average heap memory utilization by executor: ${avgHeap}MB(${avgHeapPerc * 100}%1.2f%%)",

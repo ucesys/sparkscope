@@ -6,7 +6,7 @@ import com.ucesys.sparkscope.data.DataFrame
 case class DriverMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Double, avgHeap: Long, avgHeapPerc: Double, avgNonHeap: Long, maxNonHeap: Long) {
   override def toString: String = {
     Seq(
-      s"\nDriver stats:",
+      s"Driver stats:",
       s"Driver heap size: ${heapSize}",
       f"Max heap memory utilization by driver: ${maxHeap}MB(${maxHeapPerc * 100}%1.2f%%)",
       f"Average heap memory utilization by driver: ${avgHeap}MB(${avgHeapPerc * 100}%1.2f%%)",

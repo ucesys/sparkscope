@@ -18,6 +18,7 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparklens.common.AppContext
+import com.ucesys.sparkscope.SparkScopeRunner.sparkScopeSign
 import com.ucesys.sparkscope.io.{DriverExecutorMetrics, HtmlReportGenerator, MetricsLoader}
 import com.ucesys.sparkscope.utils.Logger
 
@@ -43,20 +44,27 @@ class SparkScopeRunner(appContext: AppContext, sparkScopeConf: SparkScopeConfig,
     val executorMetricsAnalyzer = new SparkScopeAnalyzer
     val sparkScopeStart = System.currentTimeMillis()
     val sparkScopeResult = executorMetricsAnalyzer.analyze(driverExecutorMetrics, appContext)
-
-    log.info("           ____              __    ____")
-    log.info("          / __/__  ___ _____/ /__ / __/_ ___  ___  ___")
-    log.info("         _\\ \\/ _ \\/ _ `/ __/  '_/_\\ \\/_ / _ \\/ _ \\/__/ ")
-    log.info("        /___/ .__/\\_,_/_/ /_/\\_\\/___/\\__\\_,_/ .__/\\___/")
-    log.info("           /_/                             /_/ ")
-    log.info("\n" + sparkScopeResult.stats.executorStats)
-    log.info("\n" + sparkScopeResult.stats.driverStats)
-    log.info("\n" + sparkScopeResult.stats.clusterMemoryStats)
-    log.info("\n" + sparkScopeResult.stats.clusterCPUStats)
-
     val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
+
     log.info(s"SparkScope analysis took ${durationSparkScope}s")
+    log.info(sparkScopeSign)
+
+    log.info(sparkScopeResult.stats.executorStats + "\n")
+    log.info(sparkScopeResult.stats.driverStats + "\n")
+    log.info(sparkScopeResult.stats.clusterMemoryStats + "\n")
+    log.info(sparkScopeResult.stats.clusterCPUStats + "\n")
 
     HtmlReportGenerator.generateHtml(sparkScopeResult, sparkScopeConf.htmlReportPath, sparklensResults, sparkScopeConf.sparkConf)
   }
+}
+
+object SparkScopeRunner {
+  val sparkScopeSign =
+    """
+      |     ____              __    ____
+      |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+      |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+      |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+      |     /_/                             /_/      v0.1.0
+      |""".stripMargin
 }

@@ -1,15 +1,20 @@
 package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
+import com.ucesys.sparkscope.SparkScopeRunner
 import com.ucesys.sparkscope.metrics.SparkScopeResult
+import com.ucesys.sparkscope.utils.Logger
 import org.apache.spark.SparkConf
 
 import java.io.{FileWriter, InputStream}
+import java.nio.file.Paths
 import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
 
 object HtmlReportGenerator {
+  val log = new Logger
+
   def generateHtml(result: SparkScopeResult, outputDir: String, sparklensResults: Seq[String], sparkConf: SparkConf): Unit = {
     val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
     val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
@@ -26,6 +31,7 @@ object HtmlReportGenerator {
     }
 
     val rendered = template
+      .replace("${sparkScopeSign}", SparkScopeRunner.sparkScopeSign)
       .replace("${appInfo.applicationId}", result.appInfo.applicationID)
       .replace("${appInfo.start}", ofEpochSecond(result.appInfo.startTime/1000, 0, UTC).toString)
       .replace("${appInfo.end}", ofEpochSecond(result.appInfo.endTime/1000, 0, UTC).toString)
@@ -39,11 +45,11 @@ object HtmlReportGenerator {
     val renderedCharts = renderCharts(rendered, result)
     val renderedStats = renderStats(renderedCharts, result)
 
-    val outputPath = s"${outputDir}/${result.appInfo.applicationID}.html"
-    val fileWriter = new FileWriter(outputPath)
+    val outputPath = Paths.get(outputDir, s"${result.appInfo.applicationID}.html")
+    val fileWriter = new FileWriter(outputPath.toString)
     fileWriter.write(renderedStats)
     fileWriter.close()
-    println(s"Wrote HTML report file to ${outputPath}")
+    log.info(s"Wrote HTML report file to ${outputPath}")
   }
 
   def renderCharts(template: String, result: SparkScopeResult): String = {
