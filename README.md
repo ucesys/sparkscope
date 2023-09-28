@@ -62,6 +62,7 @@ executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource
 | spark.sparkscope.metrics.dir.driver     | optional path to driver csv metrics, if unspecified property driver.sink.csv.directory or *.sink.csv.directory from metrics.properties will be used |
 | spark.sparkscope.metrics.dir.executor   | optional path to executor csv metrics, if unspecified property executor.sink.csv.directory or *.sink.csv.directory from metrics.properties will be used      |
 
+## Running Spark appliations with SparkScope Listener
 Sample spark-submit command:
 ```bash
 spark-submit \
@@ -81,3 +82,58 @@ spark-submit \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
+## SparkScope summary:
+
+SparkScope analysis summary should be printed out to the console:
+```
+28/09/2023 01:20:22 INFO [SparkScope] SparkScope analysis took 0.052s
+28/09/2023 01:20:22 INFO [SparkScope] 
+     ____              __    ____
+    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+     /_/                             /_/      v0.1.0
+
+28/09/2023 01:20:22 INFO [SparkScope] Executor stats:
+Executor heap size: 800MB
+Max heap memory utilization by executor: 286MB(35.80%)
+Average heap memory utilization by executor: 156MB(19.56%)
+Max non-heap memory utilization by executor: 49MB
+Average non-heap memory utilization by executor: 35MB
+
+28/09/2023 01:20:22 INFO [SparkScope] Driver stats:
+Driver heap size: 910
+Max heap memory utilization by driver: 262MB(28.87%)
+Average heap memory utilization by driver: 207MB(22.78%)
+Max non-heap memory utilization by driver: 67MB
+Average non-heap memory utilization by driver: 65MB
+
+28/09/2023 01:20:22 INFO [SparkScope] Cluster Memory stats: 
+Average Cluster heap memory utilization: 19.56% / 156MB
+Max Cluster heap memory utilization: 35.80% / 286MB
+heapGbHoursAllocated: 0.0033
+heapGbHoursAllocated=(executorHeapSizeInGb(0.78125)*combinedExecutorUptimeInSec(15s))/3600
+heapGbHoursWasted: 0.0006
+heapGbHoursWasted=heapGbHoursAllocated(0.0033)*heapUtilization(0.1956)
+
+28/09/2023 01:20:22 INFO [SparkScope] Cluster CPU stats: 
+Total CPU utilization: 68.35%
+coreHoursAllocated: 0.0042
+coreHoursAllocated=(executorCores(1)*combinedExecutorUptimeInSec(15s))/3600
+coreHoursWasted: 0.0029
+coreHoursWasted=coreHoursAllocated(0.0042)*cpuUtilization(0.6835)
+
+28/09/2023 01:20:22 INFO [SparkScope] Wrote HTML report file to /tmp/app-20230928132004-0012.html
+```
+
+## SparkScope report
+Last line of the report shows where html report was saved:
+`28/09/2023 01:20:22 INFO [SparkScope] Wrote HTML report file to /tmp/app-20230928132004-0012.html`
+
+SparkScope html report contains:
+- Aggregated application CPU/Memory statistics & charts
+- Driver and Executor CPU/Memory statistics & charts
+- Warnings concerning application resource usage
+- Sparklens report
+- SparkScope logs
+- Spark config

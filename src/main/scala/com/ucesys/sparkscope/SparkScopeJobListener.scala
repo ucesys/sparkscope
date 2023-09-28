@@ -17,11 +17,10 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparklens.{QuboleJobListener, asyncReportingEnabled, dumpDataEnabled}
+import com.ucesys.sparklens.QuboleJobListener
 import com.ucesys.sparklens.analyzer.AppAnalyzer
 import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparklens.helper.EmailReportHelper
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, FileReaderFactory, HadoopFileReader, HadoopPropertiesLoader, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, FileReaderFactory, PropertiesLoaderFactory}
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 
@@ -57,11 +56,9 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
             stageIDToJobID
         )
 
-        val sparklensResults: Seq[String] =  try {
+        val sparklensResults: Seq[String] = try {
           AppAnalyzer.startAnalyzers(appContext)
-        }
-
-        catch {
+        } catch {
           case ex: Exception => println("Sparklens has thrown an exception" + ex, ex)
           Seq.empty
         }

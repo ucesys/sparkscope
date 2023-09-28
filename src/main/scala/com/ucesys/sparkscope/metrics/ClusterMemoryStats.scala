@@ -18,7 +18,7 @@ case class ClusterMemoryStats(maxHeap: Long,
       f"heapGbHoursAllocated: ${this.heapGbHoursAllocated}%1.4f",
       s"heapGbHoursAllocated=(executorHeapSizeInGb(${this.executorHeapSizeInGb})*combinedExecutorUptimeInSec(${this.executorTimeSecs}s))/3600",
       f"heapGbHoursWasted: ${this.heapGbHoursWasted}%1.4f",
-      f"heapGbHoursWasted=heapGbHoursAllocated(${this.heapGbHoursAllocated}%1.4f)*heapUtilization(${this.avgHeapPerc}%1.4f)\n"
+      f"heapGbHoursWasted=heapGbHoursAllocated(${this.heapGbHoursAllocated}%1.4f)*heapUtilization(${this.avgHeapPerc}%1.4f)"
     ).mkString("\n")
   }
 }

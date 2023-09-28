@@ -56,47 +56,44 @@ spark-submit \
 ```
 Sparkscope report summary should be printed out to the console:
 ```
-28/09/2023 11:20:07 INFO [SparkScope]            ____              __    ____
-28/09/2023 11:20:07 INFO [SparkScope]           / __/__  ___ _____/ /__ / __/_ ___  ___  ___
-28/09/2023 11:20:07 INFO [SparkScope]          _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/ 
-28/09/2023 11:20:07 INFO [SparkScope]         /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
-28/09/2023 11:20:07 INFO [SparkScope]            /_/                             /_/ 
-28/09/2023 11:20:07 INFO [SparkScope] 
+28/09/2023 01:20:22 INFO [SparkScope] SparkScope analysis took 0.052s
+28/09/2023 01:20:22 INFO [SparkScope] 
+     ____              __    ____
+    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+     /_/                             /_/      v0.1.0
 
-Executor stats:
+28/09/2023 01:20:22 INFO [SparkScope] Executor stats:
 Executor heap size: 800MB
-Max heap memory utilization by executor: 356MB(44.55%)
-Average heap memory utilization by executor: 197MB(24.71%)
+Max heap memory utilization by executor: 286MB(35.80%)
+Average heap memory utilization by executor: 156MB(19.56%)
 Max non-heap memory utilization by executor: 49MB
-Average non-heap memory utilization by executor: 43MB
-28/09/2023 11:20:07 INFO [SparkScope] 
+Average non-heap memory utilization by executor: 35MB
 
-Driver stats:
+28/09/2023 01:20:22 INFO [SparkScope] Driver stats:
 Driver heap size: 910
-Max heap memory utilization by driver: 313MB(34.45%)
-Average heap memory utilization by driver: 244MB(26.83%)
-Max non-heap memory utilization by driver: 68MB
-Average non-heap memory utilization by driver: 66MB
-28/09/2023 11:20:07 INFO [SparkScope] 
+Max heap memory utilization by driver: 262MB(28.87%)
+Average heap memory utilization by driver: 207MB(22.78%)
+Max non-heap memory utilization by driver: 67MB
+Average non-heap memory utilization by driver: 65MB
 
-Cluster Memory stats: 
-Average Cluster heap memory utilization: 24.71% / 395MB
-Max Cluster heap memory utilization: 40.07% / 641MB
-heapGbHoursAllocated: 0.0195
-heapGbHoursAllocated=(executorHeapSizeInGb(0.78125)*combinedExecutorUptimeInSec(90s))/3600
-heapGbHoursWasted: 0.0048
-heapGbHoursWasted=heapGbHoursAllocated(0.0195)*heapUtilization(0.2471)
+28/09/2023 01:20:22 INFO [SparkScope] Cluster Memory stats: 
+Average Cluster heap memory utilization: 19.56% / 156MB
+Max Cluster heap memory utilization: 35.80% / 286MB
+heapGbHoursAllocated: 0.0033
+heapGbHoursAllocated=(executorHeapSizeInGb(0.78125)*combinedExecutorUptimeInSec(15s))/3600
+heapGbHoursWasted: 0.0006
+heapGbHoursWasted=heapGbHoursAllocated(0.0033)*heapUtilization(0.1956)
 
-28/09/2023 11:20:07 INFO [SparkScope] 
-Cluster CPU stats: 
-Total CPU utilization: 82.20%
-coreHoursAllocated: 0.0500
-coreHoursAllocated=(executorCores(2)*combinedExecutorUptimeInSec(90s))/3600
-coreHoursWasted: 0.0411
-coreHoursWasted=coreHoursAllocated(0.0500)*cpuUtilization(0.8220)
-28/09/2023 11:20:07 INFO [SparkScope] SparkScope analysis took 0.082s
-Wrote HTML report file to /tmp//app-20230928111918-0002.html
+28/09/2023 01:20:22 INFO [SparkScope] Cluster CPU stats: 
+Total CPU utilization: 68.35%
+coreHoursAllocated: 0.0042
+coreHoursAllocated=(executorCores(1)*combinedExecutorUptimeInSec(15s))/3600
+coreHoursWasted: 0.0029
+coreHoursWasted=coreHoursAllocated(0.0042)*cpuUtilization(0.6835)
 
+28/09/2023 01:20:22 INFO [SparkScope] Wrote HTML report file to /tmp/app-20230928132004-0012.html
 ```
 # Sparklens testing #
 
