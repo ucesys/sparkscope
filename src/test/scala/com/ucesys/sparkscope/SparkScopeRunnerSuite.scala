@@ -18,8 +18,8 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.TestHelpers.{getFileReaderFactoryMock, getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, missingMetricsWarning, mockAppContext, mockAppContextMissingExecutorMetrics, mockAppContextWithDownscaling, mockMetricsWithDownscaling, mockcorrectMetrics, sparkConf, sparkScopeConf}
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, HtmlReportGenerator, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.TestHelpers._
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 
@@ -49,6 +49,24 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
   test("SparkScopeRunner upscaling and downscaling test") {
     Given("Metrics for application which was upscaled and downscaled")
     val ac = mockAppContextWithDownscaling()
+    val csvReaderMock = stub[HadoopFileReader]
+    mockMetricsWithDownscaling(csvReaderMock)
+
+    And("SparkScopeConf with specified html report path")
+    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = "./")
+    val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
+    val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfHtmlReportPath, metricsLoader, Seq("Executor Timeline", "Sparkscope text"))
+
+    When("SparkScopeRunner.run")
+    sparkScopeRunner.run()
+
+    Then("Report should be generated")
+    assert(Files.exists(Paths.get("./" + ac.appInfo.applicationID + ".html")))
+  }
+
+  test("SparkScopeRunner upscaling and downscaling multicore test") {
+    Given("Metrics for application which was upscaled and downscaled")
+    val ac = mockAppContextWithDownscalingMuticore()
     val csvReaderMock = stub[HadoopFileReader]
     mockMetricsWithDownscaling(csvReaderMock)
 

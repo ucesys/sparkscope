@@ -60,7 +60,7 @@ object HtmlReportGenerator {
         result.metrics.clusterCPUMetrics.clusterCpuUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
         .replace("${chart.cluster.cpu.capacity}", result.metrics.clusterCPUMetrics.clusterCapacity.select("totalCores").values.mkString(","))
-        .replace("${chart.cluster.cpu.usage}", result.metrics.clusterCPUMetrics.clusterCpuUsageSum.select("cpuUsage").values.mkString(","))
+        .replace("${chart.cluster.cpu.usage}", result.metrics.clusterCPUMetrics.clusterCpuUsageSum.select("cpuUsageAllCores").values.mkString(","))
         .replace(
           "${chart.cluster.cpu.usage.timestamps}",
           result.metrics.clusterCPUMetrics.clusterCpuUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")

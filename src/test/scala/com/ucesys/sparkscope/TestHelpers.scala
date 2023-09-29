@@ -446,6 +446,26 @@ object TestHelpers extends FunSuite with MockFactory {
       mutable.HashMap[Int, Long]())
   }
 
+  def mockAppContextWithDownscalingMuticore(): AppContext = {
+    val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
+      "1" -> ExecutorTimeSpan("1", "0", 2, 1695358645000L, 1695358700000L),
+      "2" -> ExecutorTimeSpan("2", "0", 2, 1695358645000L, 1695358700000L),
+      "3" -> ExecutorTimeSpan("3", "0", 2, 1695358671000L, 1695358700000L),
+      "5" -> ExecutorTimeSpan("5", "0", 2, 1695358687000L, 1695358700000L),
+      "7" -> ExecutorTimeSpan("7", "0", 2, 1695358687000L, 1695358715000L)
+    )
+
+    new AppContext(
+      new ApplicationInfo(appId, StartTime, EndTime),
+      new AggregateMetrics(),
+      mutable.HashMap[String, HostTimeSpan](),
+      executorMap,
+      new mutable.HashMap[Long, JobTimeSpan],
+      new mutable.HashMap[Long, Long],
+      mutable.HashMap[Int, StageTimeSpan](),
+      mutable.HashMap[Int, Long]())
+  }
+
   def mockcorrectMetrics(csvReaderMock: HadoopFileReader): HadoopFileReader = {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)

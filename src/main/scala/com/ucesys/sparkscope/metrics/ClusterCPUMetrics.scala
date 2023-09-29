@@ -12,7 +12,7 @@ object ClusterCPUMetrics {
     def apply(allExecutorsMetrics: DataFrame, executorCores: Int): ClusterCPUMetrics = {
         val clusterCpuTimeDf = allExecutorsMetrics.groupBy("t", CpuTime).sum.sortBy("t")
         val clusterCpuUsage = allExecutorsMetrics.groupBy("t", CpuUsage).avg.sortBy("t")
-        val clusterCpuUsageSum = allExecutorsMetrics.groupBy("t", CpuUsage).sum.sortBy("t")
+        val clusterCpuUsageSum = allExecutorsMetrics.groupBy("t", "cpuUsageAllCores").sum.sortBy("t")
         val clusterCapacityCol = allExecutorsMetrics.groupBy("t", CpuUsage).count.sortBy("t").select("cnt").mul(executorCores)
         val clusterCapacityDf = DataFrame(
             name = "clusterCapacity",
