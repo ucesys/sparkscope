@@ -290,17 +290,24 @@ ${sparkScopeSign}
 
 </div>
 <div  class="row">
-    <div style="margin-left: 15px;width:45%"><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average heap usage across all executors</span></div>
+    <div style="width:45%"><canvas id="clusterCPUUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Total cores available</b> is sum of available cores across all executors </br> </br> <b>Total cores used</b> is sum of used cores across all executors</span></div>
     <div style="width:45%"><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Size</b> is sum of heap sizes of all executors </br> </br> <b>Application Heap Usage</b> is sum of used heap across all executors</span></div>
 </div>
 
 <div  class="row" >
+    <div style="margin-left: 15px;width:45%"><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average heap usage across all executors</span></div>
     <div style="margin-left: 15px;width:45%"><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average non-heap usage across all executors</span></div>
+</div>
+
+<div  class="row" >
     <div style="width:45%"><canvas id="driverHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver heap usage vs heap size</span></div>
+    <div style="width:45%"><canvas id="driverNonHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver non-heap usage</span></div>
 </div>
 
 <script>
@@ -308,9 +315,9 @@ ${sparkScopeSign}
    var myChart = new Chart(ctx, {
        type: 'line',
        data: {
-         labels: [${chart.cluster.cpu.usage.timestamps}],
+         labels: [${chart.cluster.cpu.util.timestamps}],
          datasets: [{
-             data: [${chart.cluster.cpu.usage}],
+             data: [${chart.cluster.cpu.util}],
              label: "CPU Utilization[%]",
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
@@ -335,6 +342,41 @@ ${sparkScopeSign}
                         max: 100
                     }
                 }]
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('clusterCPUUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.cluster.cpu.usage.timestamps}],
+         datasets: [
+           {
+             data: [${chart.cluster.cpu.capacity}],
+             label: "Total Cores available",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             responsive: true,
+           },
+            {
+             data: [${chart.cluster.cpu.usage}],
+             label: "Total Cores used",
+             borderColor: "#71d1bd",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             responsive: true,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Application CPU Usage",
+          fontSize: 16
         },
       }
      });
@@ -402,6 +444,31 @@ ${sparkScopeSign}
         title: {
           display: true,
           text: "Driver Heap Usage",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('driverNonHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.driver.non-heap.timestamps}],
+         datasets: [{
+             data: [${chart.jvm.driver.non-heap.used}],
+             label: "non-heap usage[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Driver Non-Heap Usage",
           fontSize: 16
         },
       }

@@ -54,12 +54,18 @@ object HtmlReportGenerator {
 
   def renderCharts(template: String, result: SparkScopeResult): String = {
     template
-      .replace("${chart.cluster.cpu.usage}", result.metrics.clusterCPUMetrics.clusterCpuUsage.select("cpuUsage").mul(100).values.mkString(","))
+      .replace("${chart.cluster.cpu.util}", result.metrics.clusterCPUMetrics.clusterCpuUsage.select("cpuUsage").mul(100).values.mkString(","))
       .replace(
-        "${chart.cluster.cpu.usage.timestamps}",
+        "${chart.cluster.cpu.util.timestamps}",
         result.metrics.clusterCPUMetrics.clusterCpuUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
       )
-      .replace("${chart.jvm.cluster.heap.usage}", result.metrics.clusterMemoryMetrics.heapUsage.select("jvm.heap.usage").mul(100).values.mkString(","))
+        .replace("${chart.cluster.cpu.capacity}", result.metrics.clusterCPUMetrics.clusterCapacity.select("totalCores").values.mkString(","))
+        .replace("${chart.cluster.cpu.usage}", result.metrics.clusterCPUMetrics.clusterCpuUsageSum.select("cpuUsage").values.mkString(","))
+        .replace(
+          "${chart.cluster.cpu.usage.timestamps}",
+          result.metrics.clusterCPUMetrics.clusterCpuUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        )
+        .replace("${chart.jvm.cluster.heap.usage}", result.metrics.clusterMemoryMetrics.heapUsage.select("jvm.heap.usage").mul(100).values.mkString(","))
       .replace(
         "${chart.jvm.cluster.heap.usage.timestamps}",
         result.metrics.clusterMemoryMetrics.heapUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
@@ -89,6 +95,11 @@ object HtmlReportGenerator {
       )
       .replace("${chart.jvm.driver.heap.size}", result.metrics.driverMetrics.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
       .replace("${chart.jvm.driver.heap.used}", result.metrics.driverMetrics.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+        .replace(
+          "${chart.jvm.driver.non-heap.timestamps}",
+          result.metrics.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        )
+        .replace("${chart.jvm.driver.non-heap.used}", result.metrics.driverMetrics.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
   }
 
   def renderStats(template: String, result: SparkScopeResult): String = {
