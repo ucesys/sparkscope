@@ -1,6 +1,5 @@
 # Changelog
 ## [0.1.1] - 2023-10-06
-Initial SparkScope release:
 - configuration:
   - sparkscope will prioritize csv metrics SparkConf configuration and use metrics.properties files as last-resort 
 - html-report:
