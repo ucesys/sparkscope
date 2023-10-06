@@ -39,7 +39,7 @@ Sample spark-submit command:
 ```bash
 spark-submit \
 --master yarn \
---jars ./sparkscope_2.11-0.1.0.jar  \
+--jars ./sparkscope_2.11-0.1.1.jar  \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.CsvSink \
 --conf spark.metrics.conf.*.sink.csv.period=5 \
@@ -84,7 +84,7 @@ Sample spark-submit command:
 ```bash
 spark-submit \
 --master yarn \
---jars ./sparkscope_2.11-0.1.0.jar  \
+--jars ./sparkscope_2.11-0.1.1.jar  \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf=./metrics.properties \
 --files ./metrics.properties \
@@ -105,7 +105,7 @@ SparkScope analysis summary should be printed out to the console:
     / __/__  ___ _____/ /__ / __/_ ___  ___  ___
    _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
   /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
-     /_/                             /_/      v0.1.0
+     /_/                             /_/      v0.1.1
 
 28/09/2023 01:20:22 INFO [SparkScope] Executor stats:
 Executor heap size: 800MB

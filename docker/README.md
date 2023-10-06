@@ -60,7 +60,7 @@ Sparkscope report summary should be printed out to the console:
     / __/__  ___ _____/ /__ / __/_ ___  ___  ___
    _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
   /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
-     /_/                             /_/      v0.1.0
+     /_/                             /_/      v0.1.1
 
 28/09/2023 01:20:22 INFO [SparkScope] Executor stats:
 Executor heap size: 800MB

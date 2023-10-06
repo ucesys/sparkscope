@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ucesys</groupId>
   <artifactId>sparkscope</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.1-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <description>Spark profiling and diagnostic tool</description>
 <!--  <licenses>-->
