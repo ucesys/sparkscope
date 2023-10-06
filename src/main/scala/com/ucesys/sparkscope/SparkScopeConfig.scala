@@ -22,7 +22,7 @@ object SparkScopeConfig {
 
     val log = new Logger
 
-    def load(sparkConf: SparkConf, propertiesLoaderFactory: PropertiesLoaderFactory): SparkScopeConfig = {
+    def fromSparkConf(sparkConf: SparkConf, propertiesLoaderFactory: PropertiesLoaderFactory): SparkScopeConfig = {
         val driverMetricsDir: Option[String] = sparkConf match {
             case sparkConf if sparkConf.contains(SparkScopePropertyDriverMetricsDir) =>
                 log.info(s"Setting driver metrics dir to ${SparkScopePropertyDriverMetricsDir}")

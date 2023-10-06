@@ -63,7 +63,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
           Seq.empty
         }
 
-        val sparkScopeConf = SparkScopeConfig.load(sparkConf, new PropertiesLoaderFactory)
+        val sparkScopeConf = SparkScopeConfig.fromSparkConf(sparkConf, new PropertiesLoaderFactory)
         val metricsLoader = new CsvHadoopMetricsLoader(new FileReaderFactory, appContext, sparkScopeConf)
         val sparkScopeRunner = new SparkScopeRunner(appContext, sparkScopeConf, metricsLoader, sparklensResults)
         sparkScopeRunner.run()

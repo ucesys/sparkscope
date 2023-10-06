@@ -1,5 +1,3 @@
-[![Gitter](https://badges.gitter.im/qubole-sparklens/community.svg)](https://gitter.im/qubole-sparklens/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
 # SparkScope #
 
 SparkScope is a monitoring and profiling tool for Spark Applications. 
@@ -25,7 +23,38 @@ SparkScope html report contains the following features:
 - Java 7 and Java 8
 - Scala 2.11
 
-## Csv Sink configuration
+## Spark application configuration
+
+| parameter                               |                                                                                                                                                                   |
+|-----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| spark.extraListeners                    | com.ucesys.sparkscope.SparkScopeJobListener                                                                                                                       |
+| spark.jars                              | path to SparkScope jar                                                                                                                                            |
+| spark.metrics.conf                      | path to metrics.properties with CSV sinks configuration                                                                                                           |
+| spark.sparkscope.html.path              | path to which SparkScope html report will be saved                                                                                                                |
+| spark.sparkscope.metrics.dir.driver     | path to driver csv metrics relative to driver, if unspecified property driver.sink.csv.directory or *.sink.csv.directory from spark.metrics.conf will be used     |
+| spark.sparkscope.metrics.dir.executor   | path to executor csv metrics relative to driver, if unspecified property executor.sink.csv.directory or *.sink.csv.directory from spark.metrics.conf will be used |
+
+## Attaching SparkScope to Spark applications(without metrics.properties file)
+Sample spark-submit command:
+```bash
+spark-submit \
+--master yarn \
+--jars ./sparkscope_2.11-0.1.0.jar  \
+--conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
+--conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.CsvSink \
+--conf spark.metrics.conf.*.sink.csv.period=5 \
+--conf spark.metrics.conf.*.sink.csv.unit=seconds \
+--conf spark.metrics.conf.*.sink.csv.directory=/tmp/csv-metrics \
+--conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.sparkscope.metrics.dir.driver=/tmp/csv-metrics \
+--conf spark.sparkscope.metrics.dir.executor=/tmp/csv-metrics \
+--conf spark.sparkscope.html.path=./ \
+--class org.apache.spark.examples.SparkPi \
+./spark-examples_2.10-1.1.1.jar 5000
+```
+
+## Attaching SparkScope to Spark applications(with metrics.properties file)
 metrics.properties configuration example
 ```bash
 # Enable CsvSink for all instances by class name
@@ -51,37 +80,21 @@ driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource
 executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource
 ```
 
-## Spark application configuration
-
-| parameter                               |                                                                                                                                                     |
-|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| spark.extraListeners                    | com.ucesys.sparkscope.SparkScopeJobListener                                                                                                         |
-| spark.jars                              | path to SparkScope jar                                                                                                                              |
-| spark.metrics.conf                      | path to metrics.properties with CSV sinks configuration                                                                                             |
-| spark.sparkscope.html.path              | path to which SparkScope html report will be saved                                                                                                  |
-| spark.sparkscope.metrics.dir.driver     | optional path to driver csv metrics, if unspecified property driver.sink.csv.directory or *.sink.csv.directory from metrics.properties will be used |
-| spark.sparkscope.metrics.dir.executor   | optional path to executor csv metrics, if unspecified property executor.sink.csv.directory or *.sink.csv.directory from metrics.properties will be used      |
-
-## Running Spark appliations with SparkScope Listener
 Sample spark-submit command:
 ```bash
 spark-submit \
 --master yarn \
---deploy-mode client \
---num-executors 2 \
---executor-cores 4 \
 --jars ./sparkscope_2.11-0.1.0.jar  \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
---conf spark.eventLog.enabled=true \
---conf spark.eventLog.dir=/tmp/spark-events \
---conf spark.metrics.conf=/tmp/metrics.properties \
---conf spark.executor.cores=2 \
---conf spark.executor.instances=4 \
---conf spark.sparkscope.html.path=./ \
+--conf spark.metrics.conf=./metrics.properties \
 --files ./metrics.properties \
+--conf spark.sparkscope.metrics.dir.driver=/tmp/csv-metrics \
+--conf spark.sparkscope.metrics.dir.executor=/tmp/csv-metrics \
+--conf spark.sparkscope.html.path=./ \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
+
 ## SparkScope summary:
 
 SparkScope analysis summary should be printed out to the console:

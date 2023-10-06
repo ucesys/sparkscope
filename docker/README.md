@@ -1,5 +1,3 @@
-[![Gitter](https://badges.gitter.im/qubole-sparklens/community.svg)](https://gitter.im/qubole-sparklens/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
 # Sparkscope testing
 ### Build sparkscope  
 With sbt

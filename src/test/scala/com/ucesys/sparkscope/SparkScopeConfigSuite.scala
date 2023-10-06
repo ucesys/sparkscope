@@ -49,7 +49,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
     val propertiesLoaderFactoryMock= mock[PropertiesLoaderFactory]
 
     When("loading SparkScope config")
-    val sparkScopeConfig = SparkScopeConfig.load(sparkConfWithMetrics, propertiesLoaderFactoryMock)
+    val sparkScopeConfig = SparkScopeConfig.fromSparkConf(sparkConfWithMetrics, propertiesLoaderFactoryMock)
 
     Then("SparkScopeConfig.driverMetricsDir should be extracted from spark.sparkscope.metrics.dir.driver")
     assert(sparkScopeConfig.driverMetricsDir == "/sparkscope/path/to/driver/metrics")
@@ -77,7 +77,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
     val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
     When("loading SparkScope config")
-    val sparkScopeConfig = SparkScopeConfig.load(sparkConfWithMetrics, propertiesLoaderFactoryMock)
+    val sparkScopeConfig = SparkScopeConfig.fromSparkConf(sparkConfWithMetrics, propertiesLoaderFactoryMock)
 
     Then("SparkScopeConfig.driverMetricsDir should be extracted from spark.metrics.conf.driver.sink.csv.directory")
     assert(sparkScopeConfig.driverMetricsDir == "/spark/metrics/path/to/driver/metrics")
@@ -104,7 +104,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
     val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
     When("loading SparkScope config")
-    val sparkScopeConfig = SparkScopeConfig.load(sparkConfWithMetrics, propertiesLoaderFactoryMock)
+    val sparkScopeConfig = SparkScopeConfig.fromSparkConf(sparkConfWithMetrics, propertiesLoaderFactoryMock)
 
     Then("SparkScopeConfig.driverMetricsDir should be extracted from spark.metrics.conf.*.sink.csv.directory")
     assert(sparkScopeConfig.driverMetricsDir == "/spark/metrics/path/to/all/metrics")
@@ -128,7 +128,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
         .set("spark.metrics.conf", MetricsPropertiesPath)
 
     When("loading SparkScope config")
-    val sparkScopeConfig = SparkScopeConfig.load(sparkConfWithMetrics, getPropertiesLoaderFactoryMock)
+    val sparkScopeConfig = SparkScopeConfig.fromSparkConf(sparkConfWithMetrics, getPropertiesLoaderFactoryMock)
 
     Then("SparkScopeConfig.driverMetricsDir should be extracted from metrics.properties file")
     assert(sparkScopeConfig.driverMetricsDir == "/tmp/csv-metrics")
@@ -150,7 +150,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
     When("loading metrics")
     Then("SparkScopeConfig should throw IllegalArgumentException")
     assertThrows[IllegalArgumentException] {
-      val driverExecutorMetrics = SparkScopeConfig.load(sparkConf, getPropertiesLoaderFactoryMock)
+      val driverExecutorMetrics = SparkScopeConfig.fromSparkConf(sparkConf, getPropertiesLoaderFactoryMock)
     }
   }
 
@@ -168,7 +168,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
     When("loading metrics")
     Then("SparkScopeConfig should throw java.io.FileNotFoundException")
     assertThrows[IllegalArgumentException] {
-      val driverExecutorMetrics = SparkScopeConfig.load(sparkConf, new PropertiesLoaderFactory)
+      val driverExecutorMetrics = SparkScopeConfig.fromSparkConf(sparkConf, new PropertiesLoaderFactory)
     }
   }
 
@@ -193,7 +193,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
     When("loading metrics")
     Then("CsvHadoopMetricsLoader should throw NoSuchFieldException")
     assertThrows[IllegalArgumentException] {
-      val driverExecutorMetrics = SparkScopeConfig.load(sparkConf, propertiesLoaderFactoryMock)
+      val driverExecutorMetrics = SparkScopeConfig.fromSparkConf(sparkConf, propertiesLoaderFactoryMock)
     }
   }
 
@@ -218,7 +218,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
     When("loading metrics")
     Then("SparkScopeConfig should throw NoSuchFieldException")
     assertThrows[IllegalArgumentException] {
-      val driverExecutorMetrics = SparkScopeConfig.load(sparkConf, propertiesLoaderFactoryMock)
+      val driverExecutorMetrics = SparkScopeConfig.fromSparkConf(sparkConf, propertiesLoaderFactoryMock)
     }
   }
 
@@ -239,7 +239,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
     val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
     When("loading SparkScope config")
-    val sparkScopeConfig = SparkScopeConfig.load(sparkConfWithMetrics, propertiesLoaderFactoryMock)
+    val sparkScopeConfig = SparkScopeConfig.fromSparkConf(sparkConfWithMetrics, propertiesLoaderFactoryMock)
 
     Then("SparkScopeConfig.driverMetricsDir should be extracted from spark.sparkscope.metrics.dir.driver")
     assert(sparkScopeConfig.driverMetricsDir == "/sparkscope/path/to/driver/metrics")
@@ -267,7 +267,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
     val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
     When("loading SparkScope config")
-    val sparkScopeConfig = SparkScopeConfig.load(sparkConfWithMetrics, propertiesLoaderFactoryMock)
+    val sparkScopeConfig = SparkScopeConfig.fromSparkConf(sparkConfWithMetrics, propertiesLoaderFactoryMock)
 
     Then("SparkScopeConfig.driverMetricsDir should be extracted from spark.sparkscope.metrics.dir.driver")
     assert(sparkScopeConfig.driverMetricsDir == "/spark/metrics/path/to/driver/metrics")
@@ -291,7 +291,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
         .set("spark.metrics.conf.driver.sink.csv.directory", "/spark/metrics/path/to/driver/metrics")
 
     When("loading SparkScope config")
-    val sparkScopeConfig = SparkScopeConfig.load(sparkConfWithMetrics, getPropertiesLoaderFactoryMock)
+    val sparkScopeConfig = SparkScopeConfig.fromSparkConf(sparkConfWithMetrics, getPropertiesLoaderFactoryMock)
 
     And("SparkScopeConfig.driverMetricsDir should be extracted from spark.metrics.conf.driver.sink.csv.directory")
     assert(sparkScopeConfig.driverMetricsDir == "/spark/metrics/path/to/driver/metrics")
@@ -312,7 +312,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
         .set("spark.metrics.conf.executor.sink.csv.directory", "/spark/metrics/path/to/executor/metrics")
 
     When("loading SparkScope config")
-    val sparkScopeConfig = SparkScopeConfig.load(sparkConfWithMetrics, getPropertiesLoaderFactoryMock)
+    val sparkScopeConfig = SparkScopeConfig.fromSparkConf(sparkConfWithMetrics, getPropertiesLoaderFactoryMock)
 
     Then("SparkScopeConfig.driverMetricsDir should be extracted from metrics.properties file")
     assert(sparkScopeConfig.driverMetricsDir == "/tmp/csv-metrics")
@@ -324,7 +324,7 @@ class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen
   test("extract load html dir from SparkConf") {
     Given("Incorrectly configured metrics properties path")
     When("loading SparkScope config")
-    val driverExecutorMetrics = SparkScopeConfig.load(sparkConf, getPropertiesLoaderFactoryMock)
+    val driverExecutorMetrics = SparkScopeConfig.fromSparkConf(sparkConf, getPropertiesLoaderFactoryMock)
 
     Then("SparkScopeConfig should contain executorMetricsDir")
     assert(driverExecutorMetrics.htmlReportPath == "/path/to/html/report")
