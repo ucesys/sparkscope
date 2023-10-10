@@ -16,12 +16,19 @@ SparkScope html report contains the following features:
   - stats for driver, executors and aggregated stats for whole application
   - CPU and Heap Memory Waste stats
 
+## Compatibiltiy matrix
+
+| parameter                             | sparkscope-spark2(main)         |
+|---------------------------------------|---------------------------------|
+| scala version                         | 2.11.12                         |
+| compatible JDK versions               | 7, 8                            |
+| compatible Spark versions             | 2.3, 2.4                        |
+
 ## Tested environments:
-- Hadoop Yarn and Spark Standalone cluster
-- Client and Cluster Yarn deploy modes
-- Spark versions 2.3 and 2.4
-- Java 7 and Java 8
-- Scala 2.11
+- Hadoop Yarn(Client and Cluster deploy modes)
+- Spark Standalone cluster 
+
+
 
 ## Spark application configuration
 
