@@ -1,7 +1,8 @@
 # Changelog
 
 ## [0.1.2] - 2023-10-10
-Bump Scala version from 2.11.8 to 2.11.12
+- Bump Scala version from 2.11.8 to 2.11.12
+- Handle gently case for master=local where executorId=driver
 
 ## [0.1.1] - 2023-10-06
 - configuration:
