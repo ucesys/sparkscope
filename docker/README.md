@@ -7,8 +7,8 @@ docker run -it -v ./docker/lib:/opt/spark/work-dir/ apache/spark:v3.2.4  bash
 
 ```bash
 ```bash
-spark-submit \
---jars ./sparkscope-<VERSION>.jar \
+/opt/spark/bin/spark-submit \
+--jars ./sparkscope-0.1.2-SNAPSHOT.jar \
 --master local[*] \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf=./metrics.properties \

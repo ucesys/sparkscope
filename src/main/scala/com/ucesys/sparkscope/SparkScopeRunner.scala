@@ -34,9 +34,10 @@ class SparkScopeRunner(appContext: AppContext, sparkScopeConf: SparkScopeConfig,
       val driverExecutorMetrics = metricsLoader.load()
       analyze(sparkScopeConf, driverExecutorMetrics)
     } catch {
-      case ex: FileNotFoundException => log.error(s"SparkScope couldn't open a file. ${ex} SparkScope will now exit.")
-      case ex: NoSuchFileException => log.error(s"SparkScope couldn't open a file. ${ex} SparkScope will now exit.")
-      case ex: Exception =>  log.error(s"${ex}, Unexpected exception occurred, SparkScope will now exit.")
+      case ex: FileNotFoundException => log.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
+      case ex: NoSuchFileException => log.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
+      case ex: IllegalArgumentException => log.error(s"SparkScope couldn't load metrics. SparkScope will now exit.", ex)
+      case ex: Exception =>  log.error(s"Unexpected exception occurred, SparkScope will now exit.", ex)
     }
   }
 

@@ -1,5 +1,6 @@
 package com.ucesys.sparkscope.utils
 
+import java.io.{PrintWriter, StringWriter}
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import scala.collection.mutable
@@ -11,6 +12,11 @@ class Logger {
     log.append(x).append("\n")
   }
   override def toString: String = this.log.toString
+  def error(str: Any, ex: Throwable): Unit = {
+    val sw = new StringWriter();
+    ex.printStackTrace(new PrintWriter(sw));
+    log(s"${str}\n${sw.toString()}", "ERROR")
+  }
   def error(str: Any): Unit = log(str, "ERROR")
   def warn(str: Any): Unit = log(str, "WARN")
   def info(str: Any): Unit = log(str, "INFO")

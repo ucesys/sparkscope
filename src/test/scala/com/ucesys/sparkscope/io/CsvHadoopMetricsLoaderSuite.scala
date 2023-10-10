@@ -41,7 +41,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
 
     Then("Driver and Executor Metrics should be loaded")
     assert(driverExecutorMetrics.driverMetrics.length == DriverCsvMetrics.length)
-    assert(driverExecutorMetrics.executorMetricsMap(1).length == ExecutorCsvMetrics.length)
+    assert(driverExecutorMetrics.executorMetricsMap("1").length == ExecutorCsvMetrics.length)
 
     And("CsvHadoopMetricsLoader should ignore extra rows for driver metrics")
     driverExecutorMetrics.driverMetrics.foreach{ metric =>
@@ -49,7 +49,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     }
 
     And("CsvHadoopMetricsLoader should ignore extra rows for executor metrics")
-    driverExecutorMetrics.executorMetricsMap(1).foreach { metric =>
+    driverExecutorMetrics.executorMetricsMap("1").foreach { metric =>
       assert(metric.numRows == 10)
     }
   }
@@ -91,6 +91,6 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
     assert(driverExecutorMetrics.executorMetricsMap.head._2.length == ExecutorCsvMetrics.length)
 
     And("Missing Executor Metrics should be skipped")
-    assert(driverExecutorMetrics.executorMetricsMap.get(6).isEmpty)
+    assert(driverExecutorMetrics.executorMetricsMap.get("6").isEmpty)
   }
 }

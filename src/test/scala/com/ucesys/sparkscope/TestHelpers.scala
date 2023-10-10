@@ -359,28 +359,28 @@ object TestHelpers extends FunSuite with MockFactory {
   )
 
   val executorMetricsMap = Map(
-    1 -> Seq(
+    "1" -> Seq(
       DataFrame.fromCsv("exec1-heap-used", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed)),
       DataFrame.fromCsv("exec1-heap-max", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax)),
       DataFrame.fromCsv("exec1-heap-usage", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage)),
       DataFrame.fromCsv("exec1-non-heap", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed)),
       DataFrame.fromCsv("exec1-cpu-time", cpuTime1Csv, ",", Seq("t", CpuTime))
     ),
-    2 -> Seq(
+    "2" -> Seq(
       DataFrame.fromCsv("exec2-heap-used", jvmHeapExec2Csv, ",", Seq("t", JvmHeapUsed)),
       DataFrame.fromCsv("exec2-heap-max", jvmHeapMaxExec2Csv, ",", Seq("t", JvmHeapMax)),
       DataFrame.fromCsv("exec2-heap-usage", jvmHeapUsageExec2Csv, ",", Seq("t", JvmHeapUsage)),
       DataFrame.fromCsv("exec2-non-heap", jvmNonHeapExec2Csv, ",", Seq("t", JvmNonHeapUsed)),
       DataFrame.fromCsv("exec2-cpu-time", cpuTime2Csv, ",", Seq("t", CpuTime))
     ),
-    3 -> Seq(
+    "3" -> Seq(
       DataFrame.fromCsv("exec3-heap-used", jvmHeapExec3Csv, ",", Seq("t", JvmHeapUsed)),
       DataFrame.fromCsv("exec3-heap-max", jvmHeapMaxExec3Csv, ",", Seq("t", JvmHeapMax)),
       DataFrame.fromCsv("exec3-heap-usage", jvmHeapUsageExec3Csv, ",", Seq("t", JvmHeapUsage)),
       DataFrame.fromCsv("exec3-non-heap", jvmNonHeapExec3Csv, ",", Seq("t", JvmNonHeapUsed)),
       DataFrame.fromCsv("exec3-cpu-time", cpuTime3Csv, ",", Seq("t", CpuTime))
     ),
-    5 -> Seq(
+    "5" -> Seq(
       DataFrame.fromCsv("exec5-heap-used", jvmHeapExec5Csv, ",", Seq("t", JvmHeapUsed)),
       DataFrame.fromCsv("exec5-heap-max", jvmHeapMaxExec5Csv, ",", Seq("t", JvmHeapMax)),
       DataFrame.fromCsv("exec5-heap-usage", jvmHeapUsageExec5Csv, ",", Seq("t", JvmHeapUsage)),
@@ -394,7 +394,7 @@ object TestHelpers extends FunSuite with MockFactory {
     executorMetricsMap = executorMetricsMap
   )
 
-  val missingMetricsWarning = MissingMetricsWarning(Seq(1,2,3,4,5), Seq(1,2,3,5))
+  val missingMetricsWarning = MissingMetricsWarning(Seq("1","2","3","4","5"), Seq("1","2","3","5"))
   def mockAppContext(): AppContext = {
     val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
       "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
