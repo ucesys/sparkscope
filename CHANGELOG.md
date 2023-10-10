@@ -1,17 +1,7 @@
 # Changelog
 
-## [0.1.2] - 2023-10-10
-- Bump Scala version from 2.11.8 to 2.11.12
-- Handle gently case for master=local where executorId=driver
-
-## [0.1.1] - 2023-10-06
-- configuration:
-  - sparkscope will prioritize csv metrics SparkConf configuration and use metrics.properties files as last-resort 
-- html-report:
-    - remove core-hours and heap gb-hours from warnings
-
-## [0.1.0] - 2023-09-29
-Initial SparkScope release:
+## [0.1.0] - 2023-10-10
+Initial SparkScope-spark3 release:
 - Charts:
   - heap & non-heap usage charts
   - cpu utilization charts

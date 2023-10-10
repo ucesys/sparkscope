@@ -1,7 +1,7 @@
-name := "sparkscope-spark2"
+name := "sparkscope-spark3"
 organization := "com.ucesys"
 
-scalaVersion := "2.11.12"
+scalaVersion := "2.12.18"
 
 spName := "ucesys/sparkscope-spark2"
 
