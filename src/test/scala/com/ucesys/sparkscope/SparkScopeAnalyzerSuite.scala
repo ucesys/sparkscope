@@ -77,9 +77,9 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     ))
 
     assert(result.stats.clusterCPUStats == ClusterCPUStats(
-      cpuUtil = 0.54299,
+      cpuUtil = 0.55483,
       coreHoursAllocated = 0.04222,
-      coreHoursWasted = 0.02293,
+      coreHoursWasted = 0.02343,
       executorTimeSecs = 152,
       executorCores = 1
     ))
@@ -139,9 +139,9 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     ))
 
     assert(result.stats.clusterCPUStats == ClusterCPUStats(
-      cpuUtil = 0.54299,
+      cpuUtil = 0.55483,
       coreHoursAllocated = 0.04222,
-      coreHoursWasted = 0.02293,
+      coreHoursWasted = 0.02343,
       executorTimeSecs = 152,
       executorCores = 1
     ))

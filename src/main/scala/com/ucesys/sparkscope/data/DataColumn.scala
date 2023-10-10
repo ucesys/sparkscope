@@ -20,6 +20,8 @@ case class DataColumn(name: String, values: Seq[String]) {
 
     def gt(greaterThan: Double): DataColumn = DataColumn(this.name, values.map(elem => Seq(greaterThan,elem.toDouble).max.toString))
 
+    def lt(lowerThan: Double): DataColumn = DataColumn(this.name, values.map(elem => Seq(lowerThan, elem.toDouble).min.toString))
+
 
     def mul(other: DataColumn): DataColumn = {
         val multipliedValues = (this.values zip other.values).map { case (x, y) => (x.toDouble * y.toDouble).toString }
@@ -29,6 +31,12 @@ case class DataColumn(name: String, values: Seq[String]) {
         val subtractedValues = (this.values zip other.values).map { case (x, y) => (x.toDouble - y.toDouble).toString }
         DataColumn(s"${this.name}Sub${other.name}", subtractedValues)
     }
+
+    def min(other: DataColumn): DataColumn = {
+        val subtractedValues = (this.values zip other.values).map { case (x, y) => Seq(x.toDouble, y.toDouble).min.toString}
+        DataColumn(s"${this.name}Min${other.name}", subtractedValues)
+    }
+
     def sum: Double = this.toDouble.sum
     def max: Double = this.toDouble.max
     def avg: Double = this.toDouble.sum / values.length

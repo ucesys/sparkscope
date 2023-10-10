@@ -277,7 +277,7 @@ object TestHelpers extends FunSuite with MockFactory {
       |1695358685,8767561125
       |1695358690,11460149659
       |1695358695,15116281483
-      |1695358697,16963354541""".stripMargin
+      |1695358697,18263354541""".stripMargin
 
   // ---------- EXEC 3 ----------
   val jvmHeapExec5Csv: String =
@@ -309,7 +309,7 @@ object TestHelpers extends FunSuite with MockFactory {
     """t,count
       |1695358691,1877412152
       |1695358696,5451002249
-      |1695358697,6129593128""".stripMargin
+      |1695358697,6629593128""".stripMargin
 
   val jvmHeapExec7Csv: String =
     """t,value
@@ -349,7 +349,7 @@ object TestHelpers extends FunSuite with MockFactory {
       |1695358696,5451002249
       |1695358701,8129593128
       |1695358706,11129593128
-      |1695358711,14963300828""".stripMargin
+      |1695358711,16963300828""".stripMargin
 
   val driverMetrics = Seq(
     DataFrame.fromCsv("driver-heap-used", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed)),
