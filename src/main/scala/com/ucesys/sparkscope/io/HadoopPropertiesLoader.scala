@@ -2,6 +2,7 @@ package com.ucesys.sparkscope.io
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
+
 import java.io.InputStreamReader
 import java.net.URI
 import java.util.Properties
