@@ -16,17 +16,13 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope
+package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMetrics}
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, HadoopPropertiesLoader, PropertiesLoader, PropertiesLoaderFactory}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.GivenWhenThen
-
-import java.io.FileNotFoundException
-import java.util.Properties
 import org.scalatest.FunSuite
 
 class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWhenThen {
