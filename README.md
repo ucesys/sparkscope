@@ -18,11 +18,11 @@ SparkScope html report contains the following features:
 
 ## Compatibiltiy matrix
 
-| parameter                             | sparkscope-spark2(main)         |
-|---------------------------------------|---------------------------------|
-| scala version                         | 2.11.12                         |
-| compatible JDK versions               | 7, 8                            |
-| compatible Spark versions             | 2.3, 2.4                        |
+|                           | spark 2 (sparkscope/main) | spark 3 (sparkscope/spark3) |
+|---------------------------|---------------------------|-----------------------------|
+| scala version             | 2.11.12                   | 2.12.18                     |
+| compatible JDK versions   | 7, 8                      | 8, 11, 17                   |
+| compatible Spark versions | 2.3, 2.4                  | 3.2, 3.3, 3.4, 3.5          |
 
 ## Tested environments:
 - Hadoop Yarn(Client and Cluster deploy modes)

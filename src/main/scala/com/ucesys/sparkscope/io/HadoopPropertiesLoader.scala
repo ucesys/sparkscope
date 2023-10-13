@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.io
 
-import com.ucesys.sparklens.helper.HDFSConfigHelper
+import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
 import java.io.InputStreamReader
@@ -9,7 +9,7 @@ import java.util.Properties
 
 class HadoopPropertiesLoader(propertiesPathStr: String) extends PropertiesLoader {
   def load(): Properties = {
-    val fs = FileSystem.get(new URI(propertiesPathStr), HDFSConfigHelper.getHadoopConf(None))
+    val fs = FileSystem.get(new URI(propertiesPathStr), new Configuration())
     val path = new Path(propertiesPathStr)
     val fis = new InputStreamReader(fs.open(path))
     val prop = new Properties()
