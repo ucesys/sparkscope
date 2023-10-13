@@ -5,7 +5,7 @@ scalaVersion := "2.12.18"
 
 spName := "ucesys/sparkscope-spark2"
 
-sparkVersion := "2.3.1"
+sparkVersion := "3.2.0"
 
 spAppendScalaVersion := true
 
