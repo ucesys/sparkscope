@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Scala SBT CI
+name: Scala SBT CI LINUX
 
 on:
   push:
