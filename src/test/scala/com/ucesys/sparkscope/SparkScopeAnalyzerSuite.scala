@@ -34,7 +34,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     val ac = mockAppContext()
     val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
-    When("running parkScopeAnalyzer.analyze")
+    When("running SparkScopeAnalyzer.analyze")
     val result = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
     Then("SparkScopeResult shouldn contain low CPU and low heap utilization warnings")
@@ -92,7 +92,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     mockcorrectMetrics(csvReaderMock)
     val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
-    When("running parkScopeAnalyzer.analyze")
+    When("running SparkScopeAnalyzer.analyze")
     val result: SparkScopeResult = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
     Then("Result should contain a warning regarding missing executor metrics")
