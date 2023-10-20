@@ -18,7 +18,6 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparkscope.SparkScopeRunner.sparkScopeSign
 import com.ucesys.sparkscope.io.{DriverExecutorMetrics, HtmlReportGenerator, MetricsLoader}
 import com.ucesys.sparkscope.utils.Logger
 
@@ -48,7 +47,6 @@ class SparkScopeRunner(appContext: AppContext, sparkScopeConf: SparkScopeConfig,
     val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
 
     log.info(s"SparkScope analysis took ${durationSparkScope}s")
-    log.info(sparkScopeSign)
 
     log.info(sparkScopeResult.stats.executorStats + "\n")
     log.info(sparkScopeResult.stats.driverStats + "\n")
@@ -57,15 +55,4 @@ class SparkScopeRunner(appContext: AppContext, sparkScopeConf: SparkScopeConfig,
 
     HtmlReportGenerator.generateHtml(sparkScopeResult, sparkScopeConf.htmlReportPath, sparklensResults, sparkScopeConf.sparkConf)
   }
-}
-
-object SparkScopeRunner {
-  val sparkScopeSign =
-    """
-      |     ____              __    ____
-      |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
-      |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
-      |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
-      |     /_/                             /_/    spark3-v0.1.0
-      |""".stripMargin
 }

@@ -20,11 +20,15 @@ package com.ucesys.sparkscope
 import com.ucesys.sparklens.QuboleJobListener
 import com.ucesys.sparklens.analyzer.AppAnalyzer
 import com.ucesys.sparklens.common.AppContext
+import com.ucesys.sparkscope.SparkScopeJobListener.SparkScopeSign
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, FileReaderFactory, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.utils.Logger
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 
 class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(sparkConf: SparkConf) {
+
+    val log = new Logger
 
     override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
         //println(s"Application ${appInfo.applicationID} ended at ${applicationEnd.time}")
@@ -63,9 +67,22 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
           Seq.empty
         }
 
+        log.info(SparkScopeSign)
+
         val sparkScopeConf = SparkScopeConfig.fromSparkConf(sparkConf, new PropertiesLoaderFactory)
         val metricsLoader = new CsvHadoopMetricsLoader(new FileReaderFactory, appContext, sparkScopeConf)
         val sparkScopeRunner = new SparkScopeRunner(appContext, sparkScopeConf, metricsLoader, sparklensResults)
         sparkScopeRunner.run()
     }
+}
+
+object SparkScopeJobListener {
+  val SparkScopeSign =
+    """
+      |     ____              __    ____
+      |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+      |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+      |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+      |     /_/                             /_/    spark3-v0.1.0
+      |""".stripMargin
 }

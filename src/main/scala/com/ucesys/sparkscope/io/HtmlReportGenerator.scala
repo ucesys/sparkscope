@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
-import com.ucesys.sparkscope.SparkScopeRunner
+import com.ucesys.sparkscope.SparkScopeJobListener.SparkScopeSign
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 import com.ucesys.sparkscope.utils.Logger
 import org.apache.spark.SparkConf
@@ -31,7 +31,7 @@ object HtmlReportGenerator {
     }
 
     val rendered = template
-      .replace("${sparkScopeSign}", SparkScopeRunner.sparkScopeSign)
+      .replace("${sparkScopeSign}", SparkScopeSign)
       .replace("${appInfo.applicationId}", result.appInfo.applicationID)
       .replace("${appInfo.start}", ofEpochSecond(result.appInfo.startTime/1000, 0, UTC).toString)
       .replace("${appInfo.end}", ofEpochSecond(result.appInfo.endTime/1000, 0, UTC).toString)
