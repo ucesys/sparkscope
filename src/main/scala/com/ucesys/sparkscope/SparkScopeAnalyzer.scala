@@ -22,35 +22,34 @@ import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparklens.timespan.ExecutorTimeSpan
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.{DataColumn, DataFrame}
-import com.ucesys.sparkscope.io.{DriverExecutorMetrics, MetricsLoader}
+import com.ucesys.sparkscope.io.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
-import com.ucesys.sparkscope.utils.Logger
+import com.ucesys.sparkscope.utils.SparkScopeLogger
 import com.ucesys.sparkscope.warning.{CPUUtilWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
 
-class SparkScopeAnalyzer {
+class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
   def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: AppContext): SparkScopeResult = {
     val ac = appContext.filterByStartAndEndTime(appContext.appInfo.startTime, appContext.appInfo.endTime)
-    val log = new Logger
 
     var driverMetricsMerged: DataFrame = driverExecutorMetrics.driverMetrics.head
     driverExecutorMetrics.driverMetrics.tail.foreach { metric =>
       driverMetricsMerged = driverMetricsMerged.mergeOn("t", metric)
     }
-    log.println(s"\nDisplaying merged metrics for driver:\n${driverMetricsMerged}")
+    logger.println(s"\nDisplaying merged metrics for driver:\n${driverMetricsMerged}")
 
     driverExecutorMetrics.executorMetricsMap.foreach { case (id, metrics) =>
-      metrics.foreach { metric => log.println(s"\nDisplaying ${metric.name} metric for executor=${id}:\n${metric}")
+      metrics.foreach { metric => logger.println(s"\nDisplaying ${metric.name} metric for executor=${id}:\n${metric}")
       }
     }
 
     // Interpolating metrics
     val executorsMetricsMapInterpolated = interpolateExecutorMetrics(ac.executorMap, driverExecutorMetrics.executorMetricsMap)
     executorsMetricsMapInterpolated.foreach { case (id, metrics) =>
-      metrics.foreach { metric => log.println(s"\nInterpolated ${metric.name} metric for executor=${id}:\n${metric}")}
+      metrics.foreach { metric => logger.println(s"\nInterpolated ${metric.name} metric for executor=${id}:\n${metric}")}
     }
 
     // For each executor, merge it's respective metrics into a single DataFrame(one for each executor)
@@ -59,7 +58,7 @@ class SparkScopeAnalyzer {
       metrics.tail.foreach(metric => mergedMetrics = mergedMetrics.mergeOn("t", metric))
       (executorId, mergedMetrics)
     }
-    executorsMetricsCombinedMap.foreach { case (id, m) => log.println(s"\nMerged metrics for executor=${id}:\n${m}")}
+    executorsMetricsCombinedMap.foreach { case (id, m) => logger.println(s"\nMerged metrics for executor=${id}:\n${m}")}
 
     // Add cpu usage for each executor
     val executorsMetricsCombinedMapWithCpuUsage: Map[String, DataFrame] = executorsMetricsCombinedMap.map { case (id, metrics) =>
@@ -81,15 +80,15 @@ class SparkScopeAnalyzer {
     }
 
     executorsMetricsCombinedMapWithExecId.foreach { case (id, metrics) =>
-      log.println(s"\nDisplaying merged metrics with executorId for executor=${id}:\n${metrics}")
+      logger.println(s"\nDisplaying merged metrics with executorId for executor=${id}:\n${metrics}")
     }
 
     // Union all executors metrics into single DataFrame
     var allExecutorsMetrics: DataFrame = executorsMetricsCombinedMapWithExecId.head match {case (_, b) => b}
     executorsMetricsCombinedMapWithExecId.tail.foreach { case (_, metrics) => allExecutorsMetrics = allExecutorsMetrics.union(metrics)}
     allExecutorsMetrics = allExecutorsMetrics.addColumn(allExecutorsMetrics.select("t").tsToDt)
-    log.println(s"\nDisplaying merged metrics for all executors:")
-    log.println(allExecutorsMetrics)
+    logger.println(s"\nDisplaying merged metrics for all executors:")
+    logger.println(allExecutorsMetrics)
 
     // Executor Start, End, Duration
     val startEndTimes = getExecutorStartEndTimes(ac)
@@ -101,18 +100,18 @@ class SparkScopeAnalyzer {
     val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics)
     val clusterMemoryMetrics = ClusterMemoryMetrics(allExecutorsMetrics)
     val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics, getExecutorCores(ac))
-    log.println(clusterMemoryMetrics)
-    log.println(clusterCPUMetrics)
+    logger.println(clusterMemoryMetrics)
+    logger.println(clusterCPUMetrics)
 
     // Stats
     val driverStats = DriverMemoryStats(driverMetricsMerged)
     val executorStats = ExecutorMemoryStats(allExecutorsMetrics)
     val clusterMemoryStats = ClusterMemoryStats(clusterMemoryMetrics, executorTimeSecs, executorStats)
     val clusterCPUStats = ClusterCPUStats(clusterCPUMetrics, getExecutorCores(ac), executorTimeSecs)
-    log.println(executorStats)
-    log.println(driverStats)
-    log.println(clusterMemoryStats)
-    log.println(clusterCPUStats)
+    logger.println(executorStats)
+    logger.println(driverStats)
+    logger.println(clusterMemoryStats)
+    logger.println(clusterCPUStats)
 
     // Warnings
     val warnings: Seq[Option[Warning]] = Seq(
@@ -126,7 +125,7 @@ class SparkScopeAnalyzer {
 
     SparkScopeResult(
       appInfo = ac.appInfo,
-      logs=log.toString,
+      logs=logger.toString,
       stats = SparkScopeStats(
         driverStats = driverStats, 
         executorStats = executorStats,

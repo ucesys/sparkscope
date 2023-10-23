@@ -18,7 +18,7 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.TestHelpers.{MetricsPropertiesPath, csvMetricsPath, getPropertiesLoaderFactoryMock, getPropertiesLoaderMock, sparkConf}
+import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.io.{PropertiesLoader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.SparkScopeConfig._
 
@@ -26,7 +26,6 @@ import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 
-import java.io.FileNotFoundException
 import java.util.Properties
 
 class SparkScopeConfigSuite extends FunSuite with MockFactory with GivenWhenThen {

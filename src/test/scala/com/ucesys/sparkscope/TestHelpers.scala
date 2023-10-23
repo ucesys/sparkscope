@@ -5,6 +5,7 @@ import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpa
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.DataFrame
 import com.ucesys.sparkscope.io.{DriverExecutorMetrics, FileReader, FileReaderFactory, HadoopFileReader, PropertiesLoader, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.utils.SparkScopeLogger
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
@@ -15,21 +16,23 @@ import java.util.Properties
 import scala.collection.mutable
 
 object TestHelpers extends FunSuite with MockFactory {
-  val TestDir = ".tests"
-  val appId = "app-20230101010819-test"
-  val StartTime: Long = 1695358645000L
-  val EndTime: Long = 1695358700000L
-  val MetricsPropertiesPath = "path/to/metrics.properties"
-  val csvMetricsPath = "/tmp/csv-metrics"
-  val sparkConf = new SparkConf()
+    implicit val logger: SparkScopeLogger = SparkScopeLogger.get
+
+    val TestDir = ".tests"
+    val appId = "app-20230101010819-test"
+    val StartTime: Long = 1695358645000L
+    val EndTime: Long = 1695358700000L
+    val MetricsPropertiesPath = "path/to/metrics.properties"
+    val csvMetricsPath = "/tmp/csv-metrics"
+    val sparkConf = new SparkConf()
       .set("spark.metrics.conf", MetricsPropertiesPath)
       .set("spark.sparkscope.html.path", "/path/to/html/report")
-  val sparkScopeConf = SparkScopeConfig.fromSparkConf(sparkConf, getPropertiesLoaderFactoryMock)
-  val emptyFileCsv: String =
+    val sparkScopeConf = SparkScopeConfig.fromSparkConf(sparkConf, getPropertiesLoaderFactoryMock)
+    val emptyFileCsv: String =
     """t,value
       |1695358645,0""".stripMargin
 
-  val jvmHeapDriverCsv: String =
+    val jvmHeapDriverCsv: String =
     """t,value
       |1695358645,283638704
       |1695358650,220341368
