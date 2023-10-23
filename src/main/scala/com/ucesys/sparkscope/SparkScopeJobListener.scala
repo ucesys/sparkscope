@@ -64,7 +64,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
             AppAnalyzer.startAnalyzers(appContext)
         } catch {
             case ex: Exception => println("Sparklens has thrown an exception" + ex, ex)
-            Seq.empty
+                Seq.empty
         }
 
         logger.info(SparkScopeSign)
@@ -79,11 +79,11 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
 
 object SparkScopeJobListener {
     val SparkScopeSign =
-    """
-      |     ____              __    ____
-      |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
-      |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
-      |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
-      |     /_/                             /_/    spark3-v0.1.0
-      |""".stripMargin
+        """
+          |     ____              __    ____
+          |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+          |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+          |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+          |     /_/                             /_/    spark3-v0.1.0
+          |""".stripMargin
 }
