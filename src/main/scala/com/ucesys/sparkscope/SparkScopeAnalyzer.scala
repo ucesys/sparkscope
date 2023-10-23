@@ -180,15 +180,19 @@ class SparkScopeAnalyzer {
 
         val executorStartTime = executorMap(id.toString).startTime / MilliSecondsInSec
 
-         val columnsWithZeroCells = metric.columns.map{ col =>
-           val colWithZeroCell: DataColumn = col.name match {
-             case "t" => col.copy(values=Seq(executorStartTime.toString) ++ col.values)
-             case "jvm.heap.max" => col.copy(values=Seq(col.values.head) ++ col.values)
-             case _ => col.copy(values=(Seq("0") ++ col.values))
+        if (metric.select("t").values.contains(executorStartTime.toString)) {
+          metric
+        } else {
+           val columnsWithZeroCells = metric.columns.map { col =>
+             val colWithZeroCell: DataColumn = col.name match {
+               case "t" => col.copy(values = Seq(executorStartTime.toString) ++ col.values)
+               case "jvm.heap.max" => col.copy(values = Seq(col.values.head) ++ col.values)
+               case _ => col.copy(values = (Seq("0") ++ col.values))
+             }
+             colWithZeroCell
            }
-           colWithZeroCell
-        }
-        metric.copy(columns = columnsWithZeroCells)
+           metric.copy(columns = columnsWithZeroCells)
+         }
       }
       (id, metricsWithZeroRows)
     }
