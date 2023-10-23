@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Scala SBT CI LINUX
+name: Scala MVN CI WINDOWS
 
 on:
   push:
@@ -17,7 +17,7 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -26,8 +26,8 @@ jobs:
       with:
         java-version: '8'
         distribution: 'temurin'
-        cache: 'sbt'
-    - name: Build
-      run: sbt compile
-    - name: Run tests
-      run: sbt test
+        cache: 'maven'
+    - name: Compile
+      run: mvn compile
+    - name: Test and build jar
+      run: mvn package

@@ -2,6 +2,7 @@ package com.ucesys.sparkscope.data
 
 case class DataFrame(name: String, columns: Seq[DataColumn]) {
     def numCols: Int = columns.length
+
     def numRows: Int = columns.headOption.map(x => x.values.length).getOrElse(0)
 
     def columnsNames: Seq[String] = columns.map(_.name)
@@ -11,16 +12,18 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
     def toRowsWithHeader: Seq[Seq[String]] = Seq(this.columnsNames) ++ this.toRows
 
     def select(column: String): DataColumn = this.columns.find(_.name == column).get
+
     def select(subColumns: Seq[String]): DataFrame = DataFrame(this.name, this.columns.filter(col => subColumns.contains(col.name)))
 
     def toCsv(delimeter: String): String = this.toRowsWithHeader.map(_.mkString(delimeter)).mkString("\n")
+
     override def toString(): String = {
         val paddedCols = this.columns.map { col =>
             val colWithName = Seq(col.name) ++ col.values
             val maxStrLength = colWithName.map(_.length).max
             val borderStr = Seq.fill(maxStrLength)("-").mkString
             val colWithNameWithBorder = Seq(borderStr, col.name, borderStr) ++ col.values ++ Seq(borderStr)
-            val paddedValues = colWithNameWithBorder.map{ str => str + Seq.fill(maxStrLength-str.length)(" ").mkString}
+            val paddedValues = colWithNameWithBorder.map { str => str + Seq.fill(maxStrLength - str.length)(" ").mkString }
             DataColumn(col.name, paddedValues)
         }
         DataFrame(this.name, paddedCols).toRows.map(_.mkString("|", "|", "|")).mkString("\n")
@@ -45,7 +48,7 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
     def mergeOn(onCol: String, other: DataFrame): DataFrame = {
         val left = this.columns.find(_.name == onCol)
         val right = other.columns.find(_.name == onCol)
-        assert(left ==  right, s"MergedOn failed for tables(${this.name}, ${other.name}) must have the same values for the onColumn! \nLeft: ${left}\nRight: ${right}")
+        assert(left == right, s"MergedOn failed for tables(${this.name}, ${other.name}) must have the same values for the onColumn! \nLeft: ${left}\nRight: ${right}")
         DataFrame(this.name, this.columns ++ other.columns.filterNot(_.name == onCol))
     }
 
@@ -59,13 +62,13 @@ case class DataFrame(name: String, columns: Seq[DataColumn]) {
 
     def sortBy(col: String): DataFrame = {
         val sortCol: DataColumn = this.select(col)
-        val sortedRows = (sortCol.values zip this.toRows).sortBy(_._1).map{case (_, row) => row}
+        val sortedRows = (sortCol.values zip this.toRows).sortBy(_._1).map { case (_, row) => row }
         DataFrame.fromRows(this.name, this.columnsNames, sortedRows)
     }
 
     def distinct(col: String): DataFrame = {
         val dinstinctCol = this.select(col)
-        val rows = (dinstinctCol.values zip this.toRows).groupBy(_._1).map{case (key, value) => value.head._2}.toSeq
+        val rows = (dinstinctCol.values zip this.toRows).groupBy(_._1).map { case (key, value) => value.head._2 }.toSeq
         DataFrame.fromRows(this.name, this.columnsNames, rows)
     }
 
@@ -78,11 +81,12 @@ object DataFrame {
     def apply(column: DataColumn): DataFrame = {
         DataFrame(column.name, Seq(column))
     }
+
     def fromCsv(name: String, csvStr: String, delimeter: String): DataFrame = {
-        val rows = csvStr.split("\n")
+        val rows = csvStr.replace("\r\n", "\n").split("\n")
         val header = rows.head.split(delimeter)
         val columnsSeq = rows.tail.map(_.split(delimeter)).transpose
-        val columns = (header zip columnsSeq).map{case (name, values) => DataColumn(name, values)}
+        val columns = (header zip columnsSeq).map { case (name, values) => DataColumn(name, values) }
         DataFrame(name, columns)
     }
 
