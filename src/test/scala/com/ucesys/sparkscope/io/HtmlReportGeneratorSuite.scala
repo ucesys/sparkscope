@@ -21,11 +21,12 @@ package com.ucesys.sparkscope.io
 import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 import java.nio.file.{Files, Paths}
 
-class HtmlReportGeneratorSuite extends FunSuite with MockFactory {
+class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndAfterAll {
+  override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
 
   test("SparkScope end2end no warnings") {
     val ac = mockAppContext("html-generator-no-warnings")

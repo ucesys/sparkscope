@@ -26,10 +26,7 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 import java.nio.file.{Files, Paths}
 
 class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen with BeforeAndAfterAll {
-
-  override def beforeAll(): Unit = {
-    Files.createDirectories(Paths.get(TestDir))
-  }
+  override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
 
   test("SparkScopeRunner upscaling test") {
     Given("Metrics for application which was upscaled")
