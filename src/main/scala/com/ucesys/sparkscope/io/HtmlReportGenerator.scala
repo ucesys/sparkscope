@@ -34,7 +34,7 @@ class HtmlReportGenerator(implicit logger: SparkScopeLogger) {
           .replace("${appInfo.start}", ofEpochSecond(result.appInfo.startTime / 1000, 0, UTC).toString)
           .replace("${appInfo.end}", ofEpochSecond(result.appInfo.endTime / 1000, 0, UTC).toString)
           .replace("${appInfo.duration}", durationStr)
-          .replace("${logs}", result.logs)
+          .replace("${logs}", logger.toString)
           .replace("${warnings}", warningsStr)
           .replace("${sparkConf}", sparkConf.getAll.map { case (key, value) => s"${key}: ${value}" }.mkString("\n"))
           .replace("${sparklens}", sparklensResults.mkString("\n"))

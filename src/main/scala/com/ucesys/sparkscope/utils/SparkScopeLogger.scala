@@ -27,7 +27,10 @@ class SparkScopeLogger private {
 
     def info(str: Any): Unit = log(str, "INFO")
 
-    def log(str: Any, level: String): Unit = Predef.println(logStr(str, level))
+    def log(str: Any, level: String): Unit = {
+        this.println(logStr(str, level))
+        Predef.println(logStr(str, level))
+    }
 
     def logStr(str: Any, level: String): String = s"${timeFormat.format(Calendar.getInstance.getTime)} ${level} [SparkScope] ${str}"
 }

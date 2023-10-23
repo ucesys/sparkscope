@@ -110,10 +110,6 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         val executorStats = ExecutorMemoryStats(allExecutorsMetrics)
         val clusterMemoryStats = ClusterMemoryStats(clusterMemoryMetrics, executorTimeSecs, executorStats)
         val clusterCPUStats = ClusterCPUStats(clusterCPUMetrics, getExecutorCores(ac), executorTimeSecs)
-        logger.println(executorStats)
-        logger.println(driverStats)
-        logger.println(clusterMemoryStats)
-        logger.println(clusterCPUStats)
 
         // Warnings
         val warnings: Seq[Option[Warning]] = Seq(
@@ -127,7 +123,6 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
         SparkScopeResult(
             appInfo = ac.appInfo,
-            logs = logger.toString,
             stats = SparkScopeStats(
                 driverStats = driverStats,
                 executorStats = executorStats,

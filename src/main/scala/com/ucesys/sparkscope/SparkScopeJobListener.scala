@@ -63,7 +63,8 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
         val sparklensResults: Seq[String] = try {
             AppAnalyzer.startAnalyzers(appContext)
         } catch {
-            case ex: Exception => println("Sparklens has thrown an exception" + ex, ex)
+            case ex: Exception =>
+                println("Sparklens has thrown an exception" + ex, ex)
                 Seq.empty
         }
 
