@@ -21,20 +21,24 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader}
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{FunSuite, GivenWhenThen}
+import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
 import java.nio.file.{Files, Paths}
 
-class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen {
+class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen with BeforeAndAfterAll {
+
+  override def beforeAll(): Unit = {
+    Files.createDirectories(Paths.get(TestDir))
+  }
 
   test("SparkScopeRunner upscaling test") {
     Given("Metrics for application which was upscaled")
-    val ac = mockAppContext()
+    val ac = mockAppContext("runner-upscale")
     val csvReaderMock = stub[HadoopFileReader]
-    mockcorrectMetrics(csvReaderMock)
+    mockcorrectMetrics(csvReaderMock, ac.appInfo.applicationID)
 
     And("SparkScopeConf with specified html report path")
-    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = "./")
+    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
     val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
     val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfHtmlReportPath, metricsLoader, Seq("Executor Timeline", "Sparkscope text"))
 
@@ -42,18 +46,18 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     sparkScopeRunner.run()
 
     Then("Report should be generated")
-    assert(Files.exists(Paths.get("./" + ac.appInfo.applicationID + ".html")))
+    assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
   }
 
 
   test("SparkScopeRunner upscaling and downscaling test") {
     Given("Metrics for application which was upscaled and downscaled")
-    val ac = mockAppContextWithDownscaling()
+    val ac = mockAppContextWithDownscaling("runner-upscale-downscale")
     val csvReaderMock = stub[HadoopFileReader]
-    mockMetricsWithDownscaling(csvReaderMock)
+    mockMetricsWithDownscaling(csvReaderMock, ac.appInfo.applicationID)
 
     And("SparkScopeConf with specified html report path")
-    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = "./")
+    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
     val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
     val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfHtmlReportPath, metricsLoader, Seq("Executor Timeline", "Sparkscope text"))
 
@@ -61,17 +65,17 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     sparkScopeRunner.run()
 
     Then("Report should be generated")
-    assert(Files.exists(Paths.get("./" + ac.appInfo.applicationID + ".html")))
+    assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
   }
 
   test("SparkScopeRunner upscaling and downscaling multicore test") {
     Given("Metrics for application which was upscaled and downscaled")
-    val ac = mockAppContextWithDownscalingMuticore()
+    val ac = mockAppContextWithDownscalingMuticore("runner-upscale-downscale-multicore")
     val csvReaderMock = stub[HadoopFileReader]
-    mockMetricsWithDownscaling(csvReaderMock)
+    mockMetricsWithDownscaling(csvReaderMock, ac.appInfo.applicationID)
 
     And("SparkScopeConf with specified html report path")
-    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = "./")
+    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
     val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
     val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfHtmlReportPath, metricsLoader, Seq("Executor Timeline", "Sparkscope text"))
 
@@ -79,7 +83,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     sparkScopeRunner.run()
 
     Then("Report should be generated")
-    assert(Files.exists(Paths.get("./" + ac.appInfo.applicationID + ".html")))
+    assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
   }
 }
 

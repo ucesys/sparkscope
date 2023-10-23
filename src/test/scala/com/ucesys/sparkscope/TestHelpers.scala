@@ -15,9 +15,10 @@ import java.util.Properties
 import scala.collection.mutable
 
 object TestHelpers extends FunSuite with MockFactory {
-  final val appId = "app-20230101010819-test"
-  final val StartTime: Long = 1695358645000L
-  final val EndTime: Long = 1695358700000L
+  val TestDir = ".tests"
+  val appId = "app-20230101010819-test"
+  val StartTime: Long = 1695358645000L
+  val EndTime: Long = 1695358700000L
   val MetricsPropertiesPath = "path/to/metrics.properties"
   val csvMetricsPath = "/tmp/csv-metrics"
   val sparkConf = new SparkConf()
@@ -395,13 +396,18 @@ object TestHelpers extends FunSuite with MockFactory {
   )
 
   val missingMetricsWarning = MissingMetricsWarning(Seq("1","2","3","4","5"), Seq("1","2","3","5"))
-  def mockAppContext(): AppContext = {
+
+  def getAppId: String = s"app-${System.currentTimeMillis()}"
+
+  def mockAppContext(appName: String): AppContext = {
     val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
       "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
       "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
       "3" -> ExecutorTimeSpan("3", "0", 1, 1695358671000L, 1695358700000L),
       "5" -> ExecutorTimeSpan("5", "0", 1, 1695358687000L, 1695358700000L)
     )
+
+    val appId = s"${getAppId}-${appName}"
 
     new AppContext(
       new ApplicationInfo(appId, StartTime, EndTime),
@@ -414,8 +420,8 @@ object TestHelpers extends FunSuite with MockFactory {
       mutable.HashMap[Int, Long]())
   }
 
-  def mockAppContextMissingExecutorMetrics() : AppContext = {
-    mockAppContext.copy(
+  def mockAppContextMissingExecutorMetrics(appName: String) : AppContext = {
+    mockAppContext(appName).copy(
       executorMap = mutable.HashMap(
         "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
         "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
@@ -425,8 +431,7 @@ object TestHelpers extends FunSuite with MockFactory {
       )
     )
   }
-
-  def mockAppContextWithDownscaling(): AppContext = {
+  def mockAppContextWithDownscaling(appName: String): AppContext = {
     val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
       "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
       "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
@@ -435,6 +440,8 @@ object TestHelpers extends FunSuite with MockFactory {
       "7" -> ExecutorTimeSpan("7", "0", 1, 1695358687000L, 1695358715000L)
     )
 
+    val appId = s"${getAppId}-${appName}"
+
     new AppContext(
       new ApplicationInfo(appId, StartTime, EndTime),
       new AggregateMetrics(),
@@ -446,7 +453,7 @@ object TestHelpers extends FunSuite with MockFactory {
       mutable.HashMap[Int, Long]())
   }
 
-  def mockAppContextWithDownscalingMuticore(): AppContext = {
+  def mockAppContextWithDownscalingMuticore(appName: String): AppContext = {
     val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
       "1" -> ExecutorTimeSpan("1", "0", 2, 1695358645000L, 1695358700000L),
       "2" -> ExecutorTimeSpan("2", "0", 2, 1695358645000L, 1695358700000L),
@@ -455,6 +462,8 @@ object TestHelpers extends FunSuite with MockFactory {
       "7" -> ExecutorTimeSpan("7", "0", 2, 1695358687000L, 1695358715000L)
     )
 
+    val appId = s"${getAppId}-${appName}"
+
     new AppContext(
       new ApplicationInfo(appId, StartTime, EndTime),
       new AggregateMetrics(),
@@ -466,7 +475,7 @@ object TestHelpers extends FunSuite with MockFactory {
       mutable.HashMap[Int, Long]())
   }
 
-  def mockcorrectMetrics(csvReaderMock: HadoopFileReader): HadoopFileReader = {
+  def mockcorrectMetrics(csvReaderMock: HadoopFileReader, appId: String): HadoopFileReader = {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
@@ -485,7 +494,7 @@ object TestHelpers extends FunSuite with MockFactory {
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.heap.max.csv").returns(jvmHeapMaxExec2Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.non-heap.used.csv").returns(jvmNonHeapExec2Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.executor.cpuTime.csv").returns(cpuTime2Csv)
-    
+
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.heap.used.csv").returns(jvmHeapExec3Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.heap.usage.csv").returns(jvmHeapUsageExec3Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.heap.max.csv").returns(jvmHeapMaxExec3Csv)
@@ -508,8 +517,8 @@ object TestHelpers extends FunSuite with MockFactory {
     csvReaderMock
   }
 
-  def mockMetricsWithDownscaling(csvReaderMock: HadoopFileReader): HadoopFileReader = {
-    mockcorrectMetrics(csvReaderMock)
+  def mockMetricsWithDownscaling(csvReaderMock: HadoopFileReader, appId: String): HadoopFileReader = {
+    mockcorrectMetrics(csvReaderMock, appId)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.heap.used.csv").returns(jvmHeapExec7Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.heap.usage.csv").returns(jvmHeapUsageExec7Csv)
     (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.heap.max.csv").returns(jvmHeapMaxExec7Csv)
@@ -519,7 +528,7 @@ object TestHelpers extends FunSuite with MockFactory {
     csvReaderMock
   }
 
-  def mockIncorrectDriverMetrics(csvReader: HadoopFileReader) = {
+  def mockIncorrectDriverMetrics(csvReader: HadoopFileReader, appId: String): HadoopFileReader = {
 
     val driverNonHeapRows = jvmNonHeapDriverCsv.split("\n").toSeq
     val jvmNonHeapRowsWithoutLast = driverNonHeapRows.filterNot(_ == driverNonHeapRows.last).mkString("\n")

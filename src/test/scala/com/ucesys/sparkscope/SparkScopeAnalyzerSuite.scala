@@ -31,7 +31,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
 
   test("SparkScopeAnalyzer successful run") {
     Given("SparkScopeAnalyzer and correct driver & executormetrics")
-    val ac = mockAppContext()
+    val ac = mockAppContext("analyzer-successful")
     val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
     When("running SparkScopeAnalyzer.analyze")
@@ -41,7 +41,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     assert(result.warnings.length == 2)
 
     And("SparkScopeResult should be returned with correct values")
-    assert(result.appInfo.applicationID == appId)
+    assert(result.appInfo.applicationID == ac.appInfo.applicationID)
     assert(result.appInfo.startTime == StartTime)
     assert(result.appInfo.endTime == EndTime)
 
@@ -87,9 +87,9 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
 
   test("SparkScopeAnalyzer missing metrics") {
     Given("SparkScopeAnalyzer and missing csv metrics for one executor")
-    val ac = mockAppContextMissingExecutorMetrics()
+    val ac = mockAppContextMissingExecutorMetrics("analyzer-missing-metrics")
     val csvReaderMock = stub[HadoopFileReader]
-    mockcorrectMetrics(csvReaderMock)
+    mockcorrectMetrics(csvReaderMock, ac.appInfo.applicationID)
     val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
     When("running SparkScopeAnalyzer.analyze")
@@ -103,7 +103,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     missingMetricsWarning.toString.contains("Missing metrics for the following executor ids: 5")
 
     And("SparkScopeResult should be returned with correct values")
-    assert(result.appInfo.applicationID == appId)
+    assert(result.appInfo.applicationID == ac.appInfo.applicationID)
     assert(result.appInfo.startTime == StartTime)
     assert(result.appInfo.endTime == EndTime)
 
