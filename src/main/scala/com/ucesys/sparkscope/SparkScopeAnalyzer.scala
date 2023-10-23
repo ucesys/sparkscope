@@ -102,13 +102,13 @@ class SparkScopeAnalyzer {
     val clusterMemoryMetrics = ClusterMemoryMetrics(allExecutorsMetrics)
     val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics, getExecutorCores(ac))
     log.println(clusterMemoryMetrics)
-    log.println(clusterCPUMetrics.clusterCpuUsage)
+    log.println(clusterCPUMetrics)
 
     // Stats
     val driverStats = DriverMemoryStats(driverMetricsMerged)
     val executorStats = ExecutorMemoryStats(allExecutorsMetrics)
     val clusterMemoryStats = ClusterMemoryStats(clusterMemoryMetrics, executorTimeSecs, executorStats)
-    val clusterCPUStats = ClusterCPUStats(clusterCPUMetrics.clusterCpuTime, getExecutorCores(ac), executorTimeSecs)
+    val clusterCPUStats = ClusterCPUStats(clusterCPUMetrics, getExecutorCores(ac), executorTimeSecs)
     log.println(executorStats)
     log.println(driverStats)
     log.println(clusterMemoryStats)

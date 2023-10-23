@@ -6,7 +6,19 @@ import com.ucesys.sparkscope.data.DataFrame
 case class ClusterCPUMetrics(clusterCpuTime: DataFrame,
                              clusterCpuUsage: DataFrame,
                              clusterCpuUsageSum: DataFrame,
-                             clusterCapacity: DataFrame)
+                             clusterCapacity: DataFrame,
+                             cpuTimePerExecutor: DataFrame) {
+  override def toString: String = {
+    Seq(
+      s"\nCluster metrics:",
+      clusterCpuTime.toString,
+      clusterCpuUsage.toString,
+      clusterCpuUsageSum.toString,
+      clusterCapacity.toString,
+      cpuTimePerExecutor.toString
+    ).mkString("\n")
+  }
+}
 
 object ClusterCPUMetrics {
     def apply(allExecutorsMetrics: DataFrame, executorCores: Int): ClusterCPUMetrics = {
@@ -37,7 +49,8 @@ object ClusterCPUMetrics {
             clusterCpuTime=clusterCpuTimeDf,
             clusterCpuUsage=clusterCpuUsageDf,
             clusterCpuUsageSum=clusterCpuUsageSumDf,
-            clusterCapacity=clusterCapacityDf
+            clusterCapacity=clusterCapacityDf,
+            cpuTimePerExecutor=allExecutorsMetrics.groupBy("executorId", CpuTime).max
         )
     }
 }

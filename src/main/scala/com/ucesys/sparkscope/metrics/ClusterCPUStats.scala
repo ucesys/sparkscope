@@ -1,7 +1,6 @@
 package com.ucesys.sparkscope.metrics
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
-import com.ucesys.sparkscope.data.DataFrame
 
 case class ClusterCPUStats(cpuUtil: Double,
                            coreHoursAllocated: Double,
@@ -21,8 +20,8 @@ case class ClusterCPUStats(cpuUtil: Double,
 }
 
 object ClusterCPUStats {
-  def apply(clusterCpuTime: DataFrame, executorCores: Int, executorTimeSecs: Long): ClusterCPUStats = {
-    val cpuUtil: Double = clusterCpuTime.select(CpuTime).max / (executorTimeSecs * executorCores * NanoSecondsInSec)
+  def apply(clusterCpuMetrics: ClusterCPUMetrics, executorCores: Int, executorTimeSecs: Long): ClusterCPUStats = {
+    val cpuUtil: Double = clusterCpuMetrics.cpuTimePerExecutor.select(CpuTime).sum / (executorTimeSecs * executorCores * NanoSecondsInSec)
     val coreHoursAllocated = (executorCores * executorTimeSecs).toDouble / 3600d
     val coreHoursWasted = coreHoursAllocated * cpuUtil
 
