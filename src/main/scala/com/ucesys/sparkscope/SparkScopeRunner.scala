@@ -65,9 +65,9 @@ class SparkScopeRunner(appContext: AppContext,
 
 object SparkScopeRunner {
 
-    implicit val logger = SparkScopeLogger.get
-
     def main(args: Array[String]): Unit = {
+
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
         val eventLogCtx = EventLogContext.load("")
         val sparkScopeRunner = new SparkScopeRunner(

@@ -20,6 +20,7 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, MetricsLoaderFactory, ReportGeneratorFactory}
+import com.ucesys.sparkscope.utils.SparkScopeLogger
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
@@ -37,6 +38,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         mockcorrectMetrics(csvReaderMock, ac.appInfo.applicationID)
 
         And("SparkScopeConf with specified html report path")
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
         val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
         (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
@@ -60,6 +62,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         mockMetricsWithDownscaling(csvReaderMock, ac.appInfo.applicationID)
 
         And("SparkScopeConf with specified html report path")
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
         val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
         (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
@@ -82,6 +85,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         mockMetricsWithDownscaling(csvReaderMock, ac.appInfo.applicationID)
 
         And("SparkScopeConf with specified html report path")
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
         val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
         (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)

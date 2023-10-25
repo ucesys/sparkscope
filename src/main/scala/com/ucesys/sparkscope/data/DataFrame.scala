@@ -91,7 +91,7 @@ object DataFrame {
     }
 
     def fromCsv(name: String, csvStr: String, delimeter: String, columnNames: Seq[String]): DataFrame = {
-        val rows = csvStr.split("\n")
+        val rows = csvStr.replace("\r\n", "\n").split("\n")
         val columnsSeq = rows.tail.map(_.split(delimeter)).transpose
         val columns = (columnNames zip columnsSeq).map { case (name, values) => DataColumn(name, values) }
         DataFrame(name, columns)

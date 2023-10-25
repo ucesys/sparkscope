@@ -16,8 +16,6 @@ import java.util.Properties
 import scala.collection.mutable
 
 object TestHelpers extends FunSuite with MockFactory {
-    implicit val logger: SparkScopeLogger = SparkScopeLogger.get
-
     val TestDir = ".tests"
     val appId = "app-20230101010819-test"
     val StartTime: Long = 1695358645000L
@@ -27,7 +25,9 @@ object TestHelpers extends FunSuite with MockFactory {
     val sparkConf = new SparkConf()
       .set("spark.metrics.conf", MetricsPropertiesPath)
       .set("spark.sparkscope.html.path", "/path/to/html/report")
-    val sparkScopeConf = new SparkScopeConfLoader(sparkConf, getPropertiesLoaderFactoryMock).load()
+
+    val sparkScopeConf = new SparkScopeConfLoader(sparkConf, getPropertiesLoaderFactoryMock)(stub[SparkScopeLogger]).load()
+
     val emptyFileCsv: String =
         """t,value
           |1695358645,0""".stripMargin

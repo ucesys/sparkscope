@@ -21,12 +21,15 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.io.HadoopFileReader
 import com.ucesys.sparkscope.metrics._
+import com.ucesys.sparkscope.utils.SparkScopeLogger
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 import org.scalatest.MustMatchers.{a, convertToAnyMustWrapper}
 
 class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenThen {
+    implicit val logger: SparkScopeLogger = stub[SparkScopeLogger]
+
     test("SparkScopeAnalyzer successful run") {
         Given("SparkScopeAnalyzer and correct driver & executormetrics")
         val ac = mockAppContext("analyzer-successful")

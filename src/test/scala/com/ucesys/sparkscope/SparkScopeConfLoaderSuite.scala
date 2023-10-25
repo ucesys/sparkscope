@@ -21,6 +21,7 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.io.{PropertiesLoader, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.utils.SparkScopeLogger
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
@@ -28,6 +29,9 @@ import org.scalatest.{FunSuite, GivenWhenThen}
 import java.util.Properties
 
 class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhenThen {
+
+    implicit val logger: SparkScopeLogger = stub[SparkScopeLogger]
+
     test("extracting driver & executor metrics path from spark.sparkscope") {
         Given("SparkConf")
         And("with spark.sparkscope.metrics.dir.driver set")

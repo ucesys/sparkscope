@@ -20,11 +20,14 @@ package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMetrics}
 import com.ucesys.sparkscope.TestHelpers._
+import com.ucesys.sparkscope.utils.SparkScopeLogger
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 
 class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWhenThen {
+    implicit val logger: SparkScopeLogger = stub[SparkScopeLogger]
+
     test("Incorrect csv files test") {
         Given("Some csv metrics for driver and executor contain more rows than others")
         val csvReaderMock = stub[HadoopFileReader]

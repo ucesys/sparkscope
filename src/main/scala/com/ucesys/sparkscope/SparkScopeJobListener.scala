@@ -27,7 +27,7 @@ import org.apache.spark.scheduler._
 
 class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(sparkConf: SparkConf) {
 
-    implicit val logger = SparkScopeLogger.get
+    implicit val logger = new SparkScopeLogger
 
     override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
         //println(s"Application ${appInfo.applicationID} ended at ${applicationEnd.time}")

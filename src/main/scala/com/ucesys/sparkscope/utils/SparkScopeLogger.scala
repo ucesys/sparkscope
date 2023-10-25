@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import scala.collection.mutable
 
-class SparkScopeLogger private {
+class SparkScopeLogger {
     val log = new mutable.StringBuilder()
     val timeFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
 
@@ -33,10 +33,4 @@ class SparkScopeLogger private {
     }
 
     def logStr(str: Any, level: String): String = s"${timeFormat.format(Calendar.getInstance.getTime)} ${level} [SparkScope] ${str}"
-}
-
-object SparkScopeLogger {
-    private val logger = new SparkScopeLogger
-
-    def get: SparkScopeLogger = logger
 }
