@@ -3,7 +3,7 @@ package com.ucesys.sparkscope.io
 import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparklens.timespan.ExecutorTimeSpan
 import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMetrics}
-import com.ucesys.sparkscope.SparkScopeConfig
+import com.ucesys.sparkscope.SparkScopeConf
 import com.ucesys.sparkscope.data.DataFrame
 import com.ucesys.sparkscope.utils.SparkScopeLogger
 
@@ -11,7 +11,7 @@ import scala.collection.mutable
 
 class CsvHadoopMetricsLoader(readerFactory: FileReaderFactory,
                              appContext: AppContext,
-                             sparkScopeConf: SparkScopeConfig)(implicit logger: SparkScopeLogger) extends MetricsLoader {
+                             sparkScopeConf: SparkScopeConf)(implicit logger: SparkScopeLogger) extends MetricsLoader {
     def load(): DriverExecutorMetrics = {
         val ac = appContext.filterByStartAndEndTime(appContext.appInfo.startTime, appContext.appInfo.endTime)
 

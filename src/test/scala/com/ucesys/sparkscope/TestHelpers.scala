@@ -27,7 +27,7 @@ object TestHelpers extends FunSuite with MockFactory {
     val sparkConf = new SparkConf()
       .set("spark.metrics.conf", MetricsPropertiesPath)
       .set("spark.sparkscope.html.path", "/path/to/html/report")
-    val sparkScopeConf = SparkScopeConfig.fromSparkConf(sparkConf, getPropertiesLoaderFactoryMock)
+    val sparkScopeConf = new SparkScopeConfLoader(sparkConf, getPropertiesLoaderFactoryMock).load()
     val emptyFileCsv: String =
         """t,value
           |1695358645,0""".stripMargin

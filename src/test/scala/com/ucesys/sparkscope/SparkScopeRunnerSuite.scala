@@ -19,7 +19,7 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, HtmlReportGenerator}
+import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, MetricsLoaderFactory, ReportGeneratorFactory}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
@@ -28,7 +28,7 @@ import java.nio.file.{Files, Paths}
 class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen with BeforeAndAfterAll {
     override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
 
-    val htmlReportGenerator = new HtmlReportGenerator
+    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
 
     test("SparkScopeRunner upscaling test") {
         Given("Metrics for application which was upscaled")
@@ -37,9 +37,13 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         mockcorrectMetrics(csvReaderMock, ac.appInfo.applicationID)
 
         And("SparkScopeConf with specified html report path")
-        val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
         val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
-        val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfHtmlReportPath, metricsLoader, htmlReportGenerator, Seq("Executor Timeline", "Sparkscope text"))
+        val metricsLoaderFactory = stub[MetricsLoaderFactory]
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
+
+        val sparkScopeConfLoader = stub[SparkScopeConfLoader]
+        (sparkScopeConfLoader.load _).when().returns(sparkScopeConfHtmlReportPath)
+        val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfLoader, metricsLoaderFactory, new ReportGeneratorFactory, Seq("Executor Timeline", "Sparkscope text"))
 
         When("SparkScopeRunner.run")
         sparkScopeRunner.run()
@@ -56,9 +60,13 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         mockMetricsWithDownscaling(csvReaderMock, ac.appInfo.applicationID)
 
         And("SparkScopeConf with specified html report path")
-        val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
         val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
-        val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfHtmlReportPath, metricsLoader, htmlReportGenerator, Seq("Executor Timeline", "Sparkscope text"))
+        val metricsLoaderFactory = stub[MetricsLoaderFactory]
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
+
+        val sparkScopeConfLoader = stub[SparkScopeConfLoader]
+        (sparkScopeConfLoader.load _).when().returns(sparkScopeConfHtmlReportPath)
+        val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfLoader, metricsLoaderFactory, new ReportGeneratorFactory, Seq("Executor Timeline", "Sparkscope text"))
 
         When("SparkScopeRunner.run")
         sparkScopeRunner.run()
@@ -74,9 +82,13 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         mockMetricsWithDownscaling(csvReaderMock, ac.appInfo.applicationID)
 
         And("SparkScopeConf with specified html report path")
-        val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
         val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
-        val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfHtmlReportPath, metricsLoader, htmlReportGenerator, Seq("Executor Timeline", "Sparkscope text"))
+        val metricsLoaderFactory = stub[MetricsLoaderFactory]
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
+
+        val sparkScopeConfLoader = stub[SparkScopeConfLoader]
+        (sparkScopeConfLoader.load _).when().returns(sparkScopeConfHtmlReportPath)
+        val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfLoader, metricsLoaderFactory, new ReportGeneratorFactory, Seq("Executor Timeline", "Sparkscope text"))
 
         When("SparkScopeRunner.run")
         sparkScopeRunner.run()

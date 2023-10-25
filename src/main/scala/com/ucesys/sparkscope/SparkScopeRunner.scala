@@ -18,22 +18,42 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparkscope.io.{DriverExecutorMetrics, HtmlReportGenerator, MetricsLoader}
+import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
+import com.ucesys.sparkscope.io.{EventLogContext, MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.utils.SparkScopeLogger
 
 import java.io.FileNotFoundException
 import java.nio.file.NoSuchFileException
 
 class SparkScopeRunner(appContext: AppContext,
-                       sparkScopeConf: SparkScopeConfig,
-                       metricsLoader: MetricsLoader,
-                       htmlReportGenerator: HtmlReportGenerator,
+                       sparkScopeConfLoader: SparkScopeConfLoader,
+                       metricsLoaderFactory: MetricsLoaderFactory,
+                       reportGeneratorFactory: ReportGeneratorFactory,
                        sparklensResults: Seq[String])
                       (implicit logger: SparkScopeLogger) {
     def run(): Unit = {
+        logger.info(SparkScopeSign)
+
+        val sparkScopeConf = sparkScopeConfLoader.load()
+
+        val metricsLoader = metricsLoaderFactory.get(sparkScopeConf, appContext)
+        val reportGenerator = reportGeneratorFactory.get(sparkScopeConf)
+
         try {
             val driverExecutorMetrics = metricsLoader.load()
-            analyze(sparkScopeConf, driverExecutorMetrics)
+            val executorMetricsAnalyzer = new SparkScopeAnalyzer
+            val sparkScopeStart = System.currentTimeMillis()
+            val sparkScopeResult = executorMetricsAnalyzer.analyze(driverExecutorMetrics, appContext)
+            val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
+
+            logger.info(s"SparkScope analysis took ${durationSparkScope}s")
+
+            logger.info(sparkScopeResult.stats.executorStats + "\n")
+            logger.info(sparkScopeResult.stats.driverStats + "\n")
+            logger.info(sparkScopeResult.stats.clusterMemoryStats + "\n")
+            logger.info(sparkScopeResult.stats.clusterCPUStats + "\n")
+
+            reportGenerator.generate(sparkScopeResult, sparklensResults)
         } catch {
             case ex: FileNotFoundException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
             case ex: NoSuchFileException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
@@ -41,20 +61,31 @@ class SparkScopeRunner(appContext: AppContext,
             case ex: Exception => logger.error(s"Unexpected exception occurred, SparkScope will now exit.", ex)
         }
     }
+}
 
-    def analyze(sparkScopeConf: SparkScopeConfig, driverExecutorMetrics: DriverExecutorMetrics): Unit = {
-        val executorMetricsAnalyzer = new SparkScopeAnalyzer
-        val sparkScopeStart = System.currentTimeMillis()
-        val sparkScopeResult = executorMetricsAnalyzer.analyze(driverExecutorMetrics, appContext)
-        val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
+object SparkScopeRunner {
 
-        logger.info(s"SparkScope analysis took ${durationSparkScope}s")
+    implicit val logger = SparkScopeLogger.get
 
-        logger.info(sparkScopeResult.stats.executorStats + "\n")
-        logger.info(sparkScopeResult.stats.driverStats + "\n")
-        logger.info(sparkScopeResult.stats.clusterMemoryStats + "\n")
-        logger.info(sparkScopeResult.stats.clusterCPUStats + "\n")
+    def main(args: Array[String]): Unit = {
 
-        htmlReportGenerator.generateHtml(sparkScopeResult, sparkScopeConf.htmlReportPath, sparklensResults, sparkScopeConf.sparkConf)
+        val eventLogCtx = EventLogContext.load("")
+        val sparkScopeRunner = new SparkScopeRunner(
+            eventLogCtx.appContext,
+            new SparkScopeConfLoader(eventLogCtx.sparkConf, new PropertiesLoaderFactory),
+            new MetricsLoaderFactory,
+            new ReportGeneratorFactory,
+            Seq.empty
+        )
+        sparkScopeRunner.run()
     }
+
+    val SparkScopeSign =
+        """
+          |     ____              __    ____
+          |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+          |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+          |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+          |     /_/                             /_/    spark3-v0.1.1
+          |""".stripMargin
 }

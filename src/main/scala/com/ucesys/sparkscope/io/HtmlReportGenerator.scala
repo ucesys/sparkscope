@@ -1,10 +1,10 @@
 package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
-import com.ucesys.sparkscope.SparkScopeJobListener.SparkScopeSign
+import com.ucesys.sparkscope.SparkScopeConf
+import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 import com.ucesys.sparkscope.utils.SparkScopeLogger
-import org.apache.spark.SparkConf
 
 import java.io.{FileWriter, InputStream}
 import java.nio.file.Paths
@@ -12,8 +12,9 @@ import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
 
-class HtmlReportGenerator(implicit logger: SparkScopeLogger) {
-    def generateHtml(result: SparkScopeResult, outputDir: String, sparklensResults: Seq[String], sparkConf: SparkConf): Unit = {
+class HtmlReportGenerator(sparkScopeConf: SparkScopeConf)
+                         (implicit logger: SparkScopeLogger) extends ReportGenerator {
+    override def generate(result: SparkScopeResult, sparklensResults: Seq[String]): Unit = {
         val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
         val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
         val duration = (result.appInfo.endTime - result.appInfo.startTime).milliseconds
@@ -36,14 +37,14 @@ class HtmlReportGenerator(implicit logger: SparkScopeLogger) {
           .replace("${appInfo.duration}", durationStr)
           .replace("${logs}", logger.toString)
           .replace("${warnings}", warningsStr)
-          .replace("${sparkConf}", sparkConf.getAll.map { case (key, value) => s"${key}: ${value}" }.mkString("\n"))
+          .replace("${sparkConf}", sparkScopeConf.sparkConf.getAll.map { case (key, value) => s"${key}: ${value}" }.mkString("\n"))
           .replace("${sparklens}", sparklensResults.mkString("\n"))
         //      .replace("${version}", getClass.getPackage.getImplementationVersion)
 
         val renderedCharts = renderCharts(rendered, result)
         val renderedStats = renderStats(renderedCharts, result)
 
-        val outputPath = Paths.get(outputDir, s"${result.appInfo.applicationID}.html")
+        val outputPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appInfo.applicationID}.html")
         val fileWriter = new FileWriter(outputPath.toString)
         fileWriter.write(renderedStats)
         fileWriter.close()

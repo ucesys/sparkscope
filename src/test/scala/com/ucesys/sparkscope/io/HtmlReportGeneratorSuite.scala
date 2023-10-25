@@ -28,7 +28,7 @@ import java.nio.file.{Files, Paths}
 class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndAfterAll {
     override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
 
-    val htmlReportGenerator = new HtmlReportGenerator
+    val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir))
 
     test("SparkScope end2end no warnings") {
         val ac = mockAppContext("html-generator-no-warnings")
@@ -37,7 +37,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
 
-        htmlReportGenerator.generateHtml(result, TestDir, Seq("Executor Timeline", "Sparkscope text"), sparkConf)
+        htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
 
         assert(Files.exists(Paths.get(TestDir, result.appInfo.applicationID + ".html")))
     }
@@ -49,7 +49,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
-        htmlReportGenerator.generateHtml(result, TestDir, Seq("Executor Timeline", "Sparkscope text"), sparkConf)
+        htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
 
         assert(Files.exists(Paths.get(TestDir, result.appInfo.applicationID + ".html")))
     }
