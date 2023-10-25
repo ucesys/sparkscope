@@ -30,6 +30,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
 
     val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
+    val SparkLensOutput = Seq("Executor Timeline", "StageSkewAnalyzer text...")
 
     test("SparkScopeRunner upscaling test") {
         Given("Metrics for application which was upscaled")
@@ -45,7 +46,14 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when().returns(sparkScopeConfHtmlReportPath)
-        val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfLoader, metricsLoaderFactory, new ReportGeneratorFactory, Seq("Executor Timeline", "Sparkscope text"))
+        val sparkScopeRunner = new SparkScopeRunner(
+            ac,
+            sparkScopeConfLoader,
+            new SparkScopeAnalyzer,
+            metricsLoaderFactory,
+            new ReportGeneratorFactory,
+            SparkLensOutput
+        )
 
         When("SparkScopeRunner.run")
         sparkScopeRunner.run()
@@ -69,7 +77,14 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when().returns(sparkScopeConfHtmlReportPath)
-        val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfLoader, metricsLoaderFactory, new ReportGeneratorFactory, Seq("Executor Timeline", "Sparkscope text"))
+        val sparkScopeRunner = new SparkScopeRunner(
+            ac,
+            sparkScopeConfLoader,
+            new SparkScopeAnalyzer,
+            metricsLoaderFactory,
+            new ReportGeneratorFactory,
+            SparkLensOutput
+        )
 
         When("SparkScopeRunner.run")
         sparkScopeRunner.run()
@@ -92,7 +107,14 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when().returns(sparkScopeConfHtmlReportPath)
-        val sparkScopeRunner = new SparkScopeRunner(ac, sparkScopeConfLoader, metricsLoaderFactory, new ReportGeneratorFactory, Seq("Executor Timeline", "Sparkscope text"))
+        val sparkScopeRunner = new SparkScopeRunner(
+            ac,
+            sparkScopeConfLoader,
+            new SparkScopeAnalyzer,
+            metricsLoaderFactory,
+            new ReportGeneratorFactory,
+            SparkLensOutput
+        )
 
         When("SparkScopeRunner.run")
         sparkScopeRunner.run()

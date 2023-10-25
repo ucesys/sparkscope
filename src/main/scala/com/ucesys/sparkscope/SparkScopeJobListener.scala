@@ -70,6 +70,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
         val sparkScopeRunner = new SparkScopeRunner(
             appContext,
             new SparkScopeConfLoader(sparkConf, new PropertiesLoaderFactory),
+            new SparkScopeAnalyzer,
             new MetricsLoaderFactory,
             new ReportGeneratorFactory,
             sparklensResults

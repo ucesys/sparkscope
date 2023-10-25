@@ -27,11 +27,14 @@ import java.nio.file.NoSuchFileException
 
 class SparkScopeRunner(appContext: AppContext,
                        sparkScopeConfLoader: SparkScopeConfLoader,
+                       sparkScopeAnalyzer: SparkScopeAnalyzer,
                        metricsLoaderFactory: MetricsLoaderFactory,
                        reportGeneratorFactory: ReportGeneratorFactory,
                        sparklensResults: Seq[String])
                       (implicit logger: SparkScopeLogger) {
     def run(): Unit = {
+        val sparkScopeStart = System.currentTimeMillis()
+
         logger.info(SparkScopeSign)
 
         val sparkScopeConf = sparkScopeConfLoader.load()
@@ -41,12 +44,7 @@ class SparkScopeRunner(appContext: AppContext,
 
         try {
             val driverExecutorMetrics = metricsLoader.load()
-            val executorMetricsAnalyzer = new SparkScopeAnalyzer
-            val sparkScopeStart = System.currentTimeMillis()
-            val sparkScopeResult = executorMetricsAnalyzer.analyze(driverExecutorMetrics, appContext)
-            val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
-
-            logger.info(s"SparkScope analysis took ${durationSparkScope}s")
+            val sparkScopeResult = sparkScopeAnalyzer.analyze(driverExecutorMetrics, appContext)
 
             logger.info(sparkScopeResult.stats.executorStats + "\n")
             logger.info(sparkScopeResult.stats.driverStats + "\n")
@@ -59,6 +57,9 @@ class SparkScopeRunner(appContext: AppContext,
             case ex: NoSuchFileException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
             case ex: IllegalArgumentException => logger.error(s"SparkScope couldn't load metrics. SparkScope will now exit.", ex)
             case ex: Exception => logger.error(s"Unexpected exception occurred, SparkScope will now exit.", ex)
+        } finally {
+            val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
+            logger.info(s"SparkScope analysis took ${durationSparkScope}s")
         }
     }
 }
@@ -73,6 +74,7 @@ object SparkScopeRunner {
         val sparkScopeRunner = new SparkScopeRunner(
             eventLogCtx.appContext,
             new SparkScopeConfLoader(eventLogCtx.sparkConf, new PropertiesLoaderFactory),
+            new SparkScopeAnalyzer,
             new MetricsLoaderFactory,
             new ReportGeneratorFactory,
             Seq.empty
