@@ -67,10 +67,13 @@ class SparkScopeRunner(appContext: AppContext,
 object SparkScopeRunner {
 
     def main(args: Array[String]): Unit = {
+        runFromEventLog("app-20231025121456-0004")
+    }
 
+    def runFromEventLog(eventLogPath: String): Unit = {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
-        val eventLogCtx = EventLogContext.load("")
+        val eventLogCtx = EventLogContext.load(eventLogPath)
         val sparkScopeRunner = new SparkScopeRunner(
             eventLogCtx.appContext,
             new SparkScopeConfLoader(eventLogCtx.sparkConf, new PropertiesLoaderFactory),

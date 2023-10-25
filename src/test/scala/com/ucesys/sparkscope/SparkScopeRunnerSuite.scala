@@ -122,5 +122,15 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
     }
+
+    test("SparkScopeRunner offline from eventLog test") {
+        Given("Metrics for application which was upscaled and downscaled")
+
+        When("SparkScopeRunner.run")
+        SparkScopeRunner.runFromEventLog("src/test/resources/app-20231025121456-0004")
+
+        Then("Report should be generated")
+        assert(Files.exists(Paths.get(TestDir, "app-20231025121456-0004" + ".html")))
+    }
 }
 
