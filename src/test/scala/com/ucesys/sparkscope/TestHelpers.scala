@@ -26,7 +26,7 @@ object TestHelpers extends FunSuite with MockFactory {
       .set("spark.metrics.conf", MetricsPropertiesPath)
       .set("spark.sparkscope.html.path", "/path/to/html/report")
 
-    val sparkScopeConf = new SparkScopeConfLoader(sparkConf, getPropertiesLoaderFactoryMock)(stub[SparkScopeLogger]).load()
+    val sparkScopeConf = new SparkScopeConfLoader()(stub[SparkScopeLogger]).load(sparkConf, getPropertiesLoaderFactoryMock)
 
     val emptyFileCsv: String =
         """t,value
@@ -457,7 +457,7 @@ object TestHelpers extends FunSuite with MockFactory {
             mutable.HashMap[Int, Long]())
     }
 
-    def mockAppContextWithDownscalingMuticore(appName: String): AppContext = {
+    def mockAppContextWithDownscalingMuticore(appName: String, appId: String = getAppId): AppContext = {
         val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
             "1" -> ExecutorTimeSpan("1", "0", 2, 1695358645000L, 1695358700000L),
             "2" -> ExecutorTimeSpan("2", "0", 2, 1695358645000L, 1695358700000L),
@@ -466,10 +466,10 @@ object TestHelpers extends FunSuite with MockFactory {
             "7" -> ExecutorTimeSpan("7", "0", 2, 1695358687000L, 1695358715000L)
         )
 
-        val appId = s"${getAppId}-${appName}"
+        val appIdUniq = s"${appId}-${appName}"
 
         new AppContext(
-            new ApplicationInfo(appId, StartTime, EndTime),
+            new ApplicationInfo(appIdUniq, StartTime, EndTime),
             new AggregateMetrics(),
             mutable.HashMap[String, HostTimeSpan](),
             executorMap,

@@ -5,8 +5,8 @@ import com.ucesys.sparkscope.io.PropertiesLoaderFactory
 import com.ucesys.sparkscope.utils.SparkScopeLogger
 import org.apache.spark.SparkConf
 
-class SparkScopeConfLoader(sparkConf: SparkConf, propertiesLoaderFactory: PropertiesLoaderFactory)(implicit logger: SparkScopeLogger) {
-    def load(): SparkScopeConf = {
+class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
+    def load(sparkConf: SparkConf, propertiesLoaderFactory: PropertiesLoaderFactory): SparkScopeConf = {
         val driverMetricsDir: Option[String] = sparkConf match {
             case sparkConf if sparkConf.contains(SparkScopePropertyDriverMetricsDir) =>
                 logger.info(s"Setting driver metrics dir to ${SparkScopePropertyDriverMetricsDir}")

@@ -19,15 +19,20 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
-import com.ucesys.sparkscope.io.{EventLogContext, MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
+import com.ucesys.sparkscope.eventlog.{EventLogContext, EventLogContextLoader}
+import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.utils.SparkScopeLogger
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.{DataFrameReader, SparkSession}
 
 import java.io.FileNotFoundException
 import java.nio.file.NoSuchFileException
 
 class SparkScopeRunner(appContext: AppContext,
+                       sparkConf: SparkConf,
                        sparkScopeConfLoader: SparkScopeConfLoader,
                        sparkScopeAnalyzer: SparkScopeAnalyzer,
+                       propertiesLoaderFactory: PropertiesLoaderFactory,
                        metricsLoaderFactory: MetricsLoaderFactory,
                        reportGeneratorFactory: ReportGeneratorFactory,
                        sparklensResults: Seq[String])
@@ -37,7 +42,7 @@ class SparkScopeRunner(appContext: AppContext,
 
         logger.info(SparkScopeSign)
 
-        val sparkScopeConf = sparkScopeConfLoader.load()
+        val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, propertiesLoaderFactory)
 
         val metricsLoader = metricsLoaderFactory.get(sparkScopeConf, appContext)
         val reportGenerator = reportGeneratorFactory.get(sparkScopeConf)
@@ -67,19 +72,39 @@ class SparkScopeRunner(appContext: AppContext,
 object SparkScopeRunner {
 
     def main(args: Array[String]): Unit = {
-        runFromEventLog("app-20231025121456-0004")
-    }
-
-    def runFromEventLog(eventLogPath: String): Unit = {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
-        val eventLogCtx = EventLogContext.load(eventLogPath)
+        runFromEventLog(
+            eventLogPath =  args(0),
+            sparkScopeAnalyzer = new SparkScopeAnalyzer,
+            eventLogContextLoader = new EventLogContextLoader,
+            sparkScopeConfLoader = new SparkScopeConfLoader,
+            propertiesLoaderFactory = new PropertiesLoaderFactory,
+            metricsLoaderFactory = new MetricsLoaderFactory,
+            reportGeneratorFactory = new ReportGeneratorFactory,
+        )
+    }
+
+    def runFromEventLog(eventLogPath: String,
+                        sparkScopeAnalyzer: SparkScopeAnalyzer,
+                        eventLogContextLoader: EventLogContextLoader,
+                        sparkScopeConfLoader: SparkScopeConfLoader,
+                        propertiesLoaderFactory: PropertiesLoaderFactory,
+                        metricsLoaderFactory: MetricsLoaderFactory,
+                        reportGeneratorFactory: ReportGeneratorFactory)
+                       (implicit logger: SparkScopeLogger): Unit = {
+        val spark = SparkSession.builder().master("local").getOrCreate()
+        spark.sparkContext.setLogLevel("WARN")
+        val eventLogCtx = eventLogContextLoader.load(spark, eventLogPath)
+
         val sparkScopeRunner = new SparkScopeRunner(
             eventLogCtx.appContext,
-            new SparkScopeConfLoader(eventLogCtx.sparkConf, new PropertiesLoaderFactory),
-            new SparkScopeAnalyzer,
-            new MetricsLoaderFactory,
-            new ReportGeneratorFactory,
+            eventLogCtx.sparkConf,
+            sparkScopeConfLoader,
+            sparkScopeAnalyzer,
+            propertiesLoaderFactory,
+            metricsLoaderFactory,
+            reportGeneratorFactory,
             Seq.empty
         )
         sparkScopeRunner.run()

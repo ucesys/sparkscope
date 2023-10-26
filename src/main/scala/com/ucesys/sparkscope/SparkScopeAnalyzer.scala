@@ -32,9 +32,7 @@ import scala.concurrent.duration._
 
 class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
-    def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: AppContext): SparkScopeResult = {
-        val ac = appContext.filterByStartAndEndTime(appContext.appInfo.startTime, appContext.appInfo.endTime)
-
+    def analyze(driverExecutorMetrics: DriverExecutorMetrics, ac: AppContext): SparkScopeResult = {
         var driverMetricsMerged: DataFrame = driverExecutorMetrics.driverMetrics.head
         driverExecutorMetrics.driverMetrics.tail.foreach { metric =>
             driverMetricsMerged = driverMetricsMerged.mergeOn("t", metric)
