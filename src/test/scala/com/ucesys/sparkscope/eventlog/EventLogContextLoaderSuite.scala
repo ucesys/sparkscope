@@ -16,16 +16,15 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.eventlog
 
-import com.ucesys.sparkscope.eventlog.EventLogContextLoader
 import com.ucesys.sparkscope.utils.SparkScopeLogger
 import org.apache.spark.sql.SparkSession
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
+import org.scalatest.{FunSuite, GivenWhenThen}
 
 
-class EventLogContextSuite extends FunSuite with MockFactory with GivenWhenThen {
+class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhenThen {
 
     test("SparkScopeRunner offline from eventLog test") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
@@ -50,9 +49,11 @@ class EventLogContextSuite extends FunSuite with MockFactory with GivenWhenThen 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
         assert(eventLogContext.appContext.executorMap("0").startTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("1").startTime == 1698236098540L)
         assert(eventLogContext.appContext.executorMap("0").endTime == 0)
+        assert(eventLogContext.appContext.executorMap("0").cores == 2)
+        assert(eventLogContext.appContext.executorMap("1").startTime == 1698236098540L)
         assert(eventLogContext.appContext.executorMap("1").endTime == 0)
+        assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
         assert(eventLogContext.sparkConf.get("spark.eventLog.enabled") == "true")

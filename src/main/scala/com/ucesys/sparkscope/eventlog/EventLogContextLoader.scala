@@ -2,7 +2,7 @@ package com.ucesys.sparkscope.eventlog
 
 import com.ucesys.sparklens.common.{AppContext, ApplicationInfo}
 import com.ucesys.sparklens.timespan.ExecutorTimeSpan
-import com.ucesys.sparkscope.eventlog.EventLogContextLoader.{AllEvents, EventAppEnd, EventAppStart, EventEnvUpdate, EventExecutorAdded, EventExecutorRemoved}
+import com.ucesys.sparkscope.eventlog.EventLogContextLoader._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.SparkSession
@@ -15,26 +15,31 @@ class EventLogContextLoader {
         import spark.implicits._
 
         val eventLogDF = spark.read.json(eventLogPath)
-        val eventLogDFNoTasks = eventLogDF.filter(col("Event").isin(AllEvents:_*)).cache()
+        val eventLogDFNoTasks = eventLogDF
+          .where(col(ColEvent).isin(AllEvents:_*))
+          .select(AllCols.head, AllCols.tail:_*)
+          .cache()
 
         // Spark Conf
-        val sparkConfDF = eventLogDFNoTasks.filter(col("Event") === EventEnvUpdate).select("Spark Properties.*")
+        val sparkConfDF = eventLogDFNoTasks
+          .where(col(ColEvent) === EventEnvUpdate)
+          .select(s"${ColSparkProps}.*")
         val sparkConfMap: Map[String, Any] = sparkConfDF.collect.map(r => Map(sparkConfDF.columns.zip(r.toSeq):_*)).last
         val sparkConf = new SparkConf(false)
         sparkConfMap.foreach{case (key, value) => sparkConf.set(key, value.toString)}
 
         // ApplicationInfo
         val appStart: Option[ApplicationEvent] = eventLogDFNoTasks
-          .filter(col("Event") === EventAppStart)
-          .select(col("App ID").as("appId"), col("Timestamp").as("ts"))
+          .filter(col(ColEvent) === EventAppStart)
+          .select(col(ColAppId).as("appId"), col(ColTimeStamp).as("ts"))
           .as[ApplicationEvent]
           .collect
           .toSeq
           .headOption
 
         val appEnd: Option[ApplicationEvent] = eventLogDFNoTasks
-          .filter(col("Event") === EventAppEnd)
-          .select(col("App ID").as("appId"), col("Timestamp").as("ts"))
+          .filter(col(ColEvent) === EventAppEnd)
+          .select(col(ColAppId).as("appId"), col(ColTimeStamp).as("ts"))
           .as[ApplicationEvent]
           .collect
           .toSeq
@@ -44,21 +49,21 @@ class EventLogContextLoader {
 
         // ExecutorMap
         val executorAddedSeq: Seq[ExecutorEvent] = eventLogDFNoTasks
-          .filter(col("Event") === EventExecutorAdded)
-          .select(col("Executor ID").as("executorId"), col("Timestamp").as("ts"))
+          .filter(col(ColEvent) === EventExecutorAdded)
+          .select(col(ColExecutorId).as("executorId"), col(ColTimeStamp).as("ts"), col(ColExecutorCores).as("cores"))
           .as[ExecutorEvent]
           .collect()
           .toSeq
 
         val executorRemovedSeq: Seq[ExecutorEvent] = eventLogDFNoTasks
-          .filter(col("Event") === EventExecutorRemoved)
-          .select(col("Executor ID").as("executorId"), col("Timestamp").as("ts"))
+          .filter(col(ColEvent) === EventExecutorRemoved)
+          .select(col(ColExecutorId).as("executorId"), col(ColTimeStamp).as("ts"), col(ColExecutorCores).as("cores"))
           .as[ExecutorEvent]
           .collect()
           .toSeq
 
         val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.Map(executorAddedSeq.map { execAdded =>
-            (execAdded.executorId, ExecutorTimeSpan(execAdded.executorId, "", 0, execAdded.ts,  0))
+            (execAdded.executorId, ExecutorTimeSpan(execAdded.executorId, "", execAdded.cores.get.toInt, execAdded.ts,  0))
         }: _*).asInstanceOf[mutable.HashMap[String, ExecutorTimeSpan]]
 
         executorRemovedSeq.foreach{ execRemoved =>
@@ -89,4 +94,16 @@ object EventLogContextLoader {
     val EventExecutorRemoved = "SparkListenerExecutorRemoved"
 
     val AllEvents = Seq(EventEnvUpdate, EventAppStart, EventAppEnd,  EventExecutorAdded, EventExecutorRemoved)
+
+    val ColEvent = "Event"
+    val ColAppId = "App ID"
+    val ColTimeStamp = "Timestamp"
+    val ColSparkProps = "Spark Properties"
+    val ColExecutorId = "Executor ID"
+    val ColExecutorInfo = "Executor Info"
+    val ColExecutorCores = "Total cores"
+    val ColExecutorInfoCores = s"${ColExecutorInfo}.${ColExecutorCores}"
+
+    val AllCols = Seq(ColEvent, ColAppId, ColTimeStamp, ColSparkProps, ColExecutorId, ColExecutorInfoCores)
+
 }
