@@ -93,7 +93,7 @@ object SparkScopeRunner {
                         metricsLoaderFactory: MetricsLoaderFactory,
                         reportGeneratorFactory: ReportGeneratorFactory)
                        (implicit logger: SparkScopeLogger): Unit = {
-        val spark = SparkSession.builder().master("local").getOrCreate()
+        val spark = SparkSession.builder().appName("SparkScope").getOrCreate()
         spark.sparkContext.setLogLevel("WARN")
         val eventLogCtx = eventLogContextLoader.load(spark, eventLogPath)
 

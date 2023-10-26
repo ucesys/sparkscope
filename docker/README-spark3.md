@@ -32,7 +32,7 @@ docker exec -it spark-worker bash
 
 ```bash
 spark-submit \
---jars /tmp/jars/sparkscope-spark3-0.1.0-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.1-SNAPSHOT.jar \
 --master spark://spark-master:7077 \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \

@@ -10,16 +10,14 @@ import com.ucesys.sparkscope.utils.SparkScopeLogger
 import scala.collection.mutable
 
 class CsvHadoopMetricsLoader(readerFactory: FileReaderFactory,
-                             appContext: AppContext,
+                             ac: AppContext,
                              sparkScopeConf: SparkScopeConf)(implicit logger: SparkScopeLogger) extends MetricsLoader {
     def load(): DriverExecutorMetrics = {
-        val ac = appContext.filterByStartAndEndTime(appContext.appInfo.startTime, appContext.appInfo.endTime)
-
         logger.info(s"Reading driver metrics from ${sparkScopeConf.driverMetricsDir}, executor metrics from ${sparkScopeConf.executorMetricsDir}")
 
         logger.info("Reading driver metrics...")
         val driverMetrics: Seq[DataTable] = DriverCsvMetrics.map { metric =>
-            val metricsFilePath = s"${sparkScopeConf.driverMetricsDir}/${appContext.appInfo.applicationID}.driver.${metric}.csv"
+            val metricsFilePath = s"${sparkScopeConf.driverMetricsDir}/${ac.appInfo.applicationID}.driver.${metric}.csv"
             val csvFileStr = readerFactory.getFileReader(metricsFilePath).read(metricsFilePath).replace("value", metric)
             logger.info(s"Reading ${metric} metric for driver from " + metricsFilePath)
             DataTable.fromCsv(metric, csvFileStr, ",")
@@ -50,7 +48,7 @@ class CsvHadoopMetricsLoader(readerFactory: FileReaderFactory,
 
         val executorsMetricsMap: Map[String, Seq[DataTable]] = executorsMetricsMapNonDriver.map { case (executorId, _) =>
             val metricTables: Seq[DataTable] = ExecutorCsvMetrics.flatMap { metric =>
-                val metricsFilePath = s"${sparkScopeConf.executorMetricsDir}/${appContext.appInfo.applicationID}.${executorId}.${metric}.csv"
+                val metricsFilePath = s"${sparkScopeConf.executorMetricsDir}/${ac.appInfo.applicationID}.${executorId}.${metric}.csv"
                 logger.info(s"Reading ${metric} metric for executor=${executorId} from " + metricsFilePath)
                 val csvFileStrOpt = try {
                     Some(readerFactory.getFileReader(metricsFilePath).read(metricsFilePath).replace("value", metric).replace("count", metric))
