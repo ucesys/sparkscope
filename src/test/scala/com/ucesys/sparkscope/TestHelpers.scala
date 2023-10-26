@@ -3,7 +3,7 @@ package com.ucesys.sparkscope
 import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
-import com.ucesys.sparkscope.data.DataFrame
+import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io._
 import com.ucesys.sparkscope.utils.SparkScopeLogger
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
@@ -356,40 +356,40 @@ object TestHelpers extends FunSuite with MockFactory {
           |1695358711,16963300828""".stripMargin
 
     val driverMetrics = Seq(
-        DataFrame.fromCsv("driver-heap-used", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed)),
-        DataFrame.fromCsv("driver-heap-max", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax)),
-        DataFrame.fromCsv("driver-heap-usage", jvmHeapUsageDriverCsv, ",", Seq("t", JvmHeapUsage)),
-        DataFrame.fromCsv("driver-non-heap", jvmNonHeapDriverCsv, ",", Seq("t", JvmNonHeapUsed))
+        DataTable.fromCsv("driver-heap-used", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed)),
+        DataTable.fromCsv("driver-heap-max", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax)),
+        DataTable.fromCsv("driver-heap-usage", jvmHeapUsageDriverCsv, ",", Seq("t", JvmHeapUsage)),
+        DataTable.fromCsv("driver-non-heap", jvmNonHeapDriverCsv, ",", Seq("t", JvmNonHeapUsed))
     )
 
     val executorMetricsMap = Map(
         "1" -> Seq(
-            DataFrame.fromCsv("exec1-heap-used", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed)),
-            DataFrame.fromCsv("exec1-heap-max", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax)),
-            DataFrame.fromCsv("exec1-heap-usage", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage)),
-            DataFrame.fromCsv("exec1-non-heap", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed)),
-            DataFrame.fromCsv("exec1-cpu-time", cpuTime1Csv, ",", Seq("t", CpuTime))
+            DataTable.fromCsv("exec1-heap-used", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed)),
+            DataTable.fromCsv("exec1-heap-max", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax)),
+            DataTable.fromCsv("exec1-heap-usage", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage)),
+            DataTable.fromCsv("exec1-non-heap", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed)),
+            DataTable.fromCsv("exec1-cpu-time", cpuTime1Csv, ",", Seq("t", CpuTime))
         ),
         "2" -> Seq(
-            DataFrame.fromCsv("exec2-heap-used", jvmHeapExec2Csv, ",", Seq("t", JvmHeapUsed)),
-            DataFrame.fromCsv("exec2-heap-max", jvmHeapMaxExec2Csv, ",", Seq("t", JvmHeapMax)),
-            DataFrame.fromCsv("exec2-heap-usage", jvmHeapUsageExec2Csv, ",", Seq("t", JvmHeapUsage)),
-            DataFrame.fromCsv("exec2-non-heap", jvmNonHeapExec2Csv, ",", Seq("t", JvmNonHeapUsed)),
-            DataFrame.fromCsv("exec2-cpu-time", cpuTime2Csv, ",", Seq("t", CpuTime))
+            DataTable.fromCsv("exec2-heap-used", jvmHeapExec2Csv, ",", Seq("t", JvmHeapUsed)),
+            DataTable.fromCsv("exec2-heap-max", jvmHeapMaxExec2Csv, ",", Seq("t", JvmHeapMax)),
+            DataTable.fromCsv("exec2-heap-usage", jvmHeapUsageExec2Csv, ",", Seq("t", JvmHeapUsage)),
+            DataTable.fromCsv("exec2-non-heap", jvmNonHeapExec2Csv, ",", Seq("t", JvmNonHeapUsed)),
+            DataTable.fromCsv("exec2-cpu-time", cpuTime2Csv, ",", Seq("t", CpuTime))
         ),
         "3" -> Seq(
-            DataFrame.fromCsv("exec3-heap-used", jvmHeapExec3Csv, ",", Seq("t", JvmHeapUsed)),
-            DataFrame.fromCsv("exec3-heap-max", jvmHeapMaxExec3Csv, ",", Seq("t", JvmHeapMax)),
-            DataFrame.fromCsv("exec3-heap-usage", jvmHeapUsageExec3Csv, ",", Seq("t", JvmHeapUsage)),
-            DataFrame.fromCsv("exec3-non-heap", jvmNonHeapExec3Csv, ",", Seq("t", JvmNonHeapUsed)),
-            DataFrame.fromCsv("exec3-cpu-time", cpuTime3Csv, ",", Seq("t", CpuTime))
+            DataTable.fromCsv("exec3-heap-used", jvmHeapExec3Csv, ",", Seq("t", JvmHeapUsed)),
+            DataTable.fromCsv("exec3-heap-max", jvmHeapMaxExec3Csv, ",", Seq("t", JvmHeapMax)),
+            DataTable.fromCsv("exec3-heap-usage", jvmHeapUsageExec3Csv, ",", Seq("t", JvmHeapUsage)),
+            DataTable.fromCsv("exec3-non-heap", jvmNonHeapExec3Csv, ",", Seq("t", JvmNonHeapUsed)),
+            DataTable.fromCsv("exec3-cpu-time", cpuTime3Csv, ",", Seq("t", CpuTime))
         ),
         "5" -> Seq(
-            DataFrame.fromCsv("exec5-heap-used", jvmHeapExec5Csv, ",", Seq("t", JvmHeapUsed)),
-            DataFrame.fromCsv("exec5-heap-max", jvmHeapMaxExec5Csv, ",", Seq("t", JvmHeapMax)),
-            DataFrame.fromCsv("exec5-heap-usage", jvmHeapUsageExec5Csv, ",", Seq("t", JvmHeapUsage)),
-            DataFrame.fromCsv("exec5-non-heap", jvmNonHeapExec5Csv, ",", Seq("t", JvmNonHeapUsed)),
-            DataFrame.fromCsv("exec5-cpu-time", cpuTime5Csv, ",", Seq("t", CpuTime))
+            DataTable.fromCsv("exec5-heap-used", jvmHeapExec5Csv, ",", Seq("t", JvmHeapUsed)),
+            DataTable.fromCsv("exec5-heap-max", jvmHeapMaxExec5Csv, ",", Seq("t", JvmHeapMax)),
+            DataTable.fromCsv("exec5-heap-usage", jvmHeapUsageExec5Csv, ",", Seq("t", JvmHeapUsage)),
+            DataTable.fromCsv("exec5-non-heap", jvmNonHeapExec5Csv, ",", Seq("t", JvmNonHeapUsed)),
+            DataTable.fromCsv("exec5-cpu-time", cpuTime5Csv, ",", Seq("t", CpuTime))
         )
     )
 
