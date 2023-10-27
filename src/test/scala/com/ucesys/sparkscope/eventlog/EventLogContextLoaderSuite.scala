@@ -33,14 +33,15 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
     test("SparkScopeRunner offline app finished") {
         Given("Path to eventLog with finished application and no removed executors")
-        val eventLogPath = "src/test/resources/app-20231025121456-0004-eventLog-finished"
+        val appId = "app-20231025121456-0004-eventLog-finished"
+        val eventLogPath = s"src/test/resources/${appId}"
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
         val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
-        assert(eventLogContext.appContext.appInfo.applicationID == "app-20231025121456-0004")
+        assert(eventLogContext.appContext.appInfo.applicationID == appId)
         assert(eventLogContext.appContext.appInfo.startTime == 1698236095722L)
         assert(eventLogContext.appContext.appInfo.endTime == 1698236104099L)
 
@@ -59,14 +60,15 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
     test("SparkScopeRunner offline app running") {
         Given("Path to eventLog with running application and no removed executors")
-        val eventLogPath = "src/test/resources/app-20231025121456-0004-eventLog-running"
+        val appId = "app-20231025121456-0004-eventLog-running"
+        val eventLogPath = s"src/test/resources/${appId}"
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
         val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
-        assert(eventLogContext.appContext.appInfo.applicationID == "app-20231025121456-0004")
+        assert(eventLogContext.appContext.appInfo.applicationID == appId)
         assert(eventLogContext.appContext.appInfo.startTime == 1698236095722L)
         assert(eventLogContext.appContext.appInfo.endTime == 0)
 
@@ -86,14 +88,15 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
     test("SparkScopeRunner offline app finished executors removed") {
         Given("Path to eventLog with finished application and removed executors")
-        val eventLogPath = "src/test/resources/app-20231025121456-0004-eventLog-finished-exec-removed"
+        val appId = "app-20231025121456-0004-eventLog-finished-exec-removed"
+        val eventLogPath = s"src/test/resources/${appId}"
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
         val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
-        assert(eventLogContext.appContext.appInfo.applicationID == "app-20231025121456-0004")
+        assert(eventLogContext.appContext.appInfo.applicationID == appId)
         assert(eventLogContext.appContext.appInfo.startTime == 1698236095722L)
         assert(eventLogContext.appContext.appInfo.endTime == 1698236104099L)
 
@@ -113,14 +116,15 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
     test("SparkScopeRunner offline app running executors removed") {
         Given("Path to eventLog with running application and removed executors")
-        val eventLogPath = "src/test/resources/app-20231025121456-0004-eventLog-running-exec-removed"
+        val appId = "app-20231025121456-0004-eventLog-running-exec-removed"
+        val eventLogPath = s"src/test/resources/${appId}"
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
         val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
-        assert(eventLogContext.appContext.appInfo.applicationID == "app-20231025121456-0004")
+        assert(eventLogContext.appContext.appInfo.applicationID == appId)
         assert(eventLogContext.appContext.appInfo.startTime == 1698236095722L)
         assert(eventLogContext.appContext.appInfo.endTime == 0)
 

@@ -552,6 +552,97 @@ object TestHelpers extends FunSuite with MockFactory {
         csvReader
     }
 
+    def mockMetricsEventLog(csvReaderMock: HadoopFileReader, appId: String): HadoopFileReader = {
+        val jvmHeapDriverCsv: String =
+            """t,value
+              |1698236101,136879104
+              |1698236104,108239904""".stripMargin
+
+        val jvmHeapUsageDriverCsv: String =
+            """t,value
+              |1698236101,0.12747859954833984
+              |1698236104,0.10080626606941223""".stripMargin
+
+        val jvmHeapMaxDriverCsv: String =
+            """t,value
+              |1698236101,1073741824
+              |1698236104,1073741824""".stripMargin
+
+        val jvmNonHeapDriverCsv: String =
+            """t,value
+              |1698236101,89620432
+              |1698236104,93666616""".stripMargin
+
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(jvmNonHeapDriverCsv)
+
+        val jvmHeapExec0Csv: String =
+            """t,value
+              |1698236103,74032944
+              |1698236104,73224288""".stripMargin
+
+        val jvmHeapUsageExec0Csv: String =
+            """t,value
+              |1698236103,0.07733701917860243
+              |1698236104,0.07759124755859376""".stripMargin
+
+        val jvmHeapMaxExec0Csv: String =
+            """t,value
+              |1698236103,943718400
+              |1698236104,943718400""".stripMargin
+
+        val jvmNonHeapExec0Csv: String =
+            """t,value
+              |1698236103,67918808
+              |1698236104,68396480""".stripMargin
+
+        val jvmCpuTimeExec0Csv: String =
+            """t,value
+              |1698236103,4076184096
+              |1698236104,5137414040""".stripMargin
+
+        val jvmHeapExec1Csv: String =
+            """t,value
+              |1698236103,108529560
+              |1698236104,86752416""".stripMargin
+
+        val jvmHeapUsageExec1Csv: String =
+            """t,value
+              |1698236103,0.11500205993652343
+              |1698236104,0.09192616780598958""".stripMargin
+
+        val jvmHeapMaxExec1Csv: String =
+            """t,value
+              |1698236103,943718400
+              |1698236104,943718400""".stripMargin
+
+        val jvmNonHeapExec1Csv: String =
+            """t,value
+              |1698236103,68071032
+              |1698236104,68522480""".stripMargin
+
+        val jvmCpuTimeExec1Csv: String =
+            """t,value
+              |1698236103,4206969830
+              |1698236104,5259304929""".stripMargin
+
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.used.csv").returns(jvmHeapExec0Csv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.usage.csv").returns(jvmHeapUsageExec0Csv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.max.csv").returns(jvmHeapMaxExec0Csv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.non-heap.used.csv").returns(jvmNonHeapExec0Csv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.executor.cpuTime.csv").returns(jvmCpuTimeExec0Csv)
+
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.used.csv").returns(jvmHeapExec1Csv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.usage.csv").returns(jvmHeapUsageExec1Csv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.max.csv").returns(jvmHeapMaxExec1Csv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.non-heap.used.csv").returns(jvmNonHeapExec1Csv)
+        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.executor.cpuTime.csv").returns(jvmCpuTimeExec1Csv)
+
+        csvReaderMock
+    }
+
     def getPropertiesLoaderFactoryMock(loader: PropertiesLoader): PropertiesLoaderFactory = {
         val propertiesLoaderFactoryMock = stub[PropertiesLoaderFactory]
         (propertiesLoaderFactoryMock.getPropertiesLoader _).when(MetricsPropertiesPath).returns(loader)
