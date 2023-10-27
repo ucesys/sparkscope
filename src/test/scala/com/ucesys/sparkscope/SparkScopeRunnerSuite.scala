@@ -132,7 +132,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
 //    test("SparkScopeRunner offline from eventLog test") {
 //        implicit val logger: SparkScopeLogger = new SparkScopeLogger
-//        val appId = "app-20231025121456-0004-eventLog"
+//        val appId = "app-20231025121456-0004-eventLog-finished"
 //        Given("Metrics for application which was upscaled and downscaled")
 //        val ac = mockAppContextWithDownscalingMuticore("eventLog", appId)
 //        val csvReaderMock = stub[HadoopFileReader]
@@ -143,7 +143,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 //
 //        When("SparkScopeRunner.run")
 //        SparkScopeRunner.runFromEventLog(
-//            "src/test/resources/app-20231025121456-0004-eventLog",
+//            "src/test/resources/app-20231025121456-0004-eventLog-finished",
 //            new SparkScopeConfLoader,
 //            new SparkScopeAnalyzer,
 //            getPropertiesLoaderFactoryMock,
