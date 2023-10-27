@@ -33,10 +33,10 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
         val csvReaderMock = stub[HadoopFileReader]
         val appContext = mockAppContext("csv-loader-incorrect-csvs")
         mockIncorrectDriverMetrics(csvReaderMock, appContext.appInfo.applicationID)
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), appContext, sparkScopeConf)
+        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
 
         When("loading metrics")
-        val driverExecutorMetrics = metricsLoader.load()
+        val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
 
         Then("Driver and Executor Metrics should be loaded")
         assert(driverExecutorMetrics.driverMetrics.length == DriverCsvMetrics.length)
@@ -59,10 +59,10 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
         val csvReaderMock = stub[HadoopFileReader]
         val appContext = mockAppContext("csv-loader-successful")
         mockcorrectMetrics(csvReaderMock, appContext.appInfo.applicationID)
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), appContext, sparkScopeConf)
+        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
 
         When("loading metrics")
-        val driverExecutorMetrics = metricsLoader.load()
+        val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
 
         Then("Driver and Executor Metrics should be loaded")
         assert(driverExecutorMetrics.driverMetrics.length == 4)
@@ -77,10 +77,10 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
         val csvReaderMock = stub[HadoopFileReader]
         val appContext = mockAppContextMissingExecutorMetrics("csv-loader-missing-metrics")
         mockcorrectMetrics(csvReaderMock, appContext.appInfo.applicationID)
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), appContext, sparkScopeConf)
+        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
 
         When("loading metrics")
-        val driverExecutorMetrics = metricsLoader.load()
+        val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
 
         Then("Driver and Executor Metrics should be loaded")
         assert(driverExecutorMetrics.driverMetrics.length == 4)

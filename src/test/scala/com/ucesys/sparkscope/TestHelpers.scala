@@ -444,7 +444,7 @@ object TestHelpers extends FunSuite with MockFactory {
             "7" -> ExecutorTimeSpan("7", "0", 1, 1695358687000L, 1695358715000L)
         )
 
-        val appId = s"${getAppId}-${appName}"
+        val appId = s"${getAppId}${appName}"
 
         new AppContext(
             new ApplicationInfo(appId, StartTime, EndTime),
@@ -466,7 +466,7 @@ object TestHelpers extends FunSuite with MockFactory {
             "7" -> ExecutorTimeSpan("7", "0", 2, 1695358687000L, 1695358715000L)
         )
 
-        val appIdUniq = s"${appId}-${appName}"
+        val appIdUniq = s"${appId}${appName}"
 
         new AppContext(
             new ApplicationInfo(appIdUniq, StartTime, EndTime),

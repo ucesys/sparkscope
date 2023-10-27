@@ -19,9 +19,11 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
+import com.ucesys.sparkscope.eventlog.EventLogContextLoader
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.utils.SparkScopeLogger
 import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
@@ -32,6 +34,8 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
     val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
     val SparkLensOutput = Seq("Executor Timeline", "StageSkewAnalyzer text...")
+    val spark = SparkSession.builder().master("local").getOrCreate()
+    spark.sparkContext.setLogLevel("WARN")
 
     test("SparkScopeRunner upscaling test") {
         Given("Metrics for application which was upscaled")
@@ -41,9 +45,9 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         And("SparkScopeConf with specified html report path")
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
+        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
 
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when(*, *).returns(sparkScopeConfHtmlReportPath)
@@ -74,9 +78,9 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         And("SparkScopeConf with specified html report path")
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
+        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
 
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when(*, *).returns(sparkScopeConfHtmlReportPath)
@@ -106,9 +110,9 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         And("SparkScopeConf with specified html report path")
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
+        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
 
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when(*, *).returns(sparkScopeConfHtmlReportPath)
@@ -130,29 +134,33 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
     }
 
-//    test("SparkScopeRunner offline from eventLog test") {
-//        implicit val logger: SparkScopeLogger = new SparkScopeLogger
-//        val appId = "app-20231025121456-0004-eventLog-finished"
-//        Given("Metrics for application which was upscaled and downscaled")
-//        val ac = mockAppContextWithDownscalingMuticore("eventLog", appId)
-//        val csvReaderMock = stub[HadoopFileReader]
-//        mockMetricsWithDownscaling(csvReaderMock, ac.appInfo.applicationID)
-//        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock), ac, sparkScopeConfHtmlReportPath)
-//        val metricsLoaderFactory = stub[MetricsLoaderFactory]
-//        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
-//
-//        When("SparkScopeRunner.run")
-//        SparkScopeRunner.runFromEventLog(
-//            "src/test/resources/app-20231025121456-0004-eventLog-finished",
-//            new SparkScopeConfLoader,
-//            new SparkScopeAnalyzer,
-//            getPropertiesLoaderFactoryMock,
-//            metricsLoaderFactory,
-//            new ReportGeneratorFactory
-//        )
-//
-//        Then("Report should be generated")
-//        assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
-//    }
+    test("SparkScopeRunner offline from eventLog test") {
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
+        val appId = "app-20231025121456-0004"
+        Given("Metrics for application which was upscaled and downscaled")
+        val ac = mockAppContextWithDownscalingMuticore("", appId)
+        val csvReaderMock = stub[HadoopFileReader]
+        mockMetricsWithDownscaling(csvReaderMock, ac.appInfo.applicationID)
+
+        val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
+        val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
+        val metricsLoaderFactory = stub[MetricsLoaderFactory]
+        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+
+        When("SparkScopeRunner.run")
+        SparkScopeRunner.runFromEventLog(
+            "src/test/resources/app-20231025121456-0004-eventLog-finished",
+            spark,
+            new SparkScopeAnalyzer,
+            new EventLogContextLoader,
+            new SparkScopeConfLoader,
+            getPropertiesLoaderFactoryMock,
+            metricsLoaderFactory,
+            new ReportGeneratorFactory
+        )
+
+        Then("Report should be generated")
+        assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
+    }
 }
 
