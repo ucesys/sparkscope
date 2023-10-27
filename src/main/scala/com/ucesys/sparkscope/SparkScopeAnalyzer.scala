@@ -17,22 +17,18 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparklens.common.AppContext.getExecutorCores
-import com.ucesys.sparklens.timespan.ExecutorTimeSpan
+import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
-import com.ucesys.sparkscope.utils.SparkScopeLogger
 import com.ucesys.sparkscope.warning.{CPUUtilWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
 
-import scala.collection.mutable
 import scala.concurrent.duration._
 
 class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
-    def analyze(driverExecutorMetrics: DriverExecutorMetrics, ac: AppContext): SparkScopeResult = {
+    def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: SparkScopeContext): SparkScopeResult = {
         var driverMetricsMerged: DataTable = driverExecutorMetrics.driverMetrics.head
         driverExecutorMetrics.driverMetrics.tail.foreach { metric =>
             driverMetricsMerged = driverMetricsMerged.mergeOn("t", metric)
@@ -45,7 +41,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         }
 
         // Interpolating metrics
-        val executorsMetricsMapInterpolated = interpolateExecutorMetrics(ac.executorMap, driverExecutorMetrics.executorMetricsMap)
+        val executorsMetricsMapInterpolated = interpolateExecutorMetrics(appContext.executorMap, driverExecutorMetrics.executorMetricsMap)
         executorsMetricsMapInterpolated.foreach { case (id, metrics) =>
             metrics.foreach { metric => logger.println(s"\nInterpolated ${metric.name} metric for executor=${id}:\n${metric}") }
         }
@@ -66,7 +62,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
             val timeLag = metrics.select("t").lag
             val timeElapsed = metrics.select("t").sub(timeLag)
             val cpuUsageAllCores = clusterCpuTimeDiff.div(timeElapsed).rename("cpuUsageAllCores")
-            val cpuUsage = cpuUsageAllCores.div(getExecutorCores(ac)).rename(CpuUsage)
+            val cpuUsage = cpuUsageAllCores.div(appContext.executorCores).rename(CpuUsage)
             val metricsWithCpuUsage = metrics.addColumn(cpuUsage).addColumn(cpuUsageAllCores)
             (id, metricsWithCpuUsage)
         }
@@ -91,15 +87,16 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         logger.println(allExecutorsMetrics)
 
         // Executor Start, End, Duration
-        val startEndTimes = getExecutorStartEndTimes(ac)
-        val startEndTimesWithMetrics = startEndTimes.filter { case (id, _) => driverExecutorMetrics.executorMetricsMap.contains(id) }
-        val combinedExecutorUptime = startEndTimesWithMetrics.map { case (_, (_, _, duration)) => duration }.sum
+        val startEndTimesWithMetrics = appContext.executorMap.filter { case (id, _) => driverExecutorMetrics.executorMetricsMap.contains(id) }
+        val combinedExecutorUptime = startEndTimesWithMetrics.map {
+            case (id, executorContext) => executorContext.upTime(executorsMetricsCombinedMapWithExecId(id).select("t").max.toLong)
+        }.sum
         val executorTimeSecs = combinedExecutorUptime.milliseconds.toSeconds
 
         // Metrics
         val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics)
         val clusterMemoryMetrics = ClusterMemoryMetrics(allExecutorsMetrics)
-        val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics, getExecutorCores(ac))
+        val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics, appContext.executorCores)
         logger.println(clusterMemoryMetrics)
         logger.println(clusterCPUMetrics)
 
@@ -107,12 +104,12 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         val driverStats = DriverMemoryStats(driverMetricsMerged)
         val executorStats = ExecutorMemoryStats(allExecutorsMetrics)
         val clusterMemoryStats = ClusterMemoryStats(clusterMemoryMetrics, executorTimeSecs, executorStats)
-        val clusterCPUStats = ClusterCPUStats(clusterCPUMetrics, getExecutorCores(ac), executorTimeSecs)
+        val clusterCPUStats = ClusterCPUStats(clusterCPUMetrics, appContext.executorCores, executorTimeSecs)
 
         // Warnings
         val warnings: Seq[Option[Warning]] = Seq(
             MissingMetricsWarning(
-                allExecutors = ac.executorMap.map { case (id, _) => id }.toSeq,
+                allExecutors = appContext.executorMap.map { case (id, _) => id }.toSeq,
                 withMetrics = driverExecutorMetrics.executorMetricsMap.map { case (id, _) => id }.toSeq
             ),
             CPUUtilWarning(cpuUtil = clusterCPUStats.cpuUtil, coreHoursWasted = clusterCPUStats.coreHoursWasted, LowCPUUtilizationThreshold),
@@ -120,7 +117,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         )
 
         SparkScopeResult(
-            appInfo = ac.appInfo,
+            appContext = appContext,
             stats = SparkScopeStats(
                 driverStats = driverStats,
                 executorStats = executorStats,
@@ -137,18 +134,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         )
     }
 
-    private def getExecutorStartEndTimes(ac: AppContext): Map[String, (Long, Long, Long)] = {
-        ac.executorMap.map { case (id, timespan) => {
-            val end = timespan.endTime match {
-                case 0 => ac.appInfo.endTime
-                case _ => timespan.endTime
-            }
-            (id, (timespan.startTime, end, end - timespan.startTime))
-        }
-        }.toMap
-    }
-
-    private def interpolateExecutorMetrics(executorMap: mutable.HashMap[String, ExecutorTimeSpan],
+    private def interpolateExecutorMetrics(executorMap: Map[String, ExecutorContext],
                                            executorsMetricsMap: Map[String, Seq[DataTable]]): Map[String, Seq[DataTable]] = {
         /*    Interpolating executor metrics to align their timestamps for aggregations. Also adds a "zero row" with start values for when executor was added.
 
@@ -172,7 +158,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         val executorsMetricsMapWithZeroRows: Map[String, Seq[DataTable]] = executorsMetricsMap.map { case (id, metrics) =>
             val metricsWithZeroRows = metrics.map { metric =>
 
-                val executorStartTime = executorMap(id.toString).startTime / MilliSecondsInSec
+                val executorStartTime = executorMap(id.toString).addTime / MilliSecondsInSec
 
                 if (metric.select("t").values.contains(executorStartTime.toString)) {
                     metric

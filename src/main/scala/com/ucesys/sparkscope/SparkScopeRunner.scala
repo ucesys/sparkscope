@@ -17,16 +17,16 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparklens.common.AppContext
+import com.ucesys.sparkscope.common.SparkScopeContext
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.apache.spark.SparkConf
 
 import java.io.FileNotFoundException
 import java.nio.file.NoSuchFileException
 
-class SparkScopeRunner(appContext: AppContext,
+class SparkScopeRunner(appContext: SparkScopeContext,
                        sparkConf: SparkConf,
                        sparkScopeConfLoader: SparkScopeConfLoader,
                        sparkScopeAnalyzer: SparkScopeAnalyzer,

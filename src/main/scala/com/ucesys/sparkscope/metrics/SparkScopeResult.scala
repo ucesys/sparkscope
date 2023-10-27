@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.metrics
 
-import com.ucesys.sparklens.common.ApplicationInfo
+import com.ucesys.sparkscope.common.SparkScopeContext
 import com.ucesys.sparkscope.warning.Warning
 
-case class SparkScopeResult(appInfo: ApplicationInfo, warnings: Seq[Warning], stats: SparkScopeStats, metrics: SparkScopeMetrics)
+case class SparkScopeResult(appContext: SparkScopeContext, warnings: Seq[Warning], stats: SparkScopeStats, metrics: SparkScopeMetrics)

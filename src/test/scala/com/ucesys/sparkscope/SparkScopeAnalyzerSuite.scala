@@ -21,7 +21,7 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.io.HadoopFileReader
 import com.ucesys.sparkscope.metrics._
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
@@ -42,9 +42,9 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
         assert(result.warnings.length == 2)
 
         And("SparkScopeResult should be returned with correct values")
-        assert(result.appInfo.applicationID == ac.appInfo.applicationID)
-        assert(result.appInfo.startTime == StartTime)
-        assert(result.appInfo.endTime == EndTime)
+        assert(result.appContext.appId == ac.appId)
+        assert(result.appContext.appStartTime == StartTime)
+        assert(result.appContext.appEndTime.get == EndTime)
 
         assert(result.stats.driverStats == DriverMemoryStats(
             heapSize = 910,
@@ -90,7 +90,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
         Given("SparkScopeAnalyzer and missing csv metrics for one executor")
         val ac = mockAppContextMissingExecutorMetrics("analyzer-missing-metrics")
         val csvReaderMock = stub[HadoopFileReader]
-        mockcorrectMetrics(csvReaderMock, ac.appInfo.applicationID)
+        mockcorrectMetrics(csvReaderMock, ac.appId)
         val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
         When("running SparkScopeAnalyzer.analyze")
@@ -104,9 +104,9 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
         missingMetricsWarning.toString.contains("Missing metrics for the following executor ids: 5")
 
         And("SparkScopeResult should be returned with correct values")
-        assert(result.appInfo.applicationID == ac.appInfo.applicationID)
-        assert(result.appInfo.startTime == StartTime)
-        assert(result.appInfo.endTime == EndTime)
+        assert(result.appContext.appId == ac.appId)
+        assert(result.appContext.appStartTime == StartTime)
+        assert(result.appContext.appEndTime.get == EndTime)
 
         assert(result.stats.driverStats == DriverMemoryStats(
             heapSize = 910,

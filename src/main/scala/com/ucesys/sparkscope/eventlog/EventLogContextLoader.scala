@@ -1,16 +1,12 @@
 package com.ucesys.sparkscope.eventlog
 
-import com.ucesys.sparklens.common.{AppContext, ApplicationInfo}
-import com.ucesys.sparklens.timespan.ExecutorTimeSpan
+import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.eventlog.EventLogContextLoader._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
-import scala.collection.mutable
-
-
-class EventLogContextLoader {
+class EventLogContextLoader(implicit logger: SparkScopeLogger) {
     def load(spark: SparkSession, eventLogPath: String): EventLogContext = {
         import spark.implicits._
 
@@ -24,7 +20,15 @@ class EventLogContextLoader {
         val sparkConfDF = eventLogDFNoTasks
           .where(col(ColEvent) === EventEnvUpdate)
           .select(s"${ColSparkProps}.*")
-        val sparkConfMap: Map[String, Any] = sparkConfDF.collect.map(r => Map(sparkConfDF.columns.zip(r.toSeq):_*)).last
+
+
+        val sparkConfMap: Map[String, Any] = try {
+            sparkConfDF.collect.map(r => Map(sparkConfDF.columns.zip(r.toSeq):_*)).last
+        } catch {
+            case ex: Exception =>
+                logger.error(s"Error while trying to read spark properties from event log file: ${eventLogPath}" + ex)
+                throw new IllegalArgumentException(s"Error while trying to read spark properties from event log file: ${eventLogPath}" + ex, ex)
+        }
         val sparkConf = new SparkConf(false)
         sparkConfMap.foreach{case (key, value) => sparkConf.set(key, value.toString)}
 
@@ -37,6 +41,11 @@ class EventLogContextLoader {
           .toSeq
           .headOption
 
+        if (appStart.isEmpty) {
+            logger.error("Could not read application start event from eventLog")
+            throw new IllegalArgumentException("Could not read application start event from eventLog")
+        }
+
         val appEnd: Option[ApplicationEvent] = eventLogDFNoTasks
           .filter(col(ColEvent) === EventAppEnd)
           .select(col(ColAppId).as("appId"), col(ColTimeStamp).as("ts"))
@@ -45,41 +54,32 @@ class EventLogContextLoader {
           .toSeq
           .headOption
 
-        val appInfo = new ApplicationInfo(appStart.get.appId, appStart.get.ts, appEnd.map(_.ts).getOrElse(0))
-
-        // ExecutorMap
-        val executorAddedSeq: Seq[ExecutorEvent] = eventLogDFNoTasks
-          .filter(col(ColEvent) === EventExecutorAdded)
-          .select(col(ColExecutorId).as("executorId"), col(ColTimeStamp).as("ts"), col(ColExecutorCores).as("cores"))
-          .as[ExecutorEvent]
-          .collect()
-          .toSeq
-
-        val executorRemovedSeq: Seq[ExecutorEvent] = eventLogDFNoTasks
-          .filter(col(ColEvent) === EventExecutorRemoved)
-          .select(col(ColExecutorId).as("executorId"), col(ColTimeStamp).as("ts"), col(ColExecutorCores).as("cores"))
-          .as[ExecutorEvent]
-          .collect()
-          .toSeq
-
-        val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.Map(executorAddedSeq.map { execAdded =>
-            (execAdded.executorId, ExecutorTimeSpan(execAdded.executorId, "", execAdded.cores.get.toInt, execAdded.ts,  0))
-        }: _*).asInstanceOf[mutable.HashMap[String, ExecutorTimeSpan]]
-
-        executorRemovedSeq.foreach{ execRemoved =>
-            executorMap(execRemoved.executorId).setEndTime(execRemoved.ts)
+        if (appEnd.isEmpty) {
+            logger.info("Could not read application end event from eventLog, app might still be running.")
         }
 
-        // AppContext
-        val appContext = new AppContext(
-            appInfo,
-            null,
-            null,
-            executorMap,
-            null,
-            null,
-            null,
-            null
+        // ExecutorMap
+        val executorsAddedDF: DataFrame = eventLogDFNoTasks
+          .filter(col(ColEvent) === EventExecutorAdded)
+          .select(col(ColExecutorId).as("executorId"), col(ColTimeStamp).as("addTime"), col(ColExecutorCores).as("cores"))
+
+        val executorRemovedDF: DataFrame = eventLogDFNoTasks
+          .filter(col(ColEvent) === EventExecutorRemoved)
+          .select(col(ColExecutorId).as("executorId"), col(ColTimeStamp).as("removeTime"))
+
+        val executorMap: Map[String, ExecutorContext] = executorsAddedDF.join(executorRemovedDF, Seq("executorId"), "left")
+          .as[ExecutorContext]
+          .collect()
+          .toSeq
+          .map(x => (x.executorId, x))
+          .toMap
+
+        // App Context
+        val appContext = SparkScopeContext(
+            appId=appStart.get.appId,
+            appStartTime=appStart.get.ts,
+            appEndTime=appEnd.map(_.ts),
+            executorMap
         )
 
         EventLogContext(sparkConf, appContext)

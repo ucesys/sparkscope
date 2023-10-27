@@ -19,7 +19,7 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.eventlog.EventLogContextLoader
 import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.apache.spark.sql.SparkSession
 
 object SparkScopeApp {

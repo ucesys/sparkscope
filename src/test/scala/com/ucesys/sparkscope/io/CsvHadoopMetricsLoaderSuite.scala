@@ -20,7 +20,7 @@ package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMetrics}
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
@@ -32,7 +32,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
         Given("Some csv metrics for driver and executor contain more rows than others")
         val csvReaderMock = stub[HadoopFileReader]
         val appContext = mockAppContext("csv-loader-incorrect-csvs")
-        mockIncorrectDriverMetrics(csvReaderMock, appContext.appInfo.applicationID)
+        mockIncorrectDriverMetrics(csvReaderMock, appContext.appId)
         val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
 
         When("loading metrics")
@@ -58,7 +58,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
         And("Correct csv files")
         val csvReaderMock = stub[HadoopFileReader]
         val appContext = mockAppContext("csv-loader-successful")
-        mockcorrectMetrics(csvReaderMock, appContext.appInfo.applicationID)
+        mockcorrectMetrics(csvReaderMock, appContext.appId)
         val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
 
         When("loading metrics")
@@ -76,7 +76,7 @@ class CsvHadoopMetricsLoaderSuite extends FunSuite with MockFactory with GivenWh
         And("Csv metrics for 4 out of 5 executors(metrics for last executor are missing)")
         val csvReaderMock = stub[HadoopFileReader]
         val appContext = mockAppContextMissingExecutorMetrics("csv-loader-missing-metrics")
-        mockcorrectMetrics(csvReaderMock, appContext.appInfo.applicationID)
+        mockcorrectMetrics(csvReaderMock, appContext.appId)
         val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
 
         When("loading metrics")

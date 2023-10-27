@@ -21,7 +21,7 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.eventlog.EventLogContextLoader
 import com.ucesys.sparkscope.io._
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.apache.spark.sql.SparkSession
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
@@ -44,7 +44,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         val eventLogPath = s"src/test/resources/${appId}"
         val ac = mockAppContextWithDownscalingMuticore("", appId)
         val csvReaderMock = stub[HadoopFileReader]
-        mockMetricsEventLog(csvReaderMock, ac.appInfo.applicationID)
+        mockMetricsEventLog(csvReaderMock, ac.appId)
 
         val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
         val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
@@ -64,7 +64,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
+        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
     }
 
     test("SparkScopeApp.runFromEventLog for running application") {
@@ -74,7 +74,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         val eventLogPath = s"src/test/resources/${appId}"
         val ac = mockAppContextWithDownscalingMuticore("", appId)
         val csvReaderMock = stub[HadoopFileReader]
-        mockMetricsEventLog(csvReaderMock, ac.appInfo.applicationID)
+        mockMetricsEventLog(csvReaderMock, ac.appId)
 
         val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
         val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
@@ -94,7 +94,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
+        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
     }
 
     test("SparkScopeApp.runFromEventLog for finished application with removed executors") {
@@ -104,7 +104,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         val eventLogPath = s"src/test/resources/${appId}"
         val ac = mockAppContextWithDownscalingMuticore("", appId)
         val csvReaderMock = stub[HadoopFileReader]
-        mockMetricsEventLog(csvReaderMock, ac.appInfo.applicationID)
+        mockMetricsEventLog(csvReaderMock, ac.appId)
 
         val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
         val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
@@ -124,7 +124,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
+        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
     }
 
     test("SparkScopeApp.runFromEventLog for running application with removed executors") {
@@ -134,7 +134,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         val eventLogPath = s"src/test/resources/${appId}"
         val ac = mockAppContextWithDownscalingMuticore("", appId)
         val csvReaderMock = stub[HadoopFileReader]
-        mockMetricsEventLog(csvReaderMock, ac.appInfo.applicationID)
+        mockMetricsEventLog(csvReaderMock, ac.appId)
 
         val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
         val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
@@ -154,7 +154,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
+        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
     }
 }
 

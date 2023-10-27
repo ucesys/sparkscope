@@ -20,8 +20,9 @@ package com.ucesys.sparkscope
 import com.ucesys.sparklens.QuboleJobListener
 import com.ucesys.sparklens.analyzer.AppAnalyzer
 import com.ucesys.sparklens.common.AppContext
+import com.ucesys.sparkscope.common.SparkScopeContext
 import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 
@@ -68,7 +69,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
         }
 
         val sparkScopeRunner = new SparkScopeRunner(
-            appContext,
+            SparkScopeContext(appContext),
             sparkConf,
             new SparkScopeConfLoader,
             new SparkScopeAnalyzer,

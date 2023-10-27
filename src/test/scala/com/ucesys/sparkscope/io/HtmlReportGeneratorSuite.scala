@@ -20,7 +20,7 @@ package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
@@ -34,14 +34,14 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
 
         val ac = mockAppContext("html-generator-no-warnings")
         val csvReaderMock = stub[HadoopFileReader]
-        mockcorrectMetrics(csvReaderMock, ac.appInfo.applicationID)
+        mockcorrectMetrics(csvReaderMock, ac.appId)
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
 
         val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir))
         htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
 
-        assert(Files.exists(Paths.get(TestDir, result.appInfo.applicationID + ".html")))
+        assert(Files.exists(Paths.get(TestDir, result.appContext.appId + ".html")))
     }
 
     test("SparkScope end2end with warnings") {
@@ -49,14 +49,14 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
 
         val ac = mockAppContextMissingExecutorMetrics("html-generator-with-warnings")
         val csvReaderMock = stub[HadoopFileReader]
-        mockcorrectMetrics(csvReaderMock, ac.appInfo.applicationID)
+        mockcorrectMetrics(csvReaderMock, ac.appId)
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
         val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir))
         htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
 
-        assert(Files.exists(Paths.get(TestDir, result.appInfo.applicationID + ".html")))
+        assert(Files.exists(Paths.get(TestDir, result.appContext.appId + ".html")))
     }
 }
 

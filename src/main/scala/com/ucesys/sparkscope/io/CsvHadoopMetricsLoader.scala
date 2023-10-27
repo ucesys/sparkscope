@@ -1,21 +1,16 @@
 package com.ucesys.sparkscope.io
 
-import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparklens.timespan.ExecutorTimeSpan
+import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMetrics}
-import com.ucesys.sparkscope.SparkScopeConf
 import com.ucesys.sparkscope.data.DataTable
-import com.ucesys.sparkscope.utils.SparkScopeLogger
-
-import scala.collection.mutable
 
 class CsvHadoopMetricsLoader(readerFactory: FileReaderFactory)(implicit logger: SparkScopeLogger) extends MetricsLoader {
-    def load(ac: AppContext, sparkScopeConf: SparkScopeConf): DriverExecutorMetrics = {
+    def load(appContext: SparkScopeContext, sparkScopeConf: SparkScopeConf): DriverExecutorMetrics = {
         logger.info(s"Reading driver metrics from ${sparkScopeConf.driverMetricsDir}, executor metrics from ${sparkScopeConf.executorMetricsDir}")
 
         logger.info("Reading driver metrics...")
         val driverMetrics: Seq[DataTable] = DriverCsvMetrics.map { metric =>
-            val metricsFilePath = s"${sparkScopeConf.driverMetricsDir}/${ac.appInfo.applicationID}.driver.${metric}.csv"
+            val metricsFilePath = s"${sparkScopeConf.driverMetricsDir}/${appContext.appId}.driver.${metric}.csv"
             logger.info(s"Reading ${metric} metric for driver from " + metricsFilePath)
             val csvReader = readerFactory.getFileReader(metricsFilePath)
             val csvFileStr = csvReader.read(metricsFilePath).replace("value", metric)
@@ -42,12 +37,12 @@ class CsvHadoopMetricsLoader(readerFactory: FileReaderFactory)(implicit logger: 
         logger.info("Reading executor metrics...")
 
         // Filter out executorId="driver" which occurs in local mode
-        val executorsMetricsMapNonDriver: mutable.HashMap[String, ExecutorTimeSpan] = ac.executorMap
+        val executorsMetricsMapNonDriver: Map[String, ExecutorContext] = appContext.executorMap
           .filter { case (executorId, _) => executorId != "driver" }
 
         val executorsMetricsMap: Map[String, Seq[DataTable]] = executorsMetricsMapNonDriver.map { case (executorId, _) =>
             val metricTables: Seq[DataTable] = ExecutorCsvMetrics.flatMap { metric =>
-                val metricsFilePath = s"${sparkScopeConf.executorMetricsDir}/${ac.appInfo.applicationID}.${executorId}.${metric}.csv"
+                val metricsFilePath = s"${sparkScopeConf.executorMetricsDir}/${appContext.appId}.${executorId}.${metric}.csv"
                 logger.info(s"Reading ${metric} metric for executor=${executorId} from " + metricsFilePath)
                 val csvFileStrOpt = try {
                     Some(readerFactory.getFileReader(metricsFilePath).read(metricsFilePath).replace("value", metric).replace("count", metric))
@@ -64,7 +59,7 @@ class CsvHadoopMetricsLoader(readerFactory: FileReaderFactory)(implicit logger: 
                 case seq: Seq[DataTable] if (seq.length == ExecutorCsvMetrics.length) => (executorId, Some(metricTables))
                 case _ => logger.warn(s"Missing metrics for executor=${executorId}"); (executorId, None)
             }
-        }.retain { case (_, opt) => opt.nonEmpty }.map { case (id, opt) => (id, opt.get) }.toMap
+        }.filter { case (_, opt) => opt.nonEmpty }.map { case (id, opt) => (id, opt.get) }
 
         if (executorsMetricsMap.isEmpty) {
             throw new IllegalArgumentException("No executor metrics found")

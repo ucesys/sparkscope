@@ -5,7 +5,7 @@ import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpa
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io._
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
@@ -402,7 +402,7 @@ object TestHelpers extends FunSuite with MockFactory {
 
     def getAppId: String = s"app-${System.currentTimeMillis()}"
 
-    def mockAppContext(appName: String): AppContext = {
+    def mockAppContext(appName: String): SparkScopeContext = {
         val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
             "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
             "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
@@ -412,71 +412,64 @@ object TestHelpers extends FunSuite with MockFactory {
 
         val appId = s"${getAppId}-${appName}"
 
-        new AppContext(
-            new ApplicationInfo(appId, StartTime, EndTime),
-            new AggregateMetrics(),
-            mutable.HashMap[String, HostTimeSpan](),
-            executorMap,
-            new mutable.HashMap[Long, JobTimeSpan],
-            new mutable.HashMap[Long, Long],
-            mutable.HashMap[Int, StageTimeSpan](),
-            mutable.HashMap[Int, Long]())
-    }
-
-    def mockAppContextMissingExecutorMetrics(appName: String): AppContext = {
-        mockAppContext(appName).copy(
-            executorMap = mutable.HashMap(
-                "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
-                "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
-                "3" -> ExecutorTimeSpan("3", "0", 1, 1695358671000L, 1695358700000L),
-                "5" -> ExecutorTimeSpan("5", "0", 1, 1695358687000L, 1695358700000L),
-                "6" -> ExecutorTimeSpan("6", "0", 1, 1695358687000L, 1695358700000L)
+        SparkScopeContext(
+            new AppContext(
+                new ApplicationInfo(appId, StartTime, EndTime),
+                new AggregateMetrics(),
+                mutable.HashMap[String, HostTimeSpan](),
+                executorMap,
+                new mutable.HashMap[Long, JobTimeSpan],
+                new mutable.HashMap[Long, Long],
+                mutable.HashMap[Int, StageTimeSpan](),
+                mutable.HashMap[Int, Long]()
             )
         )
     }
 
-    def mockAppContextWithDownscaling(appName: String): AppContext = {
-        val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
-            "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
-            "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
-            "3" -> ExecutorTimeSpan("3", "0", 1, 1695358671000L, 1695358700000L),
-            "5" -> ExecutorTimeSpan("5", "0", 1, 1695358687000L, 1695358700000L),
-            "7" -> ExecutorTimeSpan("7", "0", 1, 1695358687000L, 1695358715000L)
+    def mockAppContextMissingExecutorMetrics(appName: String): SparkScopeContext = {
+        mockAppContext(appName).copy(
+            executorMap = Map(
+                "1" -> ExecutorContext("1", 1, 1695358645000L, Some(1695358700000L)),
+                "2" -> ExecutorContext("2", 1, 1695358645000L, Some(1695358700000L)),
+                "3" -> ExecutorContext("3", 1, 1695358671000L, Some(1695358700000L)),
+                "5" -> ExecutorContext("5", 1, 1695358687000L, Some(1695358700000L)),
+                "6" -> ExecutorContext("6", 1, 1695358687000L, Some(1695358700000L))
+            )
         )
-
-        val appId = s"${getAppId}${appName}"
-
-        new AppContext(
-            new ApplicationInfo(appId, StartTime, EndTime),
-            new AggregateMetrics(),
-            mutable.HashMap[String, HostTimeSpan](),
-            executorMap,
-            new mutable.HashMap[Long, JobTimeSpan],
-            new mutable.HashMap[Long, Long],
-            mutable.HashMap[Int, StageTimeSpan](),
-            mutable.HashMap[Int, Long]())
     }
 
-    def mockAppContextWithDownscalingMuticore(appName: String, appId: String = getAppId): AppContext = {
-        val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
-            "1" -> ExecutorTimeSpan("1", "0", 2, 1695358645000L, 1695358700000L),
-            "2" -> ExecutorTimeSpan("2", "0", 2, 1695358645000L, 1695358700000L),
-            "3" -> ExecutorTimeSpan("3", "0", 2, 1695358671000L, 1695358700000L),
-            "5" -> ExecutorTimeSpan("5", "0", 2, 1695358687000L, 1695358700000L),
-            "7" -> ExecutorTimeSpan("7", "0", 2, 1695358687000L, 1695358715000L)
+    def mockAppContextWithDownscaling(appName: String): SparkScopeContext = {
+        val executorMap: Map[String, ExecutorContext] = Map(
+            "1" -> ExecutorContext("1", 1, 1695358645000L, Some(1695358700000L)),
+            "2" -> ExecutorContext("2", 1, 1695358645000L, Some(1695358700000L)),
+            "3" -> ExecutorContext("3", 1, 1695358671000L, Some(1695358700000L)),
+            "5" -> ExecutorContext("5", 1, 1695358687000L, Some(1695358700000L)),
+            "7" -> ExecutorContext("7", 1, 1695358687000L, Some(1695358715000L))
         )
 
-        val appIdUniq = s"${appId}${appName}"
+        SparkScopeContext(
+            s"${getAppId}${appName}",
+            StartTime,
+            Some(EndTime),
+            executorMap
+        )
+    }
 
-        new AppContext(
-            new ApplicationInfo(appIdUniq, StartTime, EndTime),
-            new AggregateMetrics(),
-            mutable.HashMap[String, HostTimeSpan](),
-            executorMap,
-            new mutable.HashMap[Long, JobTimeSpan],
-            new mutable.HashMap[Long, Long],
-            mutable.HashMap[Int, StageTimeSpan](),
-            mutable.HashMap[Int, Long]())
+    def mockAppContextWithDownscalingMuticore(appName: String, appId: String = getAppId): SparkScopeContext = {
+        val executorMap: Map[String, ExecutorContext] = Map(
+            "1" -> ExecutorContext("1", 2, 1695358645000L, Some(1695358700000L)),
+            "2" -> ExecutorContext("2", 2, 1695358645000L, Some(1695358700000L)),
+            "3" -> ExecutorContext("3", 2, 1695358671000L, Some(1695358700000L)),
+            "5" -> ExecutorContext("5", 2, 1695358687000L, Some(1695358700000L)),
+            "7" -> ExecutorContext("7", 2, 1695358687000L, Some(1695358715000L))
+        )
+
+        SparkScopeContext(
+            s"${appId}${appName}",
+            StartTime,
+            Some(EndTime),
+            executorMap
+        )
     }
 
     def mockcorrectMetrics(csvReaderMock: HadoopFileReader, appId: String): HadoopFileReader = {

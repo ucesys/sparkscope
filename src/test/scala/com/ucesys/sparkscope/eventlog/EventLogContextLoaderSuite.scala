@@ -18,7 +18,7 @@
 
 package com.ucesys.sparkscope.eventlog
 
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
 import org.scalamock.scalatest.MockFactory
@@ -41,17 +41,17 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
-        assert(eventLogContext.appContext.appInfo.applicationID == appId)
-        assert(eventLogContext.appContext.appInfo.startTime == 1698236095722L)
-        assert(eventLogContext.appContext.appInfo.endTime == 1698236104099L)
+        assert(eventLogContext.appContext.appId == appId)
+        assert(eventLogContext.appContext.appStartTime == 1698236095722L)
+        assert(eventLogContext.appContext.appEndTime.get == 1698236104099L)
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").startTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").endTime == 0)
+        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").removeTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").startTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").endTime == 0)
+        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").removeTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
@@ -68,17 +68,17 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
-        assert(eventLogContext.appContext.appInfo.applicationID == appId)
-        assert(eventLogContext.appContext.appInfo.startTime == 1698236095722L)
-        assert(eventLogContext.appContext.appInfo.endTime == 0)
+        assert(eventLogContext.appContext.appId == appId)
+        assert(eventLogContext.appContext.appStartTime == 1698236095722L)
+        assert(eventLogContext.appContext.appEndTime.isEmpty)
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").startTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").endTime == 0)
+        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").removeTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").startTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").endTime == 0)
+        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").removeTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
@@ -96,17 +96,17 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
-        assert(eventLogContext.appContext.appInfo.applicationID == appId)
-        assert(eventLogContext.appContext.appInfo.startTime == 1698236095722L)
-        assert(eventLogContext.appContext.appInfo.endTime == 1698236104099L)
+        assert(eventLogContext.appContext.appId == appId)
+        assert(eventLogContext.appContext.appStartTime == 1698236095722L)
+        assert(eventLogContext.appContext.appEndTime.get == 1698236104099L)
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").startTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").endTime == 1698236102012L)
+        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").removeTime.get == 1698236102012L)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").startTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").endTime == 1698236103345L)
+        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").removeTime.get == 1698236103345L)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
@@ -124,17 +124,17 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
-        assert(eventLogContext.appContext.appInfo.applicationID == appId)
-        assert(eventLogContext.appContext.appInfo.startTime == 1698236095722L)
-        assert(eventLogContext.appContext.appInfo.endTime == 0)
+        assert(eventLogContext.appContext.appId == appId)
+        assert(eventLogContext.appContext.appStartTime == 1698236095722L)
+        assert(eventLogContext.appContext.appEndTime.isEmpty)
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").startTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").endTime == 1698236102012L)
+        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").removeTime.get == 1698236102012L)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").startTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").endTime == 1698236103345L)
+        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").removeTime.get == 1698236103345L)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")

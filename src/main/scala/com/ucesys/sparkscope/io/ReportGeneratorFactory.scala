@@ -1,7 +1,6 @@
 package com.ucesys.sparkscope.io
 
-import com.ucesys.sparkscope.SparkScopeConf
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
 
 class ReportGeneratorFactory {
     def get(sparkScopeConfig: SparkScopeConf)(implicit logger: SparkScopeLogger): ReportGenerator = {

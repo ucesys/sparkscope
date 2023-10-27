@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope
+package com.ucesys.sparkscope.common
 
 import org.apache.spark.SparkConf
 

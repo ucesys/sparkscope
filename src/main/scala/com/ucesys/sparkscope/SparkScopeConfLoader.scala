@@ -2,7 +2,7 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.io.PropertiesLoaderFactory
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
 import org.apache.spark.SparkConf
 
 class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {

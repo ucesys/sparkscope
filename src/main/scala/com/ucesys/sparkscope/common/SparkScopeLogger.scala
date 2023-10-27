@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.utils
+package com.ucesys.sparkscope.common
 
 import java.io.{PrintWriter, StringWriter}
 import java.text.SimpleDateFormat
