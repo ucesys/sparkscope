@@ -133,34 +133,5 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
     }
-
-    test("SparkScopeRunner offline from eventLog test") {
-        implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        val appId = "app-20231025121456-0004"
-        Given("Metrics for application which was upscaled and downscaled")
-        val ac = mockAppContextWithDownscalingMuticore("", appId)
-        val csvReaderMock = stub[HadoopFileReader]
-        mockMetricsWithDownscaling(csvReaderMock, ac.appInfo.applicationID)
-
-        val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
-        val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
-        val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
-
-        When("SparkScopeRunner.run")
-        SparkScopeRunner.runFromEventLog(
-            "src/test/resources/app-20231025121456-0004-eventLog-finished",
-            spark,
-            new SparkScopeAnalyzer,
-            new EventLogContextLoader,
-            new SparkScopeConfLoader,
-            getPropertiesLoaderFactoryMock,
-            metricsLoaderFactory,
-            new ReportGeneratorFactory
-        )
-
-        Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appInfo.applicationID + ".html")))
-    }
 }
 

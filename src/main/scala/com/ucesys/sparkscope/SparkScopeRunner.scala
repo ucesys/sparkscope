@@ -19,11 +19,9 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
-import com.ucesys.sparkscope.eventlog.EventLogContextLoader
 import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.utils.SparkScopeLogger
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
 
 import java.io.FileNotFoundException
 import java.nio.file.NoSuchFileException
@@ -70,48 +68,6 @@ class SparkScopeRunner(appContext: AppContext,
 }
 
 object SparkScopeRunner {
-
-    def main(args: Array[String]): Unit = {
-        implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        val spark = SparkSession.builder().appName("SparkScope").getOrCreate()
-        spark.sparkContext.setLogLevel("WARN")
-
-        runFromEventLog(
-            eventLogPath =  args(0),
-            spark = spark,
-            sparkScopeAnalyzer = new SparkScopeAnalyzer,
-            eventLogContextLoader = new EventLogContextLoader,
-            sparkScopeConfLoader = new SparkScopeConfLoader,
-            propertiesLoaderFactory = new PropertiesLoaderFactory,
-            metricsLoaderFactory = new MetricsLoaderFactory,
-            reportGeneratorFactory = new ReportGeneratorFactory,
-        )
-    }
-
-    def runFromEventLog(eventLogPath: String,
-                        spark: SparkSession,
-                        sparkScopeAnalyzer: SparkScopeAnalyzer,
-                        eventLogContextLoader: EventLogContextLoader,
-                        sparkScopeConfLoader: SparkScopeConfLoader,
-                        propertiesLoaderFactory: PropertiesLoaderFactory,
-                        metricsLoaderFactory: MetricsLoaderFactory,
-                        reportGeneratorFactory: ReportGeneratorFactory)
-                       (implicit logger: SparkScopeLogger): Unit = {
-        val eventLogCtx = eventLogContextLoader.load(spark, eventLogPath)
-
-        val sparkScopeRunner = new SparkScopeRunner(
-            eventLogCtx.appContext,
-            eventLogCtx.sparkConf,
-            sparkScopeConfLoader,
-            sparkScopeAnalyzer,
-            propertiesLoaderFactory,
-            metricsLoaderFactory,
-            reportGeneratorFactory,
-            Seq.empty
-        )
-        sparkScopeRunner.run()
-    }
-
     val SparkScopeSign =
         """
           |     ____              __    ____

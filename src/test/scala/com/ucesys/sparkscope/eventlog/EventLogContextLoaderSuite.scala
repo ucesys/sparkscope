@@ -32,15 +32,12 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
     spark.sparkContext.setLogLevel("WARN")
 
     test("SparkScopeRunner offline app finished") {
-        Given("Metrics for application which was upscaled and downscaled")
+        Given("Path to eventLog with finished application and no removed executors")
+        val eventLogPath = "src/test/resources/app-20231025121456-0004-eventLog-finished"
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-
-        val eventLogContext = eventLogContextLoader.load(
-            spark,
-            s"src/test/resources/app-20231025121456-0004-eventLog-finished",
-        )
+        val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appInfo.applicationID == "app-20231025121456-0004")
@@ -61,14 +58,12 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
     }
 
     test("SparkScopeRunner offline app running") {
-        Given("Metrics for application which was upscaled and downscaled")
+        Given("Path to eventLog with running application and no removed executors")
+        val eventLogPath = "src/test/resources/app-20231025121456-0004-eventLog-running"
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(
-            spark,
-            s"src/test/resources/app-20231025121456-0004-eventLog-running",
-        )
+        val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appInfo.applicationID == "app-20231025121456-0004")
@@ -90,14 +85,12 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
     }
 
     test("SparkScopeRunner offline app finished executors removed") {
-        Given("Metrics for application which was upscaled and downscaled")
+        Given("Path to eventLog with finished application and removed executors")
+        val eventLogPath = "src/test/resources/app-20231025121456-0004-eventLog-finished-exec-removed"
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(
-            spark,
-            s"src/test/resources/app-20231025121456-0004-eventLog-finished-exec-removed",
-        )
+        val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appInfo.applicationID == "app-20231025121456-0004")
@@ -119,14 +112,12 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
     }
 
     test("SparkScopeRunner offline app running executors removed") {
-        Given("Metrics for application which was upscaled and downscaled")
+        Given("Path to eventLog with running application and removed executors")
+        val eventLogPath = "src/test/resources/app-20231025121456-0004-eventLog-running-exec-removed"
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(
-            spark,
-            s"src/test/resources/app-20231025121456-0004-eventLog-running-exec-removed",
-        )
+        val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appInfo.applicationID == "app-20231025121456-0004")
