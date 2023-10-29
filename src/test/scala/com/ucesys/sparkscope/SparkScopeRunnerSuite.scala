@@ -19,11 +19,9 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.eventlog.EventLogContextLoader
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
@@ -34,8 +32,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
     val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
     val SparkLensOutput = Seq("Executor Timeline", "StageSkewAnalyzer text...")
-    val spark = SparkSession.builder().master("local").getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
 
     test("SparkScopeRunner upscaling test") {
         Given("Metrics for application which was upscaled")

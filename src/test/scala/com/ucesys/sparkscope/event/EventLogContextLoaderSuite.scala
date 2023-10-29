@@ -16,20 +16,17 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.eventlog
+package com.ucesys.sparkscope.event
 
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.SparkSession
+import com.ucesys.sparkscope.io.FileReaderFactory
+import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 
 
 class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhenThen {
     implicit val logger: SparkScopeLogger = new SparkScopeLogger
-
-    val spark = SparkSession.builder().master("local").getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
 
     test("SparkScopeRunner offline app finished") {
         Given("Path to eventLog with finished application and no removed executors")
@@ -38,7 +35,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appId == appId)
@@ -65,7 +62,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appId == appId)
@@ -83,7 +80,6 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("SparkConf should be read from env update event")
         assertSparkConf(eventLogContext.sparkConf)
-
     }
 
     test("SparkScopeRunner offline app finished executors removed") {
@@ -93,7 +89,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appId == appId)
@@ -121,7 +117,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(spark, eventLogPath)
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, eventLogPath)
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appId == appId)

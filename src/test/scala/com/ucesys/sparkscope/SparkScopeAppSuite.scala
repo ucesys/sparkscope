@@ -19,10 +19,9 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.eventlog.EventLogContextLoader
+import com.ucesys.sparkscope.event.EventLogContextLoader
 import com.ucesys.sparkscope.io._
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import org.apache.spark.sql.SparkSession
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
@@ -33,9 +32,6 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
     val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
     val SparkLensOutput = Seq("Executor Timeline", "StageSkewAnalyzer text...")
-    val spark = SparkSession.builder().master("local").getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
-
 
     test("SparkScopeApp.runFromEventLog for finished application ") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
@@ -54,10 +50,10 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
             eventLogPath,
-            spark,
             new SparkScopeAnalyzer,
             new EventLogContextLoader,
             new SparkScopeConfLoader,
+            new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
             new ReportGeneratorFactory
@@ -84,10 +80,10 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
             eventLogPath,
-            spark,
             new SparkScopeAnalyzer,
             new EventLogContextLoader,
             new SparkScopeConfLoader,
+            new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
             new ReportGeneratorFactory
@@ -114,10 +110,10 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
             eventLogPath,
-            spark,
             new SparkScopeAnalyzer,
             new EventLogContextLoader,
             new SparkScopeConfLoader,
+            new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
             new ReportGeneratorFactory
@@ -144,10 +140,10 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
             eventLogPath,
-            spark,
             new SparkScopeAnalyzer,
             new EventLogContextLoader,
             new SparkScopeConfLoader,
+            new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
             new ReportGeneratorFactory

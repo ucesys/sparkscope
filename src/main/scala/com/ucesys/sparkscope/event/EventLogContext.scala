@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.eventlog
+package com.ucesys.sparkscope.event
 
 import com.ucesys.sparkscope.common.SparkScopeContext
 import org.apache.spark.SparkConf

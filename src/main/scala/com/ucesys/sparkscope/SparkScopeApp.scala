@@ -17,24 +17,20 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.eventlog.EventLogContextLoader
-import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
+import com.ucesys.sparkscope.event.EventLogContextLoader
+import com.ucesys.sparkscope.io.{FileReaderFactory, MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import org.apache.spark.sql.SparkSession
 
 object SparkScopeApp {
-
     def main(args: Array[String]): Unit = {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        val spark = SparkSession.builder().appName("SparkScope").getOrCreate()
-        spark.sparkContext.setLogLevel("WARN")
 
         runFromEventLog(
             eventLogPath =  args(0),
-            spark = spark,
             sparkScopeAnalyzer = new SparkScopeAnalyzer,
             eventLogContextLoader = new EventLogContextLoader,
             sparkScopeConfLoader = new SparkScopeConfLoader,
+            fileReaderFactory = new FileReaderFactory,
             propertiesLoaderFactory = new PropertiesLoaderFactory,
             metricsLoaderFactory = new MetricsLoaderFactory,
             reportGeneratorFactory = new ReportGeneratorFactory,
@@ -42,15 +38,15 @@ object SparkScopeApp {
     }
 
     def runFromEventLog(eventLogPath: String,
-                        spark: SparkSession,
                         sparkScopeAnalyzer: SparkScopeAnalyzer,
                         eventLogContextLoader: EventLogContextLoader,
                         sparkScopeConfLoader: SparkScopeConfLoader,
+                        fileReaderFactory: FileReaderFactory,
                         propertiesLoaderFactory: PropertiesLoaderFactory,
                         metricsLoaderFactory: MetricsLoaderFactory,
                         reportGeneratorFactory: ReportGeneratorFactory)
                        (implicit logger: SparkScopeLogger): Unit = {
-        val eventLogCtx = eventLogContextLoader.load(spark, eventLogPath)
+        val eventLogCtx = eventLogContextLoader.load(fileReaderFactory, eventLogPath)
 
         val sparkScopeRunner = new SparkScopeRunner(
             eventLogCtx.appContext,
