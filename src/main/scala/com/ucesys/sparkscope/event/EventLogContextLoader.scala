@@ -1,5 +1,7 @@
 package com.ucesys.sparkscope.event
 
+import com.ucesys.sparkscope.SparkScopeArgs
+import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.event.EventLogContextLoader._
 import com.ucesys.sparkscope.io.FileReaderFactory
@@ -8,9 +10,9 @@ import org.apache.spark.SparkConf
 import scala.util.parsing.json.JSON
 
 class EventLogContextLoader(implicit logger: SparkScopeLogger) {
-    def load(fileReaderFactory: FileReaderFactory, eventLogPath: String): EventLogContext = {
-        val fileReader = fileReaderFactory.getFileReader(eventLogPath)
-        val eventLogJsonStrSeq: Seq[String] = fileReader.read(eventLogPath).split("\n").toSeq
+    def load(fileReaderFactory: FileReaderFactory, args: SparkScopeArgs): EventLogContext = {
+        val fileReader = fileReaderFactory.getFileReader(args.eventLog)
+        val eventLogJsonStrSeq: Seq[String] = fileReader.read(args.eventLog).split("\n").toSeq
         val eventLogJsonSeq = eventLogJsonStrSeq.map(JSON.parseFull(_).get.asInstanceOf[Map[String, Any]])
         val eventLogJsonSeqFiltered = eventLogJsonSeq
           .filter(mapObj => AllEvents.contains(mapObj(ColEvent).asInstanceOf[String]))
@@ -54,6 +56,11 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
 
         val sparkConf = new SparkConf(false)
         envUpdateEvent.get.sparkConf.get.foreach { case (key, value) => sparkConf.set(key, value) }
+
+        // Overriding SparkConf with input args if specified
+        args.driverMetrics.map(sparkConf.set(SparkScopePropertyDriverMetricsDir, _))
+        args.executorMetrics.map(sparkConf.set(SparkScopePropertyExecutorMetricsDir, _))
+        args.htmlPath.map(sparkConf.set(SparkScopePropertyHtmlPath, _))
 
         // App Context
         val appContext = SparkScopeContext(

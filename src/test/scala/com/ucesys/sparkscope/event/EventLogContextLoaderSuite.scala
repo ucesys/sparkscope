@@ -18,6 +18,8 @@
 
 package com.ucesys.sparkscope.event
 
+import com.ucesys.sparkscope.SparkScopeArgs
+import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.FileReaderFactory
 import org.apache.spark.SparkConf
@@ -37,7 +39,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, eventLogPath)
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appId == appId)
@@ -64,7 +66,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, eventLogPath)
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appId == appId)
@@ -91,7 +93,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, eventLogPath)
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appId == appId)
@@ -119,7 +121,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         val eventLogContextLoader = new EventLogContextLoader
 
         When("EventLogContextLoader.load")
-        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, eventLogPath)
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
 
         Then("App id, startTime, endTime should be read from app start/end events")
         assert(eventLogContext.appContext.appId == appId)
@@ -139,6 +141,42 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         assertSparkConf(eventLogContext.sparkConf)
     }
 
+    test("EventLogContextLoader parse args test") {
+        Given("Overriden driverMetrics, executorMetrics and htmlPath args")
+        val appId = "app-20231025121456-0004-eventLog-finished-exec-removed"
+        val args = SparkScopeArgs(
+            eventLog = s"src/test/resources/${appId}",
+            driverMetrics = Some("overrriden/path/to/driver/metrics"),
+            executorMetrics = Some("overrriden/path/to/executor/metrics"),
+            htmlPath = Some("overrriden/path/to/html/report"),
+        )
+        val eventLogContextLoader = new EventLogContextLoader
+
+        When("EventLogContextLoader.load")
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, args)
+
+        Then("App id, startTime, endTime should be read from app start/end events")
+        assert(eventLogContext.appContext.appId == appId)
+        assert(eventLogContext.appContext.appStartTime == 1698236095722L)
+        assert(eventLogContext.appContext.appEndTime.get == 1698236104099L)
+
+        And("Executor timeline should be read from executor add/remove events")
+        assert(eventLogContext.appContext.executorMap.size == 2)
+        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").removeTime.get == 1698236102012L)
+        assert(eventLogContext.appContext.executorMap("0").cores == 2)
+        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").removeTime.get == 1698236103345L)
+        assert(eventLogContext.appContext.executorMap("1").cores == 2)
+
+        And("SparkConf should be read from env update event")
+        assertSparkConf(eventLogContext.sparkConf)
+        assert(eventLogContext.sparkConf.get(SparkScopePropertyDriverMetricsDir) == "overrriden/path/to/driver/metrics")
+        assert(eventLogContext.sparkConf.get(SparkScopePropertyExecutorMetricsDir) == "overrriden/path/to/executor/metrics")
+        assert(eventLogContext.sparkConf.get(SparkScopePropertyHtmlPath) == "overrriden/path/to/html/report")
+
+    }
+
     test("EventLogContextLoader bad path to eventLog") {
         Given("Bad path to eventLog")
         val eventLogPath = s"bad/path/to/event/log"
@@ -146,7 +184,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         When("EventLogContextLoader.load")
         Then("NoSuchFileException should be thrown")
         assertThrows[NoSuchFileException] {
-            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
         }
     }
 
@@ -158,7 +196,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         When("EventLogContextLoader.load")
         Then("IllegalArgumentException should be thrown")
         assertThrows[IllegalArgumentException] {
-            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
         }
     }
 
@@ -170,7 +208,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         When("EventLogContextLoader.load")
         Then("IllegalArgumentException should be thrown")
         assertThrows[IllegalArgumentException] {
-            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
         }
     }
 
@@ -182,7 +220,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         When("EventLogContextLoader.load")
         Then("IllegalArgumentException should be thrown")
         assertThrows[IllegalArgumentException] {
-            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
         }
     }
 
@@ -194,7 +232,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         When("EventLogContextLoader.load")
         Then("IllegalArgumentException should be thrown")
         assertThrows[IllegalArgumentException] {
-            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
         }
     }
 

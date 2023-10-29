@@ -25,8 +25,10 @@ object SparkScopeApp {
     def main(args: Array[String]): Unit = {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
+        val parsedArgs = SparkScopeArgs(args)
+
         runFromEventLog(
-            eventLogPath =  args(0),
+            sparkScopeArgs = parsedArgs,
             sparkScopeAnalyzer = new SparkScopeAnalyzer,
             eventLogContextLoader = new EventLogContextLoader,
             sparkScopeConfLoader = new SparkScopeConfLoader,
@@ -37,7 +39,7 @@ object SparkScopeApp {
         )
     }
 
-    def runFromEventLog(eventLogPath: String,
+    def runFromEventLog(sparkScopeArgs: SparkScopeArgs,
                         sparkScopeAnalyzer: SparkScopeAnalyzer,
                         eventLogContextLoader: EventLogContextLoader,
                         sparkScopeConfLoader: SparkScopeConfLoader,
@@ -46,7 +48,7 @@ object SparkScopeApp {
                         metricsLoaderFactory: MetricsLoaderFactory,
                         reportGeneratorFactory: ReportGeneratorFactory)
                        (implicit logger: SparkScopeLogger): Unit = {
-        val eventLogCtx = eventLogContextLoader.load(fileReaderFactory, eventLogPath)
+        val eventLogCtx = eventLogContextLoader.load(fileReaderFactory, sparkScopeArgs)
 
         val sparkScopeRunner = new SparkScopeRunner(
             eventLogCtx.appContext,

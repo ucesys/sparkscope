@@ -49,7 +49,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            eventLogPath,
+            SparkScopeArgs(eventLogPath, None, None, None),
             new SparkScopeAnalyzer,
             new EventLogContextLoader,
             new SparkScopeConfLoader,
@@ -79,7 +79,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            eventLogPath,
+            SparkScopeArgs(eventLogPath, None, None, None),
             new SparkScopeAnalyzer,
             new EventLogContextLoader,
             new SparkScopeConfLoader,
@@ -109,7 +109,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            eventLogPath,
+            SparkScopeArgs(eventLogPath, None, None, None),
             new SparkScopeAnalyzer,
             new EventLogContextLoader,
             new SparkScopeConfLoader,
@@ -139,7 +139,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            eventLogPath,
+            SparkScopeArgs(eventLogPath, None, None, None),
             new SparkScopeAnalyzer,
             new EventLogContextLoader,
             new SparkScopeConfLoader,
