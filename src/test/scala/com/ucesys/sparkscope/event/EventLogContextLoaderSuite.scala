@@ -24,11 +24,13 @@ import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 
+import java.nio.file.NoSuchFileException
+
 
 class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhenThen {
     implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
-    test("SparkScopeRunner offline app finished") {
+    test("EventLogContextLoader finished") {
         Given("Path to eventLog with finished application and no removed executors")
         val appId = "app-20231025121456-0004-eventLog-finished"
         val eventLogPath = s"src/test/resources/${appId}"
@@ -55,7 +57,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         assertSparkConf(eventLogContext.sparkConf)
     }
 
-    test("SparkScopeRunner offline app running") {
+    test("EventLogContextLoader running") {
         Given("Path to eventLog with running application and no removed executors")
         val appId = "app-20231025121456-0004-eventLog-running"
         val eventLogPath = s"src/test/resources/${appId}"
@@ -82,7 +84,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         assertSparkConf(eventLogContext.sparkConf)
     }
 
-    test("SparkScopeRunner offline app finished executors removed") {
+    test("EventLogContextLoader finished executors removed") {
         Given("Path to eventLog with finished application and removed executors")
         val appId = "app-20231025121456-0004-eventLog-finished-exec-removed"
         val eventLogPath = s"src/test/resources/${appId}"
@@ -110,7 +112,7 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
     }
 
-    test("SparkScopeRunner offline app running executors removed") {
+    test("EventLogContextLoader running executors removed") {
         Given("Path to eventLog with running application and removed executors")
         val appId = "app-20231025121456-0004-eventLog-running-exec-removed"
         val eventLogPath = s"src/test/resources/${appId}"
@@ -135,6 +137,65 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("SparkConf should be read from env update event")
         assertSparkConf(eventLogContext.sparkConf)
+    }
+
+    test("EventLogContextLoader bad path to eventLog") {
+        Given("Bad path to eventLog")
+        val eventLogPath = s"bad/path/to/event/log"
+
+        When("EventLogContextLoader.load")
+        Then("NoSuchFileException should be thrown")
+        assertThrows[NoSuchFileException] {
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+        }
+    }
+
+    test("EventLogContextLoader bad eventLog, no app start event") {
+        Given("Path to bad eventLog, no app start event")
+        val appId = "app-20231025121456-0004-eventLog-error-no-app-start"
+        val eventLogPath = s"src/test/resources/${appId}"
+
+        When("EventLogContextLoader.load")
+        Then("IllegalArgumentException should be thrown")
+        assertThrows[IllegalArgumentException] {
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+        }
+    }
+
+    test("EventLogContextLoader bad eventLog, no env update event") {
+        Given("Path to bad eventLog, no env update event")
+        val appId = "app-20231025121456-0004-eventLog-error-no-env-update"
+        val eventLogPath = s"src/test/resources/${appId}"
+
+        When("EventLogContextLoader.load")
+        Then("IllegalArgumentException should be thrown")
+        assertThrows[IllegalArgumentException] {
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+        }
+    }
+
+    test("EventLogContextLoader bad eventLog, bad app start event") {
+        Given("Path to bad eventLog, no app start event")
+        val appId = "app-20231025121456-0004-eventLog-error-bad-app-start"
+        val eventLogPath = s"src/test/resources/${appId}"
+
+        When("EventLogContextLoader.load")
+        Then("IllegalArgumentException should be thrown")
+        assertThrows[IllegalArgumentException] {
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+        }
+    }
+
+    test("EventLogContextLoader bad eventLog, bad update event") {
+        Given("Path to bad eventLog, no env update event")
+        val appId = "app-20231025121456-0004-eventLog-error-bad-env-update"
+        val eventLogPath = s"src/test/resources/${appId}"
+
+        When("EventLogContextLoader.load")
+        Then("IllegalArgumentException should be thrown")
+        assertThrows[IllegalArgumentException] {
+            val eventLogContext = new EventLogContextLoader().load(new FileReaderFactory, eventLogPath)
+        }
     }
 
     def assertSparkConf(sparkConf: SparkConf): Unit = {

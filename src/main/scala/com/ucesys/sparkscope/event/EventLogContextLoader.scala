@@ -3,6 +3,7 @@ package com.ucesys.sparkscope.event
 import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.event.EventLogContextLoader._
 import com.ucesys.sparkscope.io.FileReaderFactory
+import org.apache.spark.SparkConf
 
 import scala.util.parsing.json.JSON
 
@@ -14,9 +15,9 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         val eventLogJsonSeqFiltered = eventLogJsonSeq
           .filter(mapObj => AllEvents.contains(mapObj(ColEvent).asInstanceOf[String]))
 
-        val appStartEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventAppStart).map(ApplicationStartEvent(_)).head
+        val appStartEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventAppStart).map(ApplicationStartEvent(_))
         val appEndEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventAppEnd).map(ApplicationEndEvent(_))
-        val envUpdateEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventEnvUpdate).map(EnvUpdateEvent(_)).last
+        val envUpdateEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventEnvUpdate).map(EnvUpdateEvent(_))
         val execAddedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorAdded).map(ExecutorAddedEvent(_))
         val execRemovedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorRemoved).map(ExecutorRemovedEvent(_))
 
@@ -32,20 +33,37 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
             )
         }.toMap
 
+        if (appStartEvent.isEmpty || appStartEvent.get.appId.isEmpty || appStartEvent.get.ts.isEmpty) {
+            logger.error(s"Error during parsing of Application Start Event(${appStartEvent})")
+            throw new IllegalArgumentException(s"Error during parsing of Application Start Event(${appStartEvent})")
+        }
+
+        if (appEndEvent.nonEmpty && appEndEvent.get.ts.isEmpty) {
+            logger.error(s"Error during parsing of Application End Event(${appEndEvent})")
+            throw new IllegalArgumentException(s"Error during parsing of Application End Event(${appEndEvent})")
+        }
+
+        if (envUpdateEvent.isEmpty || envUpdateEvent.get.sparkConf.isEmpty) {
+            logger.error(s"Error during parsing of Environment Update Event(${envUpdateEvent})")
+            throw new IllegalArgumentException(s"Error during parsing of Environment Update Event(${envUpdateEvent})")
+        }
 
         if (appEndEvent.isEmpty) {
             logger.info("Could not read application end event from eventLog, app might still be running.")
         }
 
+        val sparkConf = new SparkConf(false)
+        envUpdateEvent.get.sparkConf.get.foreach { case (key, value) => sparkConf.set(key, value) }
+
         // App Context
         val appContext = SparkScopeContext(
-            appId=appStartEvent.appId,
-            appStartTime=appStartEvent.ts,
-            appEndTime=appEndEvent.map(_.ts),
+            appId=appStartEvent.get.appId.get,
+            appStartTime=appStartEvent.get.ts.get,
+            appEndTime=appEndEvent.flatMap(_.ts),
             executorMap
         )
 
-        EventLogContext(envUpdateEvent.sparkConf, appContext)
+        EventLogContext(sparkConf, appContext)
     }
 }
 

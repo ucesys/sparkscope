@@ -1,12 +1,11 @@
 package com.ucesys.sparkscope.event
 
 import com.ucesys.sparkscope.event.EventLogContextLoader._
-//import collection.JavaConverters._
 
-case class ApplicationEndEvent(ts: Long)
+case class ApplicationEndEvent(ts: Option[Long])
 
 object ApplicationEndEvent {
     def apply(eventMap: Map[String, Any]): ApplicationEndEvent = {
-        ApplicationEndEvent(eventMap(ColTimeStamp).asInstanceOf[Double].doubleValue.toLong)
+        ApplicationEndEvent(eventMap.get(ColTimeStamp).map(_.asInstanceOf[Double].doubleValue.toLong))
     }
 }
