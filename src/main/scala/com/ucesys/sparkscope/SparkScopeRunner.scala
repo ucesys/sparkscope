@@ -17,10 +17,10 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.common.SparkScopeContext
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
-import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.metrics.SparkScopeResult
 import org.apache.spark.SparkConf
 
 import java.io.FileNotFoundException
@@ -36,25 +36,20 @@ class SparkScopeRunner(appContext: SparkScopeContext,
                        sparklensResults: Seq[String])
                       (implicit logger: SparkScopeLogger) {
     def run(): Unit = {
-        val sparkScopeStart = System.currentTimeMillis()
-
         logger.info(SparkScopeSign)
 
-        val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, propertiesLoaderFactory)
-
-        val metricsLoader = metricsLoaderFactory.get(sparkScopeConf)
-        val reportGenerator = reportGeneratorFactory.get(sparkScopeConf)
+        val sparkScopeStart = System.currentTimeMillis()
 
         try {
-            val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
-            val sparkScopeResult = sparkScopeAnalyzer.analyze(driverExecutorMetrics, appContext)
+            val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, propertiesLoaderFactory)
+            val sparkScopeResult = this.runAnalysis(sparkScopeConf)
+            reportGeneratorFactory.get(sparkScopeConf).generate(sparkScopeResult, sparklensResults)
 
             logger.info(sparkScopeResult.stats.executorStats + "\n")
             logger.info(sparkScopeResult.stats.driverStats + "\n")
             logger.info(sparkScopeResult.stats.clusterMemoryStats + "\n")
             logger.info(sparkScopeResult.stats.clusterCPUStats + "\n")
 
-            reportGenerator.generate(sparkScopeResult, sparklensResults)
         } catch {
             case ex: FileNotFoundException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
             case ex: NoSuchFileException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
@@ -64,6 +59,11 @@ class SparkScopeRunner(appContext: SparkScopeContext,
             val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
             logger.info(s"SparkScope analysis took ${durationSparkScope}s")
         }
+    }
+    def runAnalysis(sparkScopeConf: SparkScopeConf): SparkScopeResult = {
+        val metricsLoader = metricsLoaderFactory.get(sparkScopeConf)
+        val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
+        sparkScopeAnalyzer.analyze(driverExecutorMetrics, appContext)
     }
 }
 

@@ -21,6 +21,7 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.metrics.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
@@ -33,7 +34,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
     val SparkLensOutput = Seq("Executor Timeline", "StageSkewAnalyzer text...")
 
-    test("SparkScopeRunner upscaling test") {
+    test("SparkScopeRunner.run upscaling test") {
         Given("Metrics for application which was upscaled")
         val ac = mockAppContext("runner-upscale")
         val csvReaderMock = stub[HadoopFileReader]
@@ -66,7 +67,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     }
 
 
-    test("SparkScopeRunner upscaling and downscaling test") {
+    test("SparkScopeRunner.run upscaling and downscaling test") {
         Given("Metrics for application which was upscaled and downscaled")
         val ac = mockAppContextWithDownscaling("runner-upscale-downscale")
         val csvReaderMock = stub[HadoopFileReader]
@@ -98,7 +99,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
     }
 
-    test("SparkScopeRunner upscaling and downscaling multicore test") {
+    test("SparkScopeRunner.run upscaling and downscaling multicore test") {
         Given("Metrics for application which was upscaled and downscaled")
         val ac = mockAppContextWithDownscalingMuticore("runner-upscale-downscale-multicore")
         val csvReaderMock = stub[HadoopFileReader]
@@ -128,6 +129,219 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+    }
+
+    test("SparkScopeRunner.runAnalysis test") {
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
+
+        Given("correct metrics for application")
+        val ac = mockAppContext("runner-analysis-upscale-downscale")
+        val csvReaderMock = stub[HadoopFileReader]
+        mockcorrectMetrics(csvReaderMock, ac.appId)
+        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
+        val metricsLoaderFactory = stub[MetricsLoaderFactory]
+        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+
+        val sparkScopeRunner = new SparkScopeRunner(
+            ac,
+            new SparkConf,
+            stub[SparkScopeConfLoader],
+            new SparkScopeAnalyzer,
+            getPropertiesLoaderFactoryMock,
+            metricsLoaderFactory,
+            new ReportGeneratorFactory,
+            SparkLensOutput
+        )
+
+        When("SparkScopeRunner.runAnalysis")
+        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath)
+
+        Then("Report should be generated")
+        assert(result.appContext.appId == ac.appId)
+        assert(result.appContext.appStartTime == StartTime)
+        assert(result.appContext.appEndTime.get == EndTime)
+        assert(result.appContext.executorMap.size == 4)
+
+        assert(result.stats.driverStats == DriverMemoryStats(
+            heapSize = 910,
+            maxHeap = 315,
+            maxHeapPerc = 0.34650,
+            avgHeap = 261,
+            avgHeapPerc = 0.28736,
+            avgNonHeap = 66,
+            maxNonHeap = 69
+        ))
+
+        assert(result.stats.executorStats == ExecutorMemoryStats(
+            heapSize = 800,
+            maxHeap = 352,
+            maxHeapPerc = 0.44029,
+            avgHeap = 204,
+            avgHeapPerc = 0.25554,
+            avgNonHeap = 43,
+            maxNonHeap = 48
+        ))
+
+        assert(result.stats.clusterMemoryStats == ClusterMemoryStats(
+            maxHeap = 840,
+            avgHeap = 632,
+            maxHeapPerc = 0.4165,
+            avgHeapPerc = 0.25554,
+            executorTimeSecs = 152,
+            heapGbHoursAllocated = 0.03299,
+            heapGbHoursWasted = 0.00843,
+            executorHeapSizeInGb = 0.78125
+        ))
+
+        assert(result.stats.clusterCPUStats == ClusterCPUStats(
+            cpuUtil = 0.55483,
+            coreHoursAllocated = 0.04222,
+            coreHoursWasted = 0.02343,
+            executorTimeSecs = 152,
+            executorCores = 1
+        ))
+    }
+
+    test("SparkScopeRunner.runAnalysis upscaling and downscaling test") {
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
+
+        Given("Metrics for application which was upscaled and downscaled")
+        val ac = mockAppContextWithDownscaling("runner-analysis-upscale-downscale")
+        val csvReaderMock = stub[HadoopFileReader]
+        mockMetricsWithDownscaling(csvReaderMock, ac.appId)
+        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
+        val metricsLoaderFactory = stub[MetricsLoaderFactory]
+        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+
+        val sparkScopeRunner = new SparkScopeRunner(
+            ac,
+            new SparkConf,
+            stub[SparkScopeConfLoader],
+            new SparkScopeAnalyzer,
+            getPropertiesLoaderFactoryMock,
+            metricsLoaderFactory,
+            new ReportGeneratorFactory,
+            SparkLensOutput
+        )
+
+        When("SparkScopeRunner.run")
+        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath)
+
+        Then("Report should be generated")
+        assert(result.appContext.appId == ac.appId)
+        assert(result.appContext.appStartTime == StartTime)
+        assert(result.appContext.appEndTime.get == EndTime)
+        assert(result.appContext.executorMap.size == 5)
+
+        assert(result.stats.driverStats == DriverMemoryStats(
+            heapSize = 910,
+            maxHeap = 315,
+            maxHeapPerc = 0.34650,
+            avgHeap = 261,
+            avgHeapPerc = 0.28736,
+            avgNonHeap = 66,
+            maxNonHeap = 69
+        ))
+
+        assert(result.stats.executorStats == ExecutorMemoryStats(
+            heapSize = 800,
+            maxHeap = 352,
+            maxHeapPerc = 0.44029,
+            avgHeap = 202,
+            avgHeapPerc = 0.25273,
+            avgNonHeap = 43,
+            maxNonHeap = 48
+        ))
+
+        assert(result.stats.clusterMemoryStats == ClusterMemoryStats(
+            maxHeap = 1079,
+            avgHeap = 640,
+            maxHeapPerc = 0.4165,
+            avgHeapPerc = 0.25273,
+            executorTimeSecs = 180,
+            heapGbHoursAllocated = 0.03906,
+            heapGbHoursWasted = 0.00987,
+            executorHeapSizeInGb = 0.78125
+        ))
+
+        assert(result.stats.clusterCPUStats == ClusterCPUStats(
+            cpuUtil = 0.56276,
+            coreHoursAllocated = 0.05,
+            coreHoursWasted = 0.02814,
+            executorTimeSecs = 180,
+            executorCores = 1
+        ))
+    }
+
+    test("SparkScopeRunner.runAnalysis upscaling and downscaling multicore test") {
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
+
+        Given("Metrics for application which was upscaled and downscaled")
+        val ac = mockAppContextWithDownscalingMuticore("runner-analysis-upscale-downscale-multicore")
+        val csvReaderMock = stub[HadoopFileReader]
+        mockMetricsWithDownscaling(csvReaderMock, ac.appId)
+        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
+        val metricsLoaderFactory = stub[MetricsLoaderFactory]
+        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+
+        val sparkScopeRunner = new SparkScopeRunner(
+            ac,
+            new SparkConf,
+            stub[SparkScopeConfLoader],
+            new SparkScopeAnalyzer,
+            getPropertiesLoaderFactoryMock,
+            metricsLoaderFactory,
+            new ReportGeneratorFactory,
+            SparkLensOutput
+        )
+
+        When("SparkScopeRunner.run")
+        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath)
+
+        Then("Report should be generated")
+        assert(result.appContext.appId == ac.appId)
+        assert(result.appContext.appStartTime == StartTime)
+        assert(result.appContext.appEndTime.get == EndTime)
+        assert(result.appContext.executorMap.size == 5)
+
+        assert(result.stats.driverStats == DriverMemoryStats(
+            heapSize = 910,
+            maxHeap = 315,
+            maxHeapPerc = 0.34650,
+            avgHeap = 261,
+            avgHeapPerc = 0.28736,
+            avgNonHeap = 66,
+            maxNonHeap = 69
+        ))
+
+        assert(result.stats.executorStats == ExecutorMemoryStats(
+            heapSize = 800,
+            maxHeap = 352,
+            maxHeapPerc = 0.44029,
+            avgHeap = 202,
+            avgHeapPerc = 0.25273,
+            avgNonHeap = 43,
+            maxNonHeap = 48
+        ))
+
+        assert(result.stats.clusterMemoryStats == ClusterMemoryStats(
+            maxHeap = 1079,
+            avgHeap = 640,
+            maxHeapPerc = 0.4165,
+            avgHeapPerc = 0.25273,
+            executorTimeSecs = 180,
+            heapGbHoursAllocated = 0.03906,
+            heapGbHoursWasted = 0.00987,
+            executorHeapSizeInGb = 0.78125
+        ))
+
+        assert(result.stats.clusterCPUStats == ClusterCPUStats(
+            cpuUtil = 0.28138,
+            coreHoursAllocated = 0.1,
+            coreHoursWasted = 0.02814,
+            executorTimeSecs = 180,
+            executorCores = 2
+        ))
     }
 }
 
