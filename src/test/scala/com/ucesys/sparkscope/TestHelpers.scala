@@ -426,6 +426,22 @@ object TestHelpers extends FunSuite with MockFactory {
         )
     }
 
+    def mockAppContextExecutorsNotRemoved(appName: String): SparkScopeContext = {
+        val executorMap: Map[String, ExecutorContext] = Map(
+            "1" -> ExecutorContext("1", 1, 1695358645000L, None),
+            "2" -> ExecutorContext("2", 1, 1695358645000L, None),
+            "3" -> ExecutorContext("3", 1, 1695358671000L, None),
+            "5" -> ExecutorContext("5", 1, 1695358687000L, None)
+        )
+
+        SparkScopeContext(
+            s"${getAppId}${appName}",
+            StartTime,
+            Some(EndTime),
+            executorMap
+        )
+    }
+
     def mockAppContextMissingExecutorMetrics(appName: String): SparkScopeContext = {
         mockAppContext(appName).copy(
             executorMap = Map(
