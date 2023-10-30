@@ -141,6 +141,33 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         assertSparkConf(eventLogContext.sparkConf)
     }
 
+    test("EventLogContextLoader running incomplete eventlog") {
+        Given("Path to eventLog with running application and removed executors")
+        val appId = "app-20231025121456-0004-eventLog-running-incomplete"
+        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogContextLoader = new EventLogContextLoader
+
+        When("EventLogContextLoader.load")
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
+
+        Then("App id, startTime, endTime should be read from app start/end events")
+        assert(eventLogContext.appContext.appId == appId)
+        assert(eventLogContext.appContext.appStartTime == 1698236095722L)
+        assert(eventLogContext.appContext.appEndTime.isEmpty)
+
+        And("Executor timeline should be read from executor add/remove events")
+        assert(eventLogContext.appContext.executorMap.size == 2)
+        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("0").cores == 2)
+        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("1").cores == 2)
+
+        And("SparkConf should be read from env update event")
+        assertSparkConf(eventLogContext.sparkConf)
+    }
+
     test("EventLogContextLoader parse args test") {
         Given("Overriden driverMetrics, executorMetrics and htmlPath args")
         val appId = "app-20231025121456-0004-eventLog-finished-exec-removed"

@@ -13,7 +13,7 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
     def load(fileReaderFactory: FileReaderFactory, args: SparkScopeArgs): EventLogContext = {
         val fileReader = fileReaderFactory.getFileReader(args.eventLog)
         val eventLogJsonStrSeq: Seq[String] = fileReader.read(args.eventLog).split("\n").toSeq
-        val eventLogJsonSeq = eventLogJsonStrSeq.map(JSON.parseFull(_).get.asInstanceOf[Map[String, Any]])
+        val eventLogJsonSeq = eventLogJsonStrSeq.flatMap(JSON.parseFull(_).map(_.asInstanceOf[Map[String, Any]]))
         val eventLogJsonSeqFiltered = eventLogJsonSeq
           .filter(mapObj => AllEvents.contains(mapObj(ColEvent).asInstanceOf[String]))
 
