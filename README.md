@@ -102,6 +102,17 @@ spark-submit \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
 
+### Running SparkScope as standalone app
+```agsl
+java \
+-cp /tmp/jars/sparkscope-spark3-0.1.1-SNAPSHOT.jar:$(hadoop classpath) \
+com.ucesys.sparkscope.SparkScopeApp \
+--event-log /path/to/event/log \
+--driver-metrics /path/to/driver/metrics \
+--executor-metrics /path/to/executor/metrics \
+--html-path /path/to/html/report/directory \
+```
+
 ## SparkScope summary:
 
 SparkScope analysis summary should be printed out to the console:

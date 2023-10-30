@@ -18,73 +18,67 @@
 
 package com.ucesys.sparkscope.io
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer.{DriverCsvMetrics, ExecutorCsvMetrics}
-import com.ucesys.sparkscope.TestHelpers._
-import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.MustMatchers.{a, convertToAnyMustWrapper}
 import org.scalatest.{FunSuite, GivenWhenThen}
 
-import java.io.FileNotFoundException
-import java.util.Properties
-
 class PropertiesLoaderFactorySuite extends FunSuite with MockFactory with GivenWhenThen {
 
-  val propertiesLoaderFactory = new PropertiesLoaderFactory()
+    val propertiesLoaderFactory = new PropertiesLoaderFactory()
 
-  test("maprfs://path") {
-    Given("maprfs path")
-    val paths = Seq("maprfs:///dir", "maprfs:/path/to/file.ext")
+    test("maprfs://path") {
+        Given("maprfs path")
+        val paths = Seq("maprfs:///dir", "maprfs:/path/to/file.ext")
 
-    When("calling PropertiesLoaderFactory.getPropertiesLoader")
-    Then("HadoopPropertiesLoader should be returned")
-    paths.foreach {
-      path => {
-        val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
-        propertiesLoader mustBe a[HadoopPropertiesLoader]
-      }
+        When("calling PropertiesLoaderFactory.getPropertiesLoader")
+        Then("HadoopPropertiesLoader should be returned")
+        paths.foreach {
+            path => {
+                val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
+                propertiesLoader mustBe a[HadoopPropertiesLoader]
+            }
+        }
     }
-  }
 
-  test("hdfs:// path") {
-    Given("hdfs path")
-    val paths = Seq("hdfs:///dir", "hdfs:/path/to/file.ext")
+    test("hdfs:// path") {
+        Given("hdfs path")
+        val paths = Seq("hdfs:///dir", "hdfs:/path/to/file.ext")
 
-    When("calling PropertiesLoaderFactory.getPropertiesLoader")
-    Then("HadoopPropertiesLoader should be returned")
-    paths.foreach {
-      path => {
-        val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
-        propertiesLoader mustBe a[HadoopPropertiesLoader]
-      }
+        When("calling PropertiesLoaderFactory.getPropertiesLoader")
+        Then("HadoopPropertiesLoader should be returned")
+        paths.foreach {
+            path => {
+                val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
+                propertiesLoader mustBe a[HadoopPropertiesLoader]
+            }
+        }
     }
-  }
 
-  test("file:// path") {
-    Given("file:// path")
-    val paths = Seq("file:///dir", "file:/path/to/file.ext")
+    test("file:// path") {
+        Given("file:// path")
+        val paths = Seq("file:///dir", "file:/path/to/file.ext")
 
-    When("calling PropertiesLoaderFactory.getPropertiesLoader")
-    Then("HadoopPropertiesLoader should be returned")
-    paths.foreach {
-      path => {
-        val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
-        propertiesLoader mustBe a[HadoopPropertiesLoader]
-      }
+        When("calling PropertiesLoaderFactory.getPropertiesLoader")
+        Then("HadoopPropertiesLoader should be returned")
+        paths.foreach {
+            path => {
+                val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
+                propertiesLoader mustBe a[HadoopPropertiesLoader]
+            }
+        }
     }
-  }
 
-  test("other paths") {
-    Given("non mapr/hdfs/file path")
-    val paths = Seq("/absolute/path", "./relative/path", "/mapr/lookalike", "/hdfs/path", "/file/path")
+    test("other paths") {
+        Given("non mapr/hdfs/file path")
+        val paths = Seq("/absolute/path", "./relative/path", "/mapr/lookalike", "/hdfs/path", "/file/path")
 
-    When("calling PropertiesLoaderFactory.getPropertiesLoader")
-    Then("LocalPropertiesLoader should be returned")
-    paths.foreach {
-      path => {
-        val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
-        propertiesLoader mustBe a[LocalPropertiesLoader]
-      }
+        When("calling PropertiesLoaderFactory.getPropertiesLoader")
+        Then("LocalPropertiesLoader should be returned")
+        paths.foreach {
+            path => {
+                val propertiesLoader = propertiesLoaderFactory.getPropertiesLoader(path)
+                propertiesLoader mustBe a[LocalPropertiesLoader]
+            }
+        }
     }
-  }
 }

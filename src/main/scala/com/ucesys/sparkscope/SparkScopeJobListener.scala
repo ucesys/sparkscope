@@ -20,14 +20,17 @@ package com.ucesys.sparkscope
 import com.ucesys.sparklens.QuboleJobListener
 import com.ucesys.sparklens.analyzer.AppAnalyzer
 import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, FileReaderFactory, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.common.SparkScopeContext
+import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 
 class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(sparkConf: SparkConf) {
 
+    implicit val logger = new SparkScopeLogger
+
     override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
-        //println(s"Application ${appInfo.applicationID} ended at ${applicationEnd.time}")
         appInfo.endTime = applicationEnd.time
 
         //Set end times for the jobs for which onJobEnd event was missed
@@ -38,7 +41,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
                 //set it to end time of the stage that finished last
                 if (!x._2.stageMap.isEmpty) {
                     jobMap(x._1).setEndTime(x._2.stageMap.map(y => y._2.endTime).max)
-                }else {
+                } else {
                     //no stages? set it to endTime of the app
                     jobMap(x._1).setEndTime(appInfo.endTime)
                 }
@@ -57,15 +60,23 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
         )
 
         val sparklensResults: Seq[String] = try {
-          AppAnalyzer.startAnalyzers(appContext)
+            AppAnalyzer.startAnalyzers(appContext)
         } catch {
-          case ex: Exception => println("Sparklens has thrown an exception" + ex, ex)
-          Seq.empty
+            case ex: Exception =>
+                println("Sparklens has thrown an exception" + ex, ex)
+                Seq.empty
         }
 
-        val sparkScopeConf = SparkScopeConfig.fromSparkConf(sparkConf, new PropertiesLoaderFactory)
-        val metricsLoader = new CsvHadoopMetricsLoader(new FileReaderFactory, appContext, sparkScopeConf)
-        val sparkScopeRunner = new SparkScopeRunner(appContext, sparkScopeConf, metricsLoader, sparklensResults)
+        val sparkScopeRunner = new SparkScopeRunner(
+            SparkScopeContext(appContext),
+            sparkConf,
+            new SparkScopeConfLoader,
+            new SparkScopeAnalyzer,
+            new PropertiesLoaderFactory,
+            new MetricsLoaderFactory,
+            new ReportGeneratorFactory,
+            sparklensResults
+        )
         sparkScopeRunner.run()
     }
 }

@@ -19,9 +19,7 @@
 package com.ucesys.sparklens.analyzer
 
 import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
-import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparklens.helper.JobOverlapHelper
-import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import org.scalatest.FunSuite
 
@@ -29,51 +27,51 @@ import scala.collection.mutable
 
 class JobOverlapAnalyzerSuite extends FunSuite {
 
-  def createDummyAppContext(): AppContext = {
+    def createDummyAppContext(): AppContext = {
 
-    val jobMap = new mutable.HashMap[Long, JobTimeSpan]
-    for (i <- 1 to 4) {
-      jobMap(i) = new JobTimeSpan(i)
+        val jobMap = new mutable.HashMap[Long, JobTimeSpan]
+        for (i <- 1 to 4) {
+            jobMap(i) = new JobTimeSpan(i)
+        }
+
+        val jobSQLExecIDMap = new mutable.HashMap[Long, Long]
+        val r = scala.util.Random
+        val sqlExecutionId = r.nextInt(10000)
+
+        // Let, Job 1, 2 and 3 have same sqlExecutionId
+        jobSQLExecIDMap(1) = sqlExecutionId
+        jobSQLExecIDMap(2) = sqlExecutionId
+        jobSQLExecIDMap(3) = sqlExecutionId
+        jobSQLExecIDMap(4) = r.nextInt(10000)
+
+        // Let, Job 2 and 3 are not running in parallel, even though they have same sqlExecutionId
+        val baseTime = 1L
+        jobMap(1).setStartTime(baseTime)
+        jobMap(1).setEndTime(baseTime + 5L)
+
+        jobMap(2).setStartTime(baseTime + 3L)
+        jobMap(2).setEndTime(baseTime + 6L)
+
+        jobMap(3).setStartTime(baseTime + 7L)
+        jobMap(3).setEndTime(baseTime + 9L)
+
+        jobMap(4).setStartTime(baseTime + 10L)
+        jobMap(4).setEndTime(baseTime + 12L)
+
+        new AppContext(new ApplicationInfo(),
+            new AggregateMetrics(),
+            mutable.HashMap[String, HostTimeSpan](),
+            mutable.HashMap[String, ExecutorTimeSpan](),
+            jobMap,
+            jobSQLExecIDMap,
+            mutable.HashMap[Int, StageTimeSpan](),
+            mutable.HashMap[Int, Long]())
     }
 
-    val jobSQLExecIDMap = new mutable.HashMap[Long, Long]
-    val r = scala.util.Random
-    val sqlExecutionId = r.nextInt(10000)
-
-    // Let, Job 1, 2 and 3 have same sqlExecutionId
-    jobSQLExecIDMap(1) = sqlExecutionId
-    jobSQLExecIDMap(2) = sqlExecutionId
-    jobSQLExecIDMap(3) = sqlExecutionId
-    jobSQLExecIDMap(4) = r.nextInt(10000)
-
-    // Let, Job 2 and 3 are not running in parallel, even though they have same sqlExecutionId
-    val baseTime = 1L
-    jobMap(1).setStartTime(baseTime)
-    jobMap(1).setEndTime(baseTime + 5L)
-
-    jobMap(2).setStartTime(baseTime + 3L)
-    jobMap(2).setEndTime(baseTime + 6L)
-
-    jobMap(3).setStartTime(baseTime + 7L)
-    jobMap(3).setEndTime(baseTime + 9L)
-
-    jobMap(4).setStartTime(baseTime + 10L)
-    jobMap(4).setEndTime(baseTime + 12L)
-
-    new AppContext(new ApplicationInfo(),
-      new AggregateMetrics(),
-      mutable.HashMap[String, HostTimeSpan](),
-      mutable.HashMap[String, ExecutorTimeSpan](),
-      jobMap,
-      jobSQLExecIDMap,
-      mutable.HashMap[Int, StageTimeSpan](),
-      mutable.HashMap[Int, Long]())
-  }
-
-  test("JobOverlapAnalyzerTest: Jobs running in parallel should be considered while computing " +
-    "estimated time spent in Jobs") {
-    val ac = createDummyAppContext()
-    val jobTime = JobOverlapHelper.estimatedTimeSpentInJobs(ac)
-    assert(jobTime == 10, "Parallel Jobs are not being considered while computing the time spent in jobs")
-  }
+    test("JobOverlapAnalyzerTest: Jobs running in parallel should be considered while computing " +
+      "estimated time spent in Jobs") {
+        val ac = createDummyAppContext()
+        val jobTime = JobOverlapHelper.estimatedTimeSpentInJobs(ac)
+        assert(jobTime == 10, "Parallel Jobs are not being considered while computing the time spent in jobs")
+    }
 }
