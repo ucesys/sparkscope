@@ -50,7 +50,7 @@ object SparkScopeArgs {
         if (args.contains("--help") || args.contains("-h")) {
             println(Usage)
             exit(0)
-        } else if (argsMap.get(OptionEventLog).isEmpty) {
+        } else if (!argsMap.contains(OptionEventLog)) {
             println(Usage)
             throw new IllegalArgumentException("event log path not specified!")
         }

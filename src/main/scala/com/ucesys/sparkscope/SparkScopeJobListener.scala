@@ -31,7 +31,6 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
     implicit val logger = new SparkScopeLogger
 
     override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
-        //println(s"Application ${appInfo.applicationID} ended at ${applicationEnd.time}")
         appInfo.endTime = applicationEnd.time
 
         //Set end times for the jobs for which onJobEnd event was missed

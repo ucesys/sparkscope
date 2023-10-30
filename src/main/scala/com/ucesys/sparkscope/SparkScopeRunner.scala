@@ -43,13 +43,13 @@ class SparkScopeRunner(appContext: SparkScopeContext,
         try {
             val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, propertiesLoaderFactory)
             val sparkScopeResult = this.runAnalysis(sparkScopeConf)
+
+            logger.info(s"${sparkScopeResult.stats.executorStats}\n")
+            logger.info(s"${sparkScopeResult.stats.driverStats}\n")
+            logger.info(s"${sparkScopeResult.stats.clusterMemoryStats}\n")
+            logger.info(s"${sparkScopeResult.stats.clusterCPUStats}\n")
+
             reportGeneratorFactory.get(sparkScopeConf).generate(sparkScopeResult, sparklensResults)
-
-            logger.info(sparkScopeResult.stats.executorStats + "\n")
-            logger.info(sparkScopeResult.stats.driverStats + "\n")
-            logger.info(sparkScopeResult.stats.clusterMemoryStats + "\n")
-            logger.info(sparkScopeResult.stats.clusterCPUStats + "\n")
-
         } catch {
             case ex: FileNotFoundException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
             case ex: NoSuchFileException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
@@ -60,6 +60,7 @@ class SparkScopeRunner(appContext: SparkScopeContext,
             logger.info(s"SparkScope analysis took ${durationSparkScope}s")
         }
     }
+
     def runAnalysis(sparkScopeConf: SparkScopeConf): SparkScopeResult = {
         val metricsLoader = metricsLoaderFactory.get(sparkScopeConf)
         val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
