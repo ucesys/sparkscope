@@ -7,7 +7,7 @@ class FileReaderFactory {
     val hadoopFileReader = new HadoopFileReader
 
     def getFileReader(path: String): FileReader = {
-        if(HadoopFSPrefixes.exists(path.startsWith)) {
+        if (HadoopFSPrefixes.exists(path.startsWith)) {
             hadoopFileReader
         } else {
             localFileReader

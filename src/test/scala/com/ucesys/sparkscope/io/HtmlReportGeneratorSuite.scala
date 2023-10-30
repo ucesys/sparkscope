@@ -20,35 +20,43 @@ package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 import java.nio.file.{Files, Paths}
 
-class HtmlReportGeneratorSuite extends FunSuite with MockFactory {
+class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndAfterAll {
+    override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
 
-  test("SparkScope end2end no warnings") {
-    val ac = mockAppContext()
-    val csvReaderMock = stub[HadoopFileReader]
-    mockcorrectMetrics(csvReaderMock)
-    val executorMetricsAnalyzer = new SparkScopeAnalyzer
-    val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
+    test("SparkScope end2end no warnings") {
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
-    HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"), sparkConf)
+        val ac = mockAppContext("html-generator-no-warnings")
+        val csvReaderMock = stub[HadoopFileReader]
+        mockcorrectMetrics(csvReaderMock, ac.appId)
+        val executorMetricsAnalyzer = new SparkScopeAnalyzer
+        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
 
-    assert(Files.exists(Paths.get("./" + result.appInfo.applicationID + ".html")))
-  }
+        val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir))
+        htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
 
-  test("SparkScope end2end with warnings") {
-    val ac = mockAppContextMissingExecutorMetrics()
-    val csvReaderMock = stub[HadoopFileReader]
-    mockcorrectMetrics(csvReaderMock)
-    val executorMetricsAnalyzer = new SparkScopeAnalyzer
-    val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)
+        assert(Files.exists(Paths.get(TestDir, result.appContext.appId + ".html")))
+    }
 
-    HtmlReportGenerator.generateHtml(result, "./", Seq("Executor Timeline", "Sparkscope text"), sparkConf)
+    test("SparkScope end2end with warnings") {
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
-    assert(Files.exists(Paths.get("./" + result.appInfo.applicationID + ".html")))
-  }
+        val ac = mockAppContextMissingExecutorMetrics("html-generator-with-warnings")
+        val csvReaderMock = stub[HadoopFileReader]
+        mockcorrectMetrics(csvReaderMock, ac.appId)
+        val executorMetricsAnalyzer = new SparkScopeAnalyzer
+        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)
+
+        val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir))
+        htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
+
+        assert(Files.exists(Paths.get(TestDir, result.appContext.appId + ".html")))
+    }
 }
 
