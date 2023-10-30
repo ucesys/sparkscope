@@ -3,13 +3,13 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Scala MVN CI
+name: Scala MVN CI LINUX
 
 on:
   push:
-    branches: [ "master", "main", "spark3" ]
+    branches: [ "master", "main", "spark3",  "spark2" ]
   pull_request:
-    branches: [ "master", "main", "spark3" ]
+    branches: [ "master", "main", "spark3",  "spark2" ]
 
 permissions:
   contents: read
