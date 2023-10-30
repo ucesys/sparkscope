@@ -1,10 +1,9 @@
 package com.ucesys.sparkscope.io
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
-import com.ucesys.sparkscope.SparkScopeJobListener.SparkScopeSign
+import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.metrics.SparkScopeResult
-import com.ucesys.sparkscope.utils.SparkScopeLogger
-import org.apache.spark.SparkConf
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
 
 import java.io.{FileWriter, InputStream}
 import java.nio.file.Paths
@@ -12,15 +11,17 @@ import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
 
-class HtmlReportGenerator(implicit logger: SparkScopeLogger) {
-    def generateHtml(result: SparkScopeResult, outputDir: String, sparklensResults: Seq[String], sparkConf: SparkConf): Unit = {
+class HtmlReportGenerator(sparkScopeConf: SparkScopeConf)
+                         (implicit logger: SparkScopeLogger) extends ReportGenerator {
+    override def generate(result: SparkScopeResult, sparklensResults: Seq[String]): Unit = {
         val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
         val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
-        val duration = (result.appInfo.endTime - result.appInfo.startTime).milliseconds
-        val durationStr = duration match {
-            case duration if duration < 1.minutes => s"${duration.toSeconds.toString}s"
-            case duration if duration < 1.hours => s"${duration.toMinutes % 60}min ${duration.toSeconds % 60}s"
-            case _ => s"${duration.toHours}h ${duration.toMinutes % 60}min ${duration.toSeconds % 60}s"
+        val duration: Option[FiniteDuration] = result.appContext.appEndTime.map(endTime => (endTime - result.appContext.appStartTime).milliseconds)
+        val durationStr: String = duration match {
+            case Some(duration) if duration < 1.minutes => s"${duration.toSeconds.toString}s"
+            case Some(duration) if duration < 1.hours => s"${duration.toMinutes % 60}min ${duration.toSeconds % 60}s"
+            case Some(duration) => s"${duration.toHours}h ${duration.toMinutes % 60}min ${duration.toSeconds % 60}s"
+            case None => "In progress"
         }
 
         val warningsStr: String = result.warnings match {
@@ -30,20 +31,20 @@ class HtmlReportGenerator(implicit logger: SparkScopeLogger) {
 
         val rendered = template
           .replace("${sparkScopeSign}", SparkScopeSign)
-          .replace("${appInfo.applicationId}", result.appInfo.applicationID)
-          .replace("${appInfo.start}", ofEpochSecond(result.appInfo.startTime / 1000, 0, UTC).toString)
-          .replace("${appInfo.end}", ofEpochSecond(result.appInfo.endTime / 1000, 0, UTC).toString)
+          .replace("${appInfo.applicationId}", result.appContext.appId)
+          .replace("${appInfo.start}", ofEpochSecond(result.appContext.appStartTime / 1000, 0, UTC).toString)
+          .replace("${appInfo.end}", result.appContext.appEndTime.map(endTime => ofEpochSecond(endTime/ 1000, 0, UTC).toString).getOrElse("In progress"))
           .replace("${appInfo.duration}", durationStr)
           .replace("${logs}", logger.toString)
           .replace("${warnings}", warningsStr)
-          .replace("${sparkConf}", sparkConf.getAll.map { case (key, value) => s"${key}: ${value}" }.mkString("\n"))
+          .replace("${sparkConf}", sparkScopeConf.sparkConf.getAll.map { case (key, value) => s"${key}: ${value}" }.mkString("\n"))
           .replace("${sparklens}", sparklensResults.mkString("\n"))
         //      .replace("${version}", getClass.getPackage.getImplementationVersion)
 
         val renderedCharts = renderCharts(rendered, result)
         val renderedStats = renderStats(renderedCharts, result)
 
-        val outputPath = Paths.get(outputDir, s"${result.appInfo.applicationID}.html")
+        val outputPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appContext.appId}.html")
         val fileWriter = new FileWriter(outputPath.toString)
         fileWriter.write(renderedStats)
         fileWriter.close()

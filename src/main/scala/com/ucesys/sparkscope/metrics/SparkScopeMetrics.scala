@@ -1,8 +1,8 @@
 package com.ucesys.sparkscope.metrics
 
-import com.ucesys.sparkscope.data.DataFrame
+import com.ucesys.sparkscope.data.DataTable
 
-case class SparkScopeMetrics(driverMetrics: DataFrame,
+case class SparkScopeMetrics(driverMetrics: DataTable,
                              executorMemoryMetrics: ExecutorMemoryMetrics,
                              clusterMemoryMetrics: ClusterMemoryMetrics,
                              clusterCPUMetrics: ClusterCPUMetrics)

@@ -20,18 +20,17 @@ package com.ucesys.sparkscope
 import com.ucesys.sparklens.QuboleJobListener
 import com.ucesys.sparklens.analyzer.AppAnalyzer
 import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparkscope.SparkScopeJobListener.SparkScopeSign
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, FileReaderFactory, HtmlReportGenerator, PropertiesLoaderFactory}
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.SparkScopeContext
+import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 
 class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(sparkConf: SparkConf) {
 
-    implicit val logger = SparkScopeLogger.get
+    implicit val logger = new SparkScopeLogger
 
     override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
-        //println(s"Application ${appInfo.applicationID} ended at ${applicationEnd.time}")
         appInfo.endTime = applicationEnd.time
 
         //Set end times for the jobs for which onJobEnd event was missed
@@ -68,23 +67,16 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
                 Seq.empty
         }
 
-        logger.info(SparkScopeSign)
-
-        val sparkScopeConf = SparkScopeConfig.fromSparkConf(sparkConf, new PropertiesLoaderFactory)
-        val metricsLoader = new CsvHadoopMetricsLoader(new FileReaderFactory, appContext, sparkScopeConf)
-        val htmlReportGenerator = new HtmlReportGenerator
-        val sparkScopeRunner = new SparkScopeRunner(appContext, sparkScopeConf, metricsLoader, htmlReportGenerator, sparklensResults)
+        val sparkScopeRunner = new SparkScopeRunner(
+            SparkScopeContext(appContext),
+            sparkConf,
+            new SparkScopeConfLoader,
+            new SparkScopeAnalyzer,
+            new PropertiesLoaderFactory,
+            new MetricsLoaderFactory,
+            new ReportGeneratorFactory,
+            sparklensResults
+        )
         sparkScopeRunner.run()
     }
-}
-
-object SparkScopeJobListener {
-    val SparkScopeSign =
-        """
-          |     ____              __    ____
-          |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
-          |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
-          |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
-          |     /_/                             /_/    spark3-v0.1.0
-          |""".stripMargin
 }

@@ -21,12 +21,15 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.io.HadoopFileReader
 import com.ucesys.sparkscope.metrics._
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 import org.scalatest.MustMatchers.{a, convertToAnyMustWrapper}
 
 class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenThen {
+    implicit val logger: SparkScopeLogger = stub[SparkScopeLogger]
+
     test("SparkScopeAnalyzer successful run") {
         Given("SparkScopeAnalyzer and correct driver & executormetrics")
         val ac = mockAppContext("analyzer-successful")
@@ -35,13 +38,14 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
         When("running SparkScopeAnalyzer.analyze")
         val result = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
-        Then("SparkScopeResult shouldn contain low CPU and low heap utilization warnings")
+        Then("SparkScopeResult should contain low CPU and low heap utilization warnings")
         assert(result.warnings.length == 2)
 
         And("SparkScopeResult should be returned with correct values")
-        assert(result.appInfo.applicationID == ac.appInfo.applicationID)
-        assert(result.appInfo.startTime == StartTime)
-        assert(result.appInfo.endTime == EndTime)
+        assert(result.appContext.appId == ac.appId)
+        assert(result.appContext.appStartTime == StartTime)
+        assert(result.appContext.appEndTime.get == EndTime)
+        assert(result.appContext.executorMap.size == 4)
 
         assert(result.stats.driverStats == DriverMemoryStats(
             heapSize = 910,
@@ -83,11 +87,68 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
         ))
     }
 
+    test("SparkScopeAnalyzer, executors not removed") {
+        Given("SparkScopeAnalyzer and correct driver & executor metrics without executors removed")
+        val ac = mockAppContextExecutorsNotRemoved("analyzer-executors-not-removed")
+        val sparkScopeAnalyzer = new SparkScopeAnalyzer
+
+        When("running SparkScopeAnalyzer.analyze")
+        val result = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac)
+
+        Then("SparkScopeResult should contain low heap utilization warnings")
+        assert(result.warnings.length == 1)
+
+        And("SparkScopeResult should be returned with correct values")
+        assert(result.appContext.appId == ac.appId)
+        assert(result.appContext.appStartTime == StartTime)
+        assert(result.appContext.appEndTime.get == EndTime)
+        assert(result.appContext.executorMap.size == 4)
+
+        assert(result.stats.driverStats == DriverMemoryStats(
+            heapSize = 910,
+            maxHeap = 315,
+            maxHeapPerc = 0.34650,
+            avgHeap = 261,
+            avgHeapPerc = 0.28736,
+            avgNonHeap = 66,
+            maxNonHeap = 69
+        ))
+
+        assert(result.stats.executorStats == ExecutorMemoryStats(
+            heapSize = 800,
+            maxHeap = 352,
+            maxHeapPerc = 0.44029,
+            avgHeap = 204,
+            avgHeapPerc = 0.25554,
+            avgNonHeap = 43,
+            maxNonHeap = 48
+        ))
+
+        assert(result.stats.clusterMemoryStats == ClusterMemoryStats(
+            maxHeap = 840,
+            avgHeap = 632,
+            maxHeapPerc = 0.4165,
+            avgHeapPerc = 0.25554,
+            executorTimeSecs = 140,
+            heapGbHoursAllocated = 0.03038,
+            heapGbHoursWasted = 0.00776,
+            executorHeapSizeInGb = 0.78125
+        ))
+
+        assert(result.stats.clusterCPUStats == ClusterCPUStats(
+            cpuUtil = 0.60239,
+            coreHoursAllocated = 0.03889,
+            coreHoursWasted = 0.02343,
+            executorTimeSecs = 140,
+            executorCores = 1
+        ))
+    }
+
     test("SparkScopeAnalyzer missing metrics") {
         Given("SparkScopeAnalyzer and missing csv metrics for one executor")
         val ac = mockAppContextMissingExecutorMetrics("analyzer-missing-metrics")
         val csvReaderMock = stub[HadoopFileReader]
-        mockcorrectMetrics(csvReaderMock, ac.appInfo.applicationID)
+        mockcorrectMetrics(csvReaderMock, ac.appId)
         val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
         When("running SparkScopeAnalyzer.analyze")
@@ -101,9 +162,10 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
         missingMetricsWarning.toString.contains("Missing metrics for the following executor ids: 5")
 
         And("SparkScopeResult should be returned with correct values")
-        assert(result.appInfo.applicationID == ac.appInfo.applicationID)
-        assert(result.appInfo.startTime == StartTime)
-        assert(result.appInfo.endTime == EndTime)
+        assert(result.appContext.appId == ac.appId)
+        assert(result.appContext.appStartTime == StartTime)
+        assert(result.appContext.appEndTime.get == EndTime)
+        assert(result.appContext.executorMap.size == 5)
 
         assert(result.stats.driverStats == DriverMemoryStats(
             heapSize = 910,

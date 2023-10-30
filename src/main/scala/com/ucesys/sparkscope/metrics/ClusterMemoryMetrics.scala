@@ -1,9 +1,9 @@
 package com.ucesys.sparkscope.metrics
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
-import com.ucesys.sparkscope.data.DataFrame
+import com.ucesys.sparkscope.data.DataTable
 
-case class ClusterMemoryMetrics(heapMax: DataFrame, heapUsed: DataFrame, heapUsage: DataFrame) {
+case class ClusterMemoryMetrics(heapMax: DataTable, heapUsed: DataTable, heapUsage: DataTable) {
     override def toString: String = {
         Seq(
             s"\nCluster metrics:",
@@ -15,7 +15,7 @@ case class ClusterMemoryMetrics(heapMax: DataFrame, heapUsed: DataFrame, heapUsa
 }
 
 object ClusterMemoryMetrics {
-    def apply(allExecutorsMetrics: DataFrame): ClusterMemoryMetrics = {
+    def apply(allExecutorsMetrics: DataTable): ClusterMemoryMetrics = {
         ClusterMemoryMetrics(
             heapMax = allExecutorsMetrics.groupBy("t", JvmHeapMax).sum.sortBy("t"),
             heapUsed = allExecutorsMetrics.groupBy("t", JvmHeapUsed).sum.sortBy("t"),

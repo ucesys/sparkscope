@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope.metrics
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
-import com.ucesys.sparkscope.data.DataFrame
+import com.ucesys.sparkscope.data.DataTable
 
 case class ExecutorMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Double, avgHeap: Long, avgHeapPerc: Double, avgNonHeap: Long, maxNonHeap: Long) {
     override def toString: String = {
@@ -18,7 +18,7 @@ case class ExecutorMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Doubl
 }
 
 object ExecutorMemoryStats {
-    def apply(allExecutorsMetrics: DataFrame): ExecutorMemoryStats = {
+    def apply(allExecutorsMetrics: DataTable): ExecutorMemoryStats = {
         ExecutorMemoryStats(
             heapSize = allExecutorsMetrics.select(JvmHeapMax).max.toLong / BytesInMB,
             maxHeap = allExecutorsMetrics.select(JvmHeapUsed).max.toLong / BytesInMB,

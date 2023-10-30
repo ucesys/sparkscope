@@ -1,26 +1,12 @@
 package com.ucesys.sparkscope
 
+import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.io.PropertiesLoaderFactory
-import com.ucesys.sparkscope.utils.SparkScopeLogger
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
 import org.apache.spark.SparkConf
 
-case class SparkScopeConfig(driverMetricsDir: String, executorMetricsDir: String, htmlReportPath: String, sparkConf: SparkConf)
-
-object SparkScopeConfig {
-    val MetricsPropDriverDir = "driver.sink.csv.directory"
-    val MetricsPropExecutorDir = "executor.sink.csv.directory"
-    val MetricsPropAllDir = "*.sink.csv.directory"
-
-    val SparkPropertyMetricsConf = "spark.metrics.conf"
-    val SparkPropertyMetricsConfDriverDir = s"${SparkPropertyMetricsConf}.${MetricsPropDriverDir}"
-    val SparkPropertyMetricsConfExecutorDir = s"${SparkPropertyMetricsConf}.${MetricsPropExecutorDir}"
-    val SparkPropertyMetricsConfAllDir = s"${SparkPropertyMetricsConf}.${MetricsPropAllDir}"
-
-    val SparkScopePropertyExecutorMetricsDir = "spark.sparkscope.metrics.dir.executor"
-    val SparkScopePropertyDriverMetricsDir = "spark.sparkscope.metrics.dir.driver"
-    val SparkScopePropertyHtmlPath = "spark.sparkscope.html.path"
-
-    def fromSparkConf(sparkConf: SparkConf, propertiesLoaderFactory: PropertiesLoaderFactory)(implicit logger: SparkScopeLogger): SparkScopeConfig = {
+class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
+    def load(sparkConf: SparkConf, propertiesLoaderFactory: PropertiesLoaderFactory): SparkScopeConf = {
         val driverMetricsDir: Option[String] = sparkConf match {
             case sparkConf if sparkConf.contains(SparkScopePropertyDriverMetricsDir) =>
                 logger.info(s"Setting driver metrics dir to ${SparkScopePropertyDriverMetricsDir}")
@@ -69,11 +55,26 @@ object SparkScopeConfig {
             throw new IllegalArgumentException("Unable to extract driver & executor csv metrics directories from SparkConf")
         }
 
-        new SparkScopeConfig(
+        SparkScopeConf(
             driverMetricsDir = driverMetricsDir.get,
             executorMetricsDir = executorMetricsDir.get,
             htmlReportPath = sparkConf.get(SparkScopePropertyHtmlPath, "/tmp/"),
             sparkConf = sparkConf
         )
     }
+}
+
+object SparkScopeConfLoader {
+    val MetricsPropDriverDir = "driver.sink.csv.directory"
+    val MetricsPropExecutorDir = "executor.sink.csv.directory"
+    val MetricsPropAllDir = "*.sink.csv.directory"
+
+    val SparkPropertyMetricsConf = "spark.metrics.conf"
+    val SparkPropertyMetricsConfDriverDir = s"${SparkPropertyMetricsConf}.${MetricsPropDriverDir}"
+    val SparkPropertyMetricsConfExecutorDir = s"${SparkPropertyMetricsConf}.${MetricsPropExecutorDir}"
+    val SparkPropertyMetricsConfAllDir = s"${SparkPropertyMetricsConf}.${MetricsPropAllDir}"
+
+    val SparkScopePropertyExecutorMetricsDir = "spark.sparkscope.metrics.dir.executor"
+    val SparkScopePropertyDriverMetricsDir = "spark.sparkscope.metrics.dir.driver"
+    val SparkScopePropertyHtmlPath = "spark.sparkscope.html.path"
 }

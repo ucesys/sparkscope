@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope.metrics
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
-import com.ucesys.sparkscope.data.DataFrame
+import com.ucesys.sparkscope.data.DataTable
 
 case class DriverMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Double, avgHeap: Long, avgHeapPerc: Double, avgNonHeap: Long, maxNonHeap: Long) {
     override def toString: String = {
@@ -17,7 +17,7 @@ case class DriverMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Double,
 }
 
 object DriverMemoryStats {
-    def apply(driverMetricsMerged: DataFrame): DriverMemoryStats = {
+    def apply(driverMetricsMerged: DataTable): DriverMemoryStats = {
         DriverMemoryStats(
             heapSize = driverMetricsMerged.select(JvmHeapMax).max.toLong / BytesInMB,
             maxHeap = driverMetricsMerged.select(JvmHeapUsed).max.toLong / BytesInMB,

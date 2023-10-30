@@ -1,18 +1,18 @@
 package com.ucesys.sparkscope.metrics
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
-import com.ucesys.sparkscope.data.DataFrame
+import com.ucesys.sparkscope.data.DataTable
 
-case class ExecutorMemoryMetrics(heapUsedMax: DataFrame,
-                                 heapUsedMin: DataFrame,
-                                 heapUsedAvg: DataFrame,
-                                 heapAllocation: DataFrame,
-                                 nonHeapUsedMax: DataFrame,
-                                 nonHeapUsedMin: DataFrame,
-                                 nonHeapUsedAvg: DataFrame)
+case class ExecutorMemoryMetrics(heapUsedMax: DataTable,
+                                 heapUsedMin: DataTable,
+                                 heapUsedAvg: DataTable,
+                                 heapAllocation: DataTable,
+                                 nonHeapUsedMax: DataTable,
+                                 nonHeapUsedMin: DataTable,
+                                 nonHeapUsedAvg: DataTable)
 
 object ExecutorMemoryMetrics {
-    def apply(allExecutorsMetrics: DataFrame): ExecutorMemoryMetrics = {
+    def apply(allExecutorsMetrics: DataTable): ExecutorMemoryMetrics = {
         ExecutorMemoryMetrics(
             heapUsedMax = allExecutorsMetrics.groupBy("t", JvmHeapUsed).max.sortBy("t"),
             heapUsedMin = allExecutorsMetrics.groupBy("t", JvmHeapUsed).min.sortBy("t"),
