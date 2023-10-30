@@ -86,12 +86,32 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         logger.println(s"\nDisplaying merged metrics for all executors:")
         logger.println(allExecutorsMetrics)
 
-        // Executor Start, End, Duration
-        val startEndTimesWithMetrics = appContext.executorMap.filter { case (id, _) => driverExecutorMetrics.executorMetricsMap.contains(id) }
-        val combinedExecutorUptime = startEndTimesWithMetrics.map {
-            case (id, executorContext) => executorContext.upTime(executorsMetricsCombinedMapWithExecId(id).select("t").max.toLong)
-        }.sum
-        val executorTimeSecs = combinedExecutorUptime.milliseconds.toSeconds
+        // Executor Timeline
+        val executorMapWithMetrics = appContext.executorMap.filter { case (id, _) => driverExecutorMetrics.executorMetricsMap.contains(id) }
+
+        val executorTimelineRows: Seq[Seq[String]] = executorMapWithMetrics.map {
+            case (id, executorContext) =>
+                val lastMetricTime = executorsMetricsCombinedMapWithExecId(id).select("t").max.toLong
+                val uptime = executorContext.upTime(lastMetricTime)
+                Seq(
+                    id,
+                    executorContext.addTime.toString,
+                    executorContext.removeTime.map(_.toString).getOrElse("null"),
+                    lastMetricTime.toString,
+                    uptime.toString
+                )
+        }.toSeq
+
+        val executorTimeLine = DataTable.fromRows(
+            "executor timeline",
+            Seq("executorId", "addTime", "removeTime", "lastMetricTime", "upTimeInMs"),
+            executorTimelineRows
+        )
+
+        val executorTimeSecs = executorTimeLine.select("upTimeInMs").sum.milliseconds.toSeconds
+
+        logger.println(executorTimeLine)
+
 
         // Metrics
         val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics)
