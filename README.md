@@ -110,7 +110,7 @@ com.ucesys.sparkscope.SparkScopeApp \
 --event-log /path/to/event/log \
 --driver-metrics /path/to/driver/metrics \
 --executor-metrics /path/to/executor/metrics \
---html-path /path/to/html/report/directory \
+--html-path /path/to/html/report/directory
 ```
 
 ## SparkScope summary:
