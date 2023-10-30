@@ -18,7 +18,7 @@ SparkScope html report contains the following features:
 
 ## Compatibiltiy matrix
 
-|                           | spark 2 (sparkscope/main) | spark 3 (sparkscope/spark3) |
+|                           | spark 2 (sparkscope/spark2) | spark 3 (sparkscope/main) |
 |---------------------------|---------------------------|-----------------------------|
 | scala version             | 2.11.12                   | 2.12.18                     |
 | compatible JDK versions   | 7, 8                      | 8, 11, 17                   |
