@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.1] - 2023-10-30
+- Create SparkScopeApp with CLI to run SparkScope as standalone app 
+  - reads application context, spark conf and events from eventLog  
+  - can be run on finished or running spark application
+
 ## [0.1.0] - 2023-10-10
 Initial SparkScope-spark3 release:
 - Compatible:
