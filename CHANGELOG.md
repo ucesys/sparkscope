@@ -1,9 +1,11 @@
 # Changelog
 
-## [0.1.2] - 2023-10-30
+## [0.1.3] - 2023-10-30
 - Create SparkScopeApp with CLI to run SparkScope as standalone app 
   - reads application context, spark conf and events from eventLog  
   - can be run on finished or running spark application
+
+## [0.1.2] - 2023-10-10
 - Rename package from sparkscope to sparkscope-spark2
 - Bump Scala version from 2.11.8 to 2.11.12
 - Handle gently case for master=local where executorId=driver
