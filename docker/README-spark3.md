@@ -152,6 +152,29 @@ spark-submit \
 /tmp/jars/spark-examples_2.10-1.1.1.jar 500
 ```
 
+hdfs metrics
+```bash
+spark-submit \
+--master spark://spark-master:7077 \
+--jars /tmp/jars/sparkscope-spark3-0.1.1-hdfs-metrics-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.1-hdfs-metrics-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.1-hdfs-metrics-SNAPSHOT.jar \
+--conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
+--conf spark.eventLog.enabled=true \
+--conf spark.eventLog.dir=/tmp/spark-events \
+--conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.HDFSSink \
+--conf spark.metrics.conf.*.sink.csv.directory=file:///tmp/hdfs-metrics \
+--conf spark.metrics.conf.*.sink.csv.unit=seconds \
+--conf spark.metrics.conf.*.sink.csv.period=5 \
+--conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.executor.cores=2 \
+--conf spark.executor.memory=1800m \
+--conf spark.executor.instances=2 \
+--conf spark.cores.max=4 \
+--class org.apache.spark.examples.SparkPi \
+/tmp/jars/spark-examples_2.10-1.1.1.jar 500
+```
 ### Running SparkScope as standalone app
 ```agsl
 java -cp /tmp/jars/sparkscope-spark3-0.1.1-SNAPSHOT.jar:./jars/* com.ucesys.sparkscope.SparkScopeApp --event-log /tmp/spark-events/app-20231102142859-0005
