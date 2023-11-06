@@ -1,13 +1,10 @@
-package com.codahale.metrics;
+package org.apache.spark.metrics;
 
+import com.codahale.metrics.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
@@ -19,21 +16,21 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * A reporter which creates a comma-separated values file of the measurements for each metric.
  */
-public class CsvReporter extends ScheduledReporter {
+public class HdfsCsvReporter extends ScheduledReporter {
     private static final String DEFAULT_SEPARATOR = ",";
 
     /**
-     * Returns a new {@link Builder} for {@link CsvReporter}.
+     * Returns a new {@link Builder} for {@link HdfsCsvReporter}.
      *
      * @param registry the registry to report
-     * @return a {@link Builder} instance for a {@link CsvReporter}
+     * @return a {@link Builder} instance for a {@link HdfsCsvReporter}
      */
     public static Builder forRegistry(MetricRegistry registry) {
         return new Builder(registry);
     }
 
     /**
-     * A builder for {@link CsvReporter} instances. Defaults to using the default locale, converting
+     * A builder for {@link HdfsCsvReporter} instances. Defaults to using the default locale, converting
      * rates to events/second, converting durations to milliseconds, and not filtering metrics.
      */
     public static class Builder {
@@ -49,6 +46,8 @@ public class CsvReporter extends ScheduledReporter {
         private CsvFileProvider csvFileProvider;
 
         private Builder(MetricRegistry registry) {
+            LOGGER.info("Using HdfsCsvReporter");
+
             this.registry = registry;
             this.locale = Locale.getDefault();
             this.separator = DEFAULT_SEPARATOR;
@@ -159,14 +158,14 @@ public class CsvReporter extends ScheduledReporter {
         }
 
         /**
-         * Builds a {@link CsvReporter} with the given properties, writing {@code .csv} files to the
+         * Builds a {@link HdfsCsvReporter} with the given properties, writing {@code .csv} files to the
          * given directory.
          *
          * @param directory the directory in which the {@code .csv} files will be created
-         * @return a {@link CsvReporter}
+         * @return a {@link HdfsCsvReporter}
          */
-        public CsvReporter build(File directory) {
-            return new CsvReporter(registry,
+        public HdfsCsvReporter build(File directory) {
+            return new HdfsCsvReporter(registry,
                     directory,
                     locale,
                     separator,
@@ -180,7 +179,7 @@ public class CsvReporter extends ScheduledReporter {
         }
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsvReporter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HdfsCsvReporter.class);
 
     private final File directory;
     private final Locale locale;
@@ -196,17 +195,17 @@ public class CsvReporter extends ScheduledReporter {
     private final String meterHeader;
     private final String histogramHeader;
 
-    private CsvReporter(MetricRegistry registry,
-                        File directory,
-                        Locale locale,
-                        String separator,
-                        TimeUnit rateUnit,
-                        TimeUnit durationUnit,
-                        Clock clock,
-                        MetricFilter filter,
-                        ScheduledExecutorService executor,
-                        boolean shutdownExecutorOnStop,
-                        CsvFileProvider csvFileProvider) {
+    private HdfsCsvReporter(MetricRegistry registry,
+                             File directory,
+                             Locale locale,
+                             String separator,
+                             TimeUnit rateUnit,
+                             TimeUnit durationUnit,
+                             Clock clock,
+                             MetricFilter filter,
+                             ScheduledExecutorService executor,
+                             boolean shutdownExecutorOnStop,
+                             CsvFileProvider csvFileProvider) {
         super(registry, "csv-reporter", filter, rateUnit, durationUnit, executor, shutdownExecutorOnStop);
         this.directory = directory;
         this.locale = locale;
@@ -322,6 +321,11 @@ public class CsvReporter extends ScheduledReporter {
 
     private void report(long timestamp, String name, String header, String line, Object... values) {
         try {
+//            final File logFIle = new File(directory, "log.csv");
+//            PrintWriter outLog = new PrintWriter(new OutputStreamWriter(new FileOutputStream(logFIle, true), UTF_8));
+//            outLog.println("HdfsCsvReporter writing " + name);
+//            outLog.close();
+
             final File file = csvFileProvider.getFile(directory, name);
             final boolean fileAlreadyExists = file.exists();
             if (fileAlreadyExists || file.createNewFile()) {
