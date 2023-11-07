@@ -47,7 +47,7 @@ public class HdfsCsvReporter extends AbstractCsvReporter {
         try(FileSystem fs = FileSystem.get(new URI(directory), configuration)) {
             if (!fs.exists(path)) {
                 try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(path, true), UTF_8))) {
-                    writer.write("t" + separator + header);
+                    writer.write("t" + separator + header + "\n");
                 } catch (IOException e) {
                     LOGGER.warn("IOException while creating csv file: {}", path.getName(), e);
                 }
