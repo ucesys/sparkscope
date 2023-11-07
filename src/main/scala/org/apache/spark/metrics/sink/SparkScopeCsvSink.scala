@@ -19,12 +19,12 @@ package org.apache.spark.metrics.sink
 
 import com.codahale.metrics.MetricRegistry
 import org.apache.spark.metrics.MetricsSystem
-import org.apache.spark.metrics.reporter.AbstractCsvReporter
+import org.apache.spark.metrics.reporter.{AbstractCsvReporter, CsvReporterBuilder}
 
 import java.util.concurrent.TimeUnit
 import java.util.{Locale, Properties}
 
-private[spark] class HdfsCsvSink(val property: Properties, val registry: MetricRegistry) extends Sink {
+private[spark] class SparkScopeCsvSink(val property: Properties, val registry: MetricRegistry) extends Sink {
   val CSV_KEY_PERIOD = "period"
   val CSV_KEY_UNIT = "unit"
   val CSV_KEY_DIR = "directory"
@@ -50,7 +50,7 @@ private[spark] class HdfsCsvSink(val property: Properties, val registry: MetricR
     case None => CSV_DEFAULT_DIR
   }
 
-  val reporter: AbstractCsvReporter = AbstractCsvReporter.forRegistry(registry)
+  val reporter: AbstractCsvReporter = CsvReporterBuilder.forRegistry(registry)
     .formatFor(Locale.US)
     .convertDurationsTo(TimeUnit.MILLISECONDS)
     .convertRatesTo(TimeUnit.SECONDS)
