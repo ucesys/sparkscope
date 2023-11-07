@@ -162,7 +162,7 @@ spark-submit \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=/tmp/spark-events \
---conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.HDFSSink \
+--conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.HdfsCsvSink \
 --conf spark.metrics.conf.*.sink.csv.directory=file:///tmp/hdfs-metrics \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.period=5 \
