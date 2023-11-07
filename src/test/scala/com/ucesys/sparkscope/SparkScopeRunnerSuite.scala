@@ -187,16 +187,18 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             avgHeap = 632,
             maxHeapPerc = 0.4165,
             avgHeapPerc = 0.25554,
+            avgHeapWastedPerc = 0.74446,
             executorTimeSecs = 152,
             heapGbHoursAllocated = 0.03299,
-            heapGbHoursWasted = 0.00843,
+            heapGbHoursWasted = 0.02456,
             executorHeapSizeInGb = 0.78125
         ))
 
         assert(result.stats.clusterCPUStats == ClusterCPUStats(
             cpuUtil = 0.55483,
+            cpuNotUtil = 0.44517,
             coreHoursAllocated = 0.04222,
-            coreHoursWasted = 0.02343,
+            coreHoursWasted = 0.0188,
             executorTimeSecs = 152,
             executorCores = 1
         ))
@@ -258,16 +260,18 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             avgHeap = 640,
             maxHeapPerc = 0.4165,
             avgHeapPerc = 0.25273,
+            avgHeapWastedPerc = 0.74727,
             executorTimeSecs = 180,
             heapGbHoursAllocated = 0.03906,
-            heapGbHoursWasted = 0.00987,
+            heapGbHoursWasted = 0.02919,
             executorHeapSizeInGb = 0.78125
         ))
 
         assert(result.stats.clusterCPUStats == ClusterCPUStats(
             cpuUtil = 0.56276,
+            cpuNotUtil = 0.43724,
             coreHoursAllocated = 0.05,
-            coreHoursWasted = 0.02814,
+            coreHoursWasted = 0.02186,
             executorTimeSecs = 180,
             executorCores = 1
         ))
@@ -329,16 +333,18 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             avgHeap = 640,
             maxHeapPerc = 0.4165,
             avgHeapPerc = 0.25273,
+            avgHeapWastedPerc = 0.74727,
             executorTimeSecs = 180,
             heapGbHoursAllocated = 0.03906,
-            heapGbHoursWasted = 0.00987,
+            heapGbHoursWasted = 0.02919,
             executorHeapSizeInGb = 0.78125
         ))
 
         assert(result.stats.clusterCPUStats == ClusterCPUStats(
             cpuUtil = 0.28138,
+            cpuNotUtil = 0.71862,
             coreHoursAllocated = 0.1,
-            coreHoursWasted = 0.02814,
+            coreHoursWasted = 0.07186,
             executorTimeSecs = 180,
             executorCores = 2
         ))
