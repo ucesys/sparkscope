@@ -2,6 +2,8 @@ package org.apache.spark.metrics.reporter;
 
 import com.codahale.metrics.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +24,11 @@ public class CsvReporterBuilder {
     private boolean shutdownExecutorOnStop;
     private CsvFileProvider csvFileProvider;
 
+    private final List<String> SPARK_SCOPE_METRICS = Arrays.asList("jvm.heap.used", "jvm.heap.usage", "jvm.heap.max", "jvm.non-heap.used", "executor.cpuTime");
+    MetricFilter SPARK_SCOPE_METRICS_FILTER = (name, metric) -> {
+        return SPARK_SCOPE_METRICS.stream().anyMatch(name::contains);
+    };
+
     protected static final String DEFAULT_SEPARATOR = ",";
 
     /**
@@ -41,7 +48,7 @@ public class CsvReporterBuilder {
         this.rateUnit = TimeUnit.SECONDS;
         this.durationUnit = TimeUnit.MILLISECONDS;
         this.clock = Clock.defaultClock();
-        this.filter = MetricFilter.ALL;
+        this.filter = SPARK_SCOPE_METRICS_FILTER;
         this.executor = null;
         this.shutdownExecutorOnStop = true;
         this.csvFileProvider = new FixedNameCsvFileProvider();
