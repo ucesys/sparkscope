@@ -2,6 +2,7 @@ package org.apache.spark.metrics.reporter;
 
 import com.codahale.metrics.*;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -158,7 +159,7 @@ public class CsvReporterBuilder {
      * @param directory the directory in which the {@code .csv} files will be created
      * @return a {@link CsvReporterBuilder}
      */
-    public AbstractCsvReporter build(String directory) {
+    public AbstractCsvReporter build(String directory) throws IOException {
         if (directory.startsWith("maprfs:/") || directory.startsWith("hdfs:/")) {
             return new HdfsCsvReporter(
                     directory,

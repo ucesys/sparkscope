@@ -24,6 +24,7 @@ import org.apache.hadoop.fs.Path;
 public class HdfsCsvReporter extends AbstractCsvReporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HdfsCsvReporter.class);
+    private FileSystem fs;
 
     protected HdfsCsvReporter(String directory,
                               MetricRegistry registry,
@@ -34,17 +35,28 @@ public class HdfsCsvReporter extends AbstractCsvReporter {
                              Clock clock,
                              MetricFilter filter,
                              ScheduledExecutorService executor,
-                             boolean shutdownExecutorOnStop) {
+                             boolean shutdownExecutorOnStop) throws IOException {
         super(registry, locale, directory, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop);
         LOGGER.info("Using HdfsCsvReporter");
+
+        final Configuration configuration = SparkHadoopUtil.get().newConfiguration(null);
+        try {
+            fs = FileSystem.get(new URI(directory), configuration);
+        } catch (URISyntaxException e) {
+            LOGGER.warn("URISyntaxException while creating filesystem for directory {}", directory, e);
+            fs = FileSystem.get(configuration);
+        } catch (IOException e) {
+            LOGGER.warn("IOException while creating filesystem for directory {}", directory, e);
+            fs = FileSystem.get(configuration);
+        }
+
     }
 
     protected void report(long timestamp, String name, String header, String line, Object... values) {
         final String nameStripped = name.replace("\"", "").replace("\'", "");
         final Path path = new Path(Paths.get(directory,nameStripped + ".csv").toString());
-        final Configuration  configuration = SparkHadoopUtil.get().newConfiguration(null);
 
-        try(FileSystem fs = FileSystem.get(new URI(directory), configuration)) {
+        try {
             if (!fs.exists(path)) {
                 try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(path, true), UTF_8))) {
                     writer.write("t" + separator + header + "\n");
@@ -62,8 +74,6 @@ public class HdfsCsvReporter extends AbstractCsvReporter {
             }
         } catch (IOException e) {
             LOGGER.warn("IOException while writing {} to {}", name, directory, e);
-        } catch (URISyntaxException e) {
-            LOGGER.warn("URISyntaxException while writing {} to {}", name, directory, e);
         }
     }
 }
