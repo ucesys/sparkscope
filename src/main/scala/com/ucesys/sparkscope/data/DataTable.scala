@@ -11,7 +11,8 @@ case class DataTable(name: String, columns: Seq[DataColumn]) {
 
     def toRowsWithHeader: Seq[Seq[String]] = Seq(this.columnsNames) ++ this.toRows
 
-    def select(column: String): DataColumn = this.columns.find(_.name == column).get
+    def select(column: String): DataColumn =
+        this.columns.find(_.name == column).getOrElse(throw new IllegalArgumentException(s"${column} column does not exist among columns: ${columnsNames}"))
 
     def select(subColumns: Seq[String]): DataTable = DataTable(this.name, this.columns.filter(col => subColumns.contains(col.name)))
 
