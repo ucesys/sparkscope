@@ -55,7 +55,8 @@ public class HdfsCsvReporter extends AbstractCsvReporter {
 
             LOGGER.info("Reading hadoop file {}, scheme: {}", path, fs.getScheme());
             try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.append(path)))) {
-                writer.write(String.format(locale, "%d" + separator + "%s%n", timestamp, line));
+                String row = String.format(locale, String.format(locale, "%d" + separator + "%s%n", timestamp, line), values);
+                writer.write(row);
             } catch (IOException e) {
                 LOGGER.warn("IOException while writing row to csv file: {}", path, e);
             }
