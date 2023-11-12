@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 /**
@@ -159,10 +160,25 @@ public class CsvReporterBuilder {
      * @param directory the directory in which the {@code .csv} files will be created
      * @return a {@link CsvReporterBuilder}
      */
-    public AbstractCsvReporter build(String directory) throws IOException {
+    public AbstractCsvReporter build(String directory, Optional<String> appName, Optional<String> s3Region) throws IOException {
         if (directory.startsWith("maprfs:/") || directory.startsWith("hdfs:/")) {
-            return new HdfsCsvReporter(
+            return new HadoopCsvReporter(
                     directory,
+                    registry,
+                    locale,
+                    separator,
+                    rateUnit,
+                    durationUnit,
+                    clock,
+                    filter,
+                    executor,
+                    shutdownExecutorOnStop
+            );
+        } else if (directory.startsWith("s3:/")) {
+            return new S3CsvReporter(
+                    directory,
+                    appName,
+                    s3Region,
                     registry,
                     locale,
                     separator,

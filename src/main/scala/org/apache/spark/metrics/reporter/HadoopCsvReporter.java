@@ -21,23 +21,23 @@ import org.apache.hadoop.fs.Path;
 /**
  * A reporter which creates a comma-separated values file of the measurements for each metric.
  */
-public class HdfsCsvReporter extends AbstractCsvReporter {
+public class HadoopCsvReporter extends AbstractCsvReporter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HdfsCsvReporter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HadoopCsvReporter.class);
     private FileSystem fs;
 
-    protected HdfsCsvReporter(String directory,
-                              MetricRegistry registry,
-                              Locale locale,
-                             String separator,
-                             TimeUnit rateUnit,
-                             TimeUnit durationUnit,
-                             Clock clock,
-                             MetricFilter filter,
-                             ScheduledExecutorService executor,
-                             boolean shutdownExecutorOnStop) throws IOException {
+    protected HadoopCsvReporter(String directory,
+                                MetricRegistry registry,
+                                Locale locale,
+                                String separator,
+                                TimeUnit rateUnit,
+                                TimeUnit durationUnit,
+                                Clock clock,
+                                MetricFilter filter,
+                                ScheduledExecutorService executor,
+                                boolean shutdownExecutorOnStop) throws IOException {
         super(registry, locale, directory, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop);
-        LOGGER.info("Using HdfsCsvReporter");
+        LOGGER.info("Using HadoopCsvReporter");
 
         final Configuration configuration = SparkHadoopUtil.get().newConfiguration(null);
         try {

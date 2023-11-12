@@ -22,12 +22,14 @@ import org.apache.spark.metrics.MetricsSystem
 import org.apache.spark.metrics.reporter.{AbstractCsvReporter, CsvReporterBuilder}
 
 import java.util.concurrent.TimeUnit
-import java.util.{Locale, Properties}
+import java.util.{Locale, Optional, Properties}
 
 private[spark] class SparkScopeCsvSink(val property: Properties, val registry: MetricRegistry) extends Sink {
   val CSV_KEY_PERIOD = "period"
   val CSV_KEY_UNIT = "unit"
   val CSV_KEY_DIR = "directory"
+  val CSV_KEY_APP_NAME = "appName"
+  val CSV_KEY_S3_REGION = "region"
 
   val CSV_DEFAULT_PERIOD = 10
   val CSV_DEFAULT_UNIT = "SECONDS"
@@ -54,7 +56,11 @@ private[spark] class SparkScopeCsvSink(val property: Properties, val registry: M
     .formatFor(Locale.US)
     .convertDurationsTo(TimeUnit.MILLISECONDS)
     .convertRatesTo(TimeUnit.SECONDS)
-    .build(pollDir)
+    .build(
+      pollDir,
+      Optional.ofNullable(property.getProperty(CSV_KEY_APP_NAME)),
+      Optional.ofNullable(property.getProperty(CSV_KEY_S3_REGION))
+    )
 
   override def start(): Unit = {
     reporter.start(pollPeriod, pollUnit)
