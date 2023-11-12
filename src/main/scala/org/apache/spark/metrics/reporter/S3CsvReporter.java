@@ -55,7 +55,7 @@ public class S3CsvReporter extends AbstractCsvReporter {
         this.metricsDir = String.join("/", dirSplit.subList(2, dirSplit.size()));
         this.appName = appName.orElse("");
         this.appDir =  Paths.get(metricsDir, this.appName).toString();
-        LOGGER.info("S3CsvReporter bucketName: " + bucketName + ", metricsDir" + metricsDir + ", appName" + appName + ", appDir" + appDir);
+        LOGGER.info("bucketName: " + bucketName + ", metricsDir: " + metricsDir + ", appName: " + appName + ", appDir: " + appDir);
     }
 
     protected void report(long timestamp, String name, String header, String line, Object... values) {
@@ -64,13 +64,15 @@ public class S3CsvReporter extends AbstractCsvReporter {
         LOGGER.info("name: " + name + ", nameStripped: " + nameStripped + ", nameSplit: " + nameSplit);
 
         final String appId = nameSplit.get(0);
+        final String metricsName = String.join(".", nameSplit.subList(1, nameSplit.size()));
+
         final String rawPath = Paths.get(
                 appDir,
                 appId,
                 "metrics",
                 "raw",
-                nameStripped,
-                nameStripped + "." + timestamp + ".csv"
+                metricsName,
+                metricsName + "." + timestamp + ".csv"
         ).toString();
 
         if(!s3.doesBucketExistV2(bucketName)) {
