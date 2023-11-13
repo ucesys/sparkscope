@@ -67,9 +67,9 @@ csv metrics driver & executors custom sink
 ```bash
 spark-submit \
 --master spark://spark-master:7077 \
---jars /tmp/jars/sparkscope-spark3-0.1.2-SNAPSHOT.jar \
---files /tmp/jars/sparkscope-spark3-0.1.2-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.2-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.3-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=/tmp/spark-events \
