@@ -16,7 +16,7 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.io.property
 
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.MustMatchers.{a, convertToAnyMustWrapper}

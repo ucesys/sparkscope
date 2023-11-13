@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.io.file
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}

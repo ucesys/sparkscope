@@ -18,8 +18,11 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.event.EventLogContextLoader
-import com.ucesys.sparkscope.io.{FileReaderFactory, MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.io.file.FileReaderFactory
+import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
+import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
+import com.ucesys.sparkscope.io.report.ReportGeneratorFactory
 
 object SparkScopeApp {
     def main(args: Array[String]): Unit = {

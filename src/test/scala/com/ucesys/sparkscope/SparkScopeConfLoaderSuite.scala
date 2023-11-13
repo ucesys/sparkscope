@@ -20,8 +20,8 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.io.{PropertiesLoader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.io.property.{PropertiesLoader, PropertiesLoaderFactory}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}

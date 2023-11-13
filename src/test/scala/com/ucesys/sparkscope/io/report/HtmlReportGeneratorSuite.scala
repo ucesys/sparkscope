@@ -16,11 +16,12 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.io.report
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
@@ -33,7 +34,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
         val ac = mockAppContext("html-generator-no-warnings")
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
@@ -48,7 +49,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
         val ac = mockAppContextMissingExecutorMetrics("html-generator-with-warnings")
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)

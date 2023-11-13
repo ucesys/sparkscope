@@ -16,8 +16,9 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.io.file
 
+import com.ucesys.sparkscope.io.metrics.{HadoopMetricReader, LocalMetricReader}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.MustMatchers.{a, convertToAnyMustWrapper}
 import org.scalatest.{FunSuite, GivenWhenThen}
@@ -30,7 +31,7 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Given("maprfs path")
         val paths = Seq("maprfs:///dir", "maprfs:/path/to/file.ext")
 
-        When("calling FileReaderFactory.getFileReader")
+        When("calling FileReaderFactory.getMetricReader")
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
@@ -44,7 +45,7 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Given("hdfs path")
         val paths = Seq("hdfs:///dir", "hdfs:/path/to/file.ext")
 
-        When("calling FileReaderFactory.getFileReader")
+        When("calling FileReaderFactory.getMetricReader")
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
@@ -58,7 +59,7 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Given("file:// path")
         val paths = Seq("file:///dir", "file:/path/to/file.ext")
 
-        When("calling FileReaderFactory.getFileReader")
+        When("calling FileReaderFactory.getMetricReader")
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
@@ -72,7 +73,7 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Given("non mapr/hdfs/file path")
         val paths = Seq("/absolute/path", "./relative/path", "/mapr/lookalike", "/hdfs/path", "/file/path")
 
-        When("calling FileReaderFactory.getFileReader")
+        When("calling FileReaderFactory.getMetricReader")
         Then("LocalFileReader should be returned")
         paths.foreach {
             path => {

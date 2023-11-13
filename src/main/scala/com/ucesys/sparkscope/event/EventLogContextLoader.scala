@@ -4,7 +4,7 @@ import com.ucesys.sparkscope.SparkScopeArgs
 import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.event.EventLogContextLoader._
-import com.ucesys.sparkscope.io.FileReaderFactory
+import com.ucesys.sparkscope.io.file.FileReaderFactory
 import org.apache.spark.SparkConf
 
 import scala.util.parsing.json.JSON

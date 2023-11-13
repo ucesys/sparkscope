@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.data.DataTable
 

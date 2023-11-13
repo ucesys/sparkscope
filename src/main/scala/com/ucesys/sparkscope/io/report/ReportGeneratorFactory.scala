@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.io.report
 
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
 

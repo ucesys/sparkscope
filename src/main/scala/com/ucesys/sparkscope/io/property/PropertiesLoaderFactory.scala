@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.io.property
 
 class PropertiesLoaderFactory {
     val HadoopFSPrefixes = Seq("maprfs:/", "hdfs:/", "file:/")

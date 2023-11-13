@@ -20,7 +20,7 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
-import com.ucesys.sparkscope.io.DriverExecutorMetrics
+import com.ucesys.sparkscope.io.metrics.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.warning.{CPUUtilWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
 

@@ -19,7 +19,9 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
-import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
+import com.ucesys.sparkscope.io.metrics.MetricsLoaderFactory
+import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
+import com.ucesys.sparkscope.io.report.ReportGeneratorFactory
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 import org.apache.spark.SparkConf
 
@@ -62,7 +64,7 @@ class SparkScopeRunner(appContext: SparkScopeContext,
     }
 
     def runAnalysis(sparkScopeConf: SparkScopeConf): SparkScopeResult = {
-        val metricsLoader = metricsLoaderFactory.get(sparkScopeConf)
+        val metricsLoader = metricsLoaderFactory.get(sparkScopeConf, appContext)
         val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
         sparkScopeAnalyzer.analyze(driverExecutorMetrics, appContext)
     }

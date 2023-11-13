@@ -1,9 +1,9 @@
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.io.report
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
-import com.ucesys.sparkscope.metrics.SparkScopeResult
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
+import com.ucesys.sparkscope.metrics.SparkScopeResult
 
 import java.io.{FileWriter, InputStream}
 import java.nio.file.Paths

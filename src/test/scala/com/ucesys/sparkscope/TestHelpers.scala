@@ -2,10 +2,11 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
-import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io._
 import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.io.metrics.{DriverExecutorMetrics, HadoopMetricReader, MetricReader, MetricReaderFactory}
+import com.ucesys.sparkscope.io.property.{PropertiesLoader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
@@ -356,40 +357,40 @@ object TestHelpers extends FunSuite with MockFactory {
           |1695358711,16963300828""".stripMargin
 
     val driverMetrics = Seq(
-        DataTable.fromCsv("driver-heap-used", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed)),
-        DataTable.fromCsv("driver-heap-max", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax)),
-        DataTable.fromCsv("driver-heap-usage", jvmHeapUsageDriverCsv, ",", Seq("t", JvmHeapUsage)),
-        DataTable.fromCsv("driver-non-heap", jvmNonHeapDriverCsv, ",", Seq("t", JvmNonHeapUsed))
+        DataTable.fromCsv("driver-heap-used", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed.name)),
+        DataTable.fromCsv("driver-heap-max", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax.name)),
+        DataTable.fromCsv("driver-heap-usage", jvmHeapUsageDriverCsv, ",", Seq("t", JvmHeapUsage.name)),
+        DataTable.fromCsv("driver-non-heap", jvmNonHeapDriverCsv, ",", Seq("t", JvmNonHeapUsed.name))
     )
 
     val executorMetricsMap = Map(
         "1" -> Seq(
-            DataTable.fromCsv("exec1-heap-used", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed)),
-            DataTable.fromCsv("exec1-heap-max", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax)),
-            DataTable.fromCsv("exec1-heap-usage", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage)),
-            DataTable.fromCsv("exec1-non-heap", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed)),
-            DataTable.fromCsv("exec1-cpu-time", cpuTime1Csv, ",", Seq("t", CpuTime))
+            DataTable.fromCsv("exec1-heap-used", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed.name)),
+            DataTable.fromCsv("exec1-heap-max", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax.name)),
+            DataTable.fromCsv("exec1-heap-usage", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage.name)),
+            DataTable.fromCsv("exec1-non-heap", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed.name)),
+            DataTable.fromCsv("exec1-cpu-time", cpuTime1Csv, ",", Seq("t", CpuTime.name))
         ),
         "2" -> Seq(
-            DataTable.fromCsv("exec2-heap-used", jvmHeapExec2Csv, ",", Seq("t", JvmHeapUsed)),
-            DataTable.fromCsv("exec2-heap-max", jvmHeapMaxExec2Csv, ",", Seq("t", JvmHeapMax)),
-            DataTable.fromCsv("exec2-heap-usage", jvmHeapUsageExec2Csv, ",", Seq("t", JvmHeapUsage)),
-            DataTable.fromCsv("exec2-non-heap", jvmNonHeapExec2Csv, ",", Seq("t", JvmNonHeapUsed)),
-            DataTable.fromCsv("exec2-cpu-time", cpuTime2Csv, ",", Seq("t", CpuTime))
+            DataTable.fromCsv("exec2-heap-used", jvmHeapExec2Csv, ",", Seq("t", JvmHeapUsed.name)),
+            DataTable.fromCsv("exec2-heap-max", jvmHeapMaxExec2Csv, ",", Seq("t", JvmHeapMax.name)),
+            DataTable.fromCsv("exec2-heap-usage", jvmHeapUsageExec2Csv, ",", Seq("t", JvmHeapUsage.name)),
+            DataTable.fromCsv("exec2-non-heap", jvmNonHeapExec2Csv, ",", Seq("t", JvmNonHeapUsed.name)),
+            DataTable.fromCsv("exec2-cpu-time", cpuTime2Csv, ",", Seq("t", CpuTime.name))
         ),
         "3" -> Seq(
-            DataTable.fromCsv("exec3-heap-used", jvmHeapExec3Csv, ",", Seq("t", JvmHeapUsed)),
-            DataTable.fromCsv("exec3-heap-max", jvmHeapMaxExec3Csv, ",", Seq("t", JvmHeapMax)),
-            DataTable.fromCsv("exec3-heap-usage", jvmHeapUsageExec3Csv, ",", Seq("t", JvmHeapUsage)),
-            DataTable.fromCsv("exec3-non-heap", jvmNonHeapExec3Csv, ",", Seq("t", JvmNonHeapUsed)),
-            DataTable.fromCsv("exec3-cpu-time", cpuTime3Csv, ",", Seq("t", CpuTime))
+            DataTable.fromCsv("exec3-heap-used", jvmHeapExec3Csv, ",", Seq("t", JvmHeapUsed.name)),
+            DataTable.fromCsv("exec3-heap-max", jvmHeapMaxExec3Csv, ",", Seq("t", JvmHeapMax.name)),
+            DataTable.fromCsv("exec3-heap-usage", jvmHeapUsageExec3Csv, ",", Seq("t", JvmHeapUsage.name)),
+            DataTable.fromCsv("exec3-non-heap", jvmNonHeapExec3Csv, ",", Seq("t", JvmNonHeapUsed.name)),
+            DataTable.fromCsv("exec3-cpu-time", cpuTime3Csv, ",", Seq("t", CpuTime.name))
         ),
         "5" -> Seq(
-            DataTable.fromCsv("exec5-heap-used", jvmHeapExec5Csv, ",", Seq("t", JvmHeapUsed)),
-            DataTable.fromCsv("exec5-heap-max", jvmHeapMaxExec5Csv, ",", Seq("t", JvmHeapMax)),
-            DataTable.fromCsv("exec5-heap-usage", jvmHeapUsageExec5Csv, ",", Seq("t", JvmHeapUsage)),
-            DataTable.fromCsv("exec5-non-heap", jvmNonHeapExec5Csv, ",", Seq("t", JvmNonHeapUsed)),
-            DataTable.fromCsv("exec5-cpu-time", cpuTime5Csv, ",", Seq("t", CpuTime))
+            DataTable.fromCsv("exec5-heap-used", jvmHeapExec5Csv, ",", Seq("t", JvmHeapUsed.name)),
+            DataTable.fromCsv("exec5-heap-max", jvmHeapMaxExec5Csv, ",", Seq("t", JvmHeapMax.name)),
+            DataTable.fromCsv("exec5-heap-usage", jvmHeapUsageExec5Csv, ",", Seq("t", JvmHeapUsage.name)),
+            DataTable.fromCsv("exec5-non-heap", jvmNonHeapExec5Csv, ",", Seq("t", JvmNonHeapUsed.name)),
+            DataTable.fromCsv("exec5-cpu-time", cpuTime5Csv, ",", Seq("t", CpuTime.name))
         )
     )
 
@@ -488,80 +489,79 @@ object TestHelpers extends FunSuite with MockFactory {
         )
     }
 
-    def mockcorrectMetrics(csvReaderMock: HadoopFileReader, appId: String): HadoopFileReader = {
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(jvmNonHeapDriverCsv)
+    def mockcorrectMetrics(csvReaderMock: HadoopMetricReader, appId: String): HadoopMetricReader = {
+        (csvReaderMock.readDriver _).when(JvmHeapUsed).returns(DataTable.fromCsv("", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readDriver _).when(JvmHeapUsage).returns(DataTable.fromCsv("", jvmHeapUsageDriverCsv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readDriver _).when(JvmHeapMax).returns(DataTable.fromCsv("", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readDriver _).when(JvmNonHeapUsed).returns(DataTable.fromCsv("", jvmNonHeapDriverCsv, ",", Seq("t", JvmNonHeapUsed.name)))
 
-        // Starting from 1 on purpose
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "1").returns(DataTable.fromCsv("", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "1").returns(DataTable.fromCsv("", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "1").returns(DataTable.fromCsv("", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "1").returns(DataTable.fromCsv("", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(CpuTime, "1").returns(DataTable.fromCsv("", cpuTime1Csv, ",", Seq("t", CpuTime.name)))
 
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.used.csv").returns(jvmHeapExec1Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.usage.csv").returns(jvmHeapUsageExec1Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.max.csv").returns(jvmHeapMaxExec1Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.non-heap.used.csv").returns(jvmNonHeapExec1Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.executor.cpuTime.csv").returns(cpuTime1Csv)
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "2").returns(DataTable.fromCsv("", jvmHeapExec2Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "2").returns(DataTable.fromCsv("", jvmHeapUsageExec2Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "2").returns(DataTable.fromCsv("", jvmHeapMaxExec2Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "2").returns(DataTable.fromCsv("", jvmNonHeapExec2Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(CpuTime, "2").returns(DataTable.fromCsv("", cpuTime2Csv, ",", Seq("t", CpuTime.name)))
 
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.heap.used.csv").returns(jvmHeapExec2Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.heap.usage.csv").returns(jvmHeapUsageExec2Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.heap.max.csv").returns(jvmHeapMaxExec2Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.jvm.non-heap.used.csv").returns(jvmNonHeapExec2Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.2.executor.cpuTime.csv").returns(cpuTime2Csv)
-
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.heap.used.csv").returns(jvmHeapExec3Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.heap.usage.csv").returns(jvmHeapUsageExec3Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.heap.max.csv").returns(jvmHeapMaxExec3Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.jvm.non-heap.used.csv").returns(jvmNonHeapExec3Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.3.executor.cpuTime.csv").returns(cpuTime3Csv)
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "3").returns(DataTable.fromCsv("", jvmHeapExec3Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "3").returns(DataTable.fromCsv("", jvmHeapUsageExec3Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "3").returns(DataTable.fromCsv("", jvmHeapMaxExec3Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "3").returns(DataTable.fromCsv("", jvmNonHeapExec3Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(CpuTime, "3").returns(DataTable.fromCsv("", cpuTime3Csv, ",", Seq("t", CpuTime.name)))
 
         // Missing one ide on purpose so that order of executor ids is not assumed
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.jvm.heap.used.csv").returns(jvmHeapExec5Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.jvm.heap.usage.csv").returns(jvmHeapUsageExec5Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.jvm.heap.max.csv").returns(jvmHeapMaxExec5Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.jvm.non-heap.used.csv").returns(jvmNonHeapExec5Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.5.executor.cpuTime.csv").returns(cpuTime5Csv)
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "5").returns(DataTable.fromCsv("", jvmHeapExec5Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "5").returns(DataTable.fromCsv("", jvmHeapUsageExec5Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "5").returns(DataTable.fromCsv("", jvmHeapMaxExec5Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "5").returns(DataTable.fromCsv("", jvmNonHeapExec5Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(CpuTime, "5").returns(DataTable.fromCsv("", cpuTime5Csv, ",", Seq("t", CpuTime.name)))
 
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.jvm.heap.used.csv").throws(new FileNotFoundException)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.jvm.heap.usage.csv").throws(new FileNotFoundException)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.jvm.heap.max.csv").throws(new FileNotFoundException)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.jvm.non-heap.used.csv").throws(new FileNotFoundException)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.6.executor.cpuTime.csv").throws(new FileNotFoundException)
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "6").throws(new FileNotFoundException)
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "6").throws(new FileNotFoundException)
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "6").throws(new FileNotFoundException)
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "6").throws(new FileNotFoundException)
+        (csvReaderMock.readExecutor _).when(CpuTime, "6").throws(new FileNotFoundException)
 
         csvReaderMock
     }
 
-    def mockMetricsWithDownscaling(csvReaderMock: HadoopFileReader, appId: String): HadoopFileReader = {
+    def mockMetricsWithDownscaling(csvReaderMock: HadoopMetricReader, appId: String): HadoopMetricReader = {
         mockcorrectMetrics(csvReaderMock, appId)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.heap.used.csv").returns(jvmHeapExec7Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.heap.usage.csv").returns(jvmHeapUsageExec7Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.heap.max.csv").returns(jvmHeapMaxExec7Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.jvm.non-heap.used.csv").returns(jvmNonHeapExec7Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.7.executor.cpuTime.csv").returns(cpuTime7Csv)
+
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "7").returns(DataTable.fromCsv("", jvmHeapExec7Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "7").returns(DataTable.fromCsv("", jvmHeapUsageExec7Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "7").returns(DataTable.fromCsv("", jvmHeapMaxExec7Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "7").returns(DataTable.fromCsv("", jvmNonHeapExec7Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(CpuTime, "7").returns(DataTable.fromCsv("", cpuTime7Csv, ",", Seq("t", CpuTime.name)))
 
         csvReaderMock
     }
 
-    def mockIncorrectDriverMetrics(csvReader: HadoopFileReader, appId: String): HadoopFileReader = {
+    def mockIncorrectDriverMetrics(csvReader: HadoopMetricReader, appId: String): HadoopMetricReader = {
 
         val driverNonHeapRows = jvmNonHeapDriverCsv.split("\n").toSeq
         val jvmNonHeapRowsWithoutLast = driverNonHeapRows.filterNot(_ == driverNonHeapRows.last).mkString("\n")
-        (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
-        (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
-        (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
-        (csvReader.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(jvmNonHeapRowsWithoutLast)
+        (csvReader.readDriver _).when(JvmHeapUsed).returns(DataTable.fromCsv("", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReader.readDriver _).when(JvmHeapUsage).returns(DataTable.fromCsv("", jvmHeapUsageDriverCsv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReader.readDriver _).when(JvmHeapMax).returns(DataTable.fromCsv("", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReader.readDriver _).when(JvmNonHeapUsed).returns(DataTable.fromCsv("", jvmNonHeapRowsWithoutLast, ",", Seq("t", JvmNonHeapUsed.name)))
 
         val executorCpuRows = cpuTime1Csv.split("\n").toSeq
         val executorCpuRowsWithoutLast = executorCpuRows.filterNot(_ == executorCpuRows.last).mkString("\n")
-        (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.used.csv").returns(jvmHeapExec1Csv)
-        (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.usage.csv").returns(jvmHeapUsageExec1Csv)
-        (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.max.csv").returns(jvmHeapMaxExec1Csv)
-        (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.non-heap.used.csv").returns(jvmNonHeapExec1Csv)
-        (csvReader.read _).when(s"${csvMetricsPath}/${appId}.1.executor.cpuTime.csv").returns(executorCpuRowsWithoutLast)
+        (csvReader.readExecutor _).when(JvmHeapUsed, "1").returns(DataTable.fromCsv("", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReader.readExecutor _).when(JvmHeapUsage, "1").returns(DataTable.fromCsv("", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReader.readExecutor _).when(JvmHeapMax, "1").returns(DataTable.fromCsv("", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReader.readExecutor _).when(JvmNonHeapUsed, "1").returns(DataTable.fromCsv("", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReader.readExecutor _).when(CpuTime, "1").returns(DataTable.fromCsv("", executorCpuRowsWithoutLast, ",", Seq("t", CpuTime.name)))
 
         csvReader
     }
 
-    def mockMetricsEventLog(csvReaderMock: HadoopFileReader, appId: String): HadoopFileReader = {
+    def mockMetricsEventLog(csvReaderMock: HadoopMetricReader, appId: String): HadoopMetricReader = {
         val jvmHeapDriverCsv: String =
             """t,value
               |1698236101,136879104
@@ -582,10 +582,10 @@ object TestHelpers extends FunSuite with MockFactory {
               |1698236101,89620432
               |1698236104,93666616""".stripMargin
 
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.usage.csv").returns(jvmHeapUsageDriverCsv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.heap.max.csv").returns(jvmHeapMaxDriverCsv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.driver.jvm.non-heap.used.csv").returns(jvmNonHeapDriverCsv)
+        (csvReaderMock.readDriver _).when(JvmHeapUsed).returns(DataTable.fromCsv("", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readDriver _).when(JvmHeapUsage).returns(DataTable.fromCsv("", jvmHeapUsageDriverCsv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readDriver _).when(JvmHeapMax).returns(DataTable.fromCsv("", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readDriver _).when(JvmNonHeapUsed).returns(DataTable.fromCsv("", jvmNonHeapDriverCsv, ",", Seq("t", JvmNonHeapUsed.name)))
 
         val jvmHeapExec0Csv: String =
             """t,value
@@ -637,17 +637,18 @@ object TestHelpers extends FunSuite with MockFactory {
               |1698236103,4206969830
               |1698236104,5259304929""".stripMargin
 
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.used.csv").returns(jvmHeapExec0Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.usage.csv").returns(jvmHeapUsageExec0Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.heap.max.csv").returns(jvmHeapMaxExec0Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.jvm.non-heap.used.csv").returns(jvmNonHeapExec0Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.0.executor.cpuTime.csv").returns(jvmCpuTimeExec0Csv)
 
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.used.csv").returns(jvmHeapExec1Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.usage.csv").returns(jvmHeapUsageExec1Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.heap.max.csv").returns(jvmHeapMaxExec1Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.jvm.non-heap.used.csv").returns(jvmNonHeapExec1Csv)
-        (csvReaderMock.read _).when(s"${csvMetricsPath}/${appId}.1.executor.cpuTime.csv").returns(jvmCpuTimeExec1Csv)
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "0").returns(DataTable.fromCsv("", jvmHeapExec0Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "0").returns(DataTable.fromCsv("", jvmHeapUsageExec0Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "0").returns(DataTable.fromCsv("", jvmHeapMaxExec0Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "0").returns(DataTable.fromCsv("", jvmNonHeapExec0Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(CpuTime, "0").returns(DataTable.fromCsv("", jvmCpuTimeExec0Csv, ",", Seq("t", CpuTime.name)))
+
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "1").returns(DataTable.fromCsv("", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "1").returns(DataTable.fromCsv("", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "1").returns(DataTable.fromCsv("", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "1").returns(DataTable.fromCsv("", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(CpuTime, "1").returns(DataTable.fromCsv("", jvmCpuTimeExec1Csv, ",", Seq("t", CpuTime.name)))
 
         csvReaderMock
     }
@@ -664,9 +665,9 @@ object TestHelpers extends FunSuite with MockFactory {
         propertiesLoaderFactoryMock
     }
 
-    def getFileReaderFactoryMock(reader: FileReader): FileReaderFactory = {
-        val fileReaderFactoryMock = stub[FileReaderFactory]
-        (fileReaderFactoryMock.getFileReader _).when(*).returns(reader)
+    def getFileReaderFactoryMock(reader: MetricReader): MetricReaderFactory = {
+        val fileReaderFactoryMock = stub[MetricReaderFactory]
+        (fileReaderFactoryMock.getMetricReader _).when(*, *).returns(reader)
         fileReaderFactoryMock
     }
 

@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.io.property
 
 import java.util.Properties
 
