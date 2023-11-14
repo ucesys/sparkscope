@@ -88,21 +88,23 @@ object S3MetricReader {
         val driverS3Location = S3Location(sparkScopeConf.driverMetricsDir)
         val executorS3Location = S3Location(sparkScopeConf.executorMetricsDir)
 
+        val inProgressPath = s".tmp/${appContext.appId}/IN_PROGRESS"
+        try {
+            logger.info(s"Deleting ${inProgressPath} file")
+            s3.deleteObject(driverS3Location.bucketName, s"${driverS3Location.path}/${inProgressPath}")
+
+            if (driverS3Location.getUrl != executorS3Location.getUrl) {
+                logger.info(s"Deleting ${inProgressPath} file")
+                s3.deleteObject(executorS3Location.bucketName, s"${executorS3Location.path}/${inProgressPath}")
+            }
+        } catch {
+            case ex: AmazonServiceException => logger.error(s"Error while deleting ${inProgressPath}", ex)
+        }
+
         if (!s3.doesBucketExistV2(driverS3Location.bucketName)) {
             throw new IllegalArgumentException(s"bucket for driver metrics does not exist: ${driverS3Location.bucketName}")
         } else if (!s3.doesBucketExistV2(executorS3Location.bucketName)) {
             throw new IllegalArgumentException(s"bucket for driver metrics does not exist: ${executorS3Location.bucketName}")
-        }
-
-        try {
-            val finishedPath = s".tmp/${appContext.appId}/FINISHED"
-            s3.putObject(driverS3Location.bucketName, s"${driverS3Location.path}/${finishedPath}", "")
-
-            if (driverS3Location.getUrl != executorS3Location.getUrl) {
-                s3.putObject(driverS3Location.bucketName, s"${driverS3Location.path}/${finishedPath}", "")
-            }
-        } catch {
-            case ex: AmazonServiceException  =>  logger.error(s"Error while creating FINISHED file", ex)
         }
 
         new S3MetricReader(

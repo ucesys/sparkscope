@@ -23,9 +23,11 @@ import com.amazonaws.services.s3.AmazonS3;
  */
 public class S3CsvReporter extends AbstractCsvReporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(S3CsvReporter.class);
-    AmazonS3 s3;
-    String bucketName;
-    String metricsDir;
+    final AmazonS3 s3;
+    final String bucketName;
+    final String metricsDir;
+    boolean isInit = false;
+
     public S3CsvReporter(String directory,
                          Optional<String> region,
                          MetricRegistry registry,
@@ -68,9 +70,23 @@ public class S3CsvReporter extends AbstractCsvReporter {
             metricsName + "." + timestamp + ".csv"
         ).toString();
 
+        String inProgressPath = Paths.get(
+            metricsDir,
+            ".tmp",
+            appId,
+            "IN_PROGRESS"
+        ).toString();
+
+        if(!this.isInit) {
+            if (!s3.doesObjectExist(bucketName, inProgressPath)) {
+                s3.putObject(bucketName, inProgressPath, "");
+            }
+            this.isInit = true;
+        }
+
         String row = String.format(locale, String.format(locale, "%d" + separator + "%s%n", timestamp, line), values);
-        String finishedPath = Paths.get(metricsDir,".tmp", appId, "FINISHED").toString();
-        if(!s3.doesObjectExist(bucketName, finishedPath)) {
+
+        if(s3.doesObjectExist(bucketName, inProgressPath)) {
             s3.putObject(bucketName, rawPath, row);
         }
     }
