@@ -29,10 +29,9 @@ import java.util.concurrent.TimeUnit;
 
 class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
 
-    def mockS3CsvReporter(directory: String, appName: String, region: String): S3CsvReporter = {
+    def mockS3CsvReporter(directory: String, region: String): S3CsvReporter = {
         new S3CsvReporter(
             directory,
-            Optional.ofNullable(appName),
             Optional.ofNullable(region),
             new MetricRegistry,
             null,
@@ -49,91 +48,73 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
     test("bucket, metricsDir, appName extraction") {
         Given("s3 bucket url")
         val s3BucketUrl = "s3://my-bucket/metrics-dir"
-        And("app name")
-        val appName = "myApp"
         And("region")
         val region = "us-east1"
 
         When("calling S3CsvReporter constructor")
-        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, appName, region)
+        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
         assert(s3CsvReporter.bucketName.equals("my-bucket"))
         assert(s3CsvReporter.metricsDir.equals("metrics-dir"))
-        assert(s3CsvReporter.appName.equals("myApp"))
-        assert(s3CsvReporter.appDir.equals("metrics-dir/myApp"))
         assert(s3CsvReporter.s3 != null)
     }
 
     test("appName empty") {
         Given("s3 bucket url")
         val s3BucketUrl = "s3:///my-bucket/metrics-dir/"
-        And("app empty name")
-        val appName: String = null
         And("region")
         val region = "us-east1"
 
         When("calling S3CsvReporter constructor")
-        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, appName, region)
+        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
         assert(s3CsvReporter.bucketName.equals("my-bucket"))
         assert(s3CsvReporter.metricsDir.equals("metrics-dir"))
-        assert(s3CsvReporter.appName.equals(""))
-        assert(s3CsvReporter.appDir.equals("metrics-dir"))
         assert(s3CsvReporter.s3 != null)
     }
 
     test("nested metricsDir") {
         Given("s3 bucket url")
         val s3BucketUrl = "s3:///my-bucket/nested-path/to/metrics-dir"
-        And("app name")
-        val appName = "myApp"
         And("region")
         val region = "us-east1"
 
         When("calling S3CsvReporter constructor")
-        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, appName, region)
+        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
         assert(s3CsvReporter.bucketName.equals("my-bucket"))
         assert(s3CsvReporter.metricsDir.equals("nested-path/to/metrics-dir"))
-        assert(s3CsvReporter.appName.equals("myApp"))
-        assert(s3CsvReporter.appDir.equals("nested-path/to/metrics-dir/myApp"))
         assert(s3CsvReporter.s3 != null)
     }
 
     test("nested metricsDir, triple slash in s3:///") {
         Given("s3 bucket url")
         val s3BucketUrl = "s3:///my-bucket/nested-path/to/metrics-dir"
-        And("app name")
-        val appName = "myApp"
         And("region")
         val region = "us-east1"
 
         When("calling S3CsvReporter constructor")
-        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, appName, region)
+        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
         assert(s3CsvReporter.bucketName.equals("my-bucket"))
         assert(s3CsvReporter.metricsDir.equals("nested-path/to/metrics-dir"))
-        assert(s3CsvReporter.appName.equals("myApp"))
-        assert(s3CsvReporter.appDir.equals("nested-path/to/metrics-dir/myApp"))
         assert(s3CsvReporter.s3 != null)
     }
 
     test("region unset") {
         Given("s3 bucket url")
         val s3BucketUrl = "s3:///my-bucket/nested-path/to/metrics-dir"
-        And("app name")
-        val appName = "myApp"
         And("region")
         val region = "us-east1"
 
         When("calling S3CsvReporter constructor")
         Then("IllegalArgumentException should be thrown")
         assertThrows[IllegalArgumentException] {
-            val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, appName, null)
+            val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, null)
         }
     }
 }

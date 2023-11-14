@@ -667,6 +667,7 @@ object TestHelpers extends FunSuite with MockFactory {
 
     def getFileReaderFactoryMock(reader: MetricReader): MetricReaderFactory = {
         val fileReaderFactoryMock = stub[MetricReaderFactory]
+        implicit val logger: SparkScopeLogger = mock[SparkScopeLogger]
         (fileReaderFactoryMock.getMetricReader _).when(*, *).returns(reader)
         fileReaderFactoryMock
     }

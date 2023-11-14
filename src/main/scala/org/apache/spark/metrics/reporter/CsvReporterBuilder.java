@@ -160,7 +160,7 @@ public class CsvReporterBuilder {
      * @param directory the directory in which the {@code .csv} files will be created
      * @return a {@link CsvReporterBuilder}
      */
-    public AbstractCsvReporter build(String directory, Optional<String> appName, Optional<String> s3Region) throws IOException {
+    public AbstractCsvReporter build(String directory, Optional<String> s3Region) throws IOException {
         if (directory.startsWith("maprfs:/") || directory.startsWith("hdfs:/")) {
             return new HadoopCsvReporter(
                     directory,
@@ -177,7 +177,6 @@ public class CsvReporterBuilder {
         } else if (directory.startsWith("s3:/")) {
             return new S3CsvReporter(
                     directory,
-                    appName,
                     s3Region,
                     registry,
                     locale,

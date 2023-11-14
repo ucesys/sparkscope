@@ -55,10 +55,16 @@ class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
             throw new IllegalArgumentException("Unable to extract driver & executor csv metrics directories from SparkConf")
         }
 
+
+        val appName: Option[String] = sparkConf
+          .getOption(SparkScopePropertyAppName)
+          .orElse(sparkConf.getOption("spark.app.name"))
+
         SparkScopeConf(
             driverMetricsDir = driverMetricsDir.get,
             executorMetricsDir = executorMetricsDir.get,
             htmlReportPath = sparkConf.get(SparkScopePropertyHtmlPath, "/tmp/"),
+            appName = appName,
             sparkConf = sparkConf
         )
     }
@@ -68,13 +74,19 @@ object SparkScopeConfLoader {
     val MetricsPropDriverDir = "driver.sink.csv.directory"
     val MetricsPropExecutorDir = "executor.sink.csv.directory"
     val MetricsPropAllDir = "*.sink.csv.directory"
+    val MetricsPropS3Region = "*.sink.csv.region"
 
+    // Properties used by sinks and sparkscope
     val SparkPropertyMetricsConf = "spark.metrics.conf"
     val SparkPropertyMetricsConfDriverDir = s"${SparkPropertyMetricsConf}.${MetricsPropDriverDir}"
     val SparkPropertyMetricsConfExecutorDir = s"${SparkPropertyMetricsConf}.${MetricsPropExecutorDir}"
     val SparkPropertyMetricsConfAllDir = s"${SparkPropertyMetricsConf}.${MetricsPropAllDir}"
+    val SparkPropertyMetricsConfS3Region = s"${SparkPropertyMetricsConf}.${MetricsPropS3Region}"
 
+    // Properties used by sparkscope
     val SparkScopePropertyExecutorMetricsDir = "spark.sparkscope.metrics.dir.executor"
     val SparkScopePropertyDriverMetricsDir = "spark.sparkscope.metrics.dir.driver"
     val SparkScopePropertyHtmlPath = "spark.sparkscope.html.path"
+    val SparkScopePropertyAppName = "spark.sparkscope.app.name"
+
 }

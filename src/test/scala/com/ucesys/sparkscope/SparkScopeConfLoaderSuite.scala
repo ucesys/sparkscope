@@ -40,6 +40,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         And("with spark.metrics.conf.driver.sink.csv.director set")
         And("with spark.metrics.conf.executor.sink.csv.director set")
         And("with spark.metrics.conf set")
+        And("with spark.sparkscope.appName set")
         val sparkConfWithMetrics = new SparkConf()
           .set(SparkScopePropertyDriverMetricsDir, "/sparkscope/path/to/driver/metrics")
           .set(SparkScopePropertyExecutorMetricsDir, "/sparkscope/path/to/executor/metrics")
@@ -47,6 +48,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
           .set("spark.metrics.conf.*.sink.csv.directory", "/spark/metric/path/to/all/metrics")
           .set("spark.metrics.conf.driver.sink.csv.directory ", "/spark/metrics/path/to/driver/metrics")
           .set("spark.metrics.conf.executor.sink.csv.directory ", "/spark/metrics/path/to/executor/metrics")
+          .set("spark.sparkscope.app.name", "my-sample-app")
 
         val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
@@ -62,6 +64,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("metrics properties should not be loaded")
         (propertiesLoaderFactoryMock.getPropertiesLoader _).expects(*).never
+
+        And("SparkScopeConf.appName should be parsed from spark.sparkscope.appName")
+        assert(sparkScopeConf.appName.get == "my-sample-app")
     }
 
     test("extracting driver & executor metrics path from spark.metrics.conf.[driver|executor]") {
@@ -69,6 +74,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         And("with spark.metrics.conf.driver.sink.csv.director set")
         And("with spark.metrics.conf.executor.sink.csv.director set")
         And("with spark.metrics.conf set")
+        And("with spark.app.name set")
         And("without spark.sparkscope.metrics.dir.driver set")
         And("without spark.sparkscope.metrics.dir.executor set")
         And("without spark.metrics.conf.*.sink.csv.director set")
@@ -76,6 +82,8 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
           .set("spark.metrics.conf", MetricsPropertiesPath)
           .set("spark.metrics.conf.driver.sink.csv.directory", "/spark/metrics/path/to/driver/metrics")
           .set("spark.metrics.conf.executor.sink.csv.directory", "/spark/metrics/path/to/executor/metrics")
+          .set("spark.app.name", "my-sample-app")
+
 
         val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
@@ -91,6 +99,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("metrics properties should not be loaded")
         (propertiesLoaderFactoryMock.getPropertiesLoader _).expects(*).never
+
+        And("SparkScopeConf.appName should be parsed")
+        assert(sparkScopeConf.appName.get == "my-sample-app")
     }
 
     test("extracting driver & executor metrics path from spark.metrics.conf.*") {
@@ -119,6 +130,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("metrics properties should not be loaded")
         (propertiesLoaderFactoryMock.getPropertiesLoader _).expects(*).never
+
+        And("SparkScopeConf.appName should be empty")
+        assert(sparkScopeConf.appName.isEmpty)
     }
 
     test("extracting driver & executor metrics path from metrics.properties file") {
@@ -141,6 +155,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("SparkScopeConf.executorMetricsDir should be extracted from metrics.properties file")
         assert(sparkScopeConf.executorMetricsDir == "/tmp/csv-metrics")
+
+        And("SparkScopeConf.appName should be empty")
+        assert(sparkScopeConf.appName.isEmpty)
     }
 
     test("error extracting driver & executor metrics path, metrics.properties unset") {
@@ -260,6 +277,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("metrics properties should not be loaded")
         (propertiesLoaderFactoryMock.getPropertiesLoader _).expects(*).never
+
+        And("SparkScopeConf.appName should be empty")
+        assert(sparkScopeConf.appName.isEmpty)
     }
 
     test("extracting executor from spark.sparkscope, driver from spark.metrics.conf.driver") {
@@ -289,6 +309,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("metrics properties should not be loaded")
         (propertiesLoaderFactoryMock.getPropertiesLoader _).expects(*).never
+
+        And("SparkScopeConf.appName should be empty")
+        assert(sparkScopeConf.appName.isEmpty)
     }
 
     test("extracting driver from spark.metrics.conf.driver, executor from metrics.properties file") {
@@ -311,6 +334,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         Then("SparkScopeConf.executorMetricsDir should be extracted from metrics.properties file")
         assert(sparkScopeConf.executorMetricsDir == "/tmp/csv-metrics")
+
+        And("SparkScopeConf.appName should be empty")
+        assert(sparkScopeConf.appName.isEmpty)
     }
 
     test("extracting executor from spark.metrics.conf.executor, driver from metrics.properties file") {
@@ -333,6 +359,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("SparkScopeConf.executorMetricsDir should be extracted from spark.metrics.conf.executor.sink.csv.directory")
         assert(sparkScopeConf.executorMetricsDir == "/spark/metrics/path/to/executor/metrics")
+
+        And("SparkScopeConf.appName should be empty")
+        assert(sparkScopeConf.appName.isEmpty)
     }
 
     test("extract load html dir from SparkConf") {
@@ -343,5 +372,8 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         Then("SparkScopeConf should contain executorMetricsDir")
         assert(sparkScopeConf.htmlReportPath == "/path/to/html/report")
+
+        And("SparkScopeConf.appName should be empty")
+        assert(sparkScopeConf.appName.isEmpty)
     }
 }

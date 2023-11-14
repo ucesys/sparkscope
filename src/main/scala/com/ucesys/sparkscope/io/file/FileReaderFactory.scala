@@ -1,7 +1,5 @@
 package com.ucesys.sparkscope.io.file
 
-import com.ucesys.sparkscope.common.SparkScopeConf
-
 class FileReaderFactory {
     val HadoopFSPrefixes = Seq("maprfs:/", "hdfs:/", "file:/")
 
