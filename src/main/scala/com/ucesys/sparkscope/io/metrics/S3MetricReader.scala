@@ -94,6 +94,17 @@ object S3MetricReader {
             throw new IllegalArgumentException(s"bucket for driver metrics does not exist: ${executorS3Location.bucketName}")
         }
 
+        try {
+            val finishedPath = s".tmp/${appContext.appId}/FINISHED"
+            s3.putObject(driverS3Location.bucketName, s"${driverS3Location.path}/${finishedPath}", "")
+
+            if (driverS3Location.getUrl != executorS3Location.getUrl) {
+                s3.putObject(driverS3Location.bucketName, s"${driverS3Location.path}/${finishedPath}", "")
+            }
+        } catch {
+            case ex: AmazonServiceException  =>  logger.error(s"Error while creating FINISHED file", ex)
+        }
+
         new S3MetricReader(
             sparkScopeConf,
             appContext,

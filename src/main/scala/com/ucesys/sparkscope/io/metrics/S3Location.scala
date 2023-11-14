@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope.io.metrics
 
 case class S3Location(bucketName: String, path: String) {
-    override def toString(): String = s"s3://${bucketName}/${path}"
+    def getUrl: String = s"s3://${bucketName}/${path}"
 }
 
 object S3Location {

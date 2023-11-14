@@ -69,6 +69,9 @@ public class S3CsvReporter extends AbstractCsvReporter {
         ).toString();
 
         String row = String.format(locale, String.format(locale, "%d" + separator + "%s%n", timestamp, line), values);
-        s3.putObject(bucketName, rawPath, row);
+        String finishedPath = Paths.get(metricsDir,".tmp", appId, "FINISHED").toString();
+        if(!s3.doesObjectExist(bucketName, finishedPath)) {
+            s3.putObject(bucketName, rawPath, row);
+        }
     }
 }

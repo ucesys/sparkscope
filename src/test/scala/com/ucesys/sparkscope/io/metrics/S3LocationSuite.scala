@@ -106,7 +106,7 @@ class S3LocationSuite extends FunSuite with MockFactory with GivenWhenThen {
         val s3Location = S3Location("my-bucket", "my-directory")
 
         When("calling S3Location.toString")
-        val s3Url = s3Location.toString()
+        val s3Url = s3Location.getUrl
 
         Then("correct s3 url should be returned")
         assert(s3Url == "s3://my-bucket/my-directory")
@@ -117,7 +117,7 @@ class S3LocationSuite extends FunSuite with MockFactory with GivenWhenThen {
         val s3Location = S3Location("my-bucket", "path/to/nested/directory/")
 
         When("calling S3Location.toString")
-        val s3Url = s3Location.toString()
+        val s3Url = s3Location.getUrl
 
         Then("correct s3 url should be returned")
         assert(s3Url == "s3://my-bucket/path/to/nested/directory/")
