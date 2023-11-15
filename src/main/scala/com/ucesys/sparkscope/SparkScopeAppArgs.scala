@@ -22,13 +22,15 @@ import java.lang.System.exit
 case class SparkScopeArgs(eventLog: String,
                           driverMetrics: Option[String],
                           executorMetrics: Option[String] = None,
-                          htmlPath: Option[String] = None)
+                          htmlPath: Option[String] = None,
+                          region: Option[String] = None)
 
 object SparkScopeArgs {
     val OptionEventLog = "--event-log"
     val OptionDriverMetrics = "--driver-metrics"
     val OptionExecutorMetrics = "--executor-metrics"
     val OptionHtmlPath = "--html-path"
+    val OptionRegion = "--region"
     def Usage: String =
         s"""
           |Usage:
@@ -36,6 +38,7 @@ object SparkScopeArgs {
           |--driver-metrics   Path to directory with driver metrics
           |--executor-metrics Path to directory with executor metrics
           |--html-path        Path to directory where html report will be stored
+          |--region           required if reading eventLog from s3
           |""".stripMargin
 
 
@@ -45,6 +48,7 @@ object SparkScopeArgs {
             case Array (OptionDriverMetrics, driverMetrics) => (OptionDriverMetrics, driverMetrics)
             case Array (OptionExecutorMetrics, executorMetrics) => (OptionExecutorMetrics, executorMetrics)
             case Array (OptionHtmlPath, htmlPath) => (OptionHtmlPath, htmlPath)
+            case Array (OptionRegion, region) => (OptionRegion, region)
         }.toMap
 
         if (args.contains("--help") || args.contains("-h")) {
@@ -59,7 +63,8 @@ object SparkScopeArgs {
             eventLog=argsMap(OptionEventLog),
             driverMetrics=argsMap.get(OptionDriverMetrics),
             executorMetrics=argsMap.get(OptionExecutorMetrics),
-            htmlPath=argsMap.get(OptionHtmlPath)
+            htmlPath=argsMap.get(OptionHtmlPath),
+            region=argsMap.get(OptionRegion)
         )
     }
 }

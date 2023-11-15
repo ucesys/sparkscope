@@ -62,7 +62,7 @@ spark-submit \
 /tmp/jars/spark-examples_2.10-1.1.1.jar 1000
 ```
 
-csv metrics driver & executors custom sink  
+local metrics(--jars and --files)
 *custom metrics sink/source need to be passed via --files and executor.extraclasspath, --jars is not enough
 ```bash
 spark-submit \
@@ -81,10 +81,10 @@ spark-submit \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.executor.cores=2 \
 --conf spark.executor.memory=1800m \
---conf spark.executor.instances=2 \
+--conf spark.executor.instances=1 \
 --conf spark.cores.max=4 \
 --class org.apache.spark.examples.SparkPi \
-/tmp/jars/spark-examples_2.10-1.1.1.jar 500
+/tmp/jars/spark-examples_2.10-1.1.1.jar 1000
 ```
 csv hdfs metrics executors(--files only)
 ```bash
@@ -132,10 +132,10 @@ spark-submit \
 --conf spark.executor.instances=2 \
 --conf spark.cores.max=4 \
 --class org.apache.spark.examples.SparkPi \
-/tmp/jars/spark-examples_2.10-1.1.1.jar 500
+/tmp/jars/spark-examples_2.10-1.1.1.jar 1000
 ```
 
-s3 metrics eventlog s3
+s3 metrics & eventlog s3
 ```bash
 spark-submit \
 --master spark://spark-master:7077 \
@@ -150,15 +150,14 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=s3://ucesys-sparkscope-metrics/metrics/ \
 --conf spark.metrics.conf.*.sink.csv.region=us-east-1 \
---conf spark.sparkscope.app.name=SparkPI \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
---conf spark.executor.cores=1 \
---conf spark.executor.memory=1000m \
---conf spark.executor.instances=2 \
+--conf spark.executor.cores=2 \
+--conf spark.executor.memory=1800m \
+--conf spark.executor.instances=1 \
 --conf spark.cores.max=4 \
 --class org.apache.spark.examples.SparkPi \
-/tmp/jars/spark-examples_2.10-1.1.1.jar 500
+/tmp/jars/spark-examples_2.10-1.1.1.jar 1000
 ```
 ### Running SparkScope as standalone app
 ```agsl
