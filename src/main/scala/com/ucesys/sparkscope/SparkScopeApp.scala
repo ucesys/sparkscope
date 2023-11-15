@@ -37,7 +37,7 @@ object SparkScopeApp {
             sparkScopeConfLoader = new SparkScopeConfLoader,
             fileReaderFactory = new FileReaderFactory(parsedArgs.region),
             propertiesLoaderFactory = new PropertiesLoaderFactory,
-            metricsLoaderFactory = new MetricsLoaderFactory,
+            metricsLoaderFactory = new MetricsLoaderFactory(new MetricReaderFactory(offline = true)),
             reportGeneratorFactory = new ReportGeneratorFactory,
         )
     }

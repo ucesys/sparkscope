@@ -2,8 +2,8 @@ package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 
-class MetricsLoaderFactory(implicit logger: SparkScopeLogger) {
+class MetricsLoaderFactory(metricReaderFactory: MetricReaderFactory)(implicit logger: SparkScopeLogger) {
     def get(sparkScopeConf: SparkScopeConf, appContext: SparkScopeContext): MetricsLoader = {
-        new CsvMetricsLoader((new MetricReaderFactory).getMetricReader(sparkScopeConf, appContext))
+        new CsvMetricsLoader(metricReaderFactory.getMetricReader(sparkScopeConf, appContext))
     }
 }
