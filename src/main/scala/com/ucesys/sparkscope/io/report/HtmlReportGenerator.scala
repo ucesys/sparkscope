@@ -3,6 +3,7 @@ package com.ucesys.sparkscope.io.report
 import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
+import com.ucesys.sparkscope.io.file.TextFileWriter
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 
 import java.io.{FileWriter, InputStream}
@@ -11,7 +12,7 @@ import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
 
-class HtmlReportGenerator(sparkScopeConf: SparkScopeConf)
+class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWriter)
                          (implicit logger: SparkScopeLogger) extends ReportGenerator {
     override def generate(result: SparkScopeResult, sparklensResults: Seq[String]): Unit = {
         val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
@@ -45,9 +46,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf)
         val renderedStats = renderStats(renderedCharts, result)
 
         val outputPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appContext.appId}.html")
-        val fileWriter = new FileWriter(outputPath.toString)
-        fileWriter.write(renderedStats)
-        fileWriter.close()
+        fileWriter.write(outputPath.toString, renderedStats)
         logger.info(s"Wrote HTML report file to ${outputPath}")
     }
 

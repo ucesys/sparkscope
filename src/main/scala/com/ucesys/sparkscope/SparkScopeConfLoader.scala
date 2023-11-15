@@ -65,6 +65,7 @@ class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
             executorMetricsDir = executorMetricsDir.get,
             htmlReportPath = sparkConf.get(SparkScopePropertyHtmlPath, "/tmp/"),
             appName = appName,
+            region = sparkConf.getOption(SparkPropertyMetricsConfS3Region),
             sparkConf = sparkConf
         )
     }

@@ -159,6 +159,32 @@ spark-submit \
 --class org.apache.spark.examples.SparkPi \
 /tmp/jars/spark-examples_2.10-1.1.1.jar 1000
 ```
+
+s3 metrics & eventlog & html report s3
+```bash
+spark-submit \
+--master spark://spark-master:7077 \
+--jars /tmp/jars/sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
+--conf spark.eventLog.enabled=true \
+--conf spark.eventLog.dir=s3a://ucesys-sparkscope-metrics/spark-events \
+--conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink \
+--conf spark.metrics.conf.*.sink.csv.period=5 \
+--conf spark.metrics.conf.*.sink.csv.unit=seconds \
+--conf spark.metrics.conf.*.sink.csv.directory=s3://ucesys-sparkscope-metrics/metrics/ \
+--conf spark.metrics.conf.*.sink.csv.region=us-east-1 \
+--conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.sparkscope.report.html=s3://ucesys-sparkscope-metrics/metrics \
+--conf spark.executor.cores=2 \
+--conf spark.executor.memory=1800m \
+--conf spark.executor.instances=1 \
+--conf spark.cores.max=4 \
+--class org.apache.spark.examples.SparkPi \
+/tmp/jars/spark-examples_2.10-1.1.1.jar 1000
+```
 ### Running SparkScope as standalone app
 ```agsl
 java -cp /tmp/jars/sparkscope-spark3-0.1.1-SNAPSHOT.jar:./jars/* com.ucesys.sparkscope.SparkScopeApp --event-log /tmp/spark-events/app-20231102142859-0005

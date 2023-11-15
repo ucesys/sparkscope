@@ -21,6 +21,7 @@ package com.ucesys.sparkscope.io.report
 import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.io.file.LocalFileWriter
 import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -29,7 +30,7 @@ import java.nio.file.{Files, Paths}
 
 class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndAfterAll {
     override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
-
+    val fileWriter = new LocalFileWriter
     test("SparkScope end2end no warnings") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
@@ -39,7 +40,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
 
-        val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir))
+        val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir), fileWriter=fileWriter)
         htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
 
         assert(Files.exists(Paths.get(TestDir, result.appContext.appId + ".html")))
@@ -54,7 +55,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
-        val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir))
+        val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir), fileWriter=fileWriter)
         htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
 
         assert(Files.exists(Paths.get(TestDir, result.appContext.appId + ".html")))

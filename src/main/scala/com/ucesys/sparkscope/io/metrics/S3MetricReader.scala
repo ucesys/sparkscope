@@ -3,7 +3,6 @@ package com.ucesys.sparkscope.io.metrics
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.s3.model.{DeleteObjectsRequest, S3Object}
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.ucesys.sparkscope.SparkScopeConfLoader.SparkPropertyMetricsConfS3Region
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.MetricType
@@ -79,7 +78,7 @@ class S3MetricReader(sparkScopeConf: SparkScopeConf,
 
 object S3MetricReader {
     def apply(sparkScopeConf: SparkScopeConf, appContext: SparkScopeContext)(implicit logger: SparkScopeLogger) : S3MetricReader = {
-        val region = sparkScopeConf.sparkConf.getOption(SparkPropertyMetricsConfS3Region)
+        val region = sparkScopeConf.region
         val s3: AmazonS3 = AmazonS3ClientBuilder
           .standard
           .withRegion(region.getOrElse(throw new IllegalArgumentException("s3 region is unset!")))

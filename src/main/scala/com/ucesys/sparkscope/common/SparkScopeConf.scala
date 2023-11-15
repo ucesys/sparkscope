@@ -6,4 +6,5 @@ case class SparkScopeConf(driverMetricsDir: String,
                           executorMetricsDir: String,
                           htmlReportPath: String,
                           appName: Option[String],
+                          region: Option[String],
                           sparkConf: SparkConf)

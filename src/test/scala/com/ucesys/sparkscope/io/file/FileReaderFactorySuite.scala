@@ -18,7 +18,7 @@
 
 package com.ucesys.sparkscope.io.file
 
-import com.ucesys.sparkscope.io.metrics.{HadoopMetricReader, LocalMetricReader}
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.MustMatchers.{a, convertToAnyMustWrapper}
 import org.scalatest.{FunSuite, GivenWhenThen}
@@ -26,6 +26,7 @@ import org.scalatest.{FunSuite, GivenWhenThen}
 class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThen {
 
     val fileReaderFactory = new FileReaderFactory
+    implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
     test("maprfs://path") {
         Given("maprfs path")
