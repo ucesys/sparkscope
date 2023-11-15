@@ -23,23 +23,22 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.MustMatchers.{a, convertToAnyMustWrapper}
 import org.scalatest.{FunSuite, GivenWhenThen}
 
-class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThen {
+class FileWriterFactorySuite extends FunSuite with MockFactory with GivenWhenThen {
 
-    val fileReaderFactory = new FileReaderFactory
-    val fileReaderFactoryWithRegion = new FileReaderFactory(Some("us-east-1"))
-
+    val fileWriterFactory = new FileWriterFactory
+    val fileWriterFactoryWithRegion = new FileWriterFactory(Some("us-east-1"))
     implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
     test("maprfs://path") {
         Given("maprfs path")
         val paths = Seq("maprfs:///dir", "maprfs:/path/to/file.ext")
 
-        When("calling FileReaderFactory.getMetricReader")
+        When("calling fileWriterFactory.getMetricReader")
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileReaderFactory.getFileReader(path)
-                fileReader mustBe a[HadoopFileReader]
+                val fileReader = fileWriterFactory.get(path)
+                fileReader mustBe a[HadoopFileWriter]
             }
         }
     }
@@ -48,12 +47,12 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Given("hdfs path")
         val paths = Seq("hdfs:///dir", "hdfs:/path/to/file.ext")
 
-        When("calling FileReaderFactory.getMetricReader")
+        When("calling fileWriterFactory.getMetricReader")
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileReaderFactory.getFileReader(path)
-                fileReader mustBe a[HadoopFileReader]
+                val fileReader = fileWriterFactory.get(path)
+                fileReader mustBe a[HadoopFileWriter]
             }
         }
     }
@@ -62,12 +61,12 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Given("file:// path")
         val paths = Seq("file:///dir", "file:/path/to/file.ext")
 
-        When("calling FileReaderFactory.getMetricReader")
+        When("calling fileWriterFactory.getMetricReader")
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileReaderFactory.getFileReader(path)
-                fileReader mustBe a[HadoopFileReader]
+                val fileReader = fileWriterFactory.get(path)
+                fileReader mustBe a[HadoopFileWriter]
             }
         }
     }
@@ -80,8 +79,8 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileReaderFactoryWithRegion.getFileReader(path)
-                fileReader mustBe a[S3FileReader]
+                val fileReader = fileWriterFactoryWithRegion.get(path)
+                fileReader mustBe a[S3FileWriter]
             }
         }
     }
@@ -94,8 +93,8 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileReaderFactoryWithRegion.getFileReader(path)
-                fileReader mustBe a[S3FileReader]
+                val fileReader = fileWriterFactoryWithRegion.get(path)
+                fileReader mustBe a[S3FileWriter]
             }
         }
     }
@@ -108,8 +107,8 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileReaderFactoryWithRegion.getFileReader(path)
-                fileReader mustBe a[S3FileReader]
+                val fileReader = fileWriterFactoryWithRegion.get(path)
+                fileReader mustBe a[S3FileWriter]
             }
         }
     }
@@ -118,12 +117,12 @@ class FileReaderFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Given("non mapr/hdfs/file path")
         val paths = Seq("/absolute/path", "./relative/path", "/mapr/lookalike", "/hdfs/path", "/file/path")
 
-        When("calling FileReaderFactory.getMetricReader")
+        When("calling fileWriterFactory.getMetricReader")
         Then("LocalFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileReaderFactory.getFileReader(path)
-                fileReader mustBe a[LocalFileReader]
+                val fileReader = fileWriterFactory.get(path)
+                fileReader mustBe a[LocalFileWriter]
             }
         }
     }
