@@ -16,11 +16,11 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % 
 libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "2.6.5" % "provided"
 libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.6" % "provided"
 libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.5.6" % "provided"
+libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.12.582" % "provided"
 
 libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 libraryDependencies += "com.google.guava" % "guava" % "30.0-jre" % Test
-
 
 test in assembly := {}
 
