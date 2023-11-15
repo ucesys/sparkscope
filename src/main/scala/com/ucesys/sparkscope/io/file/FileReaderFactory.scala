@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope.io.file
 
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.io.file.FileSystem.{HadoopFSPrefixes, S3Prefix}
+import com.ucesys.sparkscope.io.file.FSPrefixes.{HadoopFSPrefixes, S3Prefix}
 
 class FileReaderFactory(region: Option[String] = None) {
 
