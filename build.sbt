@@ -9,7 +9,6 @@ sparkVersion := "3.2.0"
 
 spAppendScalaVersion := true
 
-
 libraryDependencies += "org.apache.spark" %% "spark-core" % sparkVersion.value % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "provided"
 
@@ -31,7 +30,6 @@ scalacOptions ++= Seq("-target:jvm-1.8")
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
 publishMavenStyle := true
-
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
