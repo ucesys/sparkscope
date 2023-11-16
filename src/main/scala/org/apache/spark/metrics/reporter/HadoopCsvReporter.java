@@ -22,8 +22,7 @@ import org.apache.hadoop.fs.Path;
  * A reporter which creates a comma-separated values file of the measurements for each metric.
  */
 public class HadoopCsvReporter extends AbstractCsvReporter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HadoopCsvReporter.class);
+    private final Logger LOGGER;
     private FileSystem fs;
 
     protected HadoopCsvReporter(String directory,
@@ -37,16 +36,17 @@ public class HadoopCsvReporter extends AbstractCsvReporter {
                                 ScheduledExecutorService executor,
                                 boolean shutdownExecutorOnStop) throws IOException {
         super(registry, locale, directory, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop);
+        LOGGER = LoggerFactory.getLogger(HadoopCsvReporter.class);
         LOGGER.info("Using HadoopCsvReporter");
 
         final Configuration configuration = SparkHadoopUtil.get().newConfiguration(null);
         try {
             fs = FileSystem.get(new URI(directory), configuration);
         } catch (URISyntaxException e) {
-            LOGGER.warn("URISyntaxException while creating filesystem for directory {}", directory, e);
+            LOGGER.warn("URISyntaxException while creating filesystem for directory {}. " + e, directory);
             fs = FileSystem.get(configuration);
         } catch (IOException e) {
-            LOGGER.warn("IOException while creating filesystem for directory {}", directory, e);
+            LOGGER.warn("IOException while creating filesystem for directory {}" + e, directory);
             fs = FileSystem.get(configuration);
         }
 
@@ -61,7 +61,7 @@ public class HadoopCsvReporter extends AbstractCsvReporter {
                 try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(path, true), UTF_8))) {
                     writer.write("t" + separator + header + "\n");
                 } catch (IOException e) {
-                    LOGGER.warn("IOException while creating csv file: {}", path.getName(), e);
+                    LOGGER.warn("IOException while creating csv file: {}. " + e, path.getName());
                 }
             }
 
@@ -70,10 +70,10 @@ public class HadoopCsvReporter extends AbstractCsvReporter {
                 String row = String.format(locale, String.format(locale, "%d" + separator + "%s%n", timestamp, line), values);
                 writer.write(row);
             } catch (IOException e) {
-                LOGGER.warn("IOException while writing row to csv file: {}", path, e);
+                LOGGER.warn("IOException while writing row to csv file: {}. " + e, path);
             }
         } catch (IOException e) {
-            LOGGER.warn("IOException while writing {} to {}", name, directory, e);
+            LOGGER.warn("IOException while writing " + name + " to "  + directory + ". " + e);
         }
     }
 }

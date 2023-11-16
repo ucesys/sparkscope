@@ -42,6 +42,7 @@ class HadoopMetricReaderSuite extends FunSuite with MockFactory with GivenWhenTh
 
         When("calling HadoopMetricReader.readDriver")
         Then("HadoopFileReader.read should be called with correct path")
+        // Skipping for windows due to Paths.get problems for hdfs:/ under windows
         if(SystemUtils.OS_NAME == "Linux") {
             (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
             (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
@@ -63,6 +64,7 @@ class HadoopMetricReaderSuite extends FunSuite with MockFactory with GivenWhenTh
 
         When("calling HadoopMetricReader.readDriver")
         Then("HadoopFileReader.read should be called with correct path")
+        // Skipping for windows due to Paths.get problems for hdfs:/ under windows
         if(SystemUtils.OS_NAME == "Linux") {
             (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
             (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)

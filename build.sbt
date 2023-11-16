@@ -18,7 +18,8 @@ libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.5.6" % "pro
 libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.12.582" % "provided"
 
 libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.2" % Test
+libraryDependencies += "org.mockito" %% "mockito-scala" % "1.14.8" % Test
 libraryDependencies += "com.google.guava" % "guava" % "30.0-jre" % Test
 
 test in assembly := {}
