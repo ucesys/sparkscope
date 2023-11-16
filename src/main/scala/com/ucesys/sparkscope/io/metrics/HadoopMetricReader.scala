@@ -9,12 +9,18 @@ import java.nio.file.Paths
 
 class HadoopMetricReader(sparkScopeConf: SparkScopeConf, fileReader: HadoopFileReader, appContext: SparkScopeContext) extends MetricReader {
     def readDriver(metricType: MetricType): DataTable = {
-        val metricPath: String = Paths.get(sparkScopeConf.driverMetricsDir, s"${appContext.appId}.driver.${metricType.name}.csv").toString
+        val metricPath: String = Paths.get(
+              sparkScopeConf.driverMetricsDir,
+              s"${appContext.appId}.driver.${metricType.name}.csv"
+          ).toString.replace("\\", "/")
         readMetric(metricType, metricPath)
     }
 
     def readExecutor(metricType: MetricType, executorId: String): DataTable = {
-        val metricPath: String = Paths.get(sparkScopeConf.executorMetricsDir, s"${appContext.appId}.${executorId}.${metricType.name}.csv").toString
+        val metricPath: String = Paths.get(
+            sparkScopeConf.executorMetricsDir,
+            s"${appContext.appId}.${executorId}.${metricType.name}.csv"
+        ).toString.replace("\\", "/")
         readMetric(metricType, metricPath)
     }
 

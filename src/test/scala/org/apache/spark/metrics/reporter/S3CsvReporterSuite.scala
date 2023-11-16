@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
 
-    def mockS3CsvReporter(directory: String, region: String): S3CsvReporter = {
+    def createS3CsvReporter(directory: String, region: String): S3CsvReporter = {
         new S3CsvReporter(
             directory,
             Optional.ofNullable(region),
@@ -52,7 +52,7 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
         val region = "us-east1"
 
         When("calling S3CsvReporter constructor")
-        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, region)
+        val s3CsvReporter = createS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
         assert(s3CsvReporter.bucketName.equals("my-bucket"))
@@ -67,7 +67,7 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
         val region = "us-east1"
 
         When("calling S3CsvReporter constructor")
-        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, region)
+        val s3CsvReporter = createS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
         assert(s3CsvReporter.bucketName.equals("my-bucket"))
@@ -82,7 +82,7 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
         val region = "us-east1"
 
         When("calling S3CsvReporter constructor")
-        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, region)
+        val s3CsvReporter = createS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
         assert(s3CsvReporter.bucketName.equals("my-bucket"))
@@ -97,7 +97,7 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
         val region = "us-east1"
 
         When("calling S3CsvReporter constructor")
-        val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, region)
+        val s3CsvReporter = createS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
         assert(s3CsvReporter.bucketName.equals("my-bucket"))
@@ -114,7 +114,7 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
         When("calling S3CsvReporter constructor")
         Then("IllegalArgumentException should be thrown")
         assertThrows[IllegalArgumentException] {
-            val s3CsvReporter = mockS3CsvReporter(s3BucketUrl, null)
+            val s3CsvReporter = createS3CsvReporter(s3BucketUrl, null)
         }
     }
 }

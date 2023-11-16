@@ -20,8 +20,9 @@ package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.io.{JvmHeapMax, JvmHeapUsed, JvmHeapUsage, JvmNonHeapUsed}
+import com.ucesys.sparkscope.io.{JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed}
 import com.ucesys.sparkscope.io.file.HadoopFileReader
+import org.apache.commons.lang.SystemUtils
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 
@@ -41,15 +42,17 @@ class HadoopMetricReaderSuite extends FunSuite with MockFactory with GivenWhenTh
 
         When("calling HadoopMetricReader.readDriver")
         Then("HadoopFileReader.read should be called with correct path")
-        (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.non-heap.used.csv").returns(jvmHeapDriverCsv)
+        if(SystemUtils.OS_NAME == "Linux") {
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.non-heap.used.csv").returns(jvmHeapDriverCsv)
 
-        metricsReader.readDriver(JvmHeapUsed)
-        metricsReader.readDriver(JvmHeapUsage)
-        metricsReader.readDriver(JvmHeapMax)
-        metricsReader.readDriver(JvmNonHeapUsed)
+            metricsReader.readDriver(JvmHeapUsed)
+            metricsReader.readDriver(JvmHeapUsage)
+            metricsReader.readDriver(JvmHeapMax)
+            metricsReader.readDriver(JvmNonHeapUsed)
+        }
     }
 
     test("HadoopMetricReader executor metrics test") {
@@ -60,14 +63,16 @@ class HadoopMetricReaderSuite extends FunSuite with MockFactory with GivenWhenTh
 
         When("calling HadoopMetricReader.readDriver")
         Then("HadoopFileReader.read should be called with correct path")
-        (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.non-heap.used.csv").returns(jvmHeapDriverCsv)
+        if(SystemUtils.OS_NAME == "Linux") {
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.non-heap.used.csv").returns(jvmHeapDriverCsv)
 
-        metricsReader.readExecutor(JvmHeapUsed, "1")
-        metricsReader.readExecutor(JvmHeapUsage, "1")
-        metricsReader.readExecutor(JvmHeapMax, "1")
-        metricsReader.readExecutor(JvmNonHeapUsed, "1")
+            metricsReader.readExecutor(JvmHeapUsed, "1")
+            metricsReader.readExecutor(JvmHeapUsage, "1")
+            metricsReader.readExecutor(JvmHeapMax, "1")
+            metricsReader.readExecutor(JvmNonHeapUsed, "1")
+        }
     }
 }

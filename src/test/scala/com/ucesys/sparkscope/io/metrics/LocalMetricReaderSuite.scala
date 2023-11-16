@@ -34,13 +34,13 @@ class LocalMetricReaderSuite extends FunSuite with MockFactory with GivenWhenThe
     )
 
     test("LocalMetricReader driver metrics test") {
-        Given("HadoopMetricReader with HadoopFileReader")
+        Given("LocalMetricReader with LocalFileReader")
         val appContext = mockAppContext("local-metrics-reader-driver")
         val fileReaderMock = mock[LocalFileReader]
         val metricsReader = new LocalMetricReader(sparkScopeConfHdfs, fileReaderMock, appContext)
 
-        When("calling HadoopMetricReader.readDriver")
-        Then("HadoopFileReader.read should be called with correct path")
+        When("calling LocalMetricReader.readDriver")
+        Then("LocalFileReader.read should be called with correct path")
         (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
         (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
         (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
@@ -53,13 +53,13 @@ class LocalMetricReaderSuite extends FunSuite with MockFactory with GivenWhenThe
     }
 
     test("LocalMetricReader executor metrics test") {
-        Given("HadoopMetricReader with HadoopFileReader")
+        Given("LocalMetricReader with LocalFileReader")
         val appContext = mockAppContext("local-metrics-reader-executor")
         val fileReaderMock = mock[LocalFileReader]
         val metricsReader = new LocalMetricReader(sparkScopeConfHdfs, fileReaderMock, appContext)
 
-        When("calling HadoopMetricReader.readDriver")
-        Then("HadoopFileReader.read should be called with correct path")
+        When("calling LocalFileReader.readDriver")
+        Then("LocalFileReader.read should be called with correct path")
         (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
         (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
         (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
