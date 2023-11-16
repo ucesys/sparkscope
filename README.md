@@ -46,12 +46,12 @@ SparkScope html report contains the following features:
 | spark.metrics.conf.*.sink.csv.class          | mandatory | org.apache.spark.metrics.sink.SparkScopeCsvSink   | csv sink class         
 | spark.metrics.conf.*.sink.csv.period         | mandatory | 5                                                 | period of metrics spill         
 | spark.metrics.conf.*.sink.csv.unit           | mandatory | seconds                                           | unit of period of metrics spill             |
-| spark.metrics.conf.*.sink.csv.directory      | mandatory | hdfs:///path/to/metrics                           | path to metrics directory, can be s3,hdfs,maprfs,local                                         |
+| spark.metrics.conf.*.sink.csv.directory      | mandatory | s3://my-bucket/path/to/metrics                    | path to metrics directory, can be s3,hdfs,maprfs,local                                         |
 | spark.metrics.conf.*.sink.csv.region         | optional  | us-east-1                                         | aws region, required for s3 storage                                    |
 | spark.sparkscope.app.name                    | optional  | MyApp                                             | application name, defaults to "spark.app.name" property value                                                 |
-| spark.sparkscope.html.path                   | optional  | hdfs:///path/to/html/report/dir                   | path to which SparkScope html report will be saved                                 |
-| spark.sparkscope.metrics.dir.driver          | optional  | hdfs:///path/to/metrics                           | path to driver csv metrics relative to driver, defaults to "spark.metrics.conf.driver.sink.csv.directory" property value   |
-| spark.sparkscope.metrics.dir.executor        | optional  | hdfs:///path/to/metrics                           | path to executor csv metrics relative to driver, defaults to "spark.metrics.conf.executor.sink.csv.directory" property value  |
+| spark.sparkscope.html.path                   | optional  | s3://my-bucket/path/to/html/report/dir            | path to which SparkScope html report will be saved                                 |
+| spark.sparkscope.metrics.dir.driver          | optional  | s3://my-bucket/path/to/metrics                    | path to driver csv metrics relative to driver, defaults to "spark.metrics.conf.driver.sink.csv.directory" property value   |
+| spark.sparkscope.metrics.dir.executor        | optional  | s3://my-bucket/path/to/metrics                    | path to executor csv metrics relative to driver, defaults to "spark.metrics.conf.executor.sink.csv.directory" property value  |
 
 
 
