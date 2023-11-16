@@ -2,7 +2,7 @@
 
 SparkScope is a monitoring and profiling tool for Spark Applications. 
 It is implemented as SparkListener which means that it runs inside driver and listens for spark events.
-SparkScope uses csv metrics produced by [CsvSink](https://github.com/apache/spark/blob/master/core/src/main/scala/org/apache/spark/metrics/sink/CsvSink.scala).
+SparkScope utilizes csv metrics produced by custom SparkScopeCsvSink and supports multiple storage types.
 SparkScope was forked from Qubole profiling tool [Sparklens](https://github.com/qubole/sparklens).
 
 SparkScope html report contains the following features:
@@ -16,13 +16,19 @@ SparkScope html report contains the following features:
   - stats for driver, executors and aggregated stats for whole application
   - CPU and Heap Memory Waste stats
 
-## Compatibiltiy matrix
+## Compatibility matrix
 
 |                           | spark 2 (sparkscope/spark2) | spark 3 (sparkscope/main) |
 |---------------------------|---------------------------|-----------------------------|
 | scala version             | 2.11.12                   | 2.12.18                     |
 | compatible JDK versions   | 7, 8                      | 8, 11, 17                   |
 | compatible Spark versions | 2.3, 2.4                  | 3.2, 3.3, 3.4, 3.5          |
+
+## Compatible storage types:
+- S3
+- HDFS
+- MaprFS
+- NFS/local
 
 ## Tested environments:
 - Hadoop Yarn(Client and Cluster deploy modes)
@@ -32,37 +38,64 @@ SparkScope html report contains the following features:
 
 ## Spark application configuration
 
-| parameter                               |                                                                                                                                                                   |
-|-----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| spark.extraListeners                    | com.ucesys.sparkscope.SparkScopeJobListener                                                                                                                       |
-| spark.jars                              | path to SparkScope jar                                                                                                                                            |
-| spark.metrics.conf                      | path to metrics.properties with CSV sinks configuration                                                                                                           |
-| spark.sparkscope.html.path              | path to which SparkScope html report will be saved                                                                                                                |
-| spark.sparkscope.metrics.dir.driver     | path to driver csv metrics relative to driver, if unspecified property driver.sink.csv.directory or *.sink.csv.directory from spark.metrics.conf will be used     |
-| spark.sparkscope.metrics.dir.executor   | path to executor csv metrics relative to driver, if unspecified property executor.sink.csv.directory or *.sink.csv.directory from spark.metrics.conf will be used |
+| parameter                                    | type      |   sample values                                   |      description                                                                                                              |
+|----------------------------------------------|-----------|---------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| spark.extraListeners                         | mandatory | com.ucesys.sparkscope.SparkScopeJobListener       | spark listener class 
+| spark.metrics.conf.driver.source.jvm.class   | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for driver        
+| spark.metrics.conf.executor.source.jvm.class | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for executor         
+| spark.metrics.conf.*.sink.csv.class          | mandatory | org.apache.spark.metrics.sink.SparkScopeCsvSink   | csv sink class         
+| spark.metrics.conf.*.sink.csv.period         | mandatory | 5                                                 | period of metrics spill         
+| spark.metrics.conf.*.sink.csv.unit           | mandatory | seconds                                           | unit of period of metrics spill             |
+| spark.metrics.conf.*.sink.csv.directory      | mandatory | s3://my-bucket/path/to/metrics                    | path to metrics directory, can be s3,hdfs,maprfs,local                                         |
+| spark.metrics.conf.*.sink.csv.region         | optional  | us-east-1                                         | aws region, required for s3 storage                                    |
+| spark.sparkscope.app.name                    | optional  | MyApp                                             | application name, defaults to "spark.app.name" property value                                                 |
+| spark.sparkscope.html.path                   | optional  | s3://my-bucket/path/to/html/report/dir            | path to which SparkScope html report will be saved                                 |
+| spark.sparkscope.metrics.dir.driver          | optional  | s3://my-bucket/path/to/metrics                    | path to driver csv metrics relative to driver, defaults to "spark.metrics.conf.driver.sink.csv.directory" property value   |
+| spark.sparkscope.metrics.dir.executor        | optional  | s3://my-bucket/path/to/metrics                    | path to executor csv metrics relative to driver, defaults to "spark.metrics.conf.executor.sink.csv.directory" property value  |
+
+
 
 ## Attaching SparkScope to Spark applications(without metrics.properties file)
 Note: 
 - Using custom sink(SparkScopeCsvSink) requires adding jar to driver & executors and extending their classpaths. 
 - --files(spark.files) option should be used 
 - --jars(spark.jars) option will only make the Sink available for the driver   
+
+#### Storing metrics to S3
+```bash
+spark-submit \
+--master yarn \
+--files ./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
+--conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink \
+--conf spark.metrics.conf.*.sink.csv.period=5 \
+--conf spark.metrics.conf.*.sink.csv.unit=seconds \
+--conf spark.metrics.conf.*.sink.csv.directory=s3://<bucket-name>/<path-to-metrics-dir> \
+--conf spark.metrics.conf.*.sink.csv.region=<region> \
+--conf spark.sparkscope.html.path=s3://<bucket-name>/<path-to-html-report-dir> \
+--class org.apache.spark.examples.SparkPi \
+./spark-examples_2.10-1.1.1.jar 5000
+```
+
 #### Storing metrics to Hadoop(hdfs/maprfs)
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.2-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.2-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.2-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
+--conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink \
 --conf spark.metrics.conf.*.sink.csv.period=5 \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
---conf spark.metrics.conf.*.sink.csv.directory=hdfs:///tmp/csv-metrics \
---conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
---conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
---conf spark.sparkscope.metrics.dir.driver=/tmp/csv-metrics \
---conf spark.sparkscope.metrics.dir.executor=/tmp/csv-metrics \
---conf spark.sparkscope.html.path=./ \
+--conf spark.metrics.conf.*.sink.csv.directory=hdfs://<path-to-metrics-dir> \
+--conf spark.sparkscope.html.path=hdfs://<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
@@ -71,24 +104,22 @@ spark-submit \
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.2-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.2-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.2-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
+--conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink \
 --conf spark.metrics.conf.*.sink.csv.period=5 \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
---conf spark.metrics.conf.*.sink.csv.directory=/tmp/csv-metrics \
---conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
---conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
---conf spark.sparkscope.metrics.dir.driver=/tmp/csv-metrics \
---conf spark.sparkscope.metrics.dir.executor=/tmp/csv-metrics \
---conf spark.sparkscope.html.path=./ \
+--conf spark.metrics.conf.*.sink.csv.directory=<path-to-metrics-dir> \
+--conf spark.sparkscope.html.path=<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
-#### Storing metrics to Hadoop(hdfs/maprfs) with metrics.properties file)
-metrics.properties configuration example
+#### Using metrics.properties file instead of spark.metrics.conf.* properties:
+Instead of specifying spark.metrics.conf.* as separate properties, we can also specify them in metrics.properties file:
 ```bash
 # Enable CsvSink for all instances by class name
 *.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink
@@ -107,19 +138,16 @@ driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource
 executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource
 ```
 
-Sample spark-submit command:
+And specifying path to metrics.properties file in spark-submit command:
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.2-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.2-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.2-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.3-SNAPSHOT.jar,./metrics.properties \
+--driver-class-path ./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.3-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf=./metrics.properties \
---files ./metrics.properties \
---conf spark.sparkscope.metrics.dir.driver=/tmp/csv-metrics \
---conf spark.sparkscope.metrics.dir.executor=/tmp/csv-metrics \
---conf spark.sparkscope.html.path=./ \
+--conf spark.sparkscope.html.path=hdfs://<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
@@ -127,12 +155,13 @@ spark-submit \
 ### Running SparkScope as standalone app
 ```agsl
 java \
--cp ./sparkscope-spark3-0.1.2-SNAPSHOT.jar:$(hadoop classpath) \
+-cp ./sparkscope-spark3-0.1.3-SNAPSHOT.jar:$(hadoop classpath) \
 com.ucesys.sparkscope.SparkScopeApp \
---event-log /path/to/event/log \
---driver-metrics /path/to/driver/metrics \
---executor-metrics /path/to/executor/metrics \
---html-path /path/to/html/report/directory
+--event-log <path-to-event-log> \
+--driver-metrics <path-to-executor-metrics-dir>  \
+--executor-metrics <path-to-driver-metrics-dir> \
+--html-path <path-to-html-report-dir> \
+--region <aws-region>
 ```
 
 ## SparkScope summary:

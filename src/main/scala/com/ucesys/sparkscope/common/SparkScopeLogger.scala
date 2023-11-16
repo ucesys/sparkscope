@@ -26,7 +26,6 @@ class SparkScopeLogger {
     def warn(str: Any): Unit = log(str, "WARN")
 
     def info(str: Any): Unit = log(str, "INFO")
-
     def log(str: Any, level: String): Unit = {
         this.println(logStr(str, level))
         Predef.println(logStr(str, level))

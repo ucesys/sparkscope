@@ -19,8 +19,10 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.io.{CsvHadoopMetricsLoader, HadoopFileReader, MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.io.metrics.{CsvMetricsLoader, HadoopMetricReader, MetricsLoaderFactory}
+import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
+import com.ucesys.sparkscope.io.report.ReportGeneratorFactory
 import com.ucesys.sparkscope.metrics.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats}
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
@@ -37,14 +39,14 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     test("SparkScopeRunner.run upscaling test") {
         Given("Metrics for application which was upscaled")
         val ac = mockAppContext("runner-upscale")
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
 
         And("SparkScopeConf with specified html report path")
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when(*, *).returns(sparkScopeConfHtmlReportPath)
@@ -70,14 +72,14 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     test("SparkScopeRunner.run upscaling and downscaling test") {
         Given("Metrics for application which was upscaled and downscaled")
         val ac = mockAppContextWithDownscaling("runner-upscale-downscale")
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsWithDownscaling(csvReaderMock, ac.appId)
 
         And("SparkScopeConf with specified html report path")
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when(*, *).returns(sparkScopeConfHtmlReportPath)
@@ -102,14 +104,14 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     test("SparkScopeRunner.run upscaling and downscaling multicore test") {
         Given("Metrics for application which was upscaled and downscaled")
         val ac = mockAppContextWithDownscalingMuticore("runner-upscale-downscale-multicore")
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsWithDownscaling(csvReaderMock, ac.appId)
 
         And("SparkScopeConf with specified html report path")
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when(*, *).returns(sparkScopeConfHtmlReportPath)
@@ -136,11 +138,11 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         Given("correct metrics for application")
         val ac = mockAppContext("runner-analysis-upscale-downscale")
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         val sparkScopeRunner = new SparkScopeRunner(
             ac,
@@ -209,11 +211,11 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         Given("Metrics for application which was upscaled and downscaled")
         val ac = mockAppContextWithDownscaling("runner-analysis-upscale-downscale")
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsWithDownscaling(csvReaderMock, ac.appId)
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         val sparkScopeRunner = new SparkScopeRunner(
             ac,
@@ -282,11 +284,11 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
 
         Given("Metrics for application which was upscaled and downscaled")
         val ac = mockAppContextWithDownscalingMuticore("runner-analysis-upscale-downscale-multicore")
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsWithDownscaling(csvReaderMock, ac.appId)
-        val metricsLoader = new CsvHadoopMetricsLoader(getFileReaderFactoryMock(csvReaderMock))
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         val sparkScopeRunner = new SparkScopeRunner(
             ac,

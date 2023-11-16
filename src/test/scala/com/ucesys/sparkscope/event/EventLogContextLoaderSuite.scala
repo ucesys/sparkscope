@@ -21,7 +21,8 @@ package com.ucesys.sparkscope.event
 import com.ucesys.sparkscope.SparkScopeArgs
 import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.io.FileReaderFactory
+import com.ucesys.sparkscope.io.file.FileReaderFactory
+import com.ucesys.sparkscope.io.metrics.MetricReaderFactory
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}

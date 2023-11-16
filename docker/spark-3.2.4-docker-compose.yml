@@ -1,25 +1,19 @@
 version: '2'
 
 services:
-  spark:
+  spark-master:
     container_name: spark-master
-    image: docker.io/bitnami/spark:3.2.4
+    image: sparkscope-spark-3.2.4
     env_file: spark-master.env
     ports:
       - '8080:8080'
   spark-worker:
     container_name: spark-worker
-    image: docker.io/bitnami/spark:3.2.4
+    image: sparkscope-spark-3.2.4
     env_file: spark-worker.env
     ports:
       - '18080:18080'
       - '8090:8090'
-    command: >
-      sh -c "mkdir /tmp/spark-events &&
-             echo 'AFTER MKDIR' &&
-             start-history-server.sh &
-             echo 'AFTER HISTORY SERVER' &&
-             /opt/bitnami/scripts/spark/run.sh"
     volumes:
       - ./lib/:/tmp/jars
       - ./metrics.properties/:/tmp/metrics.properties
