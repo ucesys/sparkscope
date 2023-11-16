@@ -2,18 +2,13 @@ package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
-import com.ucesys.sparkscope.io.{Driver, Executor}
 import com.ucesys.sparkscope.io.MetricType.{AllMetricsDriver, AllMetricsExecutor}
 
 class CsvMetricsLoader(metricReader: MetricReader)(implicit logger: SparkScopeLogger) extends MetricsLoader {
     def load(appContext: SparkScopeContext, sparkScopeConf: SparkScopeConf): DriverExecutorMetrics = {
         logger.info(s"Reading driver metrics from ${sparkScopeConf.driverMetricsDir}, executor metrics from ${sparkScopeConf.executorMetricsDir}")
-
         logger.info("Reading driver metrics...")
-        val driverMetrics: Seq[DataTable] = AllMetricsDriver.map { metric =>
-            logger.info(s"Reading ${metric.name} metric for driver")
-            metricReader.readDriver(metric)
-        }
+        val driverMetrics: Seq[DataTable] = AllMetricsDriver.map(metricReader.readDriver)
 
         if (driverMetrics.map(_.numRows).toSet.size > 1) {
             logger.warn(s"Csv files for driver have different rows amounts! Probably a process is still writing to csvs.")
@@ -45,9 +40,7 @@ class CsvMetricsLoader(metricReader: MetricReader)(implicit logger: SparkScopeLo
                     Option(metricReader.readExecutor(metricType, executorId))
                 }
                 catch {
-                    case ex: Exception =>
-                        logger.warn(s"Couldn't load ${metricType.name}. ${ex}")
-                        None
+                    case ex: Exception => logger.warn(s"Couldn't load ${metricType.name}. ${ex}");None
                 }
                 metricOpt
             }

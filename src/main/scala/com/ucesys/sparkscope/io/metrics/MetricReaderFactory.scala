@@ -1,10 +1,10 @@
 package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.io.file.FSPrefixes.HadoopFSPrefixes
 import com.ucesys.sparkscope.io.file.{HadoopFileReader, LocalFileReader}
 
 class MetricReaderFactory(offline: Boolean) {
-    val HadoopFSPrefixes = Seq("maprfs:/", "hdfs:/", "file:/")
 
     def getMetricReader(sparkScopeConf: SparkScopeConf, appContext: SparkScopeContext)
                        (implicit logger: SparkScopeLogger): MetricReader = {

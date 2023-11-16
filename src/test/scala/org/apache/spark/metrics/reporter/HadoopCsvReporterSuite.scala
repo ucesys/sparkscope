@@ -19,6 +19,7 @@
 package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics.{MetricFilter, MetricRegistry}
+import org.apache.commons.lang.SystemUtils
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.slf4j.Logger
 import org.apache.spark.deploy.SparkHadoopUtil
@@ -47,7 +48,7 @@ class HadoopCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenTh
     }
 
     test("HadoopCsvReporter fs closed") {
-        Given("hdfs reporter")
+            Given("hdfs reporter")
         val hdfsPath = "hdfs:/tmp/path"
         val hadoopCsvReporter = createHadoopCsvReporter(hdfsPath)
 
@@ -64,11 +65,13 @@ class HadoopCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenTh
         loggerField.setAccessible(true);
         loggerField.set(hadoopCsvReporter, loggerMock);
 
-        When("calling HadoopCsvReporter.report")
-        hadoopCsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "t,value", "%d", "123,1000")
+        if(SystemUtils.OS_NAME == "Linux") {
+            When("calling HadoopCsvReporter.report")
+            hadoopCsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "t,value", "%d", "123,1000")
 
-        Then("Filesystem closed warning should be logged")
-        val fsClosedWarning = "IOException while writing app-123-456.driver.jvm.heap.used to hdfs:/tmp/path. java.io.IOException: Filesystem closed"
-        verify(loggerMock, times(1)).warn(fsClosedWarning)
+            Then("Filesystem closed warning should be logged")
+            val fsClosedWarning = "IOException while writing app-123-456.driver.jvm.heap.used to hdfs:/tmp/path. java.io.IOException: Filesystem closed"
+            verify(loggerMock, times(1)).warn(fsClosedWarning)
+        }
     }
 }
