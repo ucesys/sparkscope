@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.1.2] - 2023-11-08
+## [0.1.3] - 2023-11-16 S3 compatiblity
+- S3 compatibility
+  - spilling metrics to s3 (SparkScopeCsvSink will spill metrics to s3 for directory starting with s3/s3a/s3n prefix)
+  - analyzing metrics spilled to s3 (SparkScopeListener can read metrics from s3)
+  - running offline on eventlog stored in s3 (SparkScopeApp can run offline on eventlog stored in s3)
+  - saving html reports to s3
+
+## [0.1.2] - 2023-11-08 Hadoop compatiblity
 - Add custom SparkScopeCsvSink
   - hdfs:/ and maprfs:/ directories are treated as hadoop directories and are handled by HdfsCsvReporter
   - file:/ and other directories are treated as local and are handled by LocalCsvReporter
@@ -9,12 +16,12 @@
     - 4 driver metrics: jvm.heap.used, jvm.heap.usage, jvm.heap.max, jvm.non-heap.used
   - fixed calculation of wasted CPU/Memory
 
-## [0.1.1] - 2023-10-30
+## [0.1.1] - 2023-10-30 Running offline from eventlog feature
 - Create SparkScopeApp with CLI to run SparkScope as standalone app 
   - reads application context, spark conf and events from eventLog  
   - can be run on finished or running spark application
 
-## [0.1.0] - 2023-10-10
+## [0.1.0] - 2023-10-10 Initial Release
 Initial SparkScope-spark3 release:
 - Compatible:
   - JDK: 8/11/17
