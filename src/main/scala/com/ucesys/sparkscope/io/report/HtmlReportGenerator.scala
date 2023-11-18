@@ -32,6 +32,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
 
         val rendered = template
           .replace("${sparkScopeSign}", SparkScopeSign)
+          .replace("${appInfo.appName}", sparkScopeConf.appName.getOrElse("None"))
           .replace("${appInfo.applicationId}", result.appContext.appId)
           .replace("${appInfo.start}", ofEpochSecond(result.appContext.appStartTime / 1000, 0, UTC).toString)
           .replace("${appInfo.end}", result.appContext.appEndTime.map(endTime => ofEpochSecond(endTime/ 1000, 0, UTC).toString).getOrElse("In progress"))
