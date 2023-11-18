@@ -89,5 +89,4 @@ object SparkScopeConfLoader {
     val SparkScopePropertyDriverMetricsDir = "spark.sparkscope.metrics.dir.driver"
     val SparkScopePropertyHtmlPath = "spark.sparkscope.html.path"
     val SparkScopePropertyAppName = "spark.sparkscope.app.name"
-
 }

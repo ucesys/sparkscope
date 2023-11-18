@@ -227,19 +227,19 @@ ${sparkScopeSign}
         </thead>
         <tbody>
         <tr>
-            <td>Avg heap usage among executors</td>
+            <td>Avg heap utilization among executors</td>
             <td>${stats.executor.heap.avg}MB(${stats.executor.heap.avg.perc}%)</td>
         </tr>
         <tr>
-            <td>Peak heap usage among executors</td>
+            <td>Peak heap utilization among executors</td>
             <td>${stats.executor.heap.max}MB(${stats.executor.heap.max.perc}%)</td>
         </tr>
         <tr>
-            <td>Avg non-heap usage among executors</td>
+            <td>Avg non-heap utilization among executors</td>
             <td>${stats.executor.non-heap.avg}MB</td>
         </tr>
         <tr>
-            <td>Peak non-heap usage among executors</td>
+            <td>Peak non-heap utilization among executors</td>
             <td>${stats.executor.non-heap.max}MB</td>
         </tr>
         <!-- and so on... -->
@@ -255,19 +255,19 @@ ${sparkScopeSign}
         </thead>
         <tbody>
         <tr>
-            <td>Avg driver heap usage</td>
+            <td>Avg driver heap utilization</td>
             <td>${stats.driver.heap.avg}MB(${stats.driver.heap.avg.perc}%)</td>
         </tr>
         <tr>
-            <td>Peak driver heap usage</td>
+            <td>Peak driver heap utilization</td>
             <td>${stats.driver.heap.max}MB(${stats.driver.heap.max.perc}%)</td>
         </tr>
         <tr>
-            <td>Avg driver non-heap usage</td>
+            <td>Avg driver non-heap utilization</td>
             <td>${stats.driver.non-heap.avg}MB</td>
         </tr>
         <tr>
-            <td>Peak driver non-heap usage</td>
+            <td>Peak driver non-heap utilization</td>
             <td>${stats.driver.non-heap.max}MB</td>
         </tr>
         <!-- and so on... -->
@@ -293,21 +293,21 @@ ${sparkScopeSign}
     <div style="width:45%"><canvas id="clusterCPUUsage" style="width:230%;max-width:1000px"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Total cores available</b> is sum of available cores across all executors </br> </br> <b>Total cores used</b> is sum of used cores across all executors</span></div>
     <div style="width:45%"><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Size</b> is sum of heap sizes of all executors </br> </br> <b>Application Heap Usage</b> is sum of used heap across all executors</span></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Size</b> is sum of heap sizes of all executors </br> </br> <b>Application Heap Utilization</b> is sum of used heap across all executors</span></div>
 </div>
 
 <div  class="row" >
     <div style="margin-left: 15px;width:45%"><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average heap usage across all executors</span></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average heap utilization across all executors</span></div>
     <div style="margin-left: 15px;width:45%"><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average non-heap usage across all executors</span></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average non-heap utilization across all executors</span></div>
 </div>
 
 <div  class="row" >
     <div style="width:45%"><canvas id="driverHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver heap usage vs heap size</span></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver heap utilization vs heap size</span></div>
     <div style="width:45%"><canvas id="driverNonHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver non-heap usage</span></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver non-heap utilization</span></div>
 </div>
 
 <script>
@@ -375,7 +375,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "Application CPU Usage",
+          text: "Application CPU Utilization",
           fontSize: 16
         },
       }
@@ -396,13 +396,13 @@ ${sparkScopeSign}
              fill: false,
            }, {
              data: [${chart.jvm.executor.heap.max}],
-             label: "max usage[MB]",
+             label: "max utilization[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: false,
            }, {
              data: [${chart.jvm.executor.heap.avg}],
-             label: "avg usage[MB]",
+             label: "avg utilization[MB]",
              borderColor: "#ffa500",
              backgroundColor:"#ffc04d",
              fill: false,
@@ -412,7 +412,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "Executor Heap Usage",
+          text: "Executor Heap Utilization",
           fontSize: 16
         },
       }
@@ -433,7 +433,7 @@ ${sparkScopeSign}
              fill: false,
            }, {
              data: [${chart.jvm.driver.heap.used}],
-             label: "heap usage[MB]",
+             label: "heap utilization[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
@@ -443,7 +443,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "Driver Heap Usage",
+          text: "Driver Heap Utilization",
           fontSize: 16
         },
       }
@@ -458,7 +458,7 @@ ${sparkScopeSign}
          labels: [${chart.jvm.driver.non-heap.timestamps}],
          datasets: [{
              data: [${chart.jvm.driver.non-heap.used}],
-             label: "non-heap usage[MB]",
+             label: "non-heap utilization[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
@@ -468,7 +468,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "Driver Non-Heap Usage",
+          text: "Driver Non-Heap Utilization",
           fontSize: 16
         },
       }
@@ -483,13 +483,13 @@ ${sparkScopeSign}
          labels: [${chart.jvm.executor.non-heap.timestamps}],
          datasets: [{
              data: [${chart.jvm.executor.non-heap.max}],
-             label: "max usage[MB]",
+             label: "max utilization[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: false,
            }, {
              data: [${chart.jvm.executor.non-heap.avg}],
-             label: "avg usage[MB]",
+             label: "avg utilization[MB]",
              borderColor: "#ffa500",
              backgroundColor:"#ffc04d",
              fill: false,
@@ -499,7 +499,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "Executor Non-Heap Usage",
+          text: "Executor Non-Heap Utilization",
           fontSize: 16
         },
       }
@@ -555,7 +555,7 @@ ${sparkScopeSign}
              fill: false,
            }, {
              data: [${chart.jvm.cluster.heap.used}],
-             label: "Application Heap usage[MB]",
+             label: "Application Heap Utilization[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
@@ -565,7 +565,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "Application Heap Usage",
+          text: "Application Heap Utilization",
           fontSize: 16
         },
       }
