@@ -455,12 +455,20 @@ ${sparkScopeSign}
        type: 'line',
        data: {
          labels: [${chart.jvm.driver.non-heap.timestamps}],
-         datasets: [{
+         datasets: [
+           {
              data: [${chart.jvm.driver.non-heap.used}],
              label: "non-heap utilization[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
+           },
+           {
+             data: [${chart.driver.memoryOverhead}],
+             label: "memory overhead[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
            }
          ]
        },
@@ -491,6 +499,13 @@ ${sparkScopeSign}
              label: "avg utilization[MB]",
              borderColor: "#ffa500",
              backgroundColor:"#ffc04d",
+             fill: false,
+           },
+           {
+             data: [${chart.executor.memoryOverhead}],
+             label: "memory overhead[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
              fill: false,
            }
          ]

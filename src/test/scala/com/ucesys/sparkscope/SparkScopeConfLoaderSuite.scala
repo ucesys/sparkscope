@@ -408,4 +408,114 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         And("SparkScopeConf.region should be empty")
         assert(sparkScopeConf.region.isEmpty)
     }
+
+    test("extract driver and executor memoryOverhead from SparkConf") {
+        Given("driver and executor memory overhead set in SparkConf")
+        val sparkScopeConfLoader = new SparkScopeConfLoader
+        val sparkConfMemOverhead = new SparkConf()
+          .set("spark.metrics.conf", MetricsPropertiesPath)
+          .set(SparkScopePropertyExecMemOverhead, "1500m")
+          .set(SparkScopePropertyDriverMemOverhead, "1g");
+
+        When("loading SparkScope config")
+        val sparkScopeConf = sparkScopeConfLoader.load(
+            sparkConfMemOverhead,
+            getPropertiesLoaderFactoryMock
+        )
+
+        Then("driver and executor memory overhead should be extracted from SparkConf")
+        assert(sparkScopeConf.executorMemOverhead.toMB == 1500)
+        assert(sparkScopeConf.driverMemOverhead.toMB == 1024)
+    }
+
+    test("getMemoryOverhead, custom overhead") {
+        Given("executor memory overhead set in SparkConf")
+        val sparkScopeConfLoader = new SparkScopeConfLoader
+        val sparkConfMemOverhead = new SparkConf().set(SparkScopePropertyExecMemOverhead, "1500m");
+
+        When("loading SparkScope config")
+        val memorySize = sparkScopeConfLoader.getMemoryOverhead(
+            sparkConfMemOverhead,
+            SparkScopePropertyExecMem,
+            SparkScopePropertyExecMemOverhead,
+            SparkScopePropertyExecMemOverheadFactor
+        )
+
+        Then("executor memory overhead should be extracted from SparkConf")
+        assert(memorySize.toMB == 1500)
+    }
+
+    test("getMemoryOverhead, custom bad(less than minimum) overhead") {
+        Given("too small executor memory overhead set in SparkConf")
+        val sparkScopeConfLoader = new SparkScopeConfLoader
+        val sparkConfMemOverhead = new SparkConf()
+          .set(SparkScopePropertyExecMemOverhead, "300m");
+
+        When("loading SparkScope config")
+        val memorySize = sparkScopeConfLoader.getMemoryOverhead(
+            sparkConfMemOverhead,
+            SparkScopePropertyExecMem,
+            SparkScopePropertyExecMemOverhead,
+            SparkScopePropertyExecMemOverheadFactor
+        )
+
+        Then("executor memory overhead should be set to minimum")
+        assert(memorySize.toMB == 384)
+    }
+
+    test("getMemoryOverhead, default overhead, overhead=minimum(384)") {
+        Given("not set executor memory overhead in SparkConf")
+        And("executor memory * fraction is < 384 MB")
+        val sparkScopeConfLoader = new SparkScopeConfLoader
+        val sparkConfMemOverhead = new SparkConf().set(SparkScopePropertyExecMem, "3000m");
+
+        When("loading SparkScope config")
+        val memorySize = sparkScopeConfLoader.getMemoryOverhead(
+            sparkConfMemOverhead,
+            SparkScopePropertyExecMem,
+            SparkScopePropertyExecMemOverhead,
+            SparkScopePropertyExecMemOverheadFactor
+        )
+
+        Then("executor memory overhead should be set to minimum(384)")
+        assert(memorySize.toMB == 384)
+    }
+
+    test("getMemoryOverhead, default overhead, overhead=fraction(10%)*executor.memory") {
+        Given("not set executor memory overhead in SparkConf")
+        And("executor memory * fraction is >= 384 MB")
+        val sparkScopeConfLoader = new SparkScopeConfLoader
+        val sparkConfMemOverhead = new SparkConf().set(SparkScopePropertyExecMem, "5000m")
+
+        When("loading SparkScope config")
+        val memorySize = sparkScopeConfLoader.getMemoryOverhead(
+            sparkConfMemOverhead,
+            SparkScopePropertyExecMem,
+            SparkScopePropertyExecMemOverhead,
+            SparkScopePropertyExecMemOverheadFactor
+        )
+
+        Then("executor memory overhead should be set 10% of executor.memory")
+        assert(memorySize.toMB == 500)
+    }
+
+    test("getMemoryOverhead, default overhead, overhead=fraction(20%)*executor.memory") {
+        Given("not set executor memory overhead in SparkConf")
+        And("executor memory * fraction is >= 384 MB and memoryOverheadFraction is set")
+        val sparkScopeConfLoader = new SparkScopeConfLoader
+        val sparkConfMemOverhead = new SparkConf()
+          .set(SparkScopePropertyExecMem, "5000m")
+          .set(SparkScopePropertyExecMemOverheadFactor, s"0.2")
+
+        When("loading SparkScope config")
+        val memorySize = sparkScopeConfLoader.getMemoryOverhead(
+            sparkConfMemOverhead,
+            SparkScopePropertyExecMem,
+            SparkScopePropertyExecMemOverhead,
+            SparkScopePropertyExecMemOverheadFactor
+        )
+
+        Then("executor memory overhead should be set to specified fraction of executor.memory")
+        assert(memorySize.toMB == 1000)
+    }
 }

@@ -88,6 +88,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           )
           .replace("${chart.jvm.executor.non-heap.max}", result.metrics.executorMemoryMetrics.nonHeapUsedMax.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
           .replace("${chart.jvm.executor.non-heap.avg}", result.metrics.executorMemoryMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+          .replace("${chart.executor.memoryOverhead}", result.metrics.executorMemoryMetrics.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
           .replace(
               "${chart.jvm.driver.heap.timestamps}",
               result.metrics.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
@@ -99,6 +100,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
               result.metrics.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
           .replace("${chart.jvm.driver.non-heap.used}", result.metrics.driverMetrics.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+          .replace("${chart.driver.memoryOverhead}", result.metrics.driverMetrics.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
     }
 
     def renderStats(template: String, result: SparkScopeResult): String = {
