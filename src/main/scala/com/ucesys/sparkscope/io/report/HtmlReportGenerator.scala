@@ -1,9 +1,9 @@
 package com.ucesys.sparkscope.io.report
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
+import com.ucesys.sparkscope.SparkScopeAnalyzer.{BytesInMB, JvmHeapUsed}
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
-import com.ucesys.sparkscope.data.DataColumn
+import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.file.TextFileWriter
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 
@@ -81,8 +81,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
               "${chart.jvm.executor.heap.timestamps}",
               result.metrics.executorMemoryMetrics.heapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
-          .replace("${chart.jvm.executor.heap.max}", result.metrics.executorMemoryMetrics.heapUsedMax.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
-          .replace("${chart.jvm.executor.heap.avg}", result.metrics.executorMemoryMetrics.heapUsedAvg.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+          .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap))
           .replace("${chart.jvm.executor.heap.allocation}", result.metrics.executorMemoryMetrics.heapAllocation.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
           .replace(
               "${chart.jvm.executor.non-heap.timestamps}",
@@ -111,10 +110,10 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
 
 
     def generateStages(stageCol: Seq[DataColumn]): String = {
-        stageCol.map(generateStage).mkString("[", ",", "]")
+        stageCol.map(generateStageData).mkString("[", ",", "]")
     }
 
-    def generateStage(stageCol: DataColumn): String = {
+    def generateStageData(stageCol: DataColumn): String = {
         val color = SeriesColor.randomColorModulo(stageCol.name.toInt)
         s"""{
           |             data: [${stageCol.toDouble.mkString(",")}],
@@ -123,6 +122,23 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           |             backgroundColor: "${color.backgroundColor}",
           |             lineTension: 0.0,
           |             fill: true,
+          |}""".stripMargin
+    }
+
+
+    def generateExecutorHeapCharts(executorMetricsMap: Map[String, DataTable]): String = {
+        executorMetricsMap.map{case (id, metrics) =>  generateExecutorChart(id, metrics.select(JvmHeapUsed))}.mkString(",")
+    }
+    def generateExecutorChart(executorId: String, col: DataColumn): String = {
+        val color = SeriesColor.randomColorModulo(executorId.toInt)
+
+        s"""
+          |{
+          |             data: [${col.values.mkString(",")}],
+          |             label: "executorId=${executorId}",
+          |             borderColor: "${color.borderColor}",
+          |             backgroundColor: "${color.backgroundColor}",
+          |             fill: false,
           |}""".stripMargin
     }
 

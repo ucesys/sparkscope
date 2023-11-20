@@ -521,19 +521,8 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
-           }, {
-             data: [${chart.jvm.executor.heap.max}],
-             label: "max utilization[MB]",
-             borderColor: "#3cba9f",
-             backgroundColor: "#71d1bd",
-             fill: false,
-           }, {
-             data: [${chart.jvm.executor.heap.avg}],
-             label: "avg utilization[MB]",
-             borderColor: "#ffa500",
-             backgroundColor:"#ffc04d",
-             fill: false,
-           }
+           },
+           ${chart.jvm.executor.heap}
          ]
        },
       options: {

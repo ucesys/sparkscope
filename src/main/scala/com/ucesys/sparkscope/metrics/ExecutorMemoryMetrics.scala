@@ -9,10 +9,11 @@ case class ExecutorMemoryMetrics(heapUsedMax: DataTable,
                                  heapAllocation: DataTable,
                                  nonHeapUsedMax: DataTable,
                                  nonHeapUsedMin: DataTable,
-                                 nonHeapUsedAvg: DataTable)
+                                 nonHeapUsedAvg: DataTable,
+                                 executorMetricsMap: Map[String, DataTable])
 
 object ExecutorMemoryMetrics {
-    def apply(allExecutorsMetrics: DataTable): ExecutorMemoryMetrics = {
+    def apply(allExecutorsMetrics: DataTable, executorMetricsMap: Map[String, DataTable]): ExecutorMemoryMetrics = {
         ExecutorMemoryMetrics(
             heapUsedMax = allExecutorsMetrics.groupBy("t", JvmHeapUsed).max.sortBy("t"),
             heapUsedMin = allExecutorsMetrics.groupBy("t", JvmHeapUsed).min.sortBy("t"),
@@ -20,7 +21,8 @@ object ExecutorMemoryMetrics {
             heapAllocation = allExecutorsMetrics.groupBy("t", JvmHeapMax).max.sortBy("t"),
             nonHeapUsedMax = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).max.sortBy("t"),
             nonHeapUsedMin = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).min.sortBy("t"),
-            nonHeapUsedAvg = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).avg.sortBy("t")
+            nonHeapUsedAvg = allExecutorsMetrics.groupBy("t", JvmNonHeapUsed).avg.sortBy("t"),
+            executorMetricsMap
         )
     }
 }

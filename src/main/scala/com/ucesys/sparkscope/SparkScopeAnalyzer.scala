@@ -115,7 +115,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
 
         // Metrics
-        val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics)
+        val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics, executorsMetricsCombinedMapWithCpuUsage)
         val clusterMemoryMetrics = ClusterMemoryMetrics(allExecutorsMetrics)
         val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics, appContext.executorCores)
         logger.println(clusterMemoryMetrics)

@@ -16,6 +16,7 @@ case class ClusterMemoryMetrics(heapMax: DataTable, heapUsed: DataTable, heapUsa
 
 object ClusterMemoryMetrics {
     def apply(allExecutorsMetrics: DataTable): ClusterMemoryMetrics = {
+
         ClusterMemoryMetrics(
             heapMax = allExecutorsMetrics.groupBy("t", JvmHeapMax).sum.sortBy("t"),
             heapUsed = allExecutorsMetrics.groupBy("t", JvmHeapUsed).sum.sortBy("t"),
