@@ -30,7 +30,7 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         val executorMap: Map[String, ExecutorContext] = execAddedEvents.map { execAddedEvent =>
             (
                 execAddedEvent.executorId,
-                ExecutorContext(
+              ExecutorContext(
                     executorId=execAddedEvent.executorId,
                     cores=execAddedEvent.cores,
                     addTime=execAddedEvent.ts,
@@ -71,7 +71,8 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
             appId=appStartEvent.get.appId.get,
             appStartTime=appStartEvent.get.ts.get,
             appEndTime=appEndEvent.flatMap(_.ts),
-            executorMap
+            executorMap,
+            stages = Seq.empty
         )
 
         EventLogContext(sparkConf, appContext)

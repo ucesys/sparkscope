@@ -386,7 +386,7 @@ ${sparkScopeSign}
             {
              data: [${chart.cluster.cpu.usage}],
              label: "Total Cores used",
-             borderColor: "#71d1bd",
+             borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
              responsive: true,
@@ -437,6 +437,8 @@ ${sparkScopeSign}
 <div  class="row">
     <div style="width:45%"><canvas id="numberOfExecutors" style="width:230%;max-width:1000px"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Number of executors</span></div>
+    <div style="width:45%"><canvas id="stages" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Stages</span></div>
 </div>
 
 <script>
@@ -454,22 +456,50 @@ ${sparkScopeSign}
            }
          ]
        },
-      options: {
-        title: {
-          display: true,
-          text: "Number of executors",
-          fontSize: 16
-        },
-        scales: {
-            yAxes: [{
+        options: {
+            title: {
+                display: true,
+                text: "Number of Executors",
+                fontSize: 16
+            },
+            scales: {
+                yAxes: [{
                     display: true,
                     ticks: {
                         beginAtZero: true
                     }
                 }]
+            }
         }
-      }
      });
+</script>
+
+<script>
+    var ctx = document.getElementById('stages').getContext('2d');
+    var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.stages.timestamps}],
+         datasets: ${chart.stages}
+       },
+        options: {
+            title: {
+                display: true,
+                text: "Number of tasks per stage vs cores",
+                fontSize: 16
+            },
+            scales: {
+                yAxes: [{
+                    display: true,
+                    stacked: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    }
+     );
 </script>
 
 <div  class="row" >

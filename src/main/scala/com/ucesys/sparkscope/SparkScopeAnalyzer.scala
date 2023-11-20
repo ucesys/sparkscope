@@ -17,6 +17,7 @@
 */
 package com.ucesys.sparkscope
 
+import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
@@ -136,6 +137,22 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
             HeapUtilWarning(heapUtil = clusterMemoryStats.avgHeapPerc, heapGbHoursWasted = clusterMemoryStats.heapGbHoursWasted, LowHeapUtilizationThreshold)
         )
 
+        // Stages
+        val stageTimestamps = (appContext.stages.flatMap(stg => Seq(stg.startTime, stg.endTime)) ++ Seq(appContext.appStartTime) ++ appContext.appEndTime.toSeq).sorted
+
+        val stageColumns: Seq[DataColumn] = appContext.stages.map{ stage =>
+            val colVals: Seq[String] = stageTimestamps.map{ ts =>
+                if (ts >= stage.startTime && ts <= stage.endTime) {
+                    stage.numberOfTasks.toString
+                } else {
+                    "0"
+                }
+            }
+            DataColumn(stage.stageId, colVals)
+        }
+
+        val stageTimeline = DataTable("stages", Seq(DataColumn("t", stageTimestamps.map(_.toString))) ++ stageColumns)
+
         SparkScopeResult(
             appContext = appContext,
             stats = SparkScopeStats(
@@ -148,7 +165,8 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
                 driverMetrics = driverMetricsMerged,
                 executorMemoryMetrics = executorMemoryMetrics,
                 clusterMemoryMetrics = clusterMemoryMetrics,
-                clusterCPUMetrics = clusterCPUMetrics
+                clusterCPUMetrics = clusterCPUMetrics,
+                stageTimeline = stageTimeline
             ),
             warnings = warnings.flatten
         )

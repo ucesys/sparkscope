@@ -3,11 +3,13 @@ package com.ucesys.sparkscope.io.report
 import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
+import com.ucesys.sparkscope.data.DataColumn
 import com.ucesys.sparkscope.io.file.TextFileWriter
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 
 import java.io.{FileWriter, InputStream}
 import java.nio.file.Paths
+import java.time.{Instant, LocalDateTime}
 import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
@@ -103,6 +105,25 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${chart.driver.memoryOverhead}", result.metrics.driverMetrics.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
           .replace("${chart.cluster.numExecutors.timestamps}", result.metrics.clusterCPUMetrics.numExecutors.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
           .replace("${chart.cluster.numExecutors}", result.metrics.clusterCPUMetrics.numExecutors.select("cnt").toDouble.mkString(","))
+          .replace("${chart.stages.timestamps}", result.metrics.stageTimeline.select("t").values.map(ts => s"'${LocalDateTime.ofInstant(Instant.ofEpochMilli(ts.toLong), UTC)}'").mkString(","))
+          .replace("${chart.stages}", generateStages(result.metrics.stageTimeline.columns.filter(_.name !="t")))
+    }
+
+
+    def generateStages(stageCol: Seq[DataColumn]): String = {
+        stageCol.map(generateStage).mkString("[", ",", "]")
+    }
+
+    def generateStage(stageCol: DataColumn): String = {
+        val color = SeriesColor.randomColorModulo(stageCol.name.toInt)
+        s"""{
+          |             data: [${stageCol.toDouble.mkString(",")}],
+          |             label: "stageId=${stageCol.name}",
+          |             borderColor: "${color.borderColor}",
+          |             backgroundColor: "${color.backgroundColor}",
+          |             lineTension: 0.0,
+          |             fill: true,
+          |}""".stripMargin
     }
 
     def renderStats(template: String, result: SparkScopeResult): String = {

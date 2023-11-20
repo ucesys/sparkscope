@@ -4,7 +4,7 @@ import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInf
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io._
-import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger, StageContext}
 import com.ucesys.sparkscope.io.metrics.{DriverExecutorMetrics, HadoopMetricReader, MetricReader, MetricReaderFactory}
 import com.ucesys.sparkscope.io.property.{PropertiesLoader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
@@ -404,26 +404,27 @@ object TestHelpers extends FunSuite with MockFactory {
     def getAppId: String = s"app-${System.currentTimeMillis()}"
 
     def mockAppContext(appName: String): SparkScopeContext = {
-        val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
-            "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),
-            "2" -> ExecutorTimeSpan("2", "0", 1, 1695358645000L, 1695358700000L),
-            "3" -> ExecutorTimeSpan("3", "0", 1, 1695358671000L, 1695358700000L),
-            "5" -> ExecutorTimeSpan("5", "0", 1, 1695358687000L, 1695358700000L)
+        val executorMap: Map[String, ExecutorContext] = Map(
+            "1" -> ExecutorContext("1", 1, 1695358645000L, Some(1695358700000L)),
+            "2" -> ExecutorContext("2", 1, 1695358645000L, Some(1695358700000L)),
+            "3" -> ExecutorContext("3", 1, 1695358671000L, Some(1695358700000L)),
+            "5" -> ExecutorContext("5", 1, 1695358687000L, Some(1695358700000L))
         )
 
-        val appId = s"${getAppId}-${appName}"
+        val stages = Seq(
+            StageContext("1", 1695358645000L, 1695358671000L, 200),
+            StageContext("2", 1695358645000L, 1695358700000L, 500),
+            StageContext("3", 1695358645000L, 1695358660000L, 100),
+            StageContext("4", 1695358660000L, 1695358671000L, 200),
+            StageContext("5", 1695358671000L, 1695358700000L, 100)
+        )
 
         SparkScopeContext(
-            new AppContext(
-                new ApplicationInfo(appId, StartTime, EndTime),
-                new AggregateMetrics(),
-                mutable.HashMap[String, HostTimeSpan](),
-                executorMap,
-                new mutable.HashMap[Long, JobTimeSpan],
-                new mutable.HashMap[Long, Long],
-                mutable.HashMap[Int, StageTimeSpan](),
-                mutable.HashMap[Int, Long]()
-            )
+            s"${getAppId}-${appName}",
+            StartTime,
+            Some(EndTime),
+            executorMap,
+            stages
         )
     }
 
@@ -439,7 +440,8 @@ object TestHelpers extends FunSuite with MockFactory {
             s"${getAppId}${appName}",
             StartTime,
             Some(EndTime),
-            executorMap
+            executorMap,
+            Seq.empty
         )
     }
 
@@ -468,7 +470,8 @@ object TestHelpers extends FunSuite with MockFactory {
             s"${getAppId}${appName}",
             StartTime,
             Some(EndTime),
-            executorMap
+            executorMap,
+            Seq.empty
         )
     }
 
@@ -485,7 +488,8 @@ object TestHelpers extends FunSuite with MockFactory {
             s"${appId}${appName}",
             StartTime,
             Some(EndTime),
-            executorMap
+            executorMap,
+            Seq.empty
         )
     }
 
