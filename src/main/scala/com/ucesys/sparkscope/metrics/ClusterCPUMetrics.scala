@@ -7,7 +7,8 @@ case class ClusterCPUMetrics(clusterCpuTime: DataTable,
                              clusterCpuUsage: DataTable,
                              clusterCpuUsageSum: DataTable,
                              clusterCapacity: DataTable,
-                             cpuTimePerExecutor: DataTable) {
+                             cpuTimePerExecutor: DataTable,
+                             numExecutors: DataTable) {
     override def toString: String = {
         Seq(
             s"\nCluster metrics:",
@@ -15,7 +16,8 @@ case class ClusterCPUMetrics(clusterCpuTime: DataTable,
             clusterCpuUsage.toString,
             clusterCpuUsageSum.toString,
             clusterCapacity.toString,
-            cpuTimePerExecutor.toString
+            cpuTimePerExecutor.toString,
+            numExecutors.toString,
         ).mkString("\n")
     }
 }
@@ -34,7 +36,8 @@ object ClusterCPUMetrics {
           .rename(CpuUsage)
         val clusterCpuUsageDf = DataTable(name = "clusterCpuUsage", columns = Seq(groupedTimeCol, clusterCpuUsageCol))
 
-        val clusterCapacityCol = allExecutorsMetrics.groupBy("t", CpuUsage).count.sortBy("t").select("cnt").mul(executorCores)
+        val numExecutors = allExecutorsMetrics.groupBy("t", CpuUsage).count.sortBy("t").select(Seq("t", "cnt"))
+        val clusterCapacityCol = numExecutors.select("cnt").mul(executorCores)
         val clusterCapacityDf = DataTable(name = "clusterCapacity", columns = Seq(groupedTimeCol, clusterCapacityCol.rename("totalCores")))
 
         val clusterCpuUsageSumCol = allExecutorsMetrics.groupBy("t", "cpuUsageAllCores")
@@ -50,7 +53,8 @@ object ClusterCPUMetrics {
             clusterCpuUsage = clusterCpuUsageDf,
             clusterCpuUsageSum = clusterCpuUsageSumDf,
             clusterCapacity = clusterCapacityDf,
-            cpuTimePerExecutor = allExecutorsMetrics.groupBy("executorId", CpuTime).max
+            cpuTimePerExecutor = allExecutorsMetrics.groupBy("executorId", CpuTime).max,
+            numExecutors = numExecutors
         )
     }
 }

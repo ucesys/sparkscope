@@ -19,7 +19,7 @@ import scala.collection.mutable
 object TestHelpers extends FunSuite with MockFactory {
     val TestDir = ".tests"
     val appId = "app-20230101010819-test"
-    val StartTime: Long = 1695358645000L
+    val StartTime: Long = 1695358644000L
     val EndTime: Long = 1695358700000L
     val MetricsPropertiesPath = "path/to/metrics.properties"
     val csvMetricsPath = "/tmp/csv-metrics"
