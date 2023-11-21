@@ -382,6 +382,7 @@ ${sparkScopeSign}
              backgroundColor: "#7bb6dd",
              fill: false,
              responsive: true,
+             lineTension: 0.2,
            },
             {
              data: [${chart.cluster.cpu.usage}],
@@ -415,6 +416,7 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
+             lineTension: 0.2,
            }, {
              data: [${chart.jvm.cluster.heap.used}],
              label: "Application Heap Utilization[MB]",
@@ -453,6 +455,7 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: true,
+             lineTension: 0.2,
            }
          ]
        },

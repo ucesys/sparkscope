@@ -416,7 +416,12 @@ object TestHelpers extends FunSuite with MockFactory {
             StageContext("2", 1695358645000L, 1695358700000L, 500),
             StageContext("3", 1695358645000L, 1695358660000L, 100),
             StageContext("4", 1695358660000L, 1695358671000L, 200),
-            StageContext("5", 1695358671000L, 1695358700000L, 100)
+            StageContext("5", 1695358671000L, 1695358700000L, 100),
+            StageContext("6", 1695358645000L, 1695358655000L, 200),
+            StageContext("7", 1695358655000L, 1695358700000L, 500),
+            StageContext("8", 1695358665000L, 1695358680000L, 100),
+            StageContext("9", 1695358670000L, 1695358675000L, 200),
+            StageContext("10", 1695358675000L, 1695357200000L, 100)
         )
 
         SparkScopeContext(
