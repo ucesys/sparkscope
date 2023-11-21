@@ -307,7 +307,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "CPU utilization as percentage of allocated CPU across all executors",
+          text: "CPU Utilization as percentage of allocated CPU across all Executors",
           fontSize: 16
         },
         scales: {
@@ -343,7 +343,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "Heap utilization as percentage of allocated Heap across all workers",
+          text: "Heap Utilization as percentage of allocated Heap across all Executors",
           fontSize: 16
         },
         scales: {
@@ -396,7 +396,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "CPU Allocation and Utilization aggregated across all executors",
+          text: "CPU Allocation and Utilization aggregated across all Executors",
           fontSize: 16
         },
       }
@@ -427,7 +427,7 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "Heap Allocation and Utilization aggregated across all executors",
+          text: "Heap Allocation and Utilization aggregated across all Executors",
           fontSize: 16
         },
       }
@@ -449,7 +449,7 @@ ${sparkScopeSign}
          labels: [${chart.cluster.numExecutors.timestamps}],
          datasets: [{
              data: [${chart.cluster.numExecutors}],
-             label: "Number of executors",
+             label: "Number of Executors",
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: true,
@@ -485,7 +485,7 @@ ${sparkScopeSign}
         options: {
             title: {
                 display: true,
-                text: "Number of tasks per stage vs cores",
+                text: "Number of Tasks per Stage",
                 fontSize: 16
             },
             scales: {
@@ -528,8 +528,16 @@ ${sparkScopeSign}
       options: {
         title: {
           display: true,
-          text: "Peak & Avg Heap Memory utilization of any executor",
+          text: "Executor Heap Memory Utilization",
           fontSize: 16
+        },
+        scales: {
+            yAxes: [{
+                display: true,
+                ticks: {
+                    min: 0
+                }
+            }]
         },
       }
      });
@@ -542,31 +550,19 @@ ${sparkScopeSign}
        data: {
          labels: [${chart.jvm.executor.non-heap.timestamps}],
          datasets: [{
-             data: [${chart.jvm.executor.non-heap.max}],
-             label: "max utilization[MB]",
-             borderColor: "#3cba9f",
-             backgroundColor: "#71d1bd",
-             fill: false,
-           }, {
-             data: [${chart.jvm.executor.non-heap.avg}],
-             label: "avg utilization[MB]",
-             borderColor: "#ffa500",
-             backgroundColor:"#ffc04d",
-             fill: false,
-           },
-           {
              data: [${chart.executor.memoryOverhead}],
              label: "memory overhead[MB]",
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
-           }
+           },
+           ${chart.jvm.executor.non-heap}
          ]
        },
       options: {
         title: {
           display: true,
-          text: "Peak & Avg Non-Heap Memory utilization of any executor",
+          text: "Executor Non-Heap Memory Utilization",
           fontSize: 16
         },
       }

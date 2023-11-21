@@ -113,9 +113,26 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
         logger.println(executorTimeLine)
 
+        val allTimestamps = executorsMetricsCombinedMapWithCpuUsage.flatMap { case (_, dt) =>
+            dt.select("t").values.map(_.toLong)
+        }.toSet.toSeq.sorted.map(_.toString)
+
+        val executorMetricsAligned = executorsMetricsCombinedMapWithCpuUsage.map{ case (id, dt) =>
+            val existingTimestamps = dt.select("t").values
+            val newTimestamps = allTimestamps.filterNot(existingTimestamps.contains)
+            val aligned = DataTable(
+                "heapUsed",
+                Seq(
+                    DataColumn("t", dt.select("t").values ++ newTimestamps),
+                    DataColumn(JvmHeapUsed, dt.select(JvmHeapUsed).values ++ Seq.fill(newTimestamps.length)("null")),
+                    DataColumn(JvmNonHeapUsed, dt.select(JvmNonHeapUsed).values ++ Seq.fill(newTimestamps.length)("null")),
+                )
+            ).sortBy("t")
+            (id, aligned)
+        }
 
         // Metrics
-        val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics, executorsMetricsCombinedMapWithCpuUsage)
+        val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned)
         val clusterMemoryMetrics = ClusterMemoryMetrics(allExecutorsMetrics)
         val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics, appContext.executorCores)
         logger.println(clusterMemoryMetrics)

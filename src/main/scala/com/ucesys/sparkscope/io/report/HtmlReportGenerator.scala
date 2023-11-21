@@ -1,10 +1,11 @@
 package com.ucesys.sparkscope.io.report
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer.{BytesInMB, JvmHeapUsed}
+import com.ucesys.sparkscope.SparkScopeAnalyzer.{BytesInMB, JvmHeapUsed, JvmNonHeapUsed}
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.file.TextFileWriter
+import com.ucesys.sparkscope.io.report.SeriesColor.{Green, Orange, Purple, Red, Yellow}
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 
 import java.io.{FileWriter, InputStream}
@@ -81,14 +82,13 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
               "${chart.jvm.executor.heap.timestamps}",
               result.metrics.executorMemoryMetrics.heapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
-          .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap))
+          .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmHeapUsed))
           .replace("${chart.jvm.executor.heap.allocation}", result.metrics.executorMemoryMetrics.heapAllocation.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
           .replace(
               "${chart.jvm.executor.non-heap.timestamps}",
               result.metrics.executorMemoryMetrics.nonHeapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
-          .replace("${chart.jvm.executor.non-heap.max}", result.metrics.executorMemoryMetrics.nonHeapUsedMax.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
-          .replace("${chart.jvm.executor.non-heap.avg}", result.metrics.executorMemoryMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+          .replace("${chart.jvm.executor.non-heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmNonHeapUsed))
           .replace("${chart.executor.memoryOverhead}", result.metrics.executorMemoryMetrics.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
           .replace(
               "${chart.jvm.driver.heap.timestamps}",
@@ -126,11 +126,11 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
     }
 
 
-    def generateExecutorHeapCharts(executorMetricsMap: Map[String, DataTable]): String = {
-        executorMetricsMap.map{case (id, metrics) =>  generateExecutorChart(id, metrics.select(JvmHeapUsed))}.mkString(",")
+    def generateExecutorHeapCharts(executorMetricsMap: Map[String, DataTable], metricName: String): String = {
+        executorMetricsMap.map{case (id, metrics) =>  generateExecutorChart(id, metrics.select(metricName).div(BytesInMB))}.mkString(",")
     }
     def generateExecutorChart(executorId: String, col: DataColumn): String = {
-        val color = SeriesColor.randomColorModulo(executorId.toInt)
+        val color = SeriesColor.randomColorModulo(executorId.toInt, Seq(Green, Red, Yellow, Purple, Orange))
 
         s"""
           |{
