@@ -113,9 +113,11 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
         logger.println(executorTimeLine)
 
-        val allTimestamps = executorsMetricsCombinedMapWithCpuUsage.flatMap { case (_, dt) =>
+        val allMetricsTimestamps = executorsMetricsCombinedMapWithCpuUsage.flatMap { case (_, dt) =>
             dt.select("t").values.map(_.toLong)
-        }.toSet.toSeq.sorted.map(_.toString)
+        }.toSet.toSeq
+
+        val allTimestamps = (allMetricsTimestamps ++ appContext.stages.flatMap(stg => Seq(stg.startTime, stg.endTime))).sorted.map(_.toString)
 
         val executorMetricsAligned = executorsMetricsCombinedMapWithCpuUsage.map{ case (id, dt) =>
             val existingTimestamps = dt.select("t").values
@@ -155,10 +157,8 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         )
 
         // Stages
-        val stageTimestamps = (appContext.stages.flatMap(stg => Seq(stg.startTime, stg.endTime)) ++ Seq(appContext.appStartTime) ++ appContext.appEndTime.toSeq).sorted
-
         val stageColumns: Seq[DataColumn] = appContext.stages.map{ stage =>
-            val colVals: Seq[String] = stageTimestamps.map{ ts =>
+            val colVals: Seq[String] = allTimestamps.map(_.toLong).map{ ts =>
                 if (ts >= stage.startTime && ts <= stage.endTime) {
                     stage.numberOfTasks.toString
                 } else {
@@ -168,7 +168,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
             DataColumn(stage.stageId, colVals)
         }
 
-        val stageTimeline = DataTable("stages", Seq(DataColumn("t", stageTimestamps.map(_.toString))) ++ stageColumns)
+        val stageTimeline = DataTable("stages", Seq(DataColumn("t", allTimestamps)) ++ stageColumns)
 
         SparkScopeResult(
             appContext = appContext,

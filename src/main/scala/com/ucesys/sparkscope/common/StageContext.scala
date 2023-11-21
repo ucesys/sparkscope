@@ -12,7 +12,7 @@ object StageContext {
         if(stgTimeSpan.startTime == 0 ||  stgTimeSpan.endTime == 0) {
             None
         } else {
-            Some(StageContext(stgTimeSpan.stageID.toString, stgTimeSpan.startTime, stgTimeSpan.endTime, stgTimeSpan.numberOfTasks))
+            Some(StageContext(stgTimeSpan.stageID.toString, stgTimeSpan.startTime/1000, stgTimeSpan.endTime/1000, stgTimeSpan.numberOfTasks))
         }
     }
 }

@@ -104,7 +104,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${chart.driver.memoryOverhead}", result.metrics.driverMetrics.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
           .replace("${chart.cluster.numExecutors.timestamps}", result.metrics.clusterCPUMetrics.numExecutors.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
           .replace("${chart.cluster.numExecutors}", result.metrics.clusterCPUMetrics.numExecutors.select("cnt").toDouble.mkString(","))
-          .replace("${chart.stages.timestamps}", result.metrics.stageTimeline.select("t").values.map(ts => s"'${LocalDateTime.ofInstant(Instant.ofEpochMilli(ts.toLong), UTC)}'").mkString(","))
+          .replace("${chart.stages.timestamps}", result.metrics.stageTimeline.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
           .replace("${chart.stages}", generateStages(result.metrics.stageTimeline.columns.filter(_.name !="t")))
     }
 
@@ -150,7 +150,6 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
         template
           .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterMemoryStats.avgHeapPerc * 100}%1.2f")
           .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterMemoryStats.maxHeapPerc * 100}%1.2f")
-          .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterMemoryStats.avgHeapPerc * 100}%1.2f")
           .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterCPUStats.cpuUtil * 100}%1.2f")
           .replace("${resource.waste.heap}", f"${result.stats.clusterMemoryStats.heapGbHoursWasted}%1.4f")
           .replace("${resource.waste.cpu}", f"${result.stats.clusterCPUStats.coreHoursWasted}%1.4f")

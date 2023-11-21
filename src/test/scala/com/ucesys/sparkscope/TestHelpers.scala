@@ -412,16 +412,16 @@ object TestHelpers extends FunSuite with MockFactory {
         )
 
         val stages = Seq(
-            StageContext("1", 1695358645000L, 1695358671000L, 200),
-            StageContext("2", 1695358645000L, 1695358700000L, 500),
-            StageContext("3", 1695358645000L, 1695358660000L, 100),
-            StageContext("4", 1695358660000L, 1695358671000L, 200),
-            StageContext("5", 1695358671000L, 1695358700000L, 100),
-            StageContext("6", 1695358645000L, 1695358655000L, 200),
-            StageContext("7", 1695358655000L, 1695358700000L, 500),
-            StageContext("8", 1695358665000L, 1695358680000L, 100),
-            StageContext("9", 1695358670000L, 1695358675000L, 200),
-            StageContext("10", 1695358675000L, 1695357200000L, 100)
+            StageContext("1", 1695358645L, 1695358671L, 200),
+            StageContext("2", 1695358645L, 1695358700L, 500),
+            StageContext("3", 1695358645L, 1695358660L, 100),
+            StageContext("4", 1695358660L, 1695358671L, 200),
+            StageContext("5", 1695358671L, 1695358700L, 100),
+            StageContext("6", 1695358645L, 1695358655L, 200),
+            StageContext("7", 1695358655L, 1695358700L, 500),
+            StageContext("8", 1695358665L, 1695358680L, 100),
+            StageContext("9", 1695358670L, 1695358675L, 200),
+            StageContext("10", 1695358675L, 1695357200L, 100)
         )
 
         SparkScopeContext(

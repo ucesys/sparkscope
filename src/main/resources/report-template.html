@@ -195,20 +195,16 @@ ${sparkScopeSign}
         </thead>
         <tbody>
         <tr>
+            <td>Total CPU utilization of application</td>
+            <td>${stats.cluster.cpu.util}%</td>
+        </tr>
+        <tr>
             <td>Total heap utilization of application</td>
             <td>${stats.cluster.heap.avg.perc}%</td>
         </tr>
         <tr>
             <td>Peak heap utilization of application</td>
             <td>${stats.cluster.heap.max.perc}%</td>
-        </tr>
-        <tr>
-            <td>Total heap waste of application</td>
-            <td>${stats.cluster.heap.waste.perc}%</td>
-        </tr>
-        <tr>
-            <td>Total CPU utilization of application</td>
-            <td>${stats.cluster.cpu.util}%</td>
         </tr>
         <tr>
             <td>Total GB-hours of wasted heap memory</td>
