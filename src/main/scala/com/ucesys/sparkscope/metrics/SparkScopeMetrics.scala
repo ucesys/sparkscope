@@ -6,4 +6,4 @@ case class SparkScopeMetrics(driverMetrics: DataTable,
                              executorMemoryMetrics: ExecutorMemoryMetrics,
                              clusterMemoryMetrics: ClusterMemoryMetrics,
                              clusterCPUMetrics: ClusterCPUMetrics,
-                             stageTimeline: DataTable)
+                             stageMetrics: StageMetrics)

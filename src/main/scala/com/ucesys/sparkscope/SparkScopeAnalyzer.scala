@@ -132,14 +132,12 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         }
 
         // Metrics
-        val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned)
         val clusterMemoryMetrics = ClusterMemoryMetrics(allExecutorsMetrics)
         val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics, appContext.executorCores)
         logger.println(clusterMemoryMetrics)
         logger.println(clusterCPUMetrics)
 
         // Stats
-        val driverStats = DriverMemoryStats(driverMetricsMerged)
         val executorStats = ExecutorMemoryStats(allExecutorsMetrics)
         val clusterMemoryStats = ClusterMemoryStats(clusterMemoryMetrics, executorTimeSecs, executorStats)
         val clusterCPUStats = ClusterCPUStats(clusterCPUMetrics, appContext.executorCores, executorTimeSecs)
@@ -154,36 +152,20 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
             HeapUtilWarning(heapUtil = clusterMemoryStats.avgHeapPerc, heapGbHoursWasted = clusterMemoryStats.heapGbHoursWasted, LowHeapUtilizationThreshold)
         )
 
-        // Stages
-        val stageColumns: Seq[DataColumn] = appContext.stages.map{ stage =>
-            val colVals: Seq[String] = allTimestamps.map(_.toLong).map{ ts =>
-                if (ts > stage.startTime && ts < stage.endTime) {
-                    stage.numberOfTasks.toString
-                } else if (ts == stage.startTime || ts == stage.endTime) {
-                    "0"
-                } else {
-                    "null"
-                }
-            }
-            DataColumn(stage.stageId, colVals)
-        }
-
-        val stageTimeline = DataTable("stages", Seq(DataColumn("t", allTimestamps)) ++ stageColumns)
-
         SparkScopeResult(
             appContext = appContext,
             stats = SparkScopeStats(
-                driverStats = driverStats,
+                driverStats = DriverMemoryStats(driverMetricsMerged),
                 executorStats = executorStats,
                 clusterMemoryStats = clusterMemoryStats,
                 clusterCPUStats = clusterCPUStats
             ),
             metrics = SparkScopeMetrics(
                 driverMetrics = driverMetricsMerged,
-                executorMemoryMetrics = executorMemoryMetrics,
+                executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned),
                 clusterMemoryMetrics = clusterMemoryMetrics,
                 clusterCPUMetrics = clusterCPUMetrics,
-                stageTimeline = stageTimeline
+                stageMetrics = StageMetrics(appContext.stages, allTimestamps, clusterCPUMetrics.clusterCapacity)
             ),
             warnings = warnings.flatten
         )

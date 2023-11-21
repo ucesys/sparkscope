@@ -61,21 +61,21 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
             heapSize = 800,
             maxHeap = 352,
             maxHeapPerc = 0.44029,
-            avgHeap = 204,
-            avgHeapPerc = 0.25554,
-            avgNonHeap = 43,
+            avgHeap = 211,
+            avgHeapPerc = 0.26391,
+            avgNonHeap = 44,
             maxNonHeap = 48
         ))
 
         assert(result.stats.clusterMemoryStats == ClusterMemoryStats(
             maxHeap = 840,
-            avgHeap = 632,
+            avgHeap = 616,
             maxHeapPerc = 0.4165,
-            avgHeapPerc = 0.25554,
-            avgHeapWastedPerc = 0.74446,
+            avgHeapPerc = 0.26391,
+            avgHeapWastedPerc = 0.73609,
             executorTimeSecs = 152,
             heapGbHoursAllocated = 0.03299,
-            heapGbHoursWasted = 0.02456,
+            heapGbHoursWasted = 0.02428,
             executorHeapSizeInGb = 0.78125
         ))
 
@@ -185,21 +185,21 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
             heapSize = 800,
             maxHeap = 352,
             maxHeapPerc = 0.44029,
-            avgHeap = 204,
-            avgHeapPerc = 0.25554,
-            avgNonHeap = 43,
+            avgHeap = 211,
+            avgHeapPerc = 0.26391,
+            avgNonHeap = 44,
             maxNonHeap = 48
         ))
 
         assert(result.stats.clusterMemoryStats == ClusterMemoryStats(
             maxHeap = 840,
-            avgHeap = 632,
+            avgHeap = 616,
             maxHeapPerc = 0.4165,
-            avgHeapPerc = 0.25554,
-            avgHeapWastedPerc = 0.74446,
+            avgHeapPerc = 0.26391,
+            avgHeapWastedPerc = 0.73609,
             executorTimeSecs = 152,
             heapGbHoursAllocated = 0.03299,
-            heapGbHoursWasted = 0.02456,
+            heapGbHoursWasted = 0.02428,
             executorHeapSizeInGb = 0.78125
         ))
 

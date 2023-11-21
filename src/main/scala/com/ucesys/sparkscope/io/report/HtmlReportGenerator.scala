@@ -104,8 +104,8 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${chart.driver.memoryOverhead}", result.metrics.driverMetrics.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
           .replace("${chart.cluster.numExecutors.timestamps}", result.metrics.clusterCPUMetrics.numExecutors.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
           .replace("${chart.cluster.numExecutors}", result.metrics.clusterCPUMetrics.numExecutors.select("cnt").toDouble.mkString(","))
-          .replace("${chart.stages.timestamps}", result.metrics.stageTimeline.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
-          .replace("${chart.stages}", generateStages(result.metrics.stageTimeline.columns.filter(_.name !="t")))
+          .replace("${chart.stages.timestamps}", result.metrics.stageMetrics.stageTimeline.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
+          .replace("${chart.stages}", generateStages(result.metrics.stageMetrics.stageTimeline.columns.filter(_.name !="t")))
     }
 
 
@@ -114,7 +114,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
     }
 
     def generateStageData(stageCol: DataColumn): String = {
-        val color = SeriesColor.randomColorModulo(stageCol.name.toInt)
+        val color = SeriesColor.randomColorModulo(stageCol.name.toInt, Seq(Green, Red, Yellow, Purple, Orange))
         s"""{
           |             data: [${stageCol.values.mkString(",")}],
           |             label: "stageId=${stageCol.name}",

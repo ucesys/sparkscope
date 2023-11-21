@@ -26,6 +26,7 @@ object TestHelpers extends FunSuite with MockFactory {
     val sparkConf = new SparkConf()
       .set("spark.metrics.conf", MetricsPropertiesPath)
       .set("spark.sparkscope.html.path", "/path/to/html/report")
+      .set("spark.name", "MyApp")
 
     val sparkScopeConf = new SparkScopeConfLoader()(stub[SparkScopeLogger]).load(sparkConf, getPropertiesLoaderFactoryMock)
 
