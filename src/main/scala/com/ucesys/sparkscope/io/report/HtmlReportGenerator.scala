@@ -122,6 +122,8 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           |             backgroundColor: "${color.backgroundColor}",
           |             lineTension: 0.0,
           |             fill: true,
+          |             pointRadius: 1,
+          |             pointHoverRadius: 8,
           |}""".stripMargin
     }
 
@@ -139,6 +141,8 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           |             borderColor: "${color.borderColor}",
           |             backgroundColor: "${color.backgroundColor}",
           |             fill: false,
+          |             pointRadius: 1,
+          |             pointHoverRadius: 8,
           |}""".stripMargin
     }
 

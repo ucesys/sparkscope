@@ -301,6 +301,8 @@ ${sparkScopeSign}
              backgroundColor: "#7bb6dd",
              fill: true,
              responsive: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
@@ -337,6 +339,8 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
@@ -383,6 +387,8 @@ ${sparkScopeSign}
              fill: false,
              responsive: true,
              lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            },
             {
              data: [${chart.cluster.cpu.usage}],
@@ -391,6 +397,8 @@ ${sparkScopeSign}
              backgroundColor: "#71d1bd",
              fill: true,
              responsive: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
@@ -417,12 +425,16 @@ ${sparkScopeSign}
              backgroundColor: "#7bb6dd",
              fill: false,
              lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }, {
              data: [${chart.jvm.cluster.heap.used}],
              label: "Application Heap Utilization[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
@@ -456,6 +468,8 @@ ${sparkScopeSign}
              backgroundColor: "#7bb6dd",
              fill: true,
              lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
@@ -524,6 +538,8 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            },
            ${chart.jvm.executor.heap}
          ]
@@ -558,6 +574,8 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            },
            ${chart.jvm.executor.non-heap}
          ]
@@ -591,12 +609,16 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }, {
              data: [${chart.jvm.driver.heap.used}],
              label: "heap utilization[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
@@ -623,6 +645,8 @@ ${sparkScopeSign}
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            },
            {
              data: [${chart.driver.memoryOverhead}],
@@ -630,6 +654,8 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
