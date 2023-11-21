@@ -116,7 +116,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
     def generateStageData(stageCol: DataColumn): String = {
         val color = SeriesColor.randomColorModulo(stageCol.name.toInt)
         s"""{
-          |             data: [${stageCol.toDouble.mkString(",")}],
+          |             data: [${stageCol.values.mkString(",")}],
           |             label: "stageId=${stageCol.name}",
           |             borderColor: "${color.borderColor}",
           |             backgroundColor: "${color.backgroundColor}",

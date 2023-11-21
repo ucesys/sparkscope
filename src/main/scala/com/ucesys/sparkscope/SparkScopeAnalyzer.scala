@@ -42,7 +42,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         }
 
         // Interpolating metrics
-        val executorsMetricsMapInterpolated = interpolateExecutorMetrics(appContext.executorMap, driverExecutorMetrics.executorMetricsMap)
+        val executorsMetricsMapInterpolated = interpolateExecutorMetrics(appContext.executorMap, driverExecutorMetrics.executorMetricsMap, appContext)
         executorsMetricsMapInterpolated.foreach { case (id, metrics) =>
             metrics.foreach { metric => logger.println(s"\nInterpolated ${metric.name} metric for executor=${id}:\n${metric}") }
         }
@@ -113,11 +113,9 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
         logger.println(executorTimeLine)
 
-        val allMetricsTimestamps = executorsMetricsCombinedMapWithCpuUsage.flatMap { case (_, dt) =>
+        val allTimestamps = executorsMetricsCombinedMapWithCpuUsage.flatMap { case (_, dt) =>
             dt.select("t").values.map(_.toLong)
-        }.toSet.toSeq
-
-        val allTimestamps = (allMetricsTimestamps ++ appContext.stages.flatMap(stg => Seq(stg.startTime, stg.endTime))).sorted.map(_.toString)
+        }.toSet.toSeq.sorted.map(_.toString)
 
         val executorMetricsAligned = executorsMetricsCombinedMapWithCpuUsage.map{ case (id, dt) =>
             val existingTimestamps = dt.select("t").values
@@ -159,10 +157,12 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         // Stages
         val stageColumns: Seq[DataColumn] = appContext.stages.map{ stage =>
             val colVals: Seq[String] = allTimestamps.map(_.toLong).map{ ts =>
-                if (ts >= stage.startTime && ts <= stage.endTime) {
+                if (ts > stage.startTime && ts < stage.endTime) {
                     stage.numberOfTasks.toString
-                } else {
+                } else if (ts == stage.startTime || ts == stage.endTime) {
                     "0"
+                } else {
+                    "null"
                 }
             }
             DataColumn(stage.stageId, colVals)
@@ -190,7 +190,8 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
     }
 
     private def interpolateExecutorMetrics(executorMap: Map[String, ExecutorContext],
-                                           executorsMetricsMap: Map[String, Seq[DataTable]]): Map[String, Seq[DataTable]] = {
+                                           executorsMetricsMap: Map[String, Seq[DataTable]],
+                                           appContext: SparkScopeContext): Map[String, Seq[DataTable]] = {
         /*    Interpolating executor metrics to align their timestamps for aggregations. Also adds a "zero row" with start values for when executor was added.
 
                     RAW                      INTERPOLATED
@@ -232,9 +233,12 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
             (id, metricsWithZeroRows)
         }
 
-        val allTimestamps = executorsMetricsMapWithZeroRows.flatMap { case (_, metrics) =>
+
+        val allMetricsTimestamps = executorsMetricsMapWithZeroRows.flatMap { case (_, metrics) =>
             metrics.flatMap(metric => metric.select("t").values.map(_.toLong))
-        }.toSet.toSeq.sorted
+        }
+
+        val allTimestamps = (allMetricsTimestamps ++ appContext.stages.flatMap(stg => Seq(stg.startTime, stg.endTime))).toSet.toSeq.sorted
 
         executorsMetricsMapWithZeroRows.map { case (executorId, metricsSeq) =>
             val metricsInterpolated: Seq[DataTable] = metricsSeq.map(metrics => {
