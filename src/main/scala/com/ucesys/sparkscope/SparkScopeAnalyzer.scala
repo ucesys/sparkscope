@@ -17,7 +17,6 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
@@ -220,7 +219,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
             metrics.flatMap(metric => metric.select("t").values.map(_.toLong))
         }
 
-        val allTimestamps = (allMetricsTimestamps ++ appContext.stages.flatMap(stg => Seq(stg.startTime, stg.endTime))).toSet.toSeq.sorted
+        val allTimestamps = (allMetricsTimestamps ++ appContext.stages.flatMap(_.getTimeline)).toSet.toSeq.sorted
 
         executorsMetricsMapWithZeroRows.map { case (executorId, metricsSeq) =>
             val metricsInterpolated: Seq[DataTable] = metricsSeq.map(metrics => {

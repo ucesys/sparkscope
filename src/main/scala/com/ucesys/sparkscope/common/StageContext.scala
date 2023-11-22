@@ -1,8 +1,13 @@
 package com.ucesys.sparkscope.common
 
 import com.ucesys.sparklens.timespan.StageTimeSpan
+import com.ucesys.sparkscope.event.{StageCompletedEvent, StageSubmittedEvent}
 
-case class StageContext(stageId: String, startTime: Long, endTime: Long, numberOfTasks: Long)
+case class StageContext(stageId: String, startTime: Long, endTime: Long, numberOfTasks: Long) {
+    def getTimeline: Seq[Long] = Seq(getTimelineStart, (getTimelineStart + getTimelineEnd) / 2, getTimelineEnd)
+    def getTimelineStart: Long = startTime - 1
+    def getTimelineEnd: Long = endTime + 1
+}
 
 object StageContext {
     def apply(stgTimeSpan: StageTimeSpan): Option[StageContext] = {
@@ -11,5 +16,9 @@ object StageContext {
         } else {
             Some(StageContext(stgTimeSpan.stageID.toString, stgTimeSpan.startTime/1000, stgTimeSpan.endTime/1000, stgTimeSpan.numberOfTasks))
         }
+    }
+
+    def apply(submitted: StageSubmittedEvent, completed: StageCompletedEvent): StageContext = {
+        StageContext(submitted.stageId, submitted.submissionTime, completed.completionTime, submitted.numberOfTasks)
     }
 }

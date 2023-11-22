@@ -663,6 +663,98 @@ object TestHelpers extends FunSuite with MockFactory {
         csvReaderMock
     }
 
+    def mockMetricsEventLogStages(csvReaderMock: HadoopMetricReader, appId: String): HadoopMetricReader = {
+        val jvmHeapDriverCsv: String =
+            """t,value
+              |1700654082,136879104
+              |1700654099,108239904""".stripMargin
+
+        val jvmHeapUsageDriverCsv: String =
+            """t,value
+              |1700654082,0.12747859954833984
+              |1700654099,0.10080626606941223""".stripMargin
+
+        val jvmHeapMaxDriverCsv: String =
+            """t,value
+              |1700654082,1073741824
+              |1700654099,1073741824""".stripMargin
+
+        val jvmNonHeapDriverCsv: String =
+            """t,value
+              |1700654082,89620432
+              |1700654099,93666616""".stripMargin
+
+        (csvReaderMock.readDriver _).when(JvmHeapUsed).returns(DataTable.fromCsv("", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readDriver _).when(JvmHeapUsage).returns(DataTable.fromCsv("", jvmHeapUsageDriverCsv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readDriver _).when(JvmHeapMax).returns(DataTable.fromCsv("", jvmHeapMaxDriverCsv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readDriver _).when(JvmNonHeapUsed).returns(DataTable.fromCsv("", jvmNonHeapDriverCsv, ",", Seq("t", JvmNonHeapUsed.name)))
+
+        val jvmHeapExec0Csv: String =
+            """t,value
+              |1700654082,74032944
+              |1700654099,73224288""".stripMargin
+
+        val jvmHeapUsageExec0Csv: String =
+            """t,value
+              |1700654082,0.07733701917860243
+              |1700654099,0.07759124755859376""".stripMargin
+
+        val jvmHeapMaxExec0Csv: String =
+            """t,value
+              |1700654082,943718400
+              |1700654099,943718400""".stripMargin
+
+        val jvmNonHeapExec0Csv: String =
+            """t,value
+              |1700654082,67918808
+              |1700654099,68396480""".stripMargin
+
+        val jvmCpuTimeExec0Csv: String =
+            """t,value
+              |1700654082,4076184096
+              |1700654099,5137414040""".stripMargin
+
+        val jvmHeapExec1Csv: String =
+            """t,value
+              |1700654082,108529560
+              |1700654099,86752416""".stripMargin
+
+        val jvmHeapUsageExec1Csv: String =
+            """t,value
+              |1700654082,0.11500205993652343
+              |1700654099,0.09192616780598958""".stripMargin
+
+        val jvmHeapMaxExec1Csv: String =
+            """t,value
+              |1700654082,943718400
+              |1700654099,943718400""".stripMargin
+
+        val jvmNonHeapExec1Csv: String =
+            """t,value
+              |1700654082,68071032
+              |1700654099,68522480""".stripMargin
+
+        val jvmCpuTimeExec1Csv: String =
+            """t,value
+              |1700654082,4206969830
+              |1700654099,5259304929""".stripMargin
+
+
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "0").returns(DataTable.fromCsv("", jvmHeapExec0Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "0").returns(DataTable.fromCsv("", jvmHeapUsageExec0Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "0").returns(DataTable.fromCsv("", jvmHeapMaxExec0Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "0").returns(DataTable.fromCsv("", jvmNonHeapExec0Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(CpuTime, "0").returns(DataTable.fromCsv("", jvmCpuTimeExec0Csv, ",", Seq("t", CpuTime.name)))
+
+        (csvReaderMock.readExecutor _).when(JvmHeapUsed, "1").returns(DataTable.fromCsv("", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapUsage, "1").returns(DataTable.fromCsv("", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage.name)))
+        (csvReaderMock.readExecutor _).when(JvmHeapMax, "1").returns(DataTable.fromCsv("", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax.name)))
+        (csvReaderMock.readExecutor _).when(JvmNonHeapUsed, "1").returns(DataTable.fromCsv("", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed.name)))
+        (csvReaderMock.readExecutor _).when(CpuTime, "1").returns(DataTable.fromCsv("", jvmCpuTimeExec1Csv, ",", Seq("t", CpuTime.name)))
+
+        csvReaderMock
+    }
+
     def getPropertiesLoaderFactoryMock(loader: PropertiesLoader): PropertiesLoaderFactory = {
         val propertiesLoaderFactoryMock = stub[PropertiesLoaderFactory]
         (propertiesLoaderFactoryMock.getPropertiesLoader _).when(MetricsPropertiesPath).returns(loader)

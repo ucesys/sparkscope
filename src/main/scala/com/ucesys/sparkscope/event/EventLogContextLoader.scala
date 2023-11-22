@@ -24,20 +24,15 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         val appStartEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventAppStart).map(ApplicationStartEvent(_))
         val appEndEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventAppEnd).map(ApplicationEndEvent(_))
         val envUpdateEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventEnvUpdate).map(EnvUpdateEvent(_))
-        val execAddedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorAdded).map(ExecutorAddedEvent(_))
-        val execRemovedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorRemoved).map(ExecutorRemovedEvent(_))
-        val stageSubmittedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventStageSubmitted).map(StageSubmittedEvent(_))
-        val stageCompletedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventStageCompleted).map(StageCompletedEvent(_))
+        val execAddedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorAdded).flatMap(ExecutorAddedEvent(_))
+        val execRemovedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorRemoved).flatMap(ExecutorRemovedEvent(_))
+        val stageSubmittedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventStageSubmitted).flatMap(StageSubmittedEvent(_))
+        val stageCompletedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventStageCompleted).flatMap(StageCompletedEvent(_))
 
         val stages: Seq[StageContext] = stageSubmittedEvents.flatMap { stageSubmission =>
             val stageCompletion = stageCompletedEvents.find(_.stageId == stageSubmission.stageId)
             stageCompletion match {
-                case Some(stageCompletion) => Some(StageContext(
-                    stageSubmission.stageId,
-                    stageSubmission.submissionTime,
-                    stageCompletion.completionTime,
-                    stageSubmission.numberOfTasks,
-                ))
+                case Some(stageCompletion) => Some(StageContext(stageSubmission, stageCompletion))
                 case None => None
             }
         }
@@ -45,7 +40,7 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         val executorMap: Map[String, ExecutorContext] = execAddedEvents.map { execAddedEvent =>
             (
                 execAddedEvent.executorId,
-              ExecutorContext(
+                ExecutorContext(
                     executorId=execAddedEvent.executorId,
                     cores=execAddedEvent.cores,
                     addTime=execAddedEvent.ts,

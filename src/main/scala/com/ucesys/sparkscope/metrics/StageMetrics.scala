@@ -17,9 +17,9 @@ object StageMetrics {
         // Stages
         val stageColumns: Seq[DataColumn] = stages.map { stage =>
             val colVals: Seq[String] = allTimestamps.map(_.toLong).map { ts =>
-                if (ts > stage.startTime && ts < stage.endTime) {
+                if (ts > stage.getTimelineStart && ts < stage.getTimelineEnd) {
                     stage.numberOfTasks.toString
-                } else if (ts == stage.startTime || ts == stage.endTime) {
+                } else if (ts == stage.getTimelineStart || ts == stage.getTimelineEnd) {
                     "0"
                 } else {
                     "null"

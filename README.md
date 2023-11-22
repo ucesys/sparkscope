@@ -152,7 +152,24 @@ spark-submit \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
 
-### Running SparkScope as standalone app
+### Running SparkScope as standalone app for running/finished Spark Application
+Your application needs to have eventLog and metrics configured(but not the listener)
+```agsl
+spark-submit \
+--master yarn \
+--files ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink \
+--conf spark.metrics.conf.*.sink.csv.period=5 \
+--conf spark.metrics.conf.*.sink.csv.unit=seconds \
+--conf spark.metrics.conf.*.sink.csv.directory=<path-to-metrics-dir> \
+--class org.apache.spark.examples.SparkPi \
+./spark-examples_2.10-1.1.1.jar 5000
+```
+Running sparkscope as java-app
 ```agsl
 java \
 -cp ./sparkscope-spark3-0.1.3-SNAPSHOT.jar:$(hadoop classpath) \
