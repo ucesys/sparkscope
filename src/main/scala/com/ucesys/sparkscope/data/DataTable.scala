@@ -18,7 +18,7 @@ case class DataTable(name: String, columns: Seq[DataColumn]) {
 
     def toCsv(delimeter: String): String = this.toRowsWithHeader.map(_.mkString(delimeter)).mkString("\n")
 
-    override def toString(): String = {
+    override def toString: String = {
         val paddedCols = this.columns.map { col =>
             val colWithName = Seq(col.name) ++ col.values
             val maxStrLength = colWithName.map(_.length).max

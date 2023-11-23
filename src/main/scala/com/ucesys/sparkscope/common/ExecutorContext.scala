@@ -19,10 +19,10 @@ case class ExecutorContext(executorId: String,
 
 object ExecutorContext {
     def apply(executorTimeSpan: ExecutorTimeSpan): ExecutorContext = {
-            val removeTime: Option[Long] = executorTimeSpan.endTime match {
-                case 0 => None
-                case _ => Some(executorTimeSpan.endTime)
-            }
-            ExecutorContext(executorTimeSpan.executorID, executorTimeSpan.cores, executorTimeSpan.startTime, removeTime)
+        val removeTime: Option[Long] = executorTimeSpan.endTime match {
+            case 0 => None
+            case _ => Some(executorTimeSpan.endTime)
+        }
+        ExecutorContext(executorTimeSpan.executorID, executorTimeSpan.cores, executorTimeSpan.startTime, removeTime)
     }
 }

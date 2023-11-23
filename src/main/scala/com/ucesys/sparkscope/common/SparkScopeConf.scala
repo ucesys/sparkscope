@@ -7,4 +7,6 @@ case class SparkScopeConf(driverMetricsDir: String,
                           htmlReportPath: String,
                           appName: Option[String],
                           region: Option[String],
+                          driverMemOverhead: MemorySize,
+                          executorMemOverhead: MemorySize,
                           sparkConf: SparkConf)

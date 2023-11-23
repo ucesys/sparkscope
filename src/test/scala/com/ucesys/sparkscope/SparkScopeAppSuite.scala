@@ -180,5 +180,34 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
     }
+
+    test("SparkScopeApp.runFromEventLog for finished application with stage events") {
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
+        Given("Path to eventLog for running application with removed executors")
+        val appId = "app-20231122115433-0000-eventLog-finished-stages"
+        val eventLogPath = s"src/test/resources/${appId}"
+        val ac = mockAppContextWithDownscalingMuticore("", appId)
+        val csvReaderMock = stub[HadoopMetricReader]
+        mockMetricsEventLogStages(csvReaderMock, ac.appId)
+
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
+        val metricsLoaderFactory = stub[MetricsLoaderFactory]
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
+
+        When("SparkScopeApp.runFromEventLog")
+        SparkScopeApp.runFromEventLog(
+            SparkScopeArgs(eventLogPath, None, None, Some(".tests")),
+            new SparkScopeAnalyzer,
+            new EventLogContextLoader,
+            new SparkScopeConfLoader,
+            new FileReaderFactory,
+            getPropertiesLoaderFactoryMock,
+            metricsLoaderFactory,
+            new ReportGeneratorFactory
+        )
+
+        Then("Report should be generated")
+        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+    }
 }
 

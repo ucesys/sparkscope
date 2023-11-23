@@ -28,7 +28,7 @@ import scala.collection.mutable
 This keeps track of data per stage
 */
 
-class StageTimeSpan(val stageID: Int, numberOfTasks: Long) extends TimeSpan {
+class StageTimeSpan(val stageID: Int, val numberOfTasks: Long) extends TimeSpan {
   var stageMetrics  = new AggregateMetrics()
   var tempTaskTimes = new mutable.ListBuffer[( Long, Long, Long)]
   var minTaskLaunchTime = Long.MaxValue

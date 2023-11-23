@@ -1,0 +1,3356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SparkScope report: <APP-ID> </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <style>
+        canvas{
+            border:10px solid white;
+        }
+        .row{
+            display: flex;
+            width: 100%
+        }
+        /* Style the button that is used to open and close the collapsible content */
+        .collapsible {
+          background-color: #999;
+          color: black;
+          cursor: pointer;
+          padding: 0px;
+          width: 14%;
+          border: solid 1px;
+          text-align: left;
+          outline: none;
+          font-size: 22px;
+<!--          font-family: georgia,garamond,serif;-->
+          border-radius: 20px;
+          font-weight: bold;
+          text-align: center;
+        }
+
+        /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+        .active, .collapsible:hover {
+          text-decoration: underline;
+        }
+
+        /* Style the collapsible content. Note: hidden by default */
+        .content {
+          padding: 0 18px;
+          display: none;
+          overflow: hidden;
+          background-color: #f1f1f1;
+        }
+
+    .styled-table {
+        border-collapse: collapse;
+        margin-left: 1%;
+        margin-right: 1%;
+        float: left;
+        width: 19%;
+        font-size: 0.7em;
+        font-family: sans-serif;
+        min-width: 200px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        border-right: 2px solid #444;
+        border-left: 2px solid #444;
+    }
+     .styled-table thead tr {
+        background-color: #444;
+        color: #ffffff;
+        text-align: left;
+    }
+    .styled-table th, .styled-table td {
+        padding: 12px 10px;
+    }
+    .styled-table tbody tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    .styled-table tbody tr:nth-of-type(even) {
+        background-color: #f3f3f3;
+    }
+
+    .styled-table tbody tr:last-of-type {
+        border-bottom: 2px solid #444;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Create a two-column layout */
+    .column {
+      float: left;
+      width: 50%;
+      padding: 5px;
+    }
+
+    /* Clearfix (clear floats) */
+    .row::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+
+    /* Tooltip container */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+<!--      border-bottom: 1px dotted black; /* If you want dots under the hoverable text */-->
+    }
+
+    /* Tooltip text */
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      padding: 5px 0;
+      border-radius: 6px;
+
+      /* Position the tooltip text */
+      position: absolute;
+      z-index: 1;
+      bottom: 100%;
+      left: 50%;
+      margin-left: -180px;
+
+      /* Fade in tooltip */
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    /* Tooltip arrow */
+    .tooltip .tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 90%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #555 transparent transparent transparent;
+    }
+
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    </style>
+</head>
+<body>
+<div class="box">
+<pre>
+
+     ____              __    ____
+    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+     /_/                             /_/    spark3-v0.1.4
+
+</pre>
+</div>
+
+<br>
+<div>
+    <pre style="color:red">WARNINGS FOUND:
+- CPU utlization is LOW(23.70%)
+- Heap utlization is LOW(9.44%)</pre>
+</div>
+<br>
+<div>
+    <table class="styled-table" style="float: left;margin-left:7%">
+        <thead>
+        <tr>
+            <th>Application Info</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Application Name</td>
+            <td>WordCount</td>
+        </tr>
+        <tr>
+            <td>Application Id</td>
+            <td>app-20231121183139-0024</td>
+        </tr>
+        <tr>
+            <td>Application Start</td>
+            <td>2023-11-21T18:31:37</td>
+        </tr>
+        <tr>
+            <td>Application End</td>
+            <td>2023-11-21T18:32:15</td>
+        </tr>
+        <tr>
+            <td>Application Duration</td>
+            <td>38s</td>
+        </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <table class="styled-table" style="float: left">
+        <thead>
+        <tr>
+            <th>Application Stats</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Total CPU utilization of application</td>
+            <td>23.70%</td>
+        </tr>
+        <tr>
+            <td>Total heap utilization of application</td>
+            <td>9.44%</td>
+        </tr>
+        <tr>
+            <td>Peak heap utilization of application</td>
+            <td>12.87%</td>
+        </tr>
+        <tr>
+            <td>Total GB-hours of wasted heap memory</td>
+            <td>0.0335 GB-hours</td>
+        </tr>
+        <tr>
+            <td>Total core-hours of wasted CPU time</td>
+            <td>0.0223 Core-hours</td>
+        </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <table class="styled-table" style="float: left;">
+        <thead>
+        <tr>
+            <th>Executor Stats</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Avg heap utilization among executors</td>
+            <td>122MB(9.44%)</td>
+        </tr>
+        <tr>
+            <td>Peak heap utilization among executors</td>
+            <td>224MB(17.26%)</td>
+        </tr>
+        <tr>
+            <td>Avg non-heap utilization among executors</td>
+            <td>67MB</td>
+        </tr>
+        <tr>
+            <td>Peak non-heap utilization among executors</td>
+            <td>86MB</td>
+        </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <table class="styled-table" style="float: left;">
+        <thead>
+        <tr>
+            <th>Driver Stats</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Avg driver heap utilization</td>
+            <td>112MB(11.04%)</td>
+        </tr>
+        <tr>
+            <td>Peak driver heap utilization</td>
+            <td>195MB(19.10%)</td>
+        </tr>
+        <tr>
+            <td>Avg driver non-heap utilization</td>
+            <td>131MB</td>
+        </tr>
+        <tr>
+            <td>Peak driver non-heap utilization</td>
+            <td>161MB</td>
+        </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+</div>
+<br>
+
+<div style="clear: both;"> </div>
+<div  class="row" style="width:100%">
+    <div style="width:45%"><canvas id="cpuUtilization"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application CPU Utilization</b> is sum of used CPUs across all executors divided by sum of allocated CPUs of all executors </span></div>
+    <div style="width:45%"><canvas id="clusterHeapUsagePerc"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Utilization</b> is sum of used heap across all executors divided by sum of heap sizes of all executors </span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('cpuUtilization').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15','2023-11-21T18:32:16'],
+         datasets: [{
+             data: [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,100.0,0.0,0.0,37.3,61.150000000000006,0.0,0.0,91.05,34.660000000000004,19.84,48.69,4.07,0.08,30.43,53.52,29.830000000000002,33.87,11.24,9.85,15.76],
+             label: "CPU Utilization[%]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+             responsive: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "CPU Utilization as percentage of allocated CPU across all Executors",
+          fontSize: 16
+        },
+        scales: {
+            yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true,
+                        steps: 10,
+                        stepValue: 5,
+                        max: 100
+                    }
+                }]
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('clusterHeapUsagePerc').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15','2023-11-21T18:32:16'],
+         datasets: [{
+             data: [0.0,5.36,5.680000000000001,5.7,5.72,6.38,6.16,6.23,9.049999999999999,9.78,10.73,10.26,12.3,12.68,9.84,11.61,9.99,9.9,12.09,11.97,12.22,11.28,12.870000000000001,10.54,9.22,10.42,11.360000000000001,12.030000000000001,12.15],
+             label: "Heap Utilization[%]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Heap Utilization as percentage of allocated Heap across all Executors",
+          fontSize: 16
+        },
+        scales: {
+            yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true,
+                        steps: 10,
+                        stepValue: 5,
+                        max: 100
+                    }
+                }]
+        },
+      }
+     });
+</script>
+
+<div  class="row">
+    <div style="width:45%"><canvas id="clusterCPUUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Total cores available</b> is sum of available cores across all executors </br> </br> <b>Total cores used</b> is sum of used cores across all executors</span></div>
+    <div style="width:45%"><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Size</b> is sum of heap sizes of all executors </br> </br> <b>Application Heap Utilization</b> is sum of used heap across all executors</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('clusterCPUUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15','2023-11-21T18:32:16'],
+         datasets: [
+           {
+             data: [3.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,1.0],
+             label: "Total Cores available",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             responsive: true,
+             lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+            {
+             data: [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,0.0,0.0,1.4918,2.4459,0.0,0.0,3.6421,1.3864,0.7938,1.9474,0.163,0.0033,1.2171,2.1407,1.193,1.3546,0.4494,0.394,0.1576],
+             label: "Total Cores used",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             responsive: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "CPU Allocation and Utilization aggregated across all Executors",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('clusterHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15','2023-11-21T18:32:16'],
+         datasets: [{
+             data: [3900.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,5200.0,1300.0],
+             label: "Application Heap Size[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }, {
+             data: [0.0,278.5414123535156,295.5414123535156,296.5414123535156,297.5414123535156,331.5414123535156,320.5309524536133,323.81858825683594,470.81858825683594,508.81858825683594,557.8185882568359,533.3472061157227,639.3472061157227,660.3472061157227,511.67432403564453,603.6743240356445,519.4051666259766,514.7571411132812,628.4677963256836,623.5243759155273,635.5243759155273,586.4485244750977,669.4485244750977,548.2855529785156,479.6975860595703,541.9165802001953,590.5647277832031,625.5647277832031,157.9617919921875],
+             label: "Application Heap Utilization[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Heap Allocation and Utilization aggregated across all Executors",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<div  class="row">
+    <div style="width:45%"><canvas id="numberOfExecutors" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Number of executors</span></div>
+    <div style="width:45%"><canvas id="stages" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Stages</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('numberOfExecutors').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15','2023-11-21T18:32:16'],
+         datasets: [{
+             data: [3.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,1.0],
+             label: "Number of Executors",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+             lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+        options: {
+            title: {
+                display: true,
+                text: "Number of Executors",
+                fontSize: 16
+            },
+            scales: {
+                yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('stages').getContext('2d');
+    var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15','2023-11-21T18:32:16'],
+         datasets: [{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null],
+             label: "stageId=16",
+             borderColor: "#CD5C5C",
+             backgroundColor: "#F08080",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,0,20,20,20,20,20,0,null,null,null,null,null,null,null,null,null],
+             label: "stageId=3",
+             borderColor: "#4B0082",
+             backgroundColor: "#9370DB",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null,null,null,null,null,null,null],
+             label: "stageId=8",
+             borderColor: "#4B0082",
+             backgroundColor: "#9370DB",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,2,2,0,null,null,null,null,null],
+             label: "stageId=7",
+             borderColor: "#f1bd3e",
+             backgroundColor: "#f4cd6e",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null],
+             label: "stageId=13",
+             borderColor: "#4B0082",
+             backgroundColor: "#9370DB",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,0,2,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+             label: "stageId=1",
+             borderColor: "#CD5C5C",
+             backgroundColor: "#F08080",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null],
+             label: "stageId=20",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,null,null,null,null,null,null,null,null,null],
+             label: "stageId=6",
+             borderColor: "#CD5C5C",
+             backgroundColor: "#F08080",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,20,0,null,null,null],
+             label: "stageId=10",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},{
+             data: [null,null,null,null,0,2,2,2,2,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+             label: "stageId=0",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             lineTension: 0.0,
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+}]
+       },
+        options: {
+            title: {
+                display: true,
+                text: "Number of Tasks per Stage",
+                fontSize: 16
+            },
+            scales: {
+                yAxes: [{
+                    display: true,
+                    stacked: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    }
+     );
+</script>
+
+<div  class="row" >
+    <div style="width:45%"><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average heap utilization across all executors</span></div>
+    <div style="width:45%"><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average non-heap utilization across all executors</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('executorHeap').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15','2023-11-21T18:32:16'],
+         datasets: [{
+             data: [1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0,1300.0],
+             label: "heap size[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+           
+{
+             data: [null,70.78875732421875,73.78875732421875,74.78875732421875,74.78875732421875,74.78875732421875,74.78875732421875,74.78875732421875,74.78875732421875,75.78875732421875,99.78875732421875,48.31737518310547,152.31737518310547,172.31737518310547,193.31737518310547,224.31737518310547,121.123046875,143.00808715820312,176.00808715820312,191.00808715820312,194.00808715820312,200.00808715820312,200.00808715820312,118.8987808227539,107.87744140625,175.87744140625,175.87744140625,175.87744140625,null],
+             label: "executorId=2",
+             borderColor: "#f1bd3e",
+             backgroundColor: "#f4cd6e",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},
+{
+             data: [0.0,67.000244140625,73.000244140625,73.000244140625,74.000244140625,89.000244140625,45.989784240722656,119.98978424072266,180.98978424072266,198.98978424072266,199.98978424072266,200.98978424072266,200.98978424072266,200.98978424072266,115.97953796386719,133.9795379638672,148.09483337402344,117.84744262695312,149.6628646850586,149.6628646850586,152.6628646850586,160.6628646850586,160.6628646850586,127.17269897460938,119.37060546875,88.46194458007812,110.46194458007812,124.46194458007812,null],
+             label: "executorId=1",
+             borderColor: "#CD5C5C",
+             backgroundColor: "#F08080",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},
+{
+             data: [0.0,72.173583984375,75.173583984375,75.173583984375,75.173583984375,75.173583984375,76.173583984375,76.173583984375,76.173583984375,76.173583984375,78.173583984375,78.173583984375,78.173583984375,78.173583984375,85.173583984375,104.173583984375,120.173583984375,135.173583984375,155.173583984375,133.23016357421875,134.23016357421875,89.1746597290039,157.1746597290039,175.1746597290039,118.54721069335938,148.55567932128906,156.20382690429688,160.20382690429688,null],
+             label: "executorId=0",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},
+{
+             data: [0.0,68.57882690429688,73.57882690429688,73.57882690429688,73.57882690429688,92.57882690429688,123.57882690429688,52.86646270751953,138.86646270751953,157.86646270751953,179.86646270751953,205.86646270751953,207.86646270751953,208.86646270751953,117.20382690429688,141.20382690429688,130.01370239257812,118.72802734375,147.62326049804688,149.62326049804688,154.62326049804688,136.60291290283203,151.60291290283203,127.03941345214844,133.90232849121094,129.02151489257812,148.02151489257812,165.02151489257812,157.9617919921875],
+             label: "executorId=3",
+             borderColor: "#4B0082",
+             backgroundColor: "#9370DB",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+}
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Executor Heap Memory Utilization",
+          fontSize: 16
+        },
+        scales: {
+            yAxes: [{
+                display: true,
+                ticks: {
+                    min: 0
+                }
+            }]
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('executorNonHeap').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15','2023-11-21T18:32:16'],
+         datasets: [{
+             data: [500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0,500.0],
+             label: "memory overhead[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+           
+{
+             data: [null,49.33940887451172,50.329627990722656,50.35645294189453,50.39331817626953,50.41008758544922,50.437034606933594,50.440696716308594,50.450347900390625,50.642967224121094,56.38407897949219,66.07677459716797,71.3112564086914,72.7304458618164,76.25,78.41031646728516,79.32209014892578,80.103515625,80.35552978515625,82.85042572021484,83.39500427246094,84.22172546386719,84.24915313720703,84.5098648071289,84.93692016601562,85.2796401977539,85.35064697265625,85.37763977050781,null],
+             label: "executorId=2",
+             borderColor: "#f1bd3e",
+             backgroundColor: "#f4cd6e",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},
+{
+             data: [0.0,49.195762634277344,50.46697235107422,50.48822784423828,50.51957702636719,54.08422088623047,62.39551544189453,70.9841537475586,71.80428314208984,73.18074798583984,73.42584991455078,73.43195343017578,73.43260955810547,73.44837188720703,75.58160400390625,78.5428695678711,79.74134063720703,80.65400695800781,81.5073471069336,81.52229309082031,81.93098449707031,82.93467712402344,82.97237396240234,83.1826400756836,83.51012420654297,83.8626708984375,83.94205474853516,85.35871887207031,null],
+             label: "executorId=1",
+             borderColor: "#CD5C5C",
+             backgroundColor: "#F08080",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},
+{
+             data: [0.0,49.85325622558594,50.48883056640625,50.51972961425781,50.5487060546875,50.5682373046875,50.59191131591797,50.599693298339844,50.60936737060547,50.616661071777344,50.84253692626953,50.8548583984375,50.86366271972656,50.902923583984375,52.62257385253906,57.08705139160156,60.484588623046875,65.48566436767578,69.15618896484375,74.75865173339844,74.84809875488281,76.61445617675781,79.02395629882812,79.90476989746094,80.69083404541016,81.31428527832031,83.05091094970703,83.69932556152344,null],
+             label: "executorId=0",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+},
+{
+             data: [0.0,49.108734130859375,50.24895477294922,50.27301025390625,50.303382873535156,54.889251708984375,62.72278594970703,70.04829406738281,71.23020935058594,72.61219024658203,73.45081329345703,73.59839630126953,73.67464447021484,73.70336151123047,76.14522552490234,78.90390014648438,80.12820434570312,81.0672378540039,81.39785766601562,81.82696533203125,81.98107147216797,82.23047637939453,82.29502868652344,82.47378540039062,82.81871032714844,83.0526351928711,83.1797866821289,85.80506134033203,86.22196960449219],
+             label: "executorId=3",
+             borderColor: "#4B0082",
+             backgroundColor: "#9370DB",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+}
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Executor Non-Heap Memory Utilization",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<div  class="row" >
+    <div style="width:45%"><canvas id="driverHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver heap utilization vs heap size</span></div>
+    <div style="width:45%"><canvas id="driverNonHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver non-heap utilization</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('driverHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:40','2023-11-21T18:31:41','2023-11-21T18:31:42','2023-11-21T18:31:43','2023-11-21T18:31:44','2023-11-21T18:31:45','2023-11-21T18:31:46','2023-11-21T18:31:47','2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15'],
+         datasets: [{
+             data: [1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0,1024.0],
+             label: "heap size[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }, {
+             data: [74.5859375,62.845237731933594,72.8452377319336,85.8452377319336,105.8452377319336,120.8452377319336,143.8452377319336,70.84370422363281,95.84370422363281,114.84370422363281,160.8437042236328,80.48591613769531,144.4859161376953,152.4859161376953,152.4859161376953,152.4859161376953,152.4859161376953,69.58203125,91.58203125,92.58203125,92.58203125,113.58203125,118.58203125,118.58203125,121.58203125,124.58203125,127.58203125,153.58203125,195.58203125,76.41533660888672,76.41533660888672,91.41533660888672,93.41533660888672,98.41533660888672,122.41533660888672,145.41533660888672],
+             label: "heap utilization[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Driver Heap Utilization",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('driverNonHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-11-21T18:31:40','2023-11-21T18:31:41','2023-11-21T18:31:42','2023-11-21T18:31:43','2023-11-21T18:31:44','2023-11-21T18:31:45','2023-11-21T18:31:46','2023-11-21T18:31:47','2023-11-21T18:31:48','2023-11-21T18:31:49','2023-11-21T18:31:50','2023-11-21T18:31:51','2023-11-21T18:31:52','2023-11-21T18:31:53','2023-11-21T18:31:54','2023-11-21T18:31:55','2023-11-21T18:31:56','2023-11-21T18:31:57','2023-11-21T18:31:58','2023-11-21T18:31:59','2023-11-21T18:32','2023-11-21T18:32:01','2023-11-21T18:32:02','2023-11-21T18:32:03','2023-11-21T18:32:04','2023-11-21T18:32:05','2023-11-21T18:32:06','2023-11-21T18:32:07','2023-11-21T18:32:08','2023-11-21T18:32:09','2023-11-21T18:32:10','2023-11-21T18:32:11','2023-11-21T18:32:12','2023-11-21T18:32:13','2023-11-21T18:32:14','2023-11-21T18:32:15'],
+         datasets: [
+           {
+             data: [69.03495788574219,77.40382385253906,80.06511688232422,83.57414245605469,86.60163116455078,89.63282012939453,93.95169830322266,98.27140808105469,103.76426696777344,107.67157745361328,117.59871673583984,127.37931060791016,137.73194885253906,139.28663635253906,139.28911590576172,139.3927230834961,139.4017562866211,144.01593780517578,146.07357788085938,146.30741119384766,146.37064361572266,148.6947479248047,149.1785888671875,149.24759674072266,149.59439849853516,149.94058227539062,150.38214874267578,152.42178344726562,156.38906860351562,157.28857421875,157.34439086914062,157.93938446044922,158.19281005859375,158.545654296875,159.63709259033203,161.44501495361328],
+             label: "non-heap utilization[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+           {
+             data: [384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0,384.0],
+             label: "memory overhead[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Driver Non-Heap Utilization",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<br><br>
+<button type="button" class="collapsible">View Sparklens Report</button>
+<div class="content">
+<pre>
+------------------------------SimpleAppAnalyzer------------------------------------
+
+Printing application meterics. These metrics are collected at task-level granularity and aggregated across the app (all tasks, stages, and jobs).
+
+ AggregateMetrics (Application Metrics) total measurements 54 
+                NAME                        SUM                MIN           MAX                MEAN         
+ diskBytesSpilled                            0.0 KB         0.0 KB         0.0 KB              0.0 KB
+ executorRuntime                            38.0 ss         3.0 ms         3.3 ss            704.0 ms
+ inputBytesRead                             21.7 MB         0.0 KB         4.1 MB            410.7 KB
+ jvmGCTime                                   1.6 ss         0.0 ms        95.0 ms             29.0 ms
+ memoryBytesSpilled                          0.0 KB         0.0 KB         0.0 KB              0.0 KB
+ outputBytesWritten                          0.0 KB         0.0 KB         0.0 KB              0.0 KB
+ peakExecutionMemory                       170.8 MB         0.0 KB        64.1 MB              3.2 MB
+ resultSize                                205.4 KB         1.3 KB        17.8 KB              3.8 KB
+ shuffleReadBytesRead                        2.0 MB         0.0 KB       353.8 KB             38.3 KB
+ shuffleReadFetchWaitTime                    0.0 ms         0.0 ms         0.0 ms              0.0 ms
+ shuffleReadLocalBlocks                         141              0             20                   2
+ shuffleReadRecordsRead                   2,341,898              0         57,932              43,368
+ shuffleReadRemoteBlocks                          0              0              0                   0
+ shuffleWriteBytesWritten                    2.2 MB         0.0 KB       261.2 KB             40.9 KB
+ shuffleWriteRecordsWritten               3,492,442              0        647,609              64,674
+ shuffleWriteTime                            4.0 ss         0.0 ms       172.6 ms             74.9 ms
+ taskDuration                               49.8 ss        30.0 ms         5.3 ss            921.0 ms
+
+
+
+------------------------------HostTimelineAnalyzer------------------------------------
+
+Total Hosts 1, and the maximum concurrent hosts = 1
+
+
+Host 172.18.0.3 startTime 06:31:48:452 executors count 4
+Done printing host timeline
+======================
+
+
+------------------------------ExecutorTimelineAnalyzer------------------------------------
+
+Printing executors timeline....
+
+Total Executors 4, and maximum concurrent executors = 4
+At 06:31 executors added 4 & removed  0 currently available 4
+
+Done printing executors timeline...
+============================
+
+
+------------------------------AppTimelineAnalyzer------------------------------------
+
+Printing Application timeline 
+
+06:31:37:236 app started 
+06:31:52:695 JOB 0 started : duration 00m 04s 
+[      0    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ]
+06:31:52:896      Stage 0 started : duration 00m 04s 
+06:31:57:276      Stage 0 ended : maxTaskTime 3252 taskCount 2
+06:31:57:296 JOB 0 ended 
+06:31:57:982 JOB 1 started : duration 00m 03s 
+[      1 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ]
+06:31:58:007      Stage 1 started : duration 00m 03s 
+06:32:01:500      Stage 1 ended : maxTaskTime 2489 taskCount 2
+06:32:01:504 JOB 1 ended 
+06:32:01:802 JOB 2 started : duration 00m 05s 
+[      3 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ]
+06:32:01:850      Stage 3 started : duration 00m 05s 
+06:32:07:121      Stage 3 ended : maxTaskTime 2822 taskCount 20
+06:32:07:127 JOB 2 ended 
+06:32:07:331 JOB 3 started : duration 00m 00s 
+[      6           ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  ]
+06:32:07:403      Stage 6 started : duration 00m 00s 
+06:32:07:858      Stage 6 ended : maxTaskTime 162 taskCount 1
+06:32:07:867 JOB 3 ended 
+06:32:08:332 JOB 4 started : duration 00m 02s 
+[      7 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ]
+06:32:08:355      Stage 7 started : duration 00m 02s 
+06:32:11:102      Stage 7 ended : maxTaskTime 2383 taskCount 2
+06:32:11:105 JOB 4 ended 
+06:32:08:356 JOB 5 started : duration 00m 00s 
+[      8    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ]
+06:32:08:376      Stage 8 started : duration 00m 00s 
+06:32:08:836      Stage 8 ended : maxTaskTime 16 taskCount 4
+06:32:08:842 JOB 5 ended 
+06:32:11:173 JOB 6 started : duration 00m 02s 
+[     10 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ]
+06:32:11:193      Stage 10 started : duration 00m 02s 
+06:32:13:821      Stage 10 ended : maxTaskTime 801 taskCount 20
+06:32:13:825 JOB 6 ended 
+06:32:14:043 JOB 7 started : duration 00m 00s 
+[     13       ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ]
+06:32:14:085      Stage 13 started : duration 00m 00s 
+06:32:14:548      Stage 13 ended : maxTaskTime 223 taskCount 1
+06:32:14:552 JOB 7 ended 
+06:32:14:587 JOB 8 started : duration 00m 00s 
+[     16             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ]
+06:32:14:651      Stage 16 started : duration 00m 00s 
+06:32:14:985      Stage 16 ended : maxTaskTime 187 taskCount 1
+06:32:14:989 JOB 8 ended 
+06:32:15:176 JOB 9 started : duration 00m 00s 
+[     20    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ]
+06:32:15:199      Stage 20 started : duration 00m 00s 
+06:32:15:681      Stage 20 ended : maxTaskTime 205 taskCount 1
+06:32:15:684 JOB 9 ended 
+06:32:15:801 app ended 
+
+
+------------------------------JobOverlapAnalyzer------------------------------------
+
+Checking for job overlap...
+
+ 
+ JobGroup 1  SQLExecID (-1)
+ Number of Jobs 1  JobIDs(0)
+ Timing [06:31:52:695 - 06:31:57:296]
+ Duration  00m 04s
+ 
+ JOB 0 Start 06:31:52:695  End 06:31:57:296
+ 
+ 
+ JobGroup 2  SQLExecID (0)
+ Number of Jobs 1  JobIDs(1)
+ Timing [06:31:57:982 - 06:32:01:504]
+ Duration  00m 03s
+ 
+ JOB 1 Start 06:31:57:982  End 06:32:01:504
+ 
+ 
+ JobGroup 3  SQLExecID (0)
+ Number of Jobs 1  JobIDs(2)
+ Timing [06:32:01:802 - 06:32:07:127]
+ Duration  00m 05s
+ 
+ JOB 2 Start 06:32:01:802  End 06:32:07:127
+ 
+ 
+ JobGroup 4  SQLExecID (0)
+ Number of Jobs 1  JobIDs(3)
+ Timing [06:32:07:331 - 06:32:07:867]
+ Duration  00m 00s
+ 
+ JOB 3 Start 06:32:07:331  End 06:32:07:867
+ 
+ 
+ JobGroup 5  SQLExecID (1)
+ Number of Jobs 2  JobIDs(4,5)
+ Timing [06:32:08:332 - 06:32:11:105]
+ Duration  00m 02s
+ 
+[JOBID       4 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||]
+[JOBID       5 ||||||||||||||                                                                  ]
+ JOB 4 Start 06:32:08:332  End 06:32:11:105
+ JOB 5 Start 06:32:08:356  End 06:32:08:842
+ 
+ 
+ JobGroup 6  SQLExecID (1)
+ Number of Jobs 1  JobIDs(6)
+ Timing [06:32:11:173 - 06:32:13:825]
+ Duration  00m 02s
+ 
+ JOB 6 Start 06:32:11:173  End 06:32:13:825
+ 
+ 
+ JobGroup 7  SQLExecID (1)
+ Number of Jobs 1  JobIDs(7)
+ Timing [06:32:14:043 - 06:32:14:552]
+ Duration  00m 00s
+ 
+ JOB 7 Start 06:32:14:043  End 06:32:14:552
+ 
+ 
+ JobGroup 8  SQLExecID (1)
+ Number of Jobs 1  JobIDs(8)
+ Timing [06:32:14:587 - 06:32:14:989]
+ Duration  00m 00s
+ 
+ JOB 8 Start 06:32:14:587  End 06:32:14:989
+ 
+ 
+ JobGroup 9  SQLExecID (1)
+ Number of Jobs 1  JobIDs(9)
+ Timing [06:32:15:176 - 06:32:15:684]
+ Duration  00m 00s
+ 
+ JOB 9 Start 06:32:15:176  End 06:32:15:684
+ 
+
+No overlapping jobgroups found. Good
+
+
+
+
+executorCores: 1, maxExecutors: 4, totalCores: 4
+jobTime: 20828, appTotalTime: 38565, driverTimeJobBased: 17737
+inJobComputeMillisUsed: 38032, inJobComputeMillisAvailable: 83312, appComputeMillisAvailable: 154260
+Note: Sparklens assumes all executors are available for the whole job duration! This means that dynamic allocation is not included.
+------------------------------EfficiencyStatisticsAnalyzer------------------------------------
+ Time spent in Driver vs Executors
+ Driver WallClock Time    00m 17s   45.99%
+ Executor WallClock Time  00m 20s   54.01%
+ Total WallClock Time     00m 38s
+      
+
+
+Minimum possible time for the app based on the critical path (with infinite resources)   00m 30s
+Minimum possible time for the app with same executors, perfect parallelism and zero skew 00m 27s
+If we were to run this app with single executor and single core                          00h 00m
+
+       
+ Total cores available to the app 4
+
+ OneCoreComputeHours: Measure of total compute power available from cluster. One core in the executor, running
+                      for one hour, counts as one OneCoreComputeHour. Executors with 4 cores, will have 4 times
+                      the OneCoreComputeHours compared to one with just one core. Similarly, one core executor
+                      running for 4 hours will OnCoreComputeHours equal to 4 core executor running for 1 hour.
+
+ Driver Utilization (Cluster idle because of driver)
+
+ Total OneCoreComputeHours available                             00h 02m
+ Total OneCoreComputeHours available (AutoScale Aware)           00h 01m
+ OneCoreComputeHours wasted by driver                            00h 01m
+
+ AutoScale Aware: Most of the calculations by this tool will assume that all executors are available throughout
+                  the runtime of the application. The number above is printed to show possible caution to be
+                  taken in interpreting the efficiency metrics.
+
+ Cluster Utilization (Executors idle because of lack of tasks or skew)
+
+ Executor OneCoreComputeHours available                  00h 01m
+ Executor OneCoreComputeHours used                       00h 00m        45.65%
+ OneCoreComputeHours wasted                              00h 00m        54.35%
+
+ App Level Wastage Metrics (Driver + Executor)
+
+ OneCoreComputeHours wasted Driver               45.99%
+ OneCoreComputeHours wasted Executor             29.35%
+ OneCoreComputeHours wasted Total                75.35%
+
+       
+
+------------------------------ExecutorWallclockAnalyzer------------------------------------
+
+ App completion time and cluster utilization estimates with different executor counts
+
+ Real App Duration 00m 38s
+ Model Estimation  00m 32s
+ Model Error       15%
+
+ NOTE: 1) Model error could be large when auto-scaling is enabled.
+       2) Model doesn't handles multiple jobs run via thread-pool. For better insights into
+          application scalability, please try such jobs one by one without thread-pool.
+
+       
+ Executor count     2  ( 50%) estimated time 00m 38s and estimated cluster utilization 49.78%
+ Executor count     3  ( 80%) estimated time 00m 34s and estimated cluster utilization 36.73%
+ Executor count     4  (100%) estimated time 00m 32s and estimated cluster utilization 29.24%
+ Executor count     4  (110%) estimated time 00m 32s and estimated cluster utilization 29.24%
+ Executor count     4  (120%) estimated time 00m 32s and estimated cluster utilization 29.24%
+ Executor count     6  (150%) estimated time 00m 31s and estimated cluster utilization 20.38%
+ Executor count     8  (200%) estimated time 00m 30s and estimated cluster utilization 15.43%
+ Executor count    12  (300%) estimated time 00m 30s and estimated cluster utilization 10.41%
+ Executor count    16  (400%) estimated time 00m 30s and estimated cluster utilization 7.85%
+ Executor count    20  (500%) estimated time 00m 30s and estimated cluster utilization 6.28%
+
+
+
+------------------------------StageSkewAnalyzer------------------------------------
+Total tasks in all stages 54
+Per Stage  Utilization
+Stage-ID   Wall    Task      Task     IO%    Input     Output    ----Shuffle-----    -WallClockTime-    --OneCoreComputeHours---   MaxTaskMem
+          Clock%  Runtime%   Count                               Input  |  Output    Measured | Ideal   Available| Used%|Wasted%                                  
+       0   21.00   17.00         2   27.9    7.2 MB    0.0 KB    0.0 KB  498.7 KB    00m 04s   00m 01s    00h 00m   36.9   63.1    0.0 KB 
+       1   16.00   10.64         2   27.9    7.2 MB    0.0 KB    0.0 KB  498.7 KB    00m 03s   00m 01s    00h 00m   29.0   71.0    0.0 KB 
+       3   25.00   36.37        20    0.0    0.0 KB    0.0 KB  498.7 KB  353.8 KB    00m 05s   00m 03s    00h 00m   65.6   34.4  256.0 KB 
+       6    2.00    0.43         1    0.0    0.0 KB    0.0 KB  353.8 KB    0.0 KB    00m 00s   00m 00s    00h 00m    8.9   91.1   32.3 MB 
+       7   13.00   10.55         2   27.9    7.2 MB    0.0 KB    0.0 KB  498.7 KB    00m 02s   00m 01s    00h 00m   36.5   63.5    0.0 KB 
+       8    2.00    0.08         4    0.0    0.0 KB    0.0 KB    0.0 KB    0.0 KB    00m 00s   00m 00s    00h 00m    1.6   98.4    0.0 KB 
+      10   12.00   23.32        20    0.0    0.0 KB    0.0 KB  498.7 KB  353.8 KB    00m 02s   00m 02s    00h 00m   84.4   15.6  256.0 KB 
+      13    2.00    0.59         1    0.0    0.0 KB    0.0 KB  353.8 KB    0.0 KB    00m 00s   00m 00s    00h 00m   12.0   88.0   32.3 MB 
+      16    1.00    0.49         1    0.0    0.0 KB    0.0 KB  353.8 KB    6.9 KB    00m 00s   00m 00s    00h 00m   14.0   86.0   32.3 MB 
+      20    2.00    0.54         1    0.0    0.0 KB    0.0 KB    6.9 KB    0.0 KB    00m 00s   00m 00s    00h 00m   10.6   89.4   64.1 MB 
+Max memory which an executor could have taken =  64.1 MB
+
+
+ Stage-ID WallClock  OneCore       Task   PRatio    -----Task------   OIRatio  |* ShuffleWrite% ReadFetch%   GC%  *|
+          Stage%     ComputeHours  Count            Skew   StageSkew                                                
+      0   21.15         00h 00m       2    0.50     1.00     0.74     0.07     |*   0.70           0.00     1.16  *|
+      1   16.86         00h 00m       2    0.50     1.00     0.71     0.07     |*   0.78           0.00     0.37  *|
+      3   25.45         00h 00m      20    5.00     6.90     0.54     0.71     |*  14.03           0.00     5.00  *|
+      6    2.20         00h 00m       1    0.25     1.00     0.36     0.00     |*   0.00           0.00     0.00  *|
+      7   13.26         00h 00m       2    0.50     1.00     0.87     0.07     |*   0.28           0.00     2.94  *|
+      8    2.22         00h 00m       4    1.00     2.67     0.03     0.00     |*   0.00           0.00     0.00  *|
+     10   12.69         00h 00m      20    5.00     1.86     0.30     0.71     |*  22.70           0.05     7.78  *|
+     13    2.24         00h 00m       1    0.25     1.00     0.48     0.00     |*   0.00           0.00     0.00  *|
+     16    1.61         00h 00m       1    0.25     1.00     0.56     0.02     |*   2.03           0.00     0.00  *|
+     20    2.33         00h 00m       1    0.25     1.00     0.43     0.00     |*   0.00           0.00    11.71  *|
+
+PRatio:        Number of tasks in stage divided by number of cores. Represents degree of
+               parallelism in the stage
+TaskSkew:      Duration of largest task in stage divided by duration of median task.
+               Represents degree of skew in the stage
+TaskStageSkew: Duration of largest task in stage divided by total duration of the stage.
+               Represents the impact of the largest task on stage time.
+OIRatio:       Output to input ration. Total output of the stage (results + shuffle write)
+               divided by total input (input data + shuffle read)
+
+These metrics below represent distribution of time within the stage
+
+ShuffleWrite:  Amount of time spent in shuffle writes across all tasks in the given
+               stage as a percentage
+ReadFetch:     Amount of time spent in shuffle read across all tasks in the given
+               stage as a percentage
+GC:            Amount of time spent in GC across all tasks in the given stage as a
+               percentage
+
+If the stage contributes large percentage to overall application time, we could look into
+these metrics to check which part (Shuffle write, read fetch or GC is responsible)
+
+
+      
+
+</pre>
+</div>
+
+<br><br>
+
+<button type="button" class="collapsible">View Sparkscope Logs</button>
+<div class="content">
+<pre>
+21/11/2023 06:32:16 INFO [SparkScope] 
+     ____              __    ____
+    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+     /_/                             /_/    spark3-v0.1.4
+
+21/11/2023 06:32:16 INFO [SparkScope] Setting driver metrics dir to spark.metrics.conf.*.sink.csv.directory
+21/11/2023 06:32:16 INFO [SparkScope] Setting executor metrics dir to spark.metrics.conf.*.sink.csv.directory
+21/11/2023 06:32:16 INFO [SparkScope] Reading driver metrics from /tmp/csv-metrics, executor metrics from /tmp/csv-metrics
+21/11/2023 06:32:16 INFO [SparkScope] Reading driver metrics...
+21/11/2023 06:32:16 INFO [SparkScope] Reading executor metrics...
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.used metric for executor=2
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.usage metric for executor=2
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.max metric for executor=2
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.non-heap.used metric for executor=2
+21/11/2023 06:32:16 INFO [SparkScope] Reading executor.cpuTime metric for executor=2
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.used metric for executor=1
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.usage metric for executor=1
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.max metric for executor=1
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.non-heap.used metric for executor=1
+21/11/2023 06:32:16 INFO [SparkScope] Reading executor.cpuTime metric for executor=1
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.used metric for executor=0
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.usage metric for executor=0
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.max metric for executor=0
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.non-heap.used metric for executor=0
+21/11/2023 06:32:16 INFO [SparkScope] Reading executor.cpuTime metric for executor=0
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.used metric for executor=3
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.usage metric for executor=3
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.heap.max metric for executor=3
+21/11/2023 06:32:16 INFO [SparkScope] Reading jvm.non-heap.used metric for executor=3
+21/11/2023 06:32:16 INFO [SparkScope] Reading executor.cpuTime metric for executor=3
+
+Displaying merged metrics for driver:
+|----------|-------------|-------------------|------------|-----------------|
+|t         |jvm.heap.used|jvm.heap.usage     |jvm.heap.max|jvm.non-heap.used|
+|----------|-------------|-------------------|------------|-----------------|
+|1700591500|78209024     |0.07283782958984375|1073741824  |72388400         |
+|1700591501|65898008     |0.0613723024725914 |1073741824  |81163792         |
+|1700591502|76383768     |0.0711379274725914 |1073741824  |83954360         |
+|1700591503|90015256     |0.0838332399725914 |1073741824  |87633840         |
+|1700591504|110986776    |0.1033644899725914 |1073741824  |90808392         |
+|1700591505|126715416    |0.1180129274725914 |1073741824  |93986824         |
+|1700591506|150832664    |0.1404738649725914 |1073741824  |98515496         |
+|1700591507|74285008     |0.06918330490589142|1073741824  |103045040        |
+|1700591508|100499408    |0.09359736740589142|1073741824  |108804720        |
+|1700591509|120422352    |0.11215205490589142|1073741824  |112901832        |
+|1700591510|168656848    |0.15707392990589142|1073741824  |123311192        |
+|1700591511|84395600     |0.07859952747821808|1073741824  |133566888        |
+|1700591512|151504464    |0.14109952747821808|1073741824  |144422416        |
+|1700591513|159893072    |0.14891202747821808|1073741824  |146052624        |
+|1700591514|159893072    |0.14891202747821808|1073741824  |146055224        |
+|1700591515|159893072    |0.14891202747821808|1073741824  |146163864        |
+|1700591516|159893072    |0.14891202747821808|1073741824  |146173336        |
+|1700591517|72962048     |0.06795120239257812|1073741824  |151011656        |
+|1700591518|96030720     |0.08943557739257812|1073741824  |153169248        |
+|1700591519|97079296     |0.09041213989257812|1073741824  |153414440        |
+|1700591520|97079296     |0.09041213989257812|1073741824  |153480744        |
+|1700591521|119099392    |0.11091995239257812|1073741824  |155917744        |
+|1700591522|124342272    |0.11580276489257812|1073741824  |156425088        |
+|1700591523|124342272    |0.11580276489257812|1073741824  |156497448        |
+|1700591524|127488000    |0.11873245239257812|1073741824  |156861096        |
+|1700591525|130633728    |0.12166213989257812|1073741824  |157224096        |
+|1700591526|133779456    |0.12459182739257812|1073741824  |157687112        |
+|1700591527|161042432    |0.14998245239257812|1073741824  |159825824        |
+|1700591528|205082624    |0.19099807739257812|1073741824  |163985824        |
+|1700591529|80127288     |0.07462435215711594|1073741824  |164929024        |
+|1700591530|80127288     |0.07462435215711594|1073741824  |164987552        |
+|1700591531|95855928     |0.08927278965711594|1073741824  |165611448        |
+|1700591532|97953080     |0.09122591465711594|1073741824  |165877184        |
+|1700591533|103195960    |0.09610872715711594|1073741824  |166247168        |
+|1700591534|128361784    |0.11954622715711594|1073741824  |167391624        |
+|1700591535|152479032    |0.14200716465711594|1073741824  |169287368        |
+|----------|-------------|-------------------|------------|-----------------|
+
+Displaying jvm.heap.used metric for executor=2:
+|----------|-------------|
+|t         |jvm.heap.used|
+|----------|-------------|
+|1700591509|74227392     |
+|1700591510|77373120     |
+|1700591511|78421696     |
+|1700591512|78421696     |
+|1700591513|78421696     |
+|1700591514|78421696     |
+|1700591515|78421696     |
+|1700591516|78421696     |
+|1700591517|79470272     |
+|1700591518|104636096    |
+|1700591519|50664440     |
+|1700591520|159716344    |
+|1700591521|180687864    |
+|1700591522|202707960    |
+|1700591523|235213816    |
+|1700591524|127006720    |
+|1700591525|149954848    |
+|1700591526|184557856    |
+|1700591527|200286496    |
+|1700591528|203432224    |
+|1700591529|209723680    |
+|1700591530|209723680    |
+|1700591531|124674408    |
+|1700591532|113117696    |
+|1700591533|184420864    |
+|1700591534|184420864    |
+|1700591535|184420864    |
+|----------|-------------|
+
+Displaying jvm.heap.usage metric for executor=2:
+|----------|--------------------|
+|t         |jvm.heap.usage      |
+|----------|--------------------|
+|1700591509|0.05445289024939904 |
+|1700591510|0.05676058255709135 |
+|1700591511|0.057529813326322114|
+|1700591512|0.057529813326322114|
+|1700591513|0.057529813326322114|
+|1700591514|0.057529813326322114|
+|1700591515|0.057529813326322114|
+|1700591516|0.057529813326322114|
+|1700591517|0.058299044095552886|
+|1700591518|0.07676058255709135 |
+|1700591519|0.0371672116793119  |
+|1700591520|0.1171672116793119  |
+|1700591521|0.1325518270639273  |
+|1700591522|0.14870567321777345 |
+|1700591523|0.17255182706392727 |
+|1700591524|0.09317157451923076 |
+|1700591525|0.11000622089092547 |
+|1700591526|0.13539083627554085 |
+|1700591527|0.14616006704477164 |
+|1700591528|0.14923699012169472 |
+|1700591529|0.15385237473707933 |
+|1700591530|0.15385237473707933 |
+|1700591531|0.09146060063288762 |
+|1700591532|0.08298264723557693 |
+|1700591533|0.13529033954326924 |
+|1700591534|0.13529033954326924 |
+|1700591535|0.13529033954326924 |
+|----------|--------------------|
+
+Displaying jvm.heap.max metric for executor=2:
+|----------|------------|
+|t         |jvm.heap.max|
+|----------|------------|
+|1700591509|1363148800  |
+|1700591510|1363148800  |
+|1700591511|1363148800  |
+|1700591512|1363148800  |
+|1700591513|1363148800  |
+|1700591514|1363148800  |
+|1700591515|1363148800  |
+|1700591516|1363148800  |
+|1700591517|1363148800  |
+|1700591518|1363148800  |
+|1700591519|1363148800  |
+|1700591520|1363148800  |
+|1700591521|1363148800  |
+|1700591522|1363148800  |
+|1700591523|1363148800  |
+|1700591524|1363148800  |
+|1700591525|1363148800  |
+|1700591526|1363148800  |
+|1700591527|1363148800  |
+|1700591528|1363148800  |
+|1700591529|1363148800  |
+|1700591530|1363148800  |
+|1700591531|1363148800  |
+|1700591532|1363148800  |
+|1700591533|1363148800  |
+|1700591534|1363148800  |
+|1700591535|1363148800  |
+|----------|------------|
+
+Displaying jvm.non-heap.used metric for executor=2:
+|----------|-----------------|
+|t         |jvm.non-heap.used|
+|----------|-----------------|
+|1700591509|51736120         |
+|1700591510|52774440         |
+|1700591511|52802568         |
+|1700591512|52841224         |
+|1700591513|52858808         |
+|1700591514|52887064         |
+|1700591515|52890904         |
+|1700591516|52901024         |
+|1700591517|53103000         |
+|1700591518|59122992         |
+|1700591519|69286520         |
+|1700591520|74775272         |
+|1700591521|76263400         |
+|1700591522|79953920         |
+|1700591523|82219176         |
+|1700591524|83175240         |
+|1700591525|83994624         |
+|1700591526|84258880         |
+|1700591527|86874968         |
+|1700591528|87446000         |
+|1700591529|88312880         |
+|1700591530|88341640         |
+|1700591531|88615016         |
+|1700591532|89062816         |
+|1700591533|89422184         |
+|1700591534|89496640         |
+|1700591535|89524944         |
+|----------|-----------------|
+
+Displaying executor.cpuTime metric for executor=2:
+|----------|----------------|
+|t         |executor.cpuTime|
+|----------|----------------|
+|1700591509|0               |
+|1700591510|0               |
+|1700591511|0               |
+|1700591512|0               |
+|1700591513|0               |
+|1700591514|0               |
+|1700591515|0               |
+|1700591516|0               |
+|1700591517|0               |
+|1700591518|0               |
+|1700591519|0               |
+|1700591520|0               |
+|1700591521|2445883379      |
+|1700591522|2445883379      |
+|1700591523|2445883379      |
+|1700591524|3682507052      |
+|1700591525|4179509834      |
+|1700591526|4334041125      |
+|1700591527|4334041125      |
+|1700591528|4497019948      |
+|1700591529|4497019948      |
+|1700591530|4497019948      |
+|1700591531|4662041394      |
+|1700591532|4954782770      |
+|1700591533|5374978320      |
+|1700591534|5374978320      |
+|1700591535|5374978320      |
+|----------|----------------|
+
+Displaying jvm.heap.used metric for executor=1:
+|----------|-------------|
+|t         |jvm.heap.used|
+|----------|-------------|
+|1700591509|70254848     |
+|1700591510|76546304     |
+|1700591511|76546304     |
+|1700591512|77594880     |
+|1700591513|93323520     |
+|1700591514|48223784     |
+|1700591515|125818408    |
+|1700591516|189781544    |
+|1700591517|208655912    |
+|1700591518|209704488    |
+|1700591519|210753064    |
+|1700591520|210753064    |
+|1700591521|210753064    |
+|1700591522|121613360    |
+|1700591523|140487728    |
+|1700591524|155288688    |
+|1700591525|123572000    |
+|1700591526|156932888    |
+|1700591527|156932888    |
+|1700591528|160078616    |
+|1700591529|168467224    |
+|1700591530|168467224    |
+|1700591531|133350240    |
+|1700591532|125169152    |
+|1700591533|92759072     |
+|1700591534|115827744    |
+|1700591535|130507808    |
+|----------|-------------|
+
+Displaying jvm.heap.usage metric for executor=1:
+|----------|--------------------|
+|t         |jvm.heap.usage      |
+|----------|--------------------|
+|1700591509|0.05153864933894231 |
+|1700591510|0.05615403395432692 |
+|1700591511|0.05615403395432692 |
+|1700591512|0.056923264723557694|
+|1700591513|0.06846172626201923 |
+|1700591514|0.0353767571082482  |
+|1700591515|0.09229983403132512 |
+|1700591516|0.13922291095440203 |
+|1700591517|0.15306906480055588 |
+|1700591518|0.15383829556978665 |
+|1700591519|0.15460752633901742 |
+|1700591520|0.15460752633901742 |
+|1700591521|0.15460752633901742 |
+|1700591522|0.08921502920297476 |
+|1700591523|0.1030611830491286  |
+|1700591524|0.11391910259540264 |
+|1700591525|0.09065187894381009 |
+|1700591526|0.11512528052696815 |
+|1700591527|0.11512528052696815 |
+|1700591528|0.11743297283466046 |
+|1700591529|0.12358681898850661 |
+|1700591530|0.12358681898850661 |
+|1700591531|0.09782515305739183 |
+|1700591532|0.09182354266826923 |
+|1700591533|0.06804764967698318 |
+|1700591534|0.0849707266000601  |
+|1700591535|0.09573995736929086 |
+|----------|--------------------|
+
+Displaying jvm.heap.max metric for executor=1:
+|----------|------------|
+|t         |jvm.heap.max|
+|----------|------------|
+|1700591509|1363148800  |
+|1700591510|1363148800  |
+|1700591511|1363148800  |
+|1700591512|1363148800  |
+|1700591513|1363148800  |
+|1700591514|1363148800  |
+|1700591515|1363148800  |
+|1700591516|1363148800  |
+|1700591517|1363148800  |
+|1700591518|1363148800  |
+|1700591519|1363148800  |
+|1700591520|1363148800  |
+|1700591521|1363148800  |
+|1700591522|1363148800  |
+|1700591523|1363148800  |
+|1700591524|1363148800  |
+|1700591525|1363148800  |
+|1700591526|1363148800  |
+|1700591527|1363148800  |
+|1700591528|1363148800  |
+|1700591529|1363148800  |
+|1700591530|1363148800  |
+|1700591531|1363148800  |
+|1700591532|1363148800  |
+|1700591533|1363148800  |
+|1700591534|1363148800  |
+|1700591535|1363148800  |
+|----------|------------|
+
+Displaying jvm.non-heap.used metric for executor=1:
+|----------|-----------------|
+|t         |jvm.non-heap.used|
+|----------|-----------------|
+|1700591509|51585496         |
+|1700591510|52918456         |
+|1700591511|52940744         |
+|1700591512|52973616         |
+|1700591513|56711416         |
+|1700591514|65426440         |
+|1700591515|74432280         |
+|1700591516|75292248         |
+|1700591517|76735576         |
+|1700591518|76992584         |
+|1700591519|76998984         |
+|1700591520|76999672         |
+|1700591521|77016200         |
+|1700591522|79253056         |
+|1700591523|82358168         |
+|1700591524|83614856         |
+|1700591525|84571856         |
+|1700591526|85466648         |
+|1700591527|85482320         |
+|1700591528|85910864         |
+|1700591529|86963312         |
+|1700591530|87002840         |
+|1700591531|87223320         |
+|1700591532|87566712         |
+|1700591533|87936384         |
+|1700591534|88019624         |
+|1700591535|89505104         |
+|----------|-----------------|
+
+Displaying executor.cpuTime metric for executor=1:
+|----------|----------------|
+|t         |executor.cpuTime|
+|----------|----------------|
+|1700591509|0               |
+|1700591510|0               |
+|1700591511|0               |
+|1700591512|0               |
+|1700591513|0               |
+|1700591514|0               |
+|1700591515|0               |
+|1700591516|0               |
+|1700591517|3068287369      |
+|1700591518|3068287369      |
+|1700591519|3068287369      |
+|1700591520|3068287369      |
+|1700591521|3068287369      |
+|1700591522|3068287369      |
+|1700591523|3068287369      |
+|1700591524|4308852625      |
+|1700591525|4661133228      |
+|1700591526|4982366128      |
+|1700591527|4982366128      |
+|1700591528|4982366128      |
+|1700591529|4985622311      |
+|1700591530|4985622311      |
+|1700591531|4985622311      |
+|1700591532|5301216447      |
+|1700591533|5597146557      |
+|1700591534|5740082709      |
+|1700591535|5920100524      |
+|----------|----------------|
+
+Displaying jvm.heap.used metric for executor=0:
+|----------|-------------|
+|t         |jvm.heap.used|
+|----------|-------------|
+|1700591509|75679488     |
+|1700591510|78825216     |
+|1700591511|78825216     |
+|1700591512|78825216     |
+|1700591513|78825216     |
+|1700591514|79873792     |
+|1700591515|79873792     |
+|1700591516|79873792     |
+|1700591517|79873792     |
+|1700591518|81970944     |
+|1700591519|81970944     |
+|1700591520|81970944     |
+|1700591521|81970944     |
+|1700591522|89310976     |
+|1700591523|109233920    |
+|1700591524|126011136    |
+|1700591525|141739776    |
+|1700591526|162711296    |
+|1700591527|139701952    |
+|1700591528|140750528    |
+|1700591529|93506408     |
+|1700591530|164809576    |
+|1700591531|183683944    |
+|1700591532|124305760    |
+|1700591533|155771920    |
+|1700591534|163791584    |
+|1700591535|167985888    |
+|----------|-------------|
+
+Displaying jvm.heap.usage metric for executor=0:
+|----------|--------------------|
+|t         |jvm.heap.usage      |
+|----------|--------------------|
+|1700591509|0.055518141526442306|
+|1700591510|0.057825833834134616|
+|1700591511|0.057825833834134616|
+|1700591512|0.057825833834134616|
+|1700591513|0.057825833834134616|
+|1700591514|0.05859506460336539 |
+|1700591515|0.05859506460336539 |
+|1700591516|0.05859506460336539 |
+|1700591517|0.05859506460336539 |
+|1700591518|0.060133526141826925|
+|1700591519|0.060133526141826925|
+|1700591520|0.060133526141826925|
+|1700591521|0.060133526141826925|
+|1700591522|0.06551814152644231 |
+|1700591523|0.08013352614182692 |
+|1700591524|0.09244121844951923 |
+|1700591525|0.10397967998798077 |
+|1700591526|0.11936429537259616 |
+|1700591527|0.1024847412109375  |
+|1700591528|0.10325397198016827 |
+|1700591529|0.06859589209923378 |
+|1700591530|0.12090358440692608 |
+|1700591531|0.13474973825307993 |
+|1700591532|0.0911901620718149  |
+|1700591533|0.11427359947791467 |
+|1700591534|0.12015678992638221 |
+|1700591535|0.1232337130033053  |
+|----------|--------------------|
+
+Displaying jvm.heap.max metric for executor=0:
+|----------|------------|
+|t         |jvm.heap.max|
+|----------|------------|
+|1700591509|1363148800  |
+|1700591510|1363148800  |
+|1700591511|1363148800  |
+|1700591512|1363148800  |
+|1700591513|1363148800  |
+|1700591514|1363148800  |
+|1700591515|1363148800  |
+|1700591516|1363148800  |
+|1700591517|1363148800  |
+|1700591518|1363148800  |
+|1700591519|1363148800  |
+|1700591520|1363148800  |
+|1700591521|1363148800  |
+|1700591522|1363148800  |
+|1700591523|1363148800  |
+|1700591524|1363148800  |
+|1700591525|1363148800  |
+|1700591526|1363148800  |
+|1700591527|1363148800  |
+|1700591528|1363148800  |
+|1700591529|1363148800  |
+|1700591530|1363148800  |
+|1700591531|1363148800  |
+|1700591532|1363148800  |
+|1700591533|1363148800  |
+|1700591534|1363148800  |
+|1700591535|1363148800  |
+|----------|------------|
+
+Displaying jvm.non-heap.used metric for executor=0:
+|----------|-----------------|
+|t         |jvm.non-heap.used|
+|----------|-----------------|
+|1700591509|52274928         |
+|1700591510|52941376         |
+|1700591511|52973776         |
+|1700591512|53004160         |
+|1700591513|53024640         |
+|1700591514|53049464         |
+|1700591515|53057624         |
+|1700591516|53067768         |
+|1700591517|53075416         |
+|1700591518|53312264         |
+|1700591519|53325184         |
+|1700591520|53334416         |
+|1700591521|53375584         |
+|1700591522|55178768         |
+|1700591523|59860112         |
+|1700591524|63422688         |
+|1700591525|68666696         |
+|1700591526|72515520         |
+|1700591527|78390128         |
+|1700591528|78483920         |
+|1700591529|80336080         |
+|1700591530|82862624         |
+|1700591531|83786224         |
+|1700591532|84610472         |
+|1700591533|85264208         |
+|1700591534|87085192         |
+|1700591535|87765104         |
+|----------|-----------------|
+
+Displaying executor.cpuTime metric for executor=0:
+|----------|----------------|
+|t         |executor.cpuTime|
+|----------|----------------|
+|1700591509|0               |
+|1700591510|0               |
+|1700591511|0               |
+|1700591512|0               |
+|1700591513|0               |
+|1700591514|0               |
+|1700591515|0               |
+|1700591516|0               |
+|1700591517|0               |
+|1700591518|0               |
+|1700591519|0               |
+|1700591520|0               |
+|1700591521|0               |
+|1700591522|0               |
+|1700591523|0               |
+|1700591524|0               |
+|1700591525|0               |
+|1700591526|0               |
+|1700591527|1947428568      |
+|1700591528|1947428568      |
+|1700591529|1947428568      |
+|1700591530|1947428568      |
+|1700591531|3923089976      |
+|1700591532|4200290848      |
+|1700591533|4545608230      |
+|1700591534|4707975917      |
+|1700591535|4922003611      |
+|----------|----------------|
+
+Displaying jvm.heap.used metric for executor=3:
+|----------|-------------|
+|t         |jvm.heap.used|
+|----------|-------------|
+|1700591509|71910112     |
+|1700591510|77152992     |
+|1700591511|77152992     |
+|1700591512|77152992     |
+|1700591513|97075936     |
+|1700591514|129581792    |
+|1700591515|55434504     |
+|1700591516|145612040    |
+|1700591517|165534984    |
+|1700591518|188603656    |
+|1700591519|215866632    |
+|1700591520|217963784    |
+|1700591521|219012360    |
+|1700591522|122897120    |
+|1700591523|148062944    |
+|1700591524|136329248    |
+|1700591525|124495360    |
+|1700591526|154794208    |
+|1700591527|156891360    |
+|1700591528|162134240    |
+|1700591529|143238536    |
+|1700591530|158967176    |
+|1700591531|133210480    |
+|1700591532|140406768    |
+|1700591533|135288864    |
+|1700591534|155211808    |
+|1700591535|173037600    |
+|1700591536|165634944    |
+|----------|-------------|
+
+Displaying jvm.heap.usage metric for executor=3:
+|----------|--------------------|
+|t         |jvm.heap.usage      |
+|----------|--------------------|
+|1700591509|0.05275294377253606 |
+|1700591510|0.056599097618689906|
+|1700591511|0.056599097618689906|
+|1700591512|0.056599097618689906|
+|1700591513|0.07121448223407452 |
+|1700591514|0.09506063608022837 |
+|1700591515|0.04066650977501502 |
+|1700591516|0.10682035592886117 |
+|1700591517|0.12143574054424579 |
+|1700591518|0.1383588174673227  |
+|1700591519|0.15835881746732272 |
+|1700591520|0.15989727900578427 |
+|1700591521|0.15989727900578427 |
+|1700591522|0.09015678992638221 |
+|1700591523|0.10861832838792067 |
+|1700591524|0.10001054030198317 |
+|1700591525|0.09132925180288462 |
+|1700591526|0.11355635422926683 |
+|1700591527|0.11509481576772837 |
+|1700591528|0.11894096961388222 |
+|1700591529|0.10507916377140926 |
+|1700591530|0.1166176253098708  |
+|1700591531|0.09772262573242188 |
+|1700591532|0.10300179114708534 |
+|1700591533|0.09924731914813702 |
+|1700591534|0.11386270376352163 |
+|1700591535|0.1269396268404447  |
+|1700591536|0.12150907076322115 |
+|----------|--------------------|
+
+Displaying jvm.heap.max metric for executor=3:
+|----------|------------|
+|t         |jvm.heap.max|
+|----------|------------|
+|1700591509|1363148800  |
+|1700591510|1363148800  |
+|1700591511|1363148800  |
+|1700591512|1363148800  |
+|1700591513|1363148800  |
+|1700591514|1363148800  |
+|1700591515|1363148800  |
+|1700591516|1363148800  |
+|1700591517|1363148800  |
+|1700591518|1363148800  |
+|1700591519|1363148800  |
+|1700591520|1363148800  |
+|1700591521|1363148800  |
+|1700591522|1363148800  |
+|1700591523|1363148800  |
+|1700591524|1363148800  |
+|1700591525|1363148800  |
+|1700591526|1363148800  |
+|1700591527|1363148800  |
+|1700591528|1363148800  |
+|1700591529|1363148800  |
+|1700591530|1363148800  |
+|1700591531|1363148800  |
+|1700591532|1363148800  |
+|1700591533|1363148800  |
+|1700591534|1363148800  |
+|1700591535|1363148800  |
+|1700591536|1363148800  |
+|----------|------------|
+
+Displaying jvm.non-heap.used metric for executor=3:
+|----------|-----------------|
+|t         |jvm.non-heap.used|
+|----------|-----------------|
+|1700591509|51494240         |
+|1700591510|52689848         |
+|1700591511|52715072         |
+|1700591512|52746920         |
+|1700591513|57555552         |
+|1700591514|65769608         |
+|1700591515|73450960         |
+|1700591516|74690288         |
+|1700591517|76139400         |
+|1700591518|77018760         |
+|1700591519|77173512         |
+|1700591520|77253464         |
+|1700591521|77283576         |
+|1700591522|79844056         |
+|1700591523|82736736         |
+|1700591524|84020512         |
+|1700591525|85005160         |
+|1700591526|85351840         |
+|1700591527|85801792         |
+|1700591528|85963384         |
+|1700591529|86224904         |
+|1700591530|86292592         |
+|1700591531|86480032         |
+|1700591532|86841712         |
+|1700591533|87087000         |
+|1700591534|87220328         |
+|1700591535|89973128         |
+|1700591536|90410288         |
+|----------|-----------------|
+
+Displaying executor.cpuTime metric for executor=3:
+|----------|----------------|
+|t         |executor.cpuTime|
+|----------|----------------|
+|1700591509|0               |
+|1700591510|0               |
+|1700591511|0               |
+|1700591512|0               |
+|1700591513|0               |
+|1700591514|0               |
+|1700591515|0               |
+|1700591516|0               |
+|1700591517|3032666434      |
+|1700591518|3032666434      |
+|1700591519|3032666434      |
+|1700591520|4524484463      |
+|1700591521|4524484463      |
+|1700591522|4524484463      |
+|1700591523|4524484463      |
+|1700591524|5689434054      |
+|1700591525|6226534594      |
+|1700591526|6544523331      |
+|1700591527|6544523331      |
+|1700591528|6544523331      |
+|1700591529|6544523331      |
+|1700591530|7761640535      |
+|1700591531|7761640535      |
+|1700591532|8069148884      |
+|1700591533|8362320721      |
+|1700591534|8506424724      |
+|1700591535|8506424724      |
+|1700591536|8664038340      |
+|----------|----------------|
+
+Interpolated jvm.heap.used metric for executor=2:
+|----------|-------------|
+|t         |jvm.heap.used|
+|----------|-------------|
+|1700591509|74227392     |
+|1700591510|77373120     |
+|1700591511|78421696     |
+|1700591512|78421696     |
+|1700591513|78421696     |
+|1700591514|78421696     |
+|1700591515|78421696     |
+|1700591516|78421696     |
+|1700591517|79470272     |
+|1700591518|104636096    |
+|1700591519|50664440     |
+|1700591520|159716344    |
+|1700591521|180687864    |
+|1700591522|202707960    |
+|1700591523|235213816    |
+|1700591524|127006720    |
+|1700591525|149954848    |
+|1700591526|184557856    |
+|1700591527|200286496    |
+|1700591528|203432224    |
+|1700591529|209723680    |
+|1700591530|209723680    |
+|1700591531|124674408    |
+|1700591532|113117696    |
+|1700591533|184420864    |
+|1700591534|184420864    |
+|1700591535|184420864    |
+|----------|-------------|
+
+Interpolated jvm.heap.usage metric for executor=2:
+|----------|--------------------|
+|t         |jvm.heap.usage      |
+|----------|--------------------|
+|1700591509|0.05445289024939904 |
+|1700591510|0.05676058255709135 |
+|1700591511|0.057529813326322114|
+|1700591512|0.057529813326322114|
+|1700591513|0.057529813326322114|
+|1700591514|0.057529813326322114|
+|1700591515|0.057529813326322114|
+|1700591516|0.057529813326322114|
+|1700591517|0.058299044095552886|
+|1700591518|0.07676058255709135 |
+|1700591519|0.0371672116793119  |
+|1700591520|0.1171672116793119  |
+|1700591521|0.1325518270639273  |
+|1700591522|0.14870567321777345 |
+|1700591523|0.17255182706392727 |
+|1700591524|0.09317157451923076 |
+|1700591525|0.11000622089092547 |
+|1700591526|0.13539083627554085 |
+|1700591527|0.14616006704477164 |
+|1700591528|0.14923699012169472 |
+|1700591529|0.15385237473707933 |
+|1700591530|0.15385237473707933 |
+|1700591531|0.09146060063288762 |
+|1700591532|0.08298264723557693 |
+|1700591533|0.13529033954326924 |
+|1700591534|0.13529033954326924 |
+|1700591535|0.13529033954326924 |
+|----------|--------------------|
+
+Interpolated jvm.heap.max metric for executor=2:
+|----------|------------|
+|t         |jvm.heap.max|
+|----------|------------|
+|1700591509|1363148800  |
+|1700591510|1363148800  |
+|1700591511|1363148800  |
+|1700591512|1363148800  |
+|1700591513|1363148800  |
+|1700591514|1363148800  |
+|1700591515|1363148800  |
+|1700591516|1363148800  |
+|1700591517|1363148800  |
+|1700591518|1363148800  |
+|1700591519|1363148800  |
+|1700591520|1363148800  |
+|1700591521|1363148800  |
+|1700591522|1363148800  |
+|1700591523|1363148800  |
+|1700591524|1363148800  |
+|1700591525|1363148800  |
+|1700591526|1363148800  |
+|1700591527|1363148800  |
+|1700591528|1363148800  |
+|1700591529|1363148800  |
+|1700591530|1363148800  |
+|1700591531|1363148800  |
+|1700591532|1363148800  |
+|1700591533|1363148800  |
+|1700591534|1363148800  |
+|1700591535|1363148800  |
+|----------|------------|
+
+Interpolated jvm.non-heap.used metric for executor=2:
+|----------|-----------------|
+|t         |jvm.non-heap.used|
+|----------|-----------------|
+|1700591509|51736120         |
+|1700591510|52774440         |
+|1700591511|52802568         |
+|1700591512|52841224         |
+|1700591513|52858808         |
+|1700591514|52887064         |
+|1700591515|52890904         |
+|1700591516|52901024         |
+|1700591517|53103000         |
+|1700591518|59122992         |
+|1700591519|69286520         |
+|1700591520|74775272         |
+|1700591521|76263400         |
+|1700591522|79953920         |
+|1700591523|82219176         |
+|1700591524|83175240         |
+|1700591525|83994624         |
+|1700591526|84258880         |
+|1700591527|86874968         |
+|1700591528|87446000         |
+|1700591529|88312880         |
+|1700591530|88341640         |
+|1700591531|88615016         |
+|1700591532|89062816         |
+|1700591533|89422184         |
+|1700591534|89496640         |
+|1700591535|89524944         |
+|----------|-----------------|
+
+Interpolated executor.cpuTime metric for executor=2:
+|----------|----------------|
+|t         |executor.cpuTime|
+|----------|----------------|
+|1700591509|0               |
+|1700591510|0               |
+|1700591511|0               |
+|1700591512|0               |
+|1700591513|0               |
+|1700591514|0               |
+|1700591515|0               |
+|1700591516|0               |
+|1700591517|0               |
+|1700591518|0               |
+|1700591519|0               |
+|1700591520|0               |
+|1700591521|2445883379      |
+|1700591522|2445883379      |
+|1700591523|2445883379      |
+|1700591524|3682507052      |
+|1700591525|4179509834      |
+|1700591526|4334041125      |
+|1700591527|4334041125      |
+|1700591528|4497019948      |
+|1700591529|4497019948      |
+|1700591530|4497019948      |
+|1700591531|4662041394      |
+|1700591532|4954782770      |
+|1700591533|5374978320      |
+|1700591534|5374978320      |
+|1700591535|5374978320      |
+|----------|----------------|
+
+Interpolated jvm.heap.used metric for executor=1:
+|----------|-------------|
+|t         |jvm.heap.used|
+|----------|-------------|
+|1700591508|0            |
+|1700591509|70254848     |
+|1700591510|76546304     |
+|1700591511|76546304     |
+|1700591512|77594880     |
+|1700591513|93323520     |
+|1700591514|48223784     |
+|1700591515|125818408    |
+|1700591516|189781544    |
+|1700591517|208655912    |
+|1700591518|209704488    |
+|1700591519|210753064    |
+|1700591520|210753064    |
+|1700591521|210753064    |
+|1700591522|121613360    |
+|1700591523|140487728    |
+|1700591524|155288688    |
+|1700591525|123572000    |
+|1700591526|156932888    |
+|1700591527|156932888    |
+|1700591528|160078616    |
+|1700591529|168467224    |
+|1700591530|168467224    |
+|1700591531|133350240    |
+|1700591532|125169152    |
+|1700591533|92759072     |
+|1700591534|115827744    |
+|1700591535|130507808    |
+|----------|-------------|
+
+Interpolated jvm.heap.usage metric for executor=1:
+|----------|--------------------|
+|t         |jvm.heap.usage      |
+|----------|--------------------|
+|1700591508|0                   |
+|1700591509|0.05153864933894231 |
+|1700591510|0.05615403395432692 |
+|1700591511|0.05615403395432692 |
+|1700591512|0.056923264723557694|
+|1700591513|0.06846172626201923 |
+|1700591514|0.0353767571082482  |
+|1700591515|0.09229983403132512 |
+|1700591516|0.13922291095440203 |
+|1700591517|0.15306906480055588 |
+|1700591518|0.15383829556978665 |
+|1700591519|0.15460752633901742 |
+|1700591520|0.15460752633901742 |
+|1700591521|0.15460752633901742 |
+|1700591522|0.08921502920297476 |
+|1700591523|0.1030611830491286  |
+|1700591524|0.11391910259540264 |
+|1700591525|0.09065187894381009 |
+|1700591526|0.11512528052696815 |
+|1700591527|0.11512528052696815 |
+|1700591528|0.11743297283466046 |
+|1700591529|0.12358681898850661 |
+|1700591530|0.12358681898850661 |
+|1700591531|0.09782515305739183 |
+|1700591532|0.09182354266826923 |
+|1700591533|0.06804764967698318 |
+|1700591534|0.0849707266000601  |
+|1700591535|0.09573995736929086 |
+|----------|--------------------|
+
+Interpolated jvm.heap.max metric for executor=1:
+|----------|------------|
+|t         |jvm.heap.max|
+|----------|------------|
+|1700591508|1363148800  |
+|1700591509|1363148800  |
+|1700591510|1363148800  |
+|1700591511|1363148800  |
+|1700591512|1363148800  |
+|1700591513|1363148800  |
+|1700591514|1363148800  |
+|1700591515|1363148800  |
+|1700591516|1363148800  |
+|1700591517|1363148800  |
+|1700591518|1363148800  |
+|1700591519|1363148800  |
+|1700591520|1363148800  |
+|1700591521|1363148800  |
+|1700591522|1363148800  |
+|1700591523|1363148800  |
+|1700591524|1363148800  |
+|1700591525|1363148800  |
+|1700591526|1363148800  |
+|1700591527|1363148800  |
+|1700591528|1363148800  |
+|1700591529|1363148800  |
+|1700591530|1363148800  |
+|1700591531|1363148800  |
+|1700591532|1363148800  |
+|1700591533|1363148800  |
+|1700591534|1363148800  |
+|1700591535|1363148800  |
+|----------|------------|
+
+Interpolated jvm.non-heap.used metric for executor=1:
+|----------|-----------------|
+|t         |jvm.non-heap.used|
+|----------|-----------------|
+|1700591508|0                |
+|1700591509|51585496         |
+|1700591510|52918456         |
+|1700591511|52940744         |
+|1700591512|52973616         |
+|1700591513|56711416         |
+|1700591514|65426440         |
+|1700591515|74432280         |
+|1700591516|75292248         |
+|1700591517|76735576         |
+|1700591518|76992584         |
+|1700591519|76998984         |
+|1700591520|76999672         |
+|1700591521|77016200         |
+|1700591522|79253056         |
+|1700591523|82358168         |
+|1700591524|83614856         |
+|1700591525|84571856         |
+|1700591526|85466648         |
+|1700591527|85482320         |
+|1700591528|85910864         |
+|1700591529|86963312         |
+|1700591530|87002840         |
+|1700591531|87223320         |
+|1700591532|87566712         |
+|1700591533|87936384         |
+|1700591534|88019624         |
+|1700591535|89505104         |
+|----------|-----------------|
+
+Interpolated executor.cpuTime metric for executor=1:
+|----------|----------------|
+|t         |executor.cpuTime|
+|----------|----------------|
+|1700591508|0               |
+|1700591509|0               |
+|1700591510|0               |
+|1700591511|0               |
+|1700591512|0               |
+|1700591513|0               |
+|1700591514|0               |
+|1700591515|0               |
+|1700591516|0               |
+|1700591517|3068287369      |
+|1700591518|3068287369      |
+|1700591519|3068287369      |
+|1700591520|3068287369      |
+|1700591521|3068287369      |
+|1700591522|3068287369      |
+|1700591523|3068287369      |
+|1700591524|4308852625      |
+|1700591525|4661133228      |
+|1700591526|4982366128      |
+|1700591527|4982366128      |
+|1700591528|4982366128      |
+|1700591529|4985622311      |
+|1700591530|4985622311      |
+|1700591531|4985622311      |
+|1700591532|5301216447      |
+|1700591533|5597146557      |
+|1700591534|5740082709      |
+|1700591535|5920100524      |
+|----------|----------------|
+
+Interpolated jvm.heap.used metric for executor=0:
+|----------|-------------|
+|t         |jvm.heap.used|
+|----------|-------------|
+|1700591508|0            |
+|1700591509|75679488     |
+|1700591510|78825216     |
+|1700591511|78825216     |
+|1700591512|78825216     |
+|1700591513|78825216     |
+|1700591514|79873792     |
+|1700591515|79873792     |
+|1700591516|79873792     |
+|1700591517|79873792     |
+|1700591518|81970944     |
+|1700591519|81970944     |
+|1700591520|81970944     |
+|1700591521|81970944     |
+|1700591522|89310976     |
+|1700591523|109233920    |
+|1700591524|126011136    |
+|1700591525|141739776    |
+|1700591526|162711296    |
+|1700591527|139701952    |
+|1700591528|140750528    |
+|1700591529|93506408     |
+|1700591530|164809576    |
+|1700591531|183683944    |
+|1700591532|124305760    |
+|1700591533|155771920    |
+|1700591534|163791584    |
+|1700591535|167985888    |
+|----------|-------------|
+
+Interpolated jvm.heap.usage metric for executor=0:
+|----------|--------------------|
+|t         |jvm.heap.usage      |
+|----------|--------------------|
+|1700591508|0                   |
+|1700591509|0.055518141526442306|
+|1700591510|0.057825833834134616|
+|1700591511|0.057825833834134616|
+|1700591512|0.057825833834134616|
+|1700591513|0.057825833834134616|
+|1700591514|0.05859506460336539 |
+|1700591515|0.05859506460336539 |
+|1700591516|0.05859506460336539 |
+|1700591517|0.05859506460336539 |
+|1700591518|0.060133526141826925|
+|1700591519|0.060133526141826925|
+|1700591520|0.060133526141826925|
+|1700591521|0.060133526141826925|
+|1700591522|0.06551814152644231 |
+|1700591523|0.08013352614182692 |
+|1700591524|0.09244121844951923 |
+|1700591525|0.10397967998798077 |
+|1700591526|0.11936429537259616 |
+|1700591527|0.1024847412109375  |
+|1700591528|0.10325397198016827 |
+|1700591529|0.06859589209923378 |
+|1700591530|0.12090358440692608 |
+|1700591531|0.13474973825307993 |
+|1700591532|0.0911901620718149  |
+|1700591533|0.11427359947791467 |
+|1700591534|0.12015678992638221 |
+|1700591535|0.1232337130033053  |
+|----------|--------------------|
+
+Interpolated jvm.heap.max metric for executor=0:
+|----------|------------|
+|t         |jvm.heap.max|
+|----------|------------|
+|1700591508|1363148800  |
+|1700591509|1363148800  |
+|1700591510|1363148800  |
+|1700591511|1363148800  |
+|1700591512|1363148800  |
+|1700591513|1363148800  |
+|1700591514|1363148800  |
+|1700591515|1363148800  |
+|1700591516|1363148800  |
+|1700591517|1363148800  |
+|1700591518|1363148800  |
+|1700591519|1363148800  |
+|1700591520|1363148800  |
+|1700591521|1363148800  |
+|1700591522|1363148800  |
+|1700591523|1363148800  |
+|1700591524|1363148800  |
+|1700591525|1363148800  |
+|1700591526|1363148800  |
+|1700591527|1363148800  |
+|1700591528|1363148800  |
+|1700591529|1363148800  |
+|1700591530|1363148800  |
+|1700591531|1363148800  |
+|1700591532|1363148800  |
+|1700591533|1363148800  |
+|1700591534|1363148800  |
+|1700591535|1363148800  |
+|----------|------------|
+
+Interpolated jvm.non-heap.used metric for executor=0:
+|----------|-----------------|
+|t         |jvm.non-heap.used|
+|----------|-----------------|
+|1700591508|0                |
+|1700591509|52274928         |
+|1700591510|52941376         |
+|1700591511|52973776         |
+|1700591512|53004160         |
+|1700591513|53024640         |
+|1700591514|53049464         |
+|1700591515|53057624         |
+|1700591516|53067768         |
+|1700591517|53075416         |
+|1700591518|53312264         |
+|1700591519|53325184         |
+|1700591520|53334416         |
+|1700591521|53375584         |
+|1700591522|55178768         |
+|1700591523|59860112         |
+|1700591524|63422688         |
+|1700591525|68666696         |
+|1700591526|72515520         |
+|1700591527|78390128         |
+|1700591528|78483920         |
+|1700591529|80336080         |
+|1700591530|82862624         |
+|1700591531|83786224         |
+|1700591532|84610472         |
+|1700591533|85264208         |
+|1700591534|87085192         |
+|1700591535|87765104         |
+|----------|-----------------|
+
+Interpolated executor.cpuTime metric for executor=0:
+|----------|----------------|
+|t         |executor.cpuTime|
+|----------|----------------|
+|1700591508|0               |
+|1700591509|0               |
+|1700591510|0               |
+|1700591511|0               |
+|1700591512|0               |
+|1700591513|0               |
+|1700591514|0               |
+|1700591515|0               |
+|1700591516|0               |
+|1700591517|0               |
+|1700591518|0               |
+|1700591519|0               |
+|1700591520|0               |
+|1700591521|0               |
+|1700591522|0               |
+|1700591523|0               |
+|1700591524|0               |
+|1700591525|0               |
+|1700591526|0               |
+|1700591527|1947428568      |
+|1700591528|1947428568      |
+|1700591529|1947428568      |
+|1700591530|1947428568      |
+|1700591531|3923089976      |
+|1700591532|4200290848      |
+|1700591533|4545608230      |
+|1700591534|4707975917      |
+|1700591535|4922003611      |
+|----------|----------------|
+
+Interpolated jvm.heap.used metric for executor=3:
+|----------|-------------|
+|t         |jvm.heap.used|
+|----------|-------------|
+|1700591508|0            |
+|1700591509|71910112     |
+|1700591510|77152992     |
+|1700591511|77152992     |
+|1700591512|77152992     |
+|1700591513|97075936     |
+|1700591514|129581792    |
+|1700591515|55434504     |
+|1700591516|145612040    |
+|1700591517|165534984    |
+|1700591518|188603656    |
+|1700591519|215866632    |
+|1700591520|217963784    |
+|1700591521|219012360    |
+|1700591522|122897120    |
+|1700591523|148062944    |
+|1700591524|136329248    |
+|1700591525|124495360    |
+|1700591526|154794208    |
+|1700591527|156891360    |
+|1700591528|162134240    |
+|1700591529|143238536    |
+|1700591530|158967176    |
+|1700591531|133210480    |
+|1700591532|140406768    |
+|1700591533|135288864    |
+|1700591534|155211808    |
+|1700591535|173037600    |
+|1700591536|165634944    |
+|----------|-------------|
+
+Interpolated jvm.heap.usage metric for executor=3:
+|----------|--------------------|
+|t         |jvm.heap.usage      |
+|----------|--------------------|
+|1700591508|0                   |
+|1700591509|0.05275294377253606 |
+|1700591510|0.056599097618689906|
+|1700591511|0.056599097618689906|
+|1700591512|0.056599097618689906|
+|1700591513|0.07121448223407452 |
+|1700591514|0.09506063608022837 |
+|1700591515|0.04066650977501502 |
+|1700591516|0.10682035592886117 |
+|1700591517|0.12143574054424579 |
+|1700591518|0.1383588174673227  |
+|1700591519|0.15835881746732272 |
+|1700591520|0.15989727900578427 |
+|1700591521|0.15989727900578427 |
+|1700591522|0.09015678992638221 |
+|1700591523|0.10861832838792067 |
+|1700591524|0.10001054030198317 |
+|1700591525|0.09132925180288462 |
+|1700591526|0.11355635422926683 |
+|1700591527|0.11509481576772837 |
+|1700591528|0.11894096961388222 |
+|1700591529|0.10507916377140926 |
+|1700591530|0.1166176253098708  |
+|1700591531|0.09772262573242188 |
+|1700591532|0.10300179114708534 |
+|1700591533|0.09924731914813702 |
+|1700591534|0.11386270376352163 |
+|1700591535|0.1269396268404447  |
+|1700591536|0.12150907076322115 |
+|----------|--------------------|
+
+Interpolated jvm.heap.max metric for executor=3:
+|----------|------------|
+|t         |jvm.heap.max|
+|----------|------------|
+|1700591508|1363148800  |
+|1700591509|1363148800  |
+|1700591510|1363148800  |
+|1700591511|1363148800  |
+|1700591512|1363148800  |
+|1700591513|1363148800  |
+|1700591514|1363148800  |
+|1700591515|1363148800  |
+|1700591516|1363148800  |
+|1700591517|1363148800  |
+|1700591518|1363148800  |
+|1700591519|1363148800  |
+|1700591520|1363148800  |
+|1700591521|1363148800  |
+|1700591522|1363148800  |
+|1700591523|1363148800  |
+|1700591524|1363148800  |
+|1700591525|1363148800  |
+|1700591526|1363148800  |
+|1700591527|1363148800  |
+|1700591528|1363148800  |
+|1700591529|1363148800  |
+|1700591530|1363148800  |
+|1700591531|1363148800  |
+|1700591532|1363148800  |
+|1700591533|1363148800  |
+|1700591534|1363148800  |
+|1700591535|1363148800  |
+|1700591536|1363148800  |
+|----------|------------|
+
+Interpolated jvm.non-heap.used metric for executor=3:
+|----------|-----------------|
+|t         |jvm.non-heap.used|
+|----------|-----------------|
+|1700591508|0                |
+|1700591509|51494240         |
+|1700591510|52689848         |
+|1700591511|52715072         |
+|1700591512|52746920         |
+|1700591513|57555552         |
+|1700591514|65769608         |
+|1700591515|73450960         |
+|1700591516|74690288         |
+|1700591517|76139400         |
+|1700591518|77018760         |
+|1700591519|77173512         |
+|1700591520|77253464         |
+|1700591521|77283576         |
+|1700591522|79844056         |
+|1700591523|82736736         |
+|1700591524|84020512         |
+|1700591525|85005160         |
+|1700591526|85351840         |
+|1700591527|85801792         |
+|1700591528|85963384         |
+|1700591529|86224904         |
+|1700591530|86292592         |
+|1700591531|86480032         |
+|1700591532|86841712         |
+|1700591533|87087000         |
+|1700591534|87220328         |
+|1700591535|89973128         |
+|1700591536|90410288         |
+|----------|-----------------|
+
+Interpolated executor.cpuTime metric for executor=3:
+|----------|----------------|
+|t         |executor.cpuTime|
+|----------|----------------|
+|1700591508|0               |
+|1700591509|0               |
+|1700591510|0               |
+|1700591511|0               |
+|1700591512|0               |
+|1700591513|0               |
+|1700591514|0               |
+|1700591515|0               |
+|1700591516|0               |
+|1700591517|3032666434      |
+|1700591518|3032666434      |
+|1700591519|3032666434      |
+|1700591520|4524484463      |
+|1700591521|4524484463      |
+|1700591522|4524484463      |
+|1700591523|4524484463      |
+|1700591524|5689434054      |
+|1700591525|6226534594      |
+|1700591526|6544523331      |
+|1700591527|6544523331      |
+|1700591528|6544523331      |
+|1700591529|6544523331      |
+|1700591530|7761640535      |
+|1700591531|7761640535      |
+|1700591532|8069148884      |
+|1700591533|8362320721      |
+|1700591534|8506424724      |
+|1700591535|8506424724      |
+|1700591536|8664038340      |
+|----------|----------------|
+
+Merged metrics for executor=2:
+|----------|-------------|--------------------|------------|-----------------|----------------|
+|t         |jvm.heap.used|jvm.heap.usage      |jvm.heap.max|jvm.non-heap.used|executor.cpuTime|
+|----------|-------------|--------------------|------------|-----------------|----------------|
+|1700591509|74227392     |0.05445289024939904 |1363148800  |51736120         |0               |
+|1700591510|77373120     |0.05676058255709135 |1363148800  |52774440         |0               |
+|1700591511|78421696     |0.057529813326322114|1363148800  |52802568         |0               |
+|1700591512|78421696     |0.057529813326322114|1363148800  |52841224         |0               |
+|1700591513|78421696     |0.057529813326322114|1363148800  |52858808         |0               |
+|1700591514|78421696     |0.057529813326322114|1363148800  |52887064         |0               |
+|1700591515|78421696     |0.057529813326322114|1363148800  |52890904         |0               |
+|1700591516|78421696     |0.057529813326322114|1363148800  |52901024         |0               |
+|1700591517|79470272     |0.058299044095552886|1363148800  |53103000         |0               |
+|1700591518|104636096    |0.07676058255709135 |1363148800  |59122992         |0               |
+|1700591519|50664440     |0.0371672116793119  |1363148800  |69286520         |0               |
+|1700591520|159716344    |0.1171672116793119  |1363148800  |74775272         |0               |
+|1700591521|180687864    |0.1325518270639273  |1363148800  |76263400         |2445883379      |
+|1700591522|202707960    |0.14870567321777345 |1363148800  |79953920         |2445883379      |
+|1700591523|235213816    |0.17255182706392727 |1363148800  |82219176         |2445883379      |
+|1700591524|127006720    |0.09317157451923076 |1363148800  |83175240         |3682507052      |
+|1700591525|149954848    |0.11000622089092547 |1363148800  |83994624         |4179509834      |
+|1700591526|184557856    |0.13539083627554085 |1363148800  |84258880         |4334041125      |
+|1700591527|200286496    |0.14616006704477164 |1363148800  |86874968         |4334041125      |
+|1700591528|203432224    |0.14923699012169472 |1363148800  |87446000         |4497019948      |
+|1700591529|209723680    |0.15385237473707933 |1363148800  |88312880         |4497019948      |
+|1700591530|209723680    |0.15385237473707933 |1363148800  |88341640         |4497019948      |
+|1700591531|124674408    |0.09146060063288762 |1363148800  |88615016         |4662041394      |
+|1700591532|113117696    |0.08298264723557693 |1363148800  |89062816         |4954782770      |
+|1700591533|184420864    |0.13529033954326924 |1363148800  |89422184         |5374978320      |
+|1700591534|184420864    |0.13529033954326924 |1363148800  |89496640         |5374978320      |
+|1700591535|184420864    |0.13529033954326924 |1363148800  |89524944         |5374978320      |
+|----------|-------------|--------------------|------------|-----------------|----------------|
+
+Merged metrics for executor=1:
+|----------|-------------|--------------------|------------|-----------------|----------------|
+|t         |jvm.heap.used|jvm.heap.usage      |jvm.heap.max|jvm.non-heap.used|executor.cpuTime|
+|----------|-------------|--------------------|------------|-----------------|----------------|
+|1700591508|0            |0                   |1363148800  |0                |0               |
+|1700591509|70254848     |0.05153864933894231 |1363148800  |51585496         |0               |
+|1700591510|76546304     |0.05615403395432692 |1363148800  |52918456         |0               |
+|1700591511|76546304     |0.05615403395432692 |1363148800  |52940744         |0               |
+|1700591512|77594880     |0.056923264723557694|1363148800  |52973616         |0               |
+|1700591513|93323520     |0.06846172626201923 |1363148800  |56711416         |0               |
+|1700591514|48223784     |0.0353767571082482  |1363148800  |65426440         |0               |
+|1700591515|125818408    |0.09229983403132512 |1363148800  |74432280         |0               |
+|1700591516|189781544    |0.13922291095440203 |1363148800  |75292248         |0               |
+|1700591517|208655912    |0.15306906480055588 |1363148800  |76735576         |3068287369      |
+|1700591518|209704488    |0.15383829556978665 |1363148800  |76992584         |3068287369      |
+|1700591519|210753064    |0.15460752633901742 |1363148800  |76998984         |3068287369      |
+|1700591520|210753064    |0.15460752633901742 |1363148800  |76999672         |3068287369      |
+|1700591521|210753064    |0.15460752633901742 |1363148800  |77016200         |3068287369      |
+|1700591522|121613360    |0.08921502920297476 |1363148800  |79253056         |3068287369      |
+|1700591523|140487728    |0.1030611830491286  |1363148800  |82358168         |3068287369      |
+|1700591524|155288688    |0.11391910259540264 |1363148800  |83614856         |4308852625      |
+|1700591525|123572000    |0.09065187894381009 |1363148800  |84571856         |4661133228      |
+|1700591526|156932888    |0.11512528052696815 |1363148800  |85466648         |4982366128      |
+|1700591527|156932888    |0.11512528052696815 |1363148800  |85482320         |4982366128      |
+|1700591528|160078616    |0.11743297283466046 |1363148800  |85910864         |4982366128      |
+|1700591529|168467224    |0.12358681898850661 |1363148800  |86963312         |4985622311      |
+|1700591530|168467224    |0.12358681898850661 |1363148800  |87002840         |4985622311      |
+|1700591531|133350240    |0.09782515305739183 |1363148800  |87223320         |4985622311      |
+|1700591532|125169152    |0.09182354266826923 |1363148800  |87566712         |5301216447      |
+|1700591533|92759072     |0.06804764967698318 |1363148800  |87936384         |5597146557      |
+|1700591534|115827744    |0.0849707266000601  |1363148800  |88019624         |5740082709      |
+|1700591535|130507808    |0.09573995736929086 |1363148800  |89505104         |5920100524      |
+|----------|-------------|--------------------|------------|-----------------|----------------|
+
+Merged metrics for executor=0:
+|----------|-------------|--------------------|------------|-----------------|----------------|
+|t         |jvm.heap.used|jvm.heap.usage      |jvm.heap.max|jvm.non-heap.used|executor.cpuTime|
+|----------|-------------|--------------------|------------|-----------------|----------------|
+|1700591508|0            |0                   |1363148800  |0                |0               |
+|1700591509|75679488     |0.055518141526442306|1363148800  |52274928         |0               |
+|1700591510|78825216     |0.057825833834134616|1363148800  |52941376         |0               |
+|1700591511|78825216     |0.057825833834134616|1363148800  |52973776         |0               |
+|1700591512|78825216     |0.057825833834134616|1363148800  |53004160         |0               |
+|1700591513|78825216     |0.057825833834134616|1363148800  |53024640         |0               |
+|1700591514|79873792     |0.05859506460336539 |1363148800  |53049464         |0               |
+|1700591515|79873792     |0.05859506460336539 |1363148800  |53057624         |0               |
+|1700591516|79873792     |0.05859506460336539 |1363148800  |53067768         |0               |
+|1700591517|79873792     |0.05859506460336539 |1363148800  |53075416         |0               |
+|1700591518|81970944     |0.060133526141826925|1363148800  |53312264         |0               |
+|1700591519|81970944     |0.060133526141826925|1363148800  |53325184         |0               |
+|1700591520|81970944     |0.060133526141826925|1363148800  |53334416         |0               |
+|1700591521|81970944     |0.060133526141826925|1363148800  |53375584         |0               |
+|1700591522|89310976     |0.06551814152644231 |1363148800  |55178768         |0               |
+|1700591523|109233920    |0.08013352614182692 |1363148800  |59860112         |0               |
+|1700591524|126011136    |0.09244121844951923 |1363148800  |63422688         |0               |
+|1700591525|141739776    |0.10397967998798077 |1363148800  |68666696         |0               |
+|1700591526|162711296    |0.11936429537259616 |1363148800  |72515520         |0               |
+|1700591527|139701952    |0.1024847412109375  |1363148800  |78390128         |1947428568      |
+|1700591528|140750528    |0.10325397198016827 |1363148800  |78483920         |1947428568      |
+|1700591529|93506408     |0.06859589209923378 |1363148800  |80336080         |1947428568      |
+|1700591530|164809576    |0.12090358440692608 |1363148800  |82862624         |1947428568      |
+|1700591531|183683944    |0.13474973825307993 |1363148800  |83786224         |3923089976      |
+|1700591532|124305760    |0.0911901620718149  |1363148800  |84610472         |4200290848      |
+|1700591533|155771920    |0.11427359947791467 |1363148800  |85264208         |4545608230      |
+|1700591534|163791584    |0.12015678992638221 |1363148800  |87085192         |4707975917      |
+|1700591535|167985888    |0.1232337130033053  |1363148800  |87765104         |4922003611      |
+|----------|-------------|--------------------|------------|-----------------|----------------|
+
+Merged metrics for executor=3:
+|----------|-------------|--------------------|------------|-----------------|----------------|
+|t         |jvm.heap.used|jvm.heap.usage      |jvm.heap.max|jvm.non-heap.used|executor.cpuTime|
+|----------|-------------|--------------------|------------|-----------------|----------------|
+|1700591508|0            |0                   |1363148800  |0                |0               |
+|1700591509|71910112     |0.05275294377253606 |1363148800  |51494240         |0               |
+|1700591510|77152992     |0.056599097618689906|1363148800  |52689848         |0               |
+|1700591511|77152992     |0.056599097618689906|1363148800  |52715072         |0               |
+|1700591512|77152992     |0.056599097618689906|1363148800  |52746920         |0               |
+|1700591513|97075936     |0.07121448223407452 |1363148800  |57555552         |0               |
+|1700591514|129581792    |0.09506063608022837 |1363148800  |65769608         |0               |
+|1700591515|55434504     |0.04066650977501502 |1363148800  |73450960         |0               |
+|1700591516|145612040    |0.10682035592886117 |1363148800  |74690288         |0               |
+|1700591517|165534984    |0.12143574054424579 |1363148800  |76139400         |3032666434      |
+|1700591518|188603656    |0.1383588174673227  |1363148800  |77018760         |3032666434      |
+|1700591519|215866632    |0.15835881746732272 |1363148800  |77173512         |3032666434      |
+|1700591520|217963784    |0.15989727900578427 |1363148800  |77253464         |4524484463      |
+|1700591521|219012360    |0.15989727900578427 |1363148800  |77283576         |4524484463      |
+|1700591522|122897120    |0.09015678992638221 |1363148800  |79844056         |4524484463      |
+|1700591523|148062944    |0.10861832838792067 |1363148800  |82736736         |4524484463      |
+|1700591524|136329248    |0.10001054030198317 |1363148800  |84020512         |5689434054      |
+|1700591525|124495360    |0.09132925180288462 |1363148800  |85005160         |6226534594      |
+|1700591526|154794208    |0.11355635422926683 |1363148800  |85351840         |6544523331      |
+|1700591527|156891360    |0.11509481576772837 |1363148800  |85801792         |6544523331      |
+|1700591528|162134240    |0.11894096961388222 |1363148800  |85963384         |6544523331      |
+|1700591529|143238536    |0.10507916377140926 |1363148800  |86224904         |6544523331      |
+|1700591530|158967176    |0.1166176253098708  |1363148800  |86292592         |7761640535      |
+|1700591531|133210480    |0.09772262573242188 |1363148800  |86480032         |7761640535      |
+|1700591532|140406768    |0.10300179114708534 |1363148800  |86841712         |8069148884      |
+|1700591533|135288864    |0.09924731914813702 |1363148800  |87087000         |8362320721      |
+|1700591534|155211808    |0.11386270376352163 |1363148800  |87220328         |8506424724      |
+|1700591535|173037600    |0.1269396268404447  |1363148800  |89973128         |8506424724      |
+|1700591536|165634944    |0.12150907076322115 |1363148800  |90410288         |8664038340      |
+|----------|-------------|--------------------|------------|-----------------|----------------|
+
+Displaying merged metrics with executorId for executor=2:
+|----------|-------------|--------------------|------------|-----------------|----------------|-------------------|-------------------|----------|
+|t         |jvm.heap.used|jvm.heap.usage      |jvm.heap.max|jvm.non-heap.used|executor.cpuTime|cpuUsage           |cpuUsageAllCores   |executorId|
+|----------|-------------|--------------------|------------|-----------------|----------------|-------------------|-------------------|----------|
+|1700591509|74227392     |0.05445289024939904 |1363148800  |51736120         |0               |0.0                |0                  |2         |
+|1700591510|77373120     |0.05676058255709135 |1363148800  |52774440         |0               |0.0                |0.0                |2         |
+|1700591511|78421696     |0.057529813326322114|1363148800  |52802568         |0               |0.0                |0.0                |2         |
+|1700591512|78421696     |0.057529813326322114|1363148800  |52841224         |0               |0.0                |0.0                |2         |
+|1700591513|78421696     |0.057529813326322114|1363148800  |52858808         |0               |0.0                |0.0                |2         |
+|1700591514|78421696     |0.057529813326322114|1363148800  |52887064         |0               |0.0                |0.0                |2         |
+|1700591515|78421696     |0.057529813326322114|1363148800  |52890904         |0               |0.0                |0.0                |2         |
+|1700591516|78421696     |0.057529813326322114|1363148800  |52901024         |0               |0.0                |0.0                |2         |
+|1700591517|79470272     |0.058299044095552886|1363148800  |53103000         |0               |0.0                |0.0                |2         |
+|1700591518|104636096    |0.07676058255709135 |1363148800  |59122992         |0               |0.0                |0.0                |2         |
+|1700591519|50664440     |0.0371672116793119  |1363148800  |69286520         |0               |0.0                |0.0                |2         |
+|1700591520|159716344    |0.1171672116793119  |1363148800  |74775272         |0               |0.0                |0.0                |2         |
+|1700591521|180687864    |0.1325518270639273  |1363148800  |76263400         |2445883379      |2.445883379        |2.445883379        |2         |
+|1700591522|202707960    |0.14870567321777345 |1363148800  |79953920         |2445883379      |0.0                |0.0                |2         |
+|1700591523|235213816    |0.17255182706392727 |1363148800  |82219176         |2445883379      |0.0                |0.0                |2         |
+|1700591524|127006720    |0.09317157451923076 |1363148800  |83175240         |3682507052      |1.236623673        |1.236623673        |2         |
+|1700591525|149954848    |0.11000622089092547 |1363148800  |83994624         |4179509834      |0.49700278200000003|0.49700278200000003|2         |
+|1700591526|184557856    |0.13539083627554085 |1363148800  |84258880         |4334041125      |0.15453129099999963|0.15453129099999963|2         |
+|1700591527|200286496    |0.14616006704477164 |1363148800  |86874968         |4334041125      |0.0                |0.0                |2         |
+|1700591528|203432224    |0.14923699012169472 |1363148800  |87446000         |4497019948      |0.16297882300000044|0.16297882300000044|2         |
+|1700591529|209723680    |0.15385237473707933 |1363148800  |88312880         |4497019948      |0.0                |0.0                |2         |
+|1700591530|209723680    |0.15385237473707933 |1363148800  |88341640         |4497019948      |0.0                |0.0                |2         |
+|1700591531|124674408    |0.09146060063288762 |1363148800  |88615016         |4662041394      |0.1650214459999999 |0.1650214459999999 |2         |
+|1700591532|113117696    |0.08298264723557693 |1363148800  |89062816         |4954782770      |0.2927413759999995 |0.2927413759999995 |2         |
+|1700591533|184420864    |0.13529033954326924 |1363148800  |89422184         |5374978320      |0.42019555000000075|0.42019555000000075|2         |
+|1700591534|184420864    |0.13529033954326924 |1363148800  |89496640         |5374978320      |0.0                |0.0                |2         |
+|1700591535|184420864    |0.13529033954326924 |1363148800  |89524944         |5374978320      |0.0                |0.0                |2         |
+|----------|-------------|--------------------|------------|-----------------|----------------|-------------------|-------------------|----------|
+
+Displaying merged metrics with executorId for executor=1:
+|----------|-------------|--------------------|------------|-----------------|----------------|--------------------|--------------------|----------|
+|t         |jvm.heap.used|jvm.heap.usage      |jvm.heap.max|jvm.non-heap.used|executor.cpuTime|cpuUsage            |cpuUsageAllCores    |executorId|
+|----------|-------------|--------------------|------------|-----------------|----------------|--------------------|--------------------|----------|
+|1700591508|0            |0                   |1363148800  |0                |0               |0.0                 |0                   |1         |
+|1700591509|70254848     |0.05153864933894231 |1363148800  |51585496         |0               |0.0                 |0.0                 |1         |
+|1700591510|76546304     |0.05615403395432692 |1363148800  |52918456         |0               |0.0                 |0.0                 |1         |
+|1700591511|76546304     |0.05615403395432692 |1363148800  |52940744         |0               |0.0                 |0.0                 |1         |
+|1700591512|77594880     |0.056923264723557694|1363148800  |52973616         |0               |0.0                 |0.0                 |1         |
+|1700591513|93323520     |0.06846172626201923 |1363148800  |56711416         |0               |0.0                 |0.0                 |1         |
+|1700591514|48223784     |0.0353767571082482  |1363148800  |65426440         |0               |0.0                 |0.0                 |1         |
+|1700591515|125818408    |0.09229983403132512 |1363148800  |74432280         |0               |0.0                 |0.0                 |1         |
+|1700591516|189781544    |0.13922291095440203 |1363148800  |75292248         |0               |0.0                 |0.0                 |1         |
+|1700591517|208655912    |0.15306906480055588 |1363148800  |76735576         |3068287369      |3.068287369         |3.068287369         |1         |
+|1700591518|209704488    |0.15383829556978665 |1363148800  |76992584         |3068287369      |0.0                 |0.0                 |1         |
+|1700591519|210753064    |0.15460752633901742 |1363148800  |76998984         |3068287369      |0.0                 |0.0                 |1         |
+|1700591520|210753064    |0.15460752633901742 |1363148800  |76999672         |3068287369      |0.0                 |0.0                 |1         |
+|1700591521|210753064    |0.15460752633901742 |1363148800  |77016200         |3068287369      |0.0                 |0.0                 |1         |
+|1700591522|121613360    |0.08921502920297476 |1363148800  |79253056         |3068287369      |0.0                 |0.0                 |1         |
+|1700591523|140487728    |0.1030611830491286  |1363148800  |82358168         |3068287369      |0.0                 |0.0                 |1         |
+|1700591524|155288688    |0.11391910259540264 |1363148800  |83614856         |4308852625      |1.240565256         |1.240565256         |1         |
+|1700591525|123572000    |0.09065187894381009 |1363148800  |84571856         |4661133228      |0.35228060299999964 |0.35228060299999964 |1         |
+|1700591526|156932888    |0.11512528052696815 |1363148800  |85466648         |4982366128      |0.32123290000000004 |0.32123290000000004 |1         |
+|1700591527|156932888    |0.11512528052696815 |1363148800  |85482320         |4982366128      |0.0                 |0.0                 |1         |
+|1700591528|160078616    |0.11743297283466046 |1363148800  |85910864         |4982366128      |0.0                 |0.0                 |1         |
+|1700591529|168467224    |0.12358681898850661 |1363148800  |86963312         |4985622311      |0.003256183000000412|0.003256183000000412|1         |
+|1700591530|168467224    |0.12358681898850661 |1363148800  |87002840         |4985622311      |0.0                 |0.0                 |1         |
+|1700591531|133350240    |0.09782515305739183 |1363148800  |87223320         |4985622311      |0.0                 |0.0                 |1         |
+|1700591532|125169152    |0.09182354266826923 |1363148800  |87566712         |5301216447      |0.31559413599999964 |0.31559413599999964 |1         |
+|1700591533|92759072     |0.06804764967698318 |1363148800  |87936384         |5597146557      |0.29593011000000047 |0.29593011000000047 |1         |
+|1700591534|115827744    |0.0849707266000601  |1363148800  |88019624         |5740082709      |0.14293615199999987 |0.14293615199999987 |1         |
+|1700591535|130507808    |0.09573995736929086 |1363148800  |89505104         |5920100524      |0.18001781500000025 |0.18001781500000025 |1         |
+|----------|-------------|--------------------|------------|-----------------|----------------|--------------------|--------------------|----------|
+
+Displaying merged metrics with executorId for executor=0:
+|----------|-------------|--------------------|------------|-----------------|----------------|-------------------|-------------------|----------|
+|t         |jvm.heap.used|jvm.heap.usage      |jvm.heap.max|jvm.non-heap.used|executor.cpuTime|cpuUsage           |cpuUsageAllCores   |executorId|
+|----------|-------------|--------------------|------------|-----------------|----------------|-------------------|-------------------|----------|
+|1700591508|0            |0                   |1363148800  |0                |0               |0.0                |0                  |0         |
+|1700591509|75679488     |0.055518141526442306|1363148800  |52274928         |0               |0.0                |0.0                |0         |
+|1700591510|78825216     |0.057825833834134616|1363148800  |52941376         |0               |0.0                |0.0                |0         |
+|1700591511|78825216     |0.057825833834134616|1363148800  |52973776         |0               |0.0                |0.0                |0         |
+|1700591512|78825216     |0.057825833834134616|1363148800  |53004160         |0               |0.0                |0.0                |0         |
+|1700591513|78825216     |0.057825833834134616|1363148800  |53024640         |0               |0.0                |0.0                |0         |
+|1700591514|79873792     |0.05859506460336539 |1363148800  |53049464         |0               |0.0                |0.0                |0         |
+|1700591515|79873792     |0.05859506460336539 |1363148800  |53057624         |0               |0.0                |0.0                |0         |
+|1700591516|79873792     |0.05859506460336539 |1363148800  |53067768         |0               |0.0                |0.0                |0         |
+|1700591517|79873792     |0.05859506460336539 |1363148800  |53075416         |0               |0.0                |0.0                |0         |
+|1700591518|81970944     |0.060133526141826925|1363148800  |53312264         |0               |0.0                |0.0                |0         |
+|1700591519|81970944     |0.060133526141826925|1363148800  |53325184         |0               |0.0                |0.0                |0         |
+|1700591520|81970944     |0.060133526141826925|1363148800  |53334416         |0               |0.0                |0.0                |0         |
+|1700591521|81970944     |0.060133526141826925|1363148800  |53375584         |0               |0.0                |0.0                |0         |
+|1700591522|89310976     |0.06551814152644231 |1363148800  |55178768         |0               |0.0                |0.0                |0         |
+|1700591523|109233920    |0.08013352614182692 |1363148800  |59860112         |0               |0.0                |0.0                |0         |
+|1700591524|126011136    |0.09244121844951923 |1363148800  |63422688         |0               |0.0                |0.0                |0         |
+|1700591525|141739776    |0.10397967998798077 |1363148800  |68666696         |0               |0.0                |0.0                |0         |
+|1700591526|162711296    |0.11936429537259616 |1363148800  |72515520         |0               |0.0                |0.0                |0         |
+|1700591527|139701952    |0.1024847412109375  |1363148800  |78390128         |1947428568      |1.947428568        |1.947428568        |0         |
+|1700591528|140750528    |0.10325397198016827 |1363148800  |78483920         |1947428568      |0.0                |0.0                |0         |
+|1700591529|93506408     |0.06859589209923378 |1363148800  |80336080         |1947428568      |0.0                |0.0                |0         |
+|1700591530|164809576    |0.12090358440692608 |1363148800  |82862624         |1947428568      |0.0                |0.0                |0         |
+|1700591531|183683944    |0.13474973825307993 |1363148800  |83786224         |3923089976      |1.975661408        |1.975661408        |0         |
+|1700591532|124305760    |0.0911901620718149  |1363148800  |84610472         |4200290848      |0.2772008719999999 |0.2772008719999999 |0         |
+|1700591533|155771920    |0.11427359947791467 |1363148800  |85264208         |4545608230      |0.3453173820000002 |0.3453173820000002 |0         |
+|1700591534|163791584    |0.12015678992638221 |1363148800  |87085192         |4707975917      |0.1623676869999997 |0.1623676869999997 |0         |
+|1700591535|167985888    |0.1232337130033053  |1363148800  |87765104         |4922003611      |0.21402769400000032|0.21402769400000032|0         |
+|----------|-------------|--------------------|------------|-----------------|----------------|-------------------|-------------------|----------|
+
+Displaying merged metrics with executorId for executor=3:
+|----------|-------------|--------------------|------------|-----------------|----------------|-------------------|-------------------|----------|
+|t         |jvm.heap.used|jvm.heap.usage      |jvm.heap.max|jvm.non-heap.used|executor.cpuTime|cpuUsage           |cpuUsageAllCores   |executorId|
+|----------|-------------|--------------------|------------|-----------------|----------------|-------------------|-------------------|----------|
+|1700591508|0            |0                   |1363148800  |0                |0               |0.0                |0                  |3         |
+|1700591509|71910112     |0.05275294377253606 |1363148800  |51494240         |0               |0.0                |0.0                |3         |
+|1700591510|77152992     |0.056599097618689906|1363148800  |52689848         |0               |0.0                |0.0                |3         |
+|1700591511|77152992     |0.056599097618689906|1363148800  |52715072         |0               |0.0                |0.0                |3         |
+|1700591512|77152992     |0.056599097618689906|1363148800  |52746920         |0               |0.0                |0.0                |3         |
+|1700591513|97075936     |0.07121448223407452 |1363148800  |57555552         |0               |0.0                |0.0                |3         |
+|1700591514|129581792    |0.09506063608022837 |1363148800  |65769608         |0               |0.0                |0.0                |3         |
+|1700591515|55434504     |0.04066650977501502 |1363148800  |73450960         |0               |0.0                |0.0                |3         |
+|1700591516|145612040    |0.10682035592886117 |1363148800  |74690288         |0               |0.0                |0.0                |3         |
+|1700591517|165534984    |0.12143574054424579 |1363148800  |76139400         |3032666434      |3.032666434        |3.032666434        |3         |
+|1700591518|188603656    |0.1383588174673227  |1363148800  |77018760         |3032666434      |0.0                |0.0                |3         |
+|1700591519|215866632    |0.15835881746732272 |1363148800  |77173512         |3032666434      |0.0                |0.0                |3         |
+|1700591520|217963784    |0.15989727900578427 |1363148800  |77253464         |4524484463      |1.4918180290000005 |1.4918180290000005 |3         |
+|1700591521|219012360    |0.15989727900578427 |1363148800  |77283576         |4524484463      |0.0                |0.0                |3         |
+|1700591522|122897120    |0.09015678992638221 |1363148800  |79844056         |4524484463      |0.0                |0.0                |3         |
+|1700591523|148062944    |0.10861832838792067 |1363148800  |82736736         |4524484463      |0.0                |0.0                |3         |
+|1700591524|136329248    |0.10001054030198317 |1363148800  |84020512         |5689434054      |1.164949591        |1.164949591        |3         |
+|1700591525|124495360    |0.09132925180288462 |1363148800  |85005160         |6226534594      |0.53710054         |0.53710054         |3         |
+|1700591526|154794208    |0.11355635422926683 |1363148800  |85351840         |6544523331      |0.3179887369999994 |0.3179887369999994 |3         |
+|1700591527|156891360    |0.11509481576772837 |1363148800  |85801792         |6544523331      |0.0                |0.0                |3         |
+|1700591528|162134240    |0.11894096961388222 |1363148800  |85963384         |6544523331      |0.0                |0.0                |3         |
+|1700591529|143238536    |0.10507916377140926 |1363148800  |86224904         |6544523331      |0.0                |0.0                |3         |
+|1700591530|158967176    |0.1166176253098708  |1363148800  |86292592         |7761640535      |1.217117204        |1.217117204        |3         |
+|1700591531|133210480    |0.09772262573242188 |1363148800  |86480032         |7761640535      |0.0                |0.0                |3         |
+|1700591532|140406768    |0.10300179114708534 |1363148800  |86841712         |8069148884      |0.3075083490000008 |0.3075083490000008 |3         |
+|1700591533|135288864    |0.09924731914813702 |1363148800  |87087000         |8362320721      |0.29317183699999916|0.29317183699999916|3         |
+|1700591534|155211808    |0.11386270376352163 |1363148800  |87220328         |8506424724      |0.1441040030000007 |0.1441040030000007 |3         |
+|1700591535|173037600    |0.1269396268404447  |1363148800  |89973128         |8506424724      |0.0                |0.0                |3         |
+|1700591536|165634944    |0.12150907076322115 |1363148800  |90410288         |8664038340      |0.157613615999999  |0.157613615999999  |3         |
+|----------|-------------|--------------------|------------|-----------------|----------------|-------------------|-------------------|----------|
+
+Displaying merged metrics for all executors:
+|----------|-------------|--------------------|------------|-----------------|----------------|--------------------|--------------------|----------|-------------------|
+|t         |jvm.heap.used|jvm.heap.usage      |jvm.heap.max|jvm.non-heap.used|executor.cpuTime|cpuUsage            |cpuUsageAllCores    |executorId|dt                 |
+|----------|-------------|--------------------|------------|-----------------|----------------|--------------------|--------------------|----------|-------------------|
+|1700591509|74227392     |0.05445289024939904 |1363148800  |51736120         |0               |0.0                 |0                   |2         |2023-11-21T18:31:49|
+|1700591510|77373120     |0.05676058255709135 |1363148800  |52774440         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:50|
+|1700591511|78421696     |0.057529813326322114|1363148800  |52802568         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:51|
+|1700591512|78421696     |0.057529813326322114|1363148800  |52841224         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:52|
+|1700591513|78421696     |0.057529813326322114|1363148800  |52858808         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:53|
+|1700591514|78421696     |0.057529813326322114|1363148800  |52887064         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:54|
+|1700591515|78421696     |0.057529813326322114|1363148800  |52890904         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:55|
+|1700591516|78421696     |0.057529813326322114|1363148800  |52901024         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:56|
+|1700591517|79470272     |0.058299044095552886|1363148800  |53103000         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:57|
+|1700591518|104636096    |0.07676058255709135 |1363148800  |59122992         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:58|
+|1700591519|50664440     |0.0371672116793119  |1363148800  |69286520         |0               |0.0                 |0.0                 |2         |2023-11-21T18:31:59|
+|1700591520|159716344    |0.1171672116793119  |1363148800  |74775272         |0               |0.0                 |0.0                 |2         |2023-11-21T18:32   |
+|1700591521|180687864    |0.1325518270639273  |1363148800  |76263400         |2445883379      |2.445883379         |2.445883379         |2         |2023-11-21T18:32:01|
+|1700591522|202707960    |0.14870567321777345 |1363148800  |79953920         |2445883379      |0.0                 |0.0                 |2         |2023-11-21T18:32:02|
+|1700591523|235213816    |0.17255182706392727 |1363148800  |82219176         |2445883379      |0.0                 |0.0                 |2         |2023-11-21T18:32:03|
+|1700591524|127006720    |0.09317157451923076 |1363148800  |83175240         |3682507052      |1.236623673         |1.236623673         |2         |2023-11-21T18:32:04|
+|1700591525|149954848    |0.11000622089092547 |1363148800  |83994624         |4179509834      |0.49700278200000003 |0.49700278200000003 |2         |2023-11-21T18:32:05|
+|1700591526|184557856    |0.13539083627554085 |1363148800  |84258880         |4334041125      |0.15453129099999963 |0.15453129099999963 |2         |2023-11-21T18:32:06|
+|1700591527|200286496    |0.14616006704477164 |1363148800  |86874968         |4334041125      |0.0                 |0.0                 |2         |2023-11-21T18:32:07|
+|1700591528|203432224    |0.14923699012169472 |1363148800  |87446000         |4497019948      |0.16297882300000044 |0.16297882300000044 |2         |2023-11-21T18:32:08|
+|1700591529|209723680    |0.15385237473707933 |1363148800  |88312880         |4497019948      |0.0                 |0.0                 |2         |2023-11-21T18:32:09|
+|1700591530|209723680    |0.15385237473707933 |1363148800  |88341640         |4497019948      |0.0                 |0.0                 |2         |2023-11-21T18:32:10|
+|1700591531|124674408    |0.09146060063288762 |1363148800  |88615016         |4662041394      |0.1650214459999999  |0.1650214459999999  |2         |2023-11-21T18:32:11|
+|1700591532|113117696    |0.08298264723557693 |1363148800  |89062816         |4954782770      |0.2927413759999995  |0.2927413759999995  |2         |2023-11-21T18:32:12|
+|1700591533|184420864    |0.13529033954326924 |1363148800  |89422184         |5374978320      |0.42019555000000075 |0.42019555000000075 |2         |2023-11-21T18:32:13|
+|1700591534|184420864    |0.13529033954326924 |1363148800  |89496640         |5374978320      |0.0                 |0.0                 |2         |2023-11-21T18:32:14|
+|1700591535|184420864    |0.13529033954326924 |1363148800  |89524944         |5374978320      |0.0                 |0.0                 |2         |2023-11-21T18:32:15|
+|1700591508|0            |0                   |1363148800  |0                |0               |0.0                 |0                   |1         |2023-11-21T18:31:48|
+|1700591509|70254848     |0.05153864933894231 |1363148800  |51585496         |0               |0.0                 |0.0                 |1         |2023-11-21T18:31:49|
+|1700591510|76546304     |0.05615403395432692 |1363148800  |52918456         |0               |0.0                 |0.0                 |1         |2023-11-21T18:31:50|
+|1700591511|76546304     |0.05615403395432692 |1363148800  |52940744         |0               |0.0                 |0.0                 |1         |2023-11-21T18:31:51|
+|1700591512|77594880     |0.056923264723557694|1363148800  |52973616         |0               |0.0                 |0.0                 |1         |2023-11-21T18:31:52|
+|1700591513|93323520     |0.06846172626201923 |1363148800  |56711416         |0               |0.0                 |0.0                 |1         |2023-11-21T18:31:53|
+|1700591514|48223784     |0.0353767571082482  |1363148800  |65426440         |0               |0.0                 |0.0                 |1         |2023-11-21T18:31:54|
+|1700591515|125818408    |0.09229983403132512 |1363148800  |74432280         |0               |0.0                 |0.0                 |1         |2023-11-21T18:31:55|
+|1700591516|189781544    |0.13922291095440203 |1363148800  |75292248         |0               |0.0                 |0.0                 |1         |2023-11-21T18:31:56|
+|1700591517|208655912    |0.15306906480055588 |1363148800  |76735576         |3068287369      |3.068287369         |3.068287369         |1         |2023-11-21T18:31:57|
+|1700591518|209704488    |0.15383829556978665 |1363148800  |76992584         |3068287369      |0.0                 |0.0                 |1         |2023-11-21T18:31:58|
+|1700591519|210753064    |0.15460752633901742 |1363148800  |76998984         |3068287369      |0.0                 |0.0                 |1         |2023-11-21T18:31:59|
+|1700591520|210753064    |0.15460752633901742 |1363148800  |76999672         |3068287369      |0.0                 |0.0                 |1         |2023-11-21T18:32   |
+|1700591521|210753064    |0.15460752633901742 |1363148800  |77016200         |3068287369      |0.0                 |0.0                 |1         |2023-11-21T18:32:01|
+|1700591522|121613360    |0.08921502920297476 |1363148800  |79253056         |3068287369      |0.0                 |0.0                 |1         |2023-11-21T18:32:02|
+|1700591523|140487728    |0.1030611830491286  |1363148800  |82358168         |3068287369      |0.0                 |0.0                 |1         |2023-11-21T18:32:03|
+|1700591524|155288688    |0.11391910259540264 |1363148800  |83614856         |4308852625      |1.240565256         |1.240565256         |1         |2023-11-21T18:32:04|
+|1700591525|123572000    |0.09065187894381009 |1363148800  |84571856         |4661133228      |0.35228060299999964 |0.35228060299999964 |1         |2023-11-21T18:32:05|
+|1700591526|156932888    |0.11512528052696815 |1363148800  |85466648         |4982366128      |0.32123290000000004 |0.32123290000000004 |1         |2023-11-21T18:32:06|
+|1700591527|156932888    |0.11512528052696815 |1363148800  |85482320         |4982366128      |0.0                 |0.0                 |1         |2023-11-21T18:32:07|
+|1700591528|160078616    |0.11743297283466046 |1363148800  |85910864         |4982366128      |0.0                 |0.0                 |1         |2023-11-21T18:32:08|
+|1700591529|168467224    |0.12358681898850661 |1363148800  |86963312         |4985622311      |0.003256183000000412|0.003256183000000412|1         |2023-11-21T18:32:09|
+|1700591530|168467224    |0.12358681898850661 |1363148800  |87002840         |4985622311      |0.0                 |0.0                 |1         |2023-11-21T18:32:10|
+|1700591531|133350240    |0.09782515305739183 |1363148800  |87223320         |4985622311      |0.0                 |0.0                 |1         |2023-11-21T18:32:11|
+|1700591532|125169152    |0.09182354266826923 |1363148800  |87566712         |5301216447      |0.31559413599999964 |0.31559413599999964 |1         |2023-11-21T18:32:12|
+|1700591533|92759072     |0.06804764967698318 |1363148800  |87936384         |5597146557      |0.29593011000000047 |0.29593011000000047 |1         |2023-11-21T18:32:13|
+|1700591534|115827744    |0.0849707266000601  |1363148800  |88019624         |5740082709      |0.14293615199999987 |0.14293615199999987 |1         |2023-11-21T18:32:14|
+|1700591535|130507808    |0.09573995736929086 |1363148800  |89505104         |5920100524      |0.18001781500000025 |0.18001781500000025 |1         |2023-11-21T18:32:15|
+|1700591508|0            |0                   |1363148800  |0                |0               |0.0                 |0                   |0         |2023-11-21T18:31:48|
+|1700591509|75679488     |0.055518141526442306|1363148800  |52274928         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:49|
+|1700591510|78825216     |0.057825833834134616|1363148800  |52941376         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:50|
+|1700591511|78825216     |0.057825833834134616|1363148800  |52973776         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:51|
+|1700591512|78825216     |0.057825833834134616|1363148800  |53004160         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:52|
+|1700591513|78825216     |0.057825833834134616|1363148800  |53024640         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:53|
+|1700591514|79873792     |0.05859506460336539 |1363148800  |53049464         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:54|
+|1700591515|79873792     |0.05859506460336539 |1363148800  |53057624         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:55|
+|1700591516|79873792     |0.05859506460336539 |1363148800  |53067768         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:56|
+|1700591517|79873792     |0.05859506460336539 |1363148800  |53075416         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:57|
+|1700591518|81970944     |0.060133526141826925|1363148800  |53312264         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:58|
+|1700591519|81970944     |0.060133526141826925|1363148800  |53325184         |0               |0.0                 |0.0                 |0         |2023-11-21T18:31:59|
+|1700591520|81970944     |0.060133526141826925|1363148800  |53334416         |0               |0.0                 |0.0                 |0         |2023-11-21T18:32   |
+|1700591521|81970944     |0.060133526141826925|1363148800  |53375584         |0               |0.0                 |0.0                 |0         |2023-11-21T18:32:01|
+|1700591522|89310976     |0.06551814152644231 |1363148800  |55178768         |0               |0.0                 |0.0                 |0         |2023-11-21T18:32:02|
+|1700591523|109233920    |0.08013352614182692 |1363148800  |59860112         |0               |0.0                 |0.0                 |0         |2023-11-21T18:32:03|
+|1700591524|126011136    |0.09244121844951923 |1363148800  |63422688         |0               |0.0                 |0.0                 |0         |2023-11-21T18:32:04|
+|1700591525|141739776    |0.10397967998798077 |1363148800  |68666696         |0               |0.0                 |0.0                 |0         |2023-11-21T18:32:05|
+|1700591526|162711296    |0.11936429537259616 |1363148800  |72515520         |0               |0.0                 |0.0                 |0         |2023-11-21T18:32:06|
+|1700591527|139701952    |0.1024847412109375  |1363148800  |78390128         |1947428568      |1.947428568         |1.947428568         |0         |2023-11-21T18:32:07|
+|1700591528|140750528    |0.10325397198016827 |1363148800  |78483920         |1947428568      |0.0                 |0.0                 |0         |2023-11-21T18:32:08|
+|1700591529|93506408     |0.06859589209923378 |1363148800  |80336080         |1947428568      |0.0                 |0.0                 |0         |2023-11-21T18:32:09|
+|1700591530|164809576    |0.12090358440692608 |1363148800  |82862624         |1947428568      |0.0                 |0.0                 |0         |2023-11-21T18:32:10|
+|1700591531|183683944    |0.13474973825307993 |1363148800  |83786224         |3923089976      |1.975661408         |1.975661408         |0         |2023-11-21T18:32:11|
+|1700591532|124305760    |0.0911901620718149  |1363148800  |84610472         |4200290848      |0.2772008719999999  |0.2772008719999999  |0         |2023-11-21T18:32:12|
+|1700591533|155771920    |0.11427359947791467 |1363148800  |85264208         |4545608230      |0.3453173820000002  |0.3453173820000002  |0         |2023-11-21T18:32:13|
+|1700591534|163791584    |0.12015678992638221 |1363148800  |87085192         |4707975917      |0.1623676869999997  |0.1623676869999997  |0         |2023-11-21T18:32:14|
+|1700591535|167985888    |0.1232337130033053  |1363148800  |87765104         |4922003611      |0.21402769400000032 |0.21402769400000032 |0         |2023-11-21T18:32:15|
+|1700591508|0            |0                   |1363148800  |0                |0               |0.0                 |0                   |3         |2023-11-21T18:31:48|
+|1700591509|71910112     |0.05275294377253606 |1363148800  |51494240         |0               |0.0                 |0.0                 |3         |2023-11-21T18:31:49|
+|1700591510|77152992     |0.056599097618689906|1363148800  |52689848         |0               |0.0                 |0.0                 |3         |2023-11-21T18:31:50|
+|1700591511|77152992     |0.056599097618689906|1363148800  |52715072         |0               |0.0                 |0.0                 |3         |2023-11-21T18:31:51|
+|1700591512|77152992     |0.056599097618689906|1363148800  |52746920         |0               |0.0                 |0.0                 |3         |2023-11-21T18:31:52|
+|1700591513|97075936     |0.07121448223407452 |1363148800  |57555552         |0               |0.0                 |0.0                 |3         |2023-11-21T18:31:53|
+|1700591514|129581792    |0.09506063608022837 |1363148800  |65769608         |0               |0.0                 |0.0                 |3         |2023-11-21T18:31:54|
+|1700591515|55434504     |0.04066650977501502 |1363148800  |73450960         |0               |0.0                 |0.0                 |3         |2023-11-21T18:31:55|
+|1700591516|145612040    |0.10682035592886117 |1363148800  |74690288         |0               |0.0                 |0.0                 |3         |2023-11-21T18:31:56|
+|1700591517|165534984    |0.12143574054424579 |1363148800  |76139400         |3032666434      |3.032666434         |3.032666434         |3         |2023-11-21T18:31:57|
+|1700591518|188603656    |0.1383588174673227  |1363148800  |77018760         |3032666434      |0.0                 |0.0                 |3         |2023-11-21T18:31:58|
+|1700591519|215866632    |0.15835881746732272 |1363148800  |77173512         |3032666434      |0.0                 |0.0                 |3         |2023-11-21T18:31:59|
+|1700591520|217963784    |0.15989727900578427 |1363148800  |77253464         |4524484463      |1.4918180290000005  |1.4918180290000005  |3         |2023-11-21T18:32   |
+|1700591521|219012360    |0.15989727900578427 |1363148800  |77283576         |4524484463      |0.0                 |0.0                 |3         |2023-11-21T18:32:01|
+|1700591522|122897120    |0.09015678992638221 |1363148800  |79844056         |4524484463      |0.0                 |0.0                 |3         |2023-11-21T18:32:02|
+|1700591523|148062944    |0.10861832838792067 |1363148800  |82736736         |4524484463      |0.0                 |0.0                 |3         |2023-11-21T18:32:03|
+|1700591524|136329248    |0.10001054030198317 |1363148800  |84020512         |5689434054      |1.164949591         |1.164949591         |3         |2023-11-21T18:32:04|
+|1700591525|124495360    |0.09132925180288462 |1363148800  |85005160         |6226534594      |0.53710054          |0.53710054          |3         |2023-11-21T18:32:05|
+|1700591526|154794208    |0.11355635422926683 |1363148800  |85351840         |6544523331      |0.3179887369999994  |0.3179887369999994  |3         |2023-11-21T18:32:06|
+|1700591527|156891360    |0.11509481576772837 |1363148800  |85801792         |6544523331      |0.0                 |0.0                 |3         |2023-11-21T18:32:07|
+|1700591528|162134240    |0.11894096961388222 |1363148800  |85963384         |6544523331      |0.0                 |0.0                 |3         |2023-11-21T18:32:08|
+|1700591529|143238536    |0.10507916377140926 |1363148800  |86224904         |6544523331      |0.0                 |0.0                 |3         |2023-11-21T18:32:09|
+|1700591530|158967176    |0.1166176253098708  |1363148800  |86292592         |7761640535      |1.217117204         |1.217117204         |3         |2023-11-21T18:32:10|
+|1700591531|133210480    |0.09772262573242188 |1363148800  |86480032         |7761640535      |0.0                 |0.0                 |3         |2023-11-21T18:32:11|
+|1700591532|140406768    |0.10300179114708534 |1363148800  |86841712         |8069148884      |0.3075083490000008  |0.3075083490000008  |3         |2023-11-21T18:32:12|
+|1700591533|135288864    |0.09924731914813702 |1363148800  |87087000         |8362320721      |0.29317183699999916 |0.29317183699999916 |3         |2023-11-21T18:32:13|
+|1700591534|155211808    |0.11386270376352163 |1363148800  |87220328         |8506424724      |0.1441040030000007  |0.1441040030000007  |3         |2023-11-21T18:32:14|
+|1700591535|173037600    |0.1269396268404447  |1363148800  |89973128         |8506424724      |0.0                 |0.0                 |3         |2023-11-21T18:32:15|
+|1700591536|165634944    |0.12150907076322115 |1363148800  |90410288         |8664038340      |0.157613615999999   |0.157613615999999   |3         |2023-11-21T18:32:16|
+|----------|-------------|--------------------|------------|-----------------|----------------|--------------------|--------------------|----------|-------------------|
+21/11/2023 06:32:16 INFO [SparkScope] Missing remove time for executorId=2, using last metric timestamp to calculate uptime
+21/11/2023 06:32:16 INFO [SparkScope] Missing remove time for executorId=1, using last metric timestamp to calculate uptime
+21/11/2023 06:32:16 INFO [SparkScope] Missing remove time for executorId=0, using last metric timestamp to calculate uptime
+21/11/2023 06:32:16 INFO [SparkScope] Missing remove time for executorId=3, using last metric timestamp to calculate uptime
+|----------|-------------|----------|--------------|----------|
+|executorId|addTime      |removeTime|lastMetricTime|upTimeInMs|
+|----------|-------------|----------|--------------|----------|
+|2         |1700591509065|null      |1700591535    |25935     |
+|1         |1700591508901|null      |1700591535    |26099     |
+|0         |1700591508452|null      |1700591535    |26548     |
+|3         |1700591508894|null      |1700591536    |27106     |
+|----------|-------------|----------|--------------|----------|
+
+Cluster metrics:
+|----------|---------------|
+|t         |jvm.heap.max   |
+|----------|---------------|
+|1700591508|4089446400.0000|
+|1700591509|5452595200.0000|
+|1700591510|5452595200.0000|
+|1700591511|5452595200.0000|
+|1700591512|5452595200.0000|
+|1700591513|5452595200.0000|
+|1700591514|5452595200.0000|
+|1700591515|5452595200.0000|
+|1700591516|5452595200.0000|
+|1700591517|5452595200.0000|
+|1700591518|5452595200.0000|
+|1700591519|5452595200.0000|
+|1700591520|5452595200.0000|
+|1700591521|5452595200.0000|
+|1700591522|5452595200.0000|
+|1700591523|5452595200.0000|
+|1700591524|5452595200.0000|
+|1700591525|5452595200.0000|
+|1700591526|5452595200.0000|
+|1700591527|5452595200.0000|
+|1700591528|5452595200.0000|
+|1700591529|5452595200.0000|
+|1700591530|5452595200.0000|
+|1700591531|5452595200.0000|
+|1700591532|5452595200.0000|
+|1700591533|5452595200.0000|
+|1700591534|5452595200.0000|
+|1700591535|5452595200.0000|
+|1700591536|1363148800.0000|
+|----------|---------------|
+|----------|--------------|
+|t         |jvm.heap.used |
+|----------|--------------|
+|1700591508|0.0000        |
+|1700591509|292071840.0000|
+|1700591510|309897632.0000|
+|1700591511|310946208.0000|
+|1700591512|311994784.0000|
+|1700591513|347646368.0000|
+|1700591514|336101064.0000|
+|1700591515|339548400.0000|
+|1700591516|493689072.0000|
+|1700591517|533534960.0000|
+|1700591518|584915184.0000|
+|1700591519|559255080.0000|
+|1700591520|670404136.0000|
+|1700591521|692424232.0000|
+|1700591522|536529416.0000|
+|1700591523|632998408.0000|
+|1700591524|544635792.0000|
+|1700591525|539761984.0000|
+|1700591526|658996248.0000|
+|1700591527|653812696.0000|
+|1700591528|666395608.0000|
+|1700591529|614935848.0000|
+|1700591530|701967656.0000|
+|1700591531|574919072.0000|
+|1700591532|502999376.0000|
+|1700591533|568240720.0000|
+|1700591534|619252000.0000|
+|1700591535|655952160.0000|
+|1700591536|165634944.0000|
+|----------|--------------|
+|----------|--------------|
+|t         |jvm.heap.usage|
+|----------|--------------|
+|1700591508|0.0000        |
+|1700591509|0.0536        |
+|1700591510|0.0568        |
+|1700591511|0.0570        |
+|1700591512|0.0572        |
+|1700591513|0.0638        |
+|1700591514|0.0616        |
+|1700591515|0.0623        |
+|1700591516|0.0905        |
+|1700591517|0.0978        |
+|1700591518|0.1073        |
+|1700591519|0.1026        |
+|1700591520|0.1230        |
+|1700591521|0.1268        |
+|1700591522|0.0984        |
+|1700591523|0.1161        |
+|1700591524|0.0999        |
+|1700591525|0.0990        |
+|1700591526|0.1209        |
+|1700591527|0.1197        |
+|1700591528|0.1222        |
+|1700591529|0.1128        |
+|1700591530|0.1287        |
+|1700591531|0.1054        |
+|1700591532|0.0922        |
+|1700591533|0.1042        |
+|1700591534|0.1136        |
+|1700591535|0.1203        |
+|1700591536|0.1215        |
+|----------|--------------|
+
+Cluster metrics:
+|----------|----------------|
+|t         |executor.cpuTime|
+|----------|----------------|
+|1700591508|0.0000          |
+|1700591509|0.0000          |
+|1700591510|0.0000          |
+|1700591511|0.0000          |
+|1700591512|0.0000          |
+|1700591513|0.0000          |
+|1700591514|0.0000          |
+|1700591515|0.0000          |
+|1700591516|0.0000          |
+|1700591517|6100953803.0000 |
+|1700591518|6100953803.0000 |
+|1700591519|6100953803.0000 |
+|1700591520|7592771832.0000 |
+|1700591521|10038655211.0000|
+|1700591522|10038655211.0000|
+|1700591523|10038655211.0000|
+|1700591524|13680793731.0000|
+|1700591525|15067177656.0000|
+|1700591526|15860930584.0000|
+|1700591527|17808359152.0000|
+|1700591528|17971337975.0000|
+|1700591529|17974594158.0000|
+|1700591530|19191711362.0000|
+|1700591531|21332394216.0000|
+|1700591532|22525438949.0000|
+|1700591533|23880053828.0000|
+|1700591534|24329461670.0000|
+|1700591535|24723507179.0000|
+|1700591536|8664038340.0000 |
+|----------|----------------|
+|----------|--------|
+|t         |cpuUsage|
+|----------|--------|
+|1700591508|0.0     |
+|1700591509|0.0     |
+|1700591510|0.0     |
+|1700591511|0.0     |
+|1700591512|0.0     |
+|1700591513|0.0     |
+|1700591514|0.0     |
+|1700591515|0.0     |
+|1700591516|0.0     |
+|1700591517|1.0     |
+|1700591518|0.0     |
+|1700591519|0.0     |
+|1700591520|0.373   |
+|1700591521|0.6115  |
+|1700591522|0.0     |
+|1700591523|0.0     |
+|1700591524|0.9105  |
+|1700591525|0.3466  |
+|1700591526|0.1984  |
+|1700591527|0.4869  |
+|1700591528|0.0407  |
+|1700591529|8.0E-4  |
+|1700591530|0.3043  |
+|1700591531|0.5352  |
+|1700591532|0.2983  |
+|1700591533|0.3387  |
+|1700591534|0.1124  |
+|1700591535|0.0985  |
+|1700591536|0.1576  |
+|----------|--------|
+|----------|----------------|
+|t         |cpuUsageAllCores|
+|----------|----------------|
+|1700591508|0.0             |
+|1700591509|0.0             |
+|1700591510|0.0             |
+|1700591511|0.0             |
+|1700591512|0.0             |
+|1700591513|0.0             |
+|1700591514|0.0             |
+|1700591515|0.0             |
+|1700591516|0.0             |
+|1700591517|4.0             |
+|1700591518|0.0             |
+|1700591519|0.0             |
+|1700591520|1.4918          |
+|1700591521|2.4459          |
+|1700591522|0.0             |
+|1700591523|0.0             |
+|1700591524|3.6421          |
+|1700591525|1.3864          |
+|1700591526|0.7938          |
+|1700591527|1.9474          |
+|1700591528|0.163           |
+|1700591529|0.0033          |
+|1700591530|1.2171          |
+|1700591531|2.1407          |
+|1700591532|1.193           |
+|1700591533|1.3546          |
+|1700591534|0.4494          |
+|1700591535|0.394           |
+|1700591536|0.1576          |
+|----------|----------------|
+|----------|----------|
+|t         |totalCores|
+|----------|----------|
+|1700591508|3.0       |
+|1700591509|4.0       |
+|1700591510|4.0       |
+|1700591511|4.0       |
+|1700591512|4.0       |
+|1700591513|4.0       |
+|1700591514|4.0       |
+|1700591515|4.0       |
+|1700591516|4.0       |
+|1700591517|4.0       |
+|1700591518|4.0       |
+|1700591519|4.0       |
+|1700591520|4.0       |
+|1700591521|4.0       |
+|1700591522|4.0       |
+|1700591523|4.0       |
+|1700591524|4.0       |
+|1700591525|4.0       |
+|1700591526|4.0       |
+|1700591527|4.0       |
+|1700591528|4.0       |
+|1700591529|4.0       |
+|1700591530|4.0       |
+|1700591531|4.0       |
+|1700591532|4.0       |
+|1700591533|4.0       |
+|1700591534|4.0       |
+|1700591535|4.0       |
+|1700591536|1.0       |
+|----------|----------|
+|----------|----------------|
+|executorId|executor.cpuTime|
+|----------|----------------|
+|2         |5374978320.0000 |
+|1         |5920100524.0000 |
+|0         |4922003611.0000 |
+|3         |8664038340.0000 |
+|----------|----------------|
+|----------|------|
+|t         |cnt   |
+|----------|------|
+|1700591508|3.0000|
+|1700591509|4.0000|
+|1700591510|4.0000|
+|1700591511|4.0000|
+|1700591512|4.0000|
+|1700591513|4.0000|
+|1700591514|4.0000|
+|1700591515|4.0000|
+|1700591516|4.0000|
+|1700591517|4.0000|
+|1700591518|4.0000|
+|1700591519|4.0000|
+|1700591520|4.0000|
+|1700591521|4.0000|
+|1700591522|4.0000|
+|1700591523|4.0000|
+|1700591524|4.0000|
+|1700591525|4.0000|
+|1700591526|4.0000|
+|1700591527|4.0000|
+|1700591528|4.0000|
+|1700591529|4.0000|
+|1700591530|4.0000|
+|1700591531|4.0000|
+|1700591532|4.0000|
+|1700591533|4.0000|
+|1700591534|4.0000|
+|1700591535|4.0000|
+|1700591536|1.0000|
+|----------|------|
+21/11/2023 06:32:16 INFO [SparkScope] Executor stats:
+Executor heap size: 1300MB
+Max heap memory utilization by executor: 224MB(17.26%)
+Average heap memory utilization by executor: 122MB(9.44%)
+Max non-heap memory utilization by executor: 86MB
+Average non-heap memory utilization by executor: 67MB
+
+21/11/2023 06:32:16 INFO [SparkScope] Driver stats:
+Driver heap size: 1024
+Max heap memory utilization by driver: 195MB(19.10%)
+Average heap memory utilization by driver: 112MB(11.04%)
+Max non-heap memory utilization by driver: 161MB
+Average non-heap memory utilization by driver: 131MB
+
+21/11/2023 06:32:16 INFO [SparkScope] Cluster Memory stats: 
+Average Cluster heap memory utilization: 9.44% / 474MB
+Max Cluster heap memory utilization: 12.87% / 669MB
+Average Cluster heap memory waste: 90.56%
+heapGbHoursAllocated: 0.0370
+heapGbHoursAllocated=(executorHeapSizeInGb(1.26953)*combinedExecutorUptimeInSec(105s))/3600
+heapGbHoursWasted: 0.0335
+heapGbHoursWasted=heapGbHoursAllocated(0.0370)*heapWaste(0.9056)
+
+21/11/2023 06:32:16 INFO [SparkScope] Cluster CPU stats: 
+Total CPU utilized: 23.70%
+Total CPU not utilized: 76.30%
+coreHoursAllocated: 0.0292
+coreHoursAllocated=(executorCores(1)*combinedExecutorUptimeInSec(105s))/3600
+coreHoursWasted: 0.0223
+coreHoursWasted=coreHoursAllocated(0.0292)*cpuNotUtilized(0.7630)
+
+
+</pre>
+</div>
+
+<br><br>
+
+<button type="button" class="collapsible">View Spark Config  </button>
+<div class="content">
+<pre>
+spark.eventLog.enabled: true
+spark.executor.instances: 4
+spark.metrics.conf.*.sink.csv.period: 1
+spark.jars: file:///tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar,file:///tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT-tests.jar,file:/tmp/jars/spark-examples_2.10-1.1.1.jar
+spark.sql.warehouse.dir: file:/opt/bitnami/spark/spark-warehouse
+spark.driver.host: e8017e064e70
+spark.executor.extraClassPath: /tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar
+spark.cores.max: 4
+spark.metrics.conf.executor.source.jvm.class: org.apache.spark.metrics.source.JvmSource
+spark.driver.port: 45019
+spark.files: file:///tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar
+spark.repl.local.jars: file:///tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar,file:///tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT-tests.jar
+spark.executor.memory: 1300m
+spark.master: spark://spark-master:7077
+spark.metrics.conf.*.sink.csv.directory: /tmp/csv-metrics
+spark.metrics.conf.driver.source.jvm.class: org.apache.spark.metrics.source.JvmSource
+spark.extraListeners: com.ucesys.sparkscope.SparkScopeJobListener
+spark.submit.deployMode: client
+spark.app.id: app-20231121183139-0024
+spark.app.initial.jar.urls: spark://e8017e064e70:45019/jars/sparkscope-spark3-0.1.4-SNAPSHOT-tests.jar,spark://e8017e064e70:45019/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar,spark://e8017e064e70:45019/jars/spark-examples_2.10-1.1.1.jar
+spark.metrics.conf.*.sink.csv.unit: seconds
+spark.executor.memoryOverhead: 500m
+spark.executor.id: driver
+spark.eventLog.dir: /tmp/spark-events
+spark.app.startTime: 1700591497236
+spark.app.name: WordCount
+spark.app.initial.file.urls: spark://e8017e064e70:45019/files/sparkscope-spark3-0.1.4-SNAPSHOT.jar
+spark.submit.pyFiles: 
+spark.executor.cores: 1
+spark.metrics.conf.*.sink.csv.class: org.apache.spark.metrics.sink.SparkScopeCsvSink
+</pre>
+</div>
+
+<script>
+    var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
+</body>
+</html>

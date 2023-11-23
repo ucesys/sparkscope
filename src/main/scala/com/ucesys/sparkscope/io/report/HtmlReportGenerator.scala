@@ -1,13 +1,16 @@
 package com.ucesys.sparkscope.io.report
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
+import com.ucesys.sparkscope.SparkScopeAnalyzer.{BytesInMB, JvmHeapUsed, JvmNonHeapUsed}
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
+import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.file.TextFileWriter
+import com.ucesys.sparkscope.io.report.SeriesColor.{Green, Orange, Purple, Red, Yellow}
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 
 import java.io.{FileWriter, InputStream}
 import java.nio.file.Paths
+import java.time.{Instant, LocalDateTime}
 import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
@@ -32,6 +35,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
 
         val rendered = template
           .replace("${sparkScopeSign}", SparkScopeSign)
+          .replace("${appInfo.appName}", sparkScopeConf.appName.getOrElse("None"))
           .replace("${appInfo.applicationId}", result.appContext.appId)
           .replace("${appInfo.start}", ofEpochSecond(result.appContext.appStartTime / 1000, 0, UTC).toString)
           .replace("${appInfo.end}", result.appContext.appEndTime.map(endTime => ofEpochSecond(endTime/ 1000, 0, UTC).toString).getOrElse("In progress"))
@@ -78,15 +82,14 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
               "${chart.jvm.executor.heap.timestamps}",
               result.metrics.executorMemoryMetrics.heapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
-          .replace("${chart.jvm.executor.heap.max}", result.metrics.executorMemoryMetrics.heapUsedMax.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
-          .replace("${chart.jvm.executor.heap.avg}", result.metrics.executorMemoryMetrics.heapUsedAvg.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
+          .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmHeapUsed))
           .replace("${chart.jvm.executor.heap.allocation}", result.metrics.executorMemoryMetrics.heapAllocation.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
           .replace(
               "${chart.jvm.executor.non-heap.timestamps}",
               result.metrics.executorMemoryMetrics.nonHeapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
-          .replace("${chart.jvm.executor.non-heap.max}", result.metrics.executorMemoryMetrics.nonHeapUsedMax.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
-          .replace("${chart.jvm.executor.non-heap.avg}", result.metrics.executorMemoryMetrics.nonHeapUsedAvg.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+          .replace("${chart.jvm.executor.non-heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmNonHeapUsed))
+          .replace("${chart.executor.memoryOverhead}", result.metrics.executorMemoryMetrics.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
           .replace(
               "${chart.jvm.driver.heap.timestamps}",
               result.metrics.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
@@ -98,13 +101,55 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
               result.metrics.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
           .replace("${chart.jvm.driver.non-heap.used}", result.metrics.driverMetrics.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
+          .replace("${chart.driver.memoryOverhead}", result.metrics.driverMetrics.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
+          .replace("${chart.cluster.numExecutors.timestamps}", result.metrics.clusterCPUMetrics.numExecutors.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
+          .replace("${chart.cluster.numExecutors}", result.metrics.clusterCPUMetrics.numExecutors.select("cnt").toDouble.mkString(","))
+          .replace("${chart.stages.timestamps}", result.metrics.stageMetrics.stageTimeline.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
+          .replace("${chart.stages}", generateStages(result.metrics.stageMetrics.stageTimeline.columns.filter(_.name !="t")))
+    }
+
+
+    def generateStages(stageCol: Seq[DataColumn]): String = {
+        stageCol.map(generateStageData).mkString("[", ",", "]")
+    }
+
+    def generateStageData(stageCol: DataColumn): String = {
+        val color = SeriesColor.randomColorModulo(stageCol.name.toInt, Seq(Green, Red, Yellow, Purple, Orange))
+        s"""{
+          |             data: [${stageCol.values.mkString(",")}],
+          |             label: "stageId=${stageCol.name}",
+          |             borderColor: "${color.borderColor}",
+          |             backgroundColor: "${color.backgroundColor}",
+          |             lineTension: 0.0,
+          |             fill: true,
+          |             pointRadius: 1,
+          |             pointHoverRadius: 8,
+          |}""".stripMargin
+    }
+
+
+    def generateExecutorHeapCharts(executorMetricsMap: Map[String, DataTable], metricName: String): String = {
+        executorMetricsMap.map{case (id, metrics) =>  generateExecutorChart(id, metrics.select(metricName).div(BytesInMB))}.mkString(",")
+    }
+    def generateExecutorChart(executorId: String, col: DataColumn): String = {
+        val color = SeriesColor.randomColorModulo(executorId.toInt, Seq(Green, Red, Yellow, Purple, Orange))
+
+        s"""
+          |{
+          |             data: [${col.values.mkString(",")}],
+          |             label: "executorId=${executorId}",
+          |             borderColor: "${color.borderColor}",
+          |             backgroundColor: "${color.backgroundColor}",
+          |             fill: false,
+          |             pointRadius: 1,
+          |             pointHoverRadius: 8,
+          |}""".stripMargin
     }
 
     def renderStats(template: String, result: SparkScopeResult): String = {
         template
           .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterMemoryStats.avgHeapPerc * 100}%1.2f")
           .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterMemoryStats.maxHeapPerc * 100}%1.2f")
-          .replace("${stats.cluster.heap.waste.perc}", f"${100 - result.stats.clusterMemoryStats.avgHeapPerc * 100}%1.2f")
           .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterCPUStats.cpuUtil * 100}%1.2f")
           .replace("${resource.waste.heap}", f"${result.stats.clusterMemoryStats.heapGbHoursWasted}%1.4f")
           .replace("${resource.waste.cpu}", f"${result.stats.clusterCPUStats.coreHoursWasted}%1.4f")

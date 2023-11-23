@@ -12,7 +12,13 @@ case class DataColumn(name: String, values: Seq[String]) {
 
     def toDouble: Seq[Double] = values.map(_.toDouble)
 
-    def div(divBy: Long): DataColumn = DataColumn(this.name, values.map(elem => (elem.toDouble / divBy).toString))
+    def div(divBy: Long): DataColumn = {
+        val newVals = values.map(elem => elem match {
+            case "null" => "null"
+            case _ => (elem.toDouble / divBy).toString
+        })
+        DataColumn(this.name, newVals)
+    }
 
     def div(other: DataColumn): DataColumn = {
         val dividedValues = (this.values zip other.values).map {

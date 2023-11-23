@@ -20,7 +20,7 @@ package com.ucesys.sparkscope.event
 
 import com.ucesys.sparkscope.SparkScopeArgs
 import com.ucesys.sparkscope.SparkScopeConfLoader._
-import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.common.{SparkScopeLogger, StageContext}
 import com.ucesys.sparkscope.io.file.FileReaderFactory
 import com.ucesys.sparkscope.io.metrics.MetricReaderFactory
 import org.apache.spark.SparkConf
@@ -203,6 +203,96 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         assert(eventLogContext.sparkConf.get(SparkScopePropertyExecutorMetricsDir) == "overrriden/path/to/executor/metrics")
         assert(eventLogContext.sparkConf.get(SparkScopePropertyHtmlPath) == "overrriden/path/to/html/report")
 
+    }
+
+    test("EventLogContextLoader finished stages test") {
+        Given("Path to eventLog with finished application with stage events")
+        val appId = "app-20231122115433-0000-eventLog-finished-stages"
+        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogContextLoader = new EventLogContextLoader
+
+        When("EventLogContextLoader.load")
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
+
+        Then("App id, startTime, endTime should be read from app start/end events")
+        assert(eventLogContext.appContext.appId == appId)
+        assert(eventLogContext.appContext.appStartTime == 1700654071065L)
+        assert(eventLogContext.appContext.appEndTime.get == 1700654100452L)
+
+        And("Stages be read from stage subbmitted/completed events")
+        assert(eventLogContext.appContext.stages.length == 10)
+        assert(eventLogContext.appContext.stages.head == StageContext("0", 1700654082, 1700654087, 2))
+        assert(eventLogContext.appContext.stages(1) == StageContext("1", 1700654088, 1700654089, 2))
+        assert(eventLogContext.appContext.stages(2) == StageContext("3", 1700654090, 1700654093, 20))
+        assert(eventLogContext.appContext.stages(3) == StageContext("6", 1700654093, 1700654094, 1))
+        assert(eventLogContext.appContext.stages(4) == StageContext("7", 1700654094, 1700654096, 2))
+        assert(eventLogContext.appContext.stages(5) == StageContext("8", 1700654094, 1700654095, 4))
+        assert(eventLogContext.appContext.stages(6) == StageContext("10", 1700654096, 1700654099, 20))
+        assert(eventLogContext.appContext.stages(7) == StageContext("13", 1700654099, 1700654099, 1))
+        assert(eventLogContext.appContext.stages(8) == StageContext("16", 1700654099, 1700654099, 1))
+        assert(eventLogContext.appContext.stages(9) == StageContext("20", 1700654099, 1700654100, 1))
+    }
+
+    test("EventLogContextLoader running stages not completed test") {
+        Given("Path to eventLog with running application with incomplete stage events")
+        val appId = "app-20231122115433-0000-eventLog-running-stages"
+        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogContextLoader = new EventLogContextLoader
+
+        When("EventLogContextLoader.load")
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
+
+        Then("App id, startTime, endTime should be read from app start/end events")
+        assert(eventLogContext.appContext.appId == appId)
+        assert(eventLogContext.appContext.appStartTime == 1700654071065L)
+        assert(eventLogContext.appContext.appEndTime.isEmpty)
+
+        And("Stages be read from stage subbmitted/completed events")
+        assert(eventLogContext.appContext.stages.length == 9)
+        assert(eventLogContext.appContext.stages.head == StageContext("0", 1700654082, 1700654087, 2))
+        assert(eventLogContext.appContext.stages(1) == StageContext("1", 1700654088, 1700654089, 2))
+        assert(eventLogContext.appContext.stages(2) == StageContext("3", 1700654090, 1700654093, 20))
+        assert(eventLogContext.appContext.stages(3) == StageContext("6", 1700654093, 1700654094, 1))
+        assert(eventLogContext.appContext.stages(4) == StageContext("7", 1700654094, 1700654096, 2))
+        assert(eventLogContext.appContext.stages(5) == StageContext("8", 1700654094, 1700654095, 4))
+        assert(eventLogContext.appContext.stages(6) == StageContext("10", 1700654096, 1700654099, 20))
+        assert(eventLogContext.appContext.stages(7) == StageContext("13", 1700654099, 1700654099, 1))
+        assert(eventLogContext.appContext.stages(8) == StageContext("16", 1700654099, 1700654099, 1))
+    }
+
+    test("EventLogContextLoader corrupted events test") {
+        Given("Path to eventLog with corrupted executor added/removed and stage submitted/completed events")
+        val appId = "app-20231122115433-0000-eventLog-corrupted-events"
+        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogContextLoader = new EventLogContextLoader
+
+        When("EventLogContextLoader.load")
+        val eventLogContext = eventLogContextLoader.load(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
+
+        Then("No exception should be thrown")
+        And("App id, startTime, endTime should be read from app start/end events")
+        assert(eventLogContext.appContext.appId == appId)
+        assert(eventLogContext.appContext.appStartTime == 1700654071065L)
+        assert(eventLogContext.appContext.appEndTime.isEmpty)
+
+        And("Corrupted stage events should be ignored")
+        And("Stages be read from stage submitted/completed events")
+        assert(eventLogContext.appContext.stages.length == 8)
+        assert(eventLogContext.appContext.stages.head == StageContext("0", 1700654082, 1700654087, 2))
+        assert(eventLogContext.appContext.stages(1) == StageContext("1", 1700654088, 1700654089, 2))
+        assert(eventLogContext.appContext.stages(2) == StageContext("3", 1700654090, 1700654093, 20))
+        assert(eventLogContext.appContext.stages(3) == StageContext("6", 1700654093, 1700654094, 1))
+        assert(eventLogContext.appContext.stages(4) == StageContext("7", 1700654094, 1700654096, 2))
+        assert(eventLogContext.appContext.stages(5) == StageContext("8", 1700654094, 1700654095, 4))
+        assert(eventLogContext.appContext.stages(6) == StageContext("10", 1700654096, 1700654099, 20))
+        assert(eventLogContext.appContext.stages(7) == StageContext("13", 1700654099, 1700654099, 1))
+
+        And("Corrupted executor events should be ignored")
+        And("Executor timeline should be read from executor add/remove events")
+        assert(eventLogContext.appContext.executorMap.size == 1)
+        assert(eventLogContext.appContext.executorMap("1").addTime == 1700654079478L)
+        assert(eventLogContext.appContext.executorMap("1").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("1").cores == 2)
     }
 
     test("EventLogContextLoader bad path to eventLog") {

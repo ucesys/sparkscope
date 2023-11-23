@@ -5,7 +5,8 @@ import com.ucesys.sparklens.common.AppContext
 case class SparkScopeContext(appId: String,
                              appStartTime: Long,
                              appEndTime: Option[Long],
-                             executorMap: Map[String, ExecutorContext]) {
+                             executorMap: Map[String, ExecutorContext],
+                             stages: Seq[StageContext]) {
   def executorCores: Int = executorMap.head._2.cores.toInt
 }
 
@@ -16,11 +17,14 @@ object SparkScopeContext {
           (id, ExecutorContext(timeSpan))
         }.toMap
 
-      SparkScopeContext(
-        appId = sparkLensContext.appInfo.applicationID,
-        appStartTime = sparkLensContext.appInfo.startTime,
-        appEndTime = Some(sparkLensContext.appInfo.endTime),
-        executorMap = executorMap
-      )
+        val stages: Seq[StageContext] = sparkLensContext.jobMap.flatMap{case (id, d) => d.stageMap.flatMap{case (id, stage) => StageContext(stage)}}.toSeq
+
+        SparkScopeContext(
+            appId = sparkLensContext.appInfo.applicationID,
+            appStartTime = sparkLensContext.appInfo.startTime,
+            appEndTime = Some(sparkLensContext.appInfo.endTime),
+            executorMap = executorMap,
+            stages = stages
+        )
     }
 }

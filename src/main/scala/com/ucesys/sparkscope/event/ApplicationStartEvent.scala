@@ -5,6 +5,7 @@ import com.ucesys.sparkscope.event.EventLogContextLoader._
 case class ApplicationStartEvent(appId: Option[String], ts: Option[Long])
 
 object ApplicationStartEvent {
+    val ColAppId = "App ID"
     def apply(eventMap: Map[String, Any]): ApplicationStartEvent = {
         ApplicationStartEvent(
             eventMap.get(ColAppId).map(_.asInstanceOf[String]),

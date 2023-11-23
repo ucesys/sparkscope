@@ -41,7 +41,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         }
 
         // Interpolating metrics
-        val executorsMetricsMapInterpolated = interpolateExecutorMetrics(appContext.executorMap, driverExecutorMetrics.executorMetricsMap)
+        val executorsMetricsMapInterpolated = interpolateExecutorMetrics(appContext.executorMap, driverExecutorMetrics.executorMetricsMap, appContext)
         executorsMetricsMapInterpolated.foreach { case (id, metrics) =>
             metrics.foreach { metric => logger.println(s"\nInterpolated ${metric.name} metric for executor=${id}:\n${metric}") }
         }
@@ -112,16 +112,31 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
         logger.println(executorTimeLine)
 
+        val allTimestamps = executorsMetricsCombinedMapWithCpuUsage.flatMap { case (_, dt) =>
+            dt.select("t").values.map(_.toLong)
+        }.toSet.toSeq.sorted.map(_.toString)
+
+        val executorMetricsAligned = executorsMetricsCombinedMapWithCpuUsage.map{ case (id, dt) =>
+            val existingTimestamps = dt.select("t").values
+            val newTimestamps = allTimestamps.filterNot(existingTimestamps.contains)
+            val aligned = DataTable(
+                "heapUsed",
+                Seq(
+                    DataColumn("t", dt.select("t").values ++ newTimestamps),
+                    DataColumn(JvmHeapUsed, dt.select(JvmHeapUsed).values ++ Seq.fill(newTimestamps.length)("null")),
+                    DataColumn(JvmNonHeapUsed, dt.select(JvmNonHeapUsed).values ++ Seq.fill(newTimestamps.length)("null")),
+                )
+            ).sortBy("t")
+            (id, aligned)
+        }
 
         // Metrics
-        val executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics)
         val clusterMemoryMetrics = ClusterMemoryMetrics(allExecutorsMetrics)
         val clusterCPUMetrics = ClusterCPUMetrics(allExecutorsMetrics, appContext.executorCores)
         logger.println(clusterMemoryMetrics)
         logger.println(clusterCPUMetrics)
 
         // Stats
-        val driverStats = DriverMemoryStats(driverMetricsMerged)
         val executorStats = ExecutorMemoryStats(allExecutorsMetrics)
         val clusterMemoryStats = ClusterMemoryStats(clusterMemoryMetrics, executorTimeSecs, executorStats)
         val clusterCPUStats = ClusterCPUStats(clusterCPUMetrics, appContext.executorCores, executorTimeSecs)
@@ -139,23 +154,25 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         SparkScopeResult(
             appContext = appContext,
             stats = SparkScopeStats(
-                driverStats = driverStats,
+                driverStats = DriverMemoryStats(driverMetricsMerged),
                 executorStats = executorStats,
                 clusterMemoryStats = clusterMemoryStats,
                 clusterCPUStats = clusterCPUStats
             ),
             metrics = SparkScopeMetrics(
                 driverMetrics = driverMetricsMerged,
-                executorMemoryMetrics = executorMemoryMetrics,
+                executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned),
                 clusterMemoryMetrics = clusterMemoryMetrics,
-                clusterCPUMetrics = clusterCPUMetrics
+                clusterCPUMetrics = clusterCPUMetrics,
+                stageMetrics = StageMetrics(appContext.stages, allTimestamps, clusterCPUMetrics.clusterCapacity)
             ),
             warnings = warnings.flatten
         )
     }
 
     private def interpolateExecutorMetrics(executorMap: Map[String, ExecutorContext],
-                                           executorsMetricsMap: Map[String, Seq[DataTable]]): Map[String, Seq[DataTable]] = {
+                                           executorsMetricsMap: Map[String, Seq[DataTable]],
+                                           appContext: SparkScopeContext): Map[String, Seq[DataTable]] = {
         /*    Interpolating executor metrics to align their timestamps for aggregations. Also adds a "zero row" with start values for when executor was added.
 
                     RAW                      INTERPOLATED
@@ -197,9 +214,12 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
             (id, metricsWithZeroRows)
         }
 
-        val allTimestamps = executorsMetricsMapWithZeroRows.flatMap { case (_, metrics) =>
+
+        val allMetricsTimestamps = executorsMetricsMapWithZeroRows.flatMap { case (_, metrics) =>
             metrics.flatMap(metric => metric.select("t").values.map(_.toLong))
-        }.toSet.toSeq.sorted
+        }
+
+        val allTimestamps = (allMetricsTimestamps ++ appContext.stages.flatMap(_.getTimeline)).toSet.toSeq.sorted
 
         executorsMetricsMapWithZeroRows.map { case (executorId, metricsSeq) =>
             val metricsInterpolated: Seq[DataTable] = metricsSeq.map(metrics => {
