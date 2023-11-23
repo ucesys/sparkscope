@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.4] - 2023-11-23 UI Enhancements
+- New charts
+  - chart of stages in time with number of tasks per stage
+  - chart of active executors in time
+  - seperate memory charts for each executor instead of aggregated
+- UI enhancements
+  - appName field added to application summary
+  - added executor and driver memoryOverheads to charts
+
 ## [0.1.3] - 2023-11-16 S3 compatiblity
 - S3 compatibility
   - spilling metrics to s3 (SparkScopeCsvSink will spill metrics to s3 for directory starting with s3/s3a/s3n prefix)
