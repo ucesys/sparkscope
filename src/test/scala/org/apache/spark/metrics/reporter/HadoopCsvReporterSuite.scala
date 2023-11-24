@@ -20,7 +20,7 @@ package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics.{MetricFilter, MetricRegistry}
 import org.apache.commons.lang.SystemUtils
-import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.fs.{FSDataOutputStream, FileSystem, Path}
 import org.slf4j.Logger
 import org.apache.spark.deploy.SparkHadoopUtil
 import org.mockito.ArgumentMatchers.any
@@ -67,11 +67,72 @@ class HadoopCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenTh
 
         if(SystemUtils.OS_NAME == "Linux") {
             When("calling HadoopCsvReporter.report")
-            hadoopCsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "t,value", "%d", "123,1000")
+            hadoopCsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "value", "%s", "123")
 
             Then("Filesystem closed warning should be logged")
             val fsClosedWarning = "IOException while writing app-123-456.driver.jvm.heap.used to hdfs:/tmp/path. java.io.IOException: Filesystem closed"
             verify(loggerMock, times(1)).warn(fsClosedWarning)
+        }
+    }
+
+    test("HadoopCsvReporter report metrics append") {
+        Given("hdfs reporter")
+        val hdfsPath = "hdfs:/tmp/path"
+        val hadoopCsvReporter = createHadoopCsvReporter(hdfsPath)
+
+        And("hadoop fs is open and metrics file already exists")
+        val fsMock = mock[FileSystem]
+        doReturn(true).when(fsMock).exists(any[Path])
+        doReturn(mock[FSDataOutputStream]).when(fsMock).append(any[Path])
+
+        val fsField = hadoopCsvReporter.getClass.getDeclaredField("fs");
+        fsField.setAccessible(true);
+        fsField.set(hadoopCsvReporter, fsMock);
+
+        if (SystemUtils.OS_NAME == "Linux") {
+            When("calling HadoopCsvReporter.report")
+            hadoopCsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "t,value", "%s", 1000)
+            hadoopCsvReporter.report(123, "app-123-456.0.executor.cpuTime", "count", "%d", 999)
+
+            Then("Filesystem.exists should be called")
+            verify(fsMock, times(2)).exists(any[Path])
+
+            And("New file should not be created")
+            verify(fsMock, times(0)).create(any[Path])
+
+            And("Row should be appended to file")
+            verify(fsMock, times(2)).append(any[Path])
+        }
+    }
+
+    test("HadoopCsvReporter report metrics create") {
+        Given("hdfs reporter")
+        val hdfsPath = "hdfs:/tmp/path"
+        val hadoopCsvReporter = createHadoopCsvReporter(hdfsPath)
+
+        And("hadoop fs is open and metrics file doesn't exists")
+        val fsMock = mock[FileSystem]
+        doReturn(false).when(fsMock).exists(any[Path])
+        doReturn(mock[FSDataOutputStream]).when(fsMock).create(any[Path], any[Boolean])
+        doReturn(mock[FSDataOutputStream]).when(fsMock).append(any[Path])
+
+        val fsField = hadoopCsvReporter.getClass.getDeclaredField("fs");
+        fsField.setAccessible(true);
+        fsField.set(hadoopCsvReporter, fsMock);
+
+        if (SystemUtils.OS_NAME == "Linux") {
+            When("calling HadoopCsvReporter.report")
+            hadoopCsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "value", "%s", 1000)
+            hadoopCsvReporter.report(123, "app-123-456.0.executor.cpuTime", "count", "%d", 999)
+
+            Then("Filesystem.exists should be called")
+            verify(fsMock, times(2)).exists(any[Path])
+
+            And("New metrics file should be created")
+            verify(fsMock, times(2)).create(any[Path], any[Boolean])
+
+            And("Row should be appended to file")
+            verify(fsMock, times(2)).append(any[Path])
         }
     }
 }

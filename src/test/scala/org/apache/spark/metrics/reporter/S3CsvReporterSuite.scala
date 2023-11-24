@@ -30,9 +30,9 @@ import java.util.concurrent.TimeUnit;
 class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
 
     def createS3CsvReporter(directory: String, region: String): S3CsvReporter = {
-        new S3CsvReporter(
+        new S3BufferedCsvReporter(
             directory,
-            Optional.ofNullable(region),
+            Option(region),
             new MetricRegistry,
             null,
             ",",
@@ -55,8 +55,8 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
         val s3CsvReporter = createS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
-        assert(s3CsvReporter.bucketName.equals("my-bucket"))
-        assert(s3CsvReporter.metricsDir.equals("metrics-dir"))
+        assert(s3CsvReporter.s3Location.bucketName.equals("my-bucket"))
+        assert(s3CsvReporter.s3Location.path.equals("metrics-dir"))
         assert(s3CsvReporter.s3 != null)
     }
 
@@ -70,8 +70,8 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
         val s3CsvReporter = createS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
-        assert(s3CsvReporter.bucketName.equals("my-bucket"))
-        assert(s3CsvReporter.metricsDir.equals("metrics-dir"))
+        assert(s3CsvReporter.s3Location.bucketName.equals("my-bucket"))
+        assert(s3CsvReporter.s3Location.path.equals("metrics-dir"))
         assert(s3CsvReporter.s3 != null)
     }
 
@@ -85,8 +85,8 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
         val s3CsvReporter = createS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
-        assert(s3CsvReporter.bucketName.equals("my-bucket"))
-        assert(s3CsvReporter.metricsDir.equals("nested-path/to/metrics-dir"))
+        assert(s3CsvReporter.s3Location.bucketName.equals("my-bucket"))
+        assert(s3CsvReporter.s3Location.path.equals("nested-path/to/metrics-dir"))
         assert(s3CsvReporter.s3 != null)
     }
 
@@ -100,8 +100,8 @@ class S3CsvReporterSuite extends FunSuite with MockFactory with GivenWhenThen {
         val s3CsvReporter = createS3CsvReporter(s3BucketUrl, region)
 
         Then("bucketName and metricsDir should be extracted")
-        assert(s3CsvReporter.bucketName.equals("my-bucket"))
-        assert(s3CsvReporter.metricsDir.equals("nested-path/to/metrics-dir"))
+        assert(s3CsvReporter.s3Location.bucketName.equals("my-bucket"))
+        assert(s3CsvReporter.s3Location.path.equals("nested-path/to/metrics-dir"))
         assert(s3CsvReporter.s3 != null)
     }
 

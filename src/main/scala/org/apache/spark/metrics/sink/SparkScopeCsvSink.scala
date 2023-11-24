@@ -57,7 +57,7 @@ private[spark] class SparkScopeCsvSink(val property: Properties, val registry: M
     .convertRatesTo(TimeUnit.SECONDS)
     .build(
       pollDir,
-      Optional.ofNullable(property.getProperty(CSV_KEY_S3_REGION))
+      Option(property.getProperty(CSV_KEY_S3_REGION))
     )
 
   override def start(): Unit = {
