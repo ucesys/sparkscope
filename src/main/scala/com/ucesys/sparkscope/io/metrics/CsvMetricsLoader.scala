@@ -2,7 +2,7 @@ package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
-import com.ucesys.sparkscope.io.MetricType.{AllMetricsDriver, AllMetricsExecutor}
+import com.ucesys.sparkscope.common.MetricType.{AllMetricsDriver, AllMetricsExecutor}
 
 class CsvMetricsLoader(metricReader: MetricReader)(implicit logger: SparkScopeLogger) extends MetricsLoader {
     def load(appContext: SparkScopeContext, sparkScopeConf: SparkScopeConf): DriverExecutorMetrics = {

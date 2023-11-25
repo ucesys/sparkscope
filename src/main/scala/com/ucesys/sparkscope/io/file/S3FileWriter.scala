@@ -15,6 +15,14 @@ class S3FileWriter(s3: AmazonS3)(implicit logger: SparkScopeLogger)  extends Tex
                 throw ex
         }
     }
+
+    def exists(url: String): Boolean = {
+        val s3Location = S3Location(url)
+        if (!s3.doesBucketExistV2(s3Location.bucketName)) {
+            throw new IllegalArgumentException(s"${s3Location.bucketName} bucket does not exist, provided s3 url: ${url}")
+        }
+        s3.doesObjectExist(s3Location.bucketName, s3Location.path)
+    }
 }
 
 object S3FileWriter {

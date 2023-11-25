@@ -4,7 +4,7 @@ import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInf
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io._
-import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger, StageContext}
+import com.ucesys.sparkscope.common.{CpuTime, ExecutorContext, JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed, SparkScopeContext, SparkScopeLogger, StageContext}
 import com.ucesys.sparkscope.io.metrics.{DriverExecutorMetrics, HadoopMetricReader, MetricReader, MetricReaderFactory}
 import com.ucesys.sparkscope.io.property.{PropertiesLoader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.warning.MissingMetricsWarning

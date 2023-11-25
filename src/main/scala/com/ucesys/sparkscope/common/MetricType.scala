@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.io
+package com.ucesys.sparkscope.common
 
 sealed trait MetricType { def name: String }
 
@@ -11,4 +11,7 @@ case object CpuTime extends MetricType { val name = "executor.cpuTime" }
 object MetricType {
     val AllMetricsExecutor: Seq[MetricType] = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, CpuTime)
     val AllMetricsDriver: Seq[MetricType] = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed)
+    val AllMetrics = (AllMetricsExecutor ++ AllMetricsDriver).toSet
+
+    def fromString(name: String): MetricType = AllMetrics.find(_.name == name).getOrElse(throw new IllegalArgumentException(s"Unknown metric: ${name}"))
 }

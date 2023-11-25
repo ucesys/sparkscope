@@ -1,6 +1,8 @@
 package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics._
+import com.ucesys.sparkscope.common.Metric
+import com.ucesys.sparkscope.io.file.LocalFileWriter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -9,6 +11,7 @@ import java.util.Locale
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.nio.charset.StandardCharsets.UTF_8
+import java.nio.file.Paths
 
 /**
  * A reporter which creates a comma-separated values file of the measurements for each metric.
@@ -23,7 +26,7 @@ class LocalCsvReporter(directory: String,
                        filter: MetricFilter,
                        executor: ScheduledExecutorService,
                        shutdownExecutorOnStop: Boolean,
-                       csvFileProvider: CsvFileProvider)
+                       fileWriter: LocalFileWriter)
   extends AbstractCsvReporter(registry, locale, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop) {
 
     /**
@@ -34,29 +37,20 @@ class LocalCsvReporter(directory: String,
     private val LOGGER: Logger = LoggerFactory.getLogger(this.getClass)
     LOGGER.info("Using LocalCsvReporter")
 
-    private val directoryFile: File = new File(directory.replace("file:", ""))
+    override protected[reporter] def report(metric: Metric, header: String, row: String, timestamp: Long): Unit = {
+        LOGGER.debug(s"name: ${metric.fullName}, header: ${header}, row: ${row}")
 
-    override protected[reporter] def report(timestamp: Long, name: String, header: String, line: String, values: Any*): Unit = {
+        val csvFilePath = Paths.get(directory, s"${metric.fullName}.csv").toString
+
         try {
-            LOGGER.debug(s"Writing to ${directoryFile.getPath}/${name}")
-            val file: File = csvFileProvider.getFile(directoryFile, name)
-            val fileAlreadyExists: Boolean = file.exists()
-            if (fileAlreadyExists || file.createNewFile()) {
-                val out: PrintWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, true), UTF_8))
-                try {
-                    if (!fileAlreadyExists) {
-                        out.println("t" + separator + header)
-                    }
-                    val row = formatRow(timestamp, line, values)
-                    LOGGER.debug(s"timestamp: ${timestamp}, name: ${name}, header: ${header}, line: ${line}, values: ${values}")
-                    LOGGER.debug(s"Writing row: ${row}")
-                    out.println(row);
-                } finally {
-                    out.close()
-                }
+            LOGGER.debug(s"Writing to ${csvFilePath}")
+            if (!fileWriter.exists(csvFilePath)) {
+                fileWriter.write(csvFilePath, s"t${separator}${header}\n");
             }
+
+            fileWriter.append(csvFilePath, row);
         } catch {
-            case e: IOException => LOGGER.warn(s"Error writing ${name} to local dir ${directory}. ${e}")
+            case e: IOException => LOGGER.warn(s"Error writing ${metric.fullName} to local dir ${directory}. ${e}")
         }
     }
 }

@@ -19,8 +19,7 @@
 package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.io.{JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed}
+import com.ucesys.sparkscope.common.{JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed, SparkScopeLogger}
 import com.ucesys.sparkscope.io.file.HadoopFileReader
 import org.apache.commons.lang.SystemUtils
 import org.scalamock.scalatest.MockFactory

@@ -1,9 +1,8 @@
 package com.ucesys.sparkscope.io.metrics
 
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{MetricType, SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
-import com.ucesys.sparkscope.io.MetricType
 import com.ucesys.sparkscope.io.file.S3FileReader
 
 import java.nio.file.Paths

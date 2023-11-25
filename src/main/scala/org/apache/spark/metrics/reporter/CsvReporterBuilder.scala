@@ -1,6 +1,10 @@
 package org.apache.spark.metrics.reporter
 
+import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.codahale.metrics._
+import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.io.file.{HadoopFileWriter, LocalFileWriter, S3FileWriter}
+import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.metrics.reporter.CsvReporterBuilder.{DEFAULT_SEPARATOR, SPARK_SCOPE_METRICS_FILTER}
 
 import java.util.Locale
@@ -141,6 +145,8 @@ class CsvReporterBuilder(val registry: MetricRegistry,
      * @return a {@link CsvReporterBuilder}
      */
     def build(directory: String, s3Region: Option[String]): AbstractCsvReporter = {
+        implicit val logger: SparkScopeLogger = new SparkScopeLogger
+
         if (directory.startsWith("maprfs:/") || directory.startsWith("hdfs:/")) {
             new HadoopCsvReporter(
                 directory,
@@ -152,12 +158,12 @@ class CsvReporterBuilder(val registry: MetricRegistry,
                 clock,
                 filter,
                 executor,
-                shutdownExecutorOnStop
+                shutdownExecutorOnStop,
+                new HadoopFileWriter(SparkHadoopUtil.get.newConfiguration(null))
             )
         } else if (directory.startsWith("s3:/")) {
-            new S3UnbufferedCsvReporter(
+            new S3CsvReporter(
                 directory,
-                s3Region,
                 registry,
                 locale,
                 separator,
@@ -166,7 +172,10 @@ class CsvReporterBuilder(val registry: MetricRegistry,
                 clock,
                 filter,
                 executor,
-                shutdownExecutorOnStop
+                shutdownExecutorOnStop,
+                new S3FileWriter(
+                    AmazonS3ClientBuilder.standard().withRegion(s3Region.getOrElse(throw new IllegalArgumentException("s3 region is unset!"))).build()
+                )
             )
         } else {
             new LocalCsvReporter(
@@ -180,7 +189,7 @@ class CsvReporterBuilder(val registry: MetricRegistry,
                 filter,
                 executor,
                 shutdownExecutorOnStop,
-                csvFileProvider
+                new LocalFileWriter
             )
         }
     }

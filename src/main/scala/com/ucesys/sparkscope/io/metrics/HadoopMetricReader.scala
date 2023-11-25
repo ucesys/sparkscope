@@ -1,9 +1,8 @@
 package com.ucesys.sparkscope.io.metrics
 
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext}
+import com.ucesys.sparkscope.common.{MetricType, SparkScopeConf, SparkScopeContext}
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.file.HadoopFileReader
-import com.ucesys.sparkscope.io.MetricType
 
 import java.nio.file.Paths
 

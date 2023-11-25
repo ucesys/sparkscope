@@ -1,6 +1,7 @@
 package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics._
+import com.ucesys.sparkscope.common.Metric
 
 import java.util.Locale
 import java.util.SortedMap
@@ -119,5 +120,11 @@ abstract class AbstractCsvReporter(registry: MetricRegistry,
         val formatStr = s"%s${separator}%s".formatLocal(locale, timestamp.toString, line)
         formatStr.formatLocal(locale, values: _*)
     }
-    protected[reporter] def report(timestamp: Long, name: String, header: String, line: String, values: Any*): Unit
+    protected[reporter] def report(timestamp: Long, name: String, header: String, line: String, values: Any*): Unit = {
+        val metric: Metric = Metric.parse(name)
+        val row: String = formatRow(timestamp, line, values)
+        report(metric, header, row, timestamp)
+    }
+
+    protected[reporter] def report(metric: Metric, header: String, row: String, timestamp: Long): Unit
 }
