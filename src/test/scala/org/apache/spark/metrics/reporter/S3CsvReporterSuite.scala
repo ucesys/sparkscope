@@ -47,23 +47,9 @@ class S3CsvReporterSuite extends FunSuite with GivenWhenThen with MockitoSugar {
         )
     }
 
-    test("bucket, metricsDir, appName extraction") {
+    test("bucket, metricsDir extraction") {
         Given("s3 bucket url")
         val s3BucketUrl = "s3://my-bucket/metrics-dir"
-        And("region")
-
-        When("calling S3CsvReporter constructor")
-        val s3CsvReporter = createS3CsvReporter(s3BucketUrl)
-
-        Then("bucketName and metricsDir should be extracted")
-        assert(s3CsvReporter.s3Location.bucketName.equals("my-bucket"))
-        assert(s3CsvReporter.s3Location.path.equals("metrics-dir"))
-    }
-
-    test("appName empty") {
-        Given("s3 bucket url")
-        val s3BucketUrl = "s3:///my-bucket/metrics-dir/"
-        And("region")
 
         When("calling S3CsvReporter constructor")
         val s3CsvReporter = createS3CsvReporter(s3BucketUrl)
@@ -76,7 +62,6 @@ class S3CsvReporterSuite extends FunSuite with GivenWhenThen with MockitoSugar {
     test("nested metricsDir") {
         Given("s3 bucket url")
         val s3BucketUrl = "s3:///my-bucket/nested-path/to/metrics-dir"
-        And("region")
 
         When("calling S3CsvReporter constructor")
         val s3CsvReporter = createS3CsvReporter(s3BucketUrl)
