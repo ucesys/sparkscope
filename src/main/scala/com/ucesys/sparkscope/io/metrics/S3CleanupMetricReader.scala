@@ -3,8 +3,9 @@ package com.ucesys.sparkscope.io.metrics
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.s3.model.{DeleteObjectsRequest, S3Object}
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.ucesys.sparkscope.common.{MetricType, SparkScopeConf, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
+import com.ucesys.sparkscope.io.metrics.S3CleanupMetricReader.Delimeter
 
 import java.nio.file.Paths
 import scala.collection.JavaConverters
@@ -16,66 +17,71 @@ class S3CleanupMetricReader(sparkScopeConf: SparkScopeConf,
                             driverS3Location: S3Location,
                             executorS3Location: S3Location)
                            (implicit logger: SparkScopeLogger) extends MetricReader {
-    def readDriver(metricType: MetricType): DataTable = {
-        readTmpWithCleanup(metricType, driverS3Location, "driver")
+    def readDriver: DataTable = {
+        readTmpWithCleanup(driverS3Location, "driver")
     }
 
-    def readExecutor(metricType: MetricType, executorId: String): DataTable = {
-        readTmpWithCleanup(metricType, executorS3Location, executorId)
+    def readExecutor(executorId: String): DataTable = {
+        readTmpWithCleanup(executorS3Location, executorId)
     }
 
-    def readTmpWithCleanup(metricType: MetricType, s3Location: S3Location, instanceId: String): DataTable = {
-        val metricTable: DataTable = readTmpMetrics(metricType, s3Location, instanceId)
+    def readTmpWithCleanup(s3Location: S3Location, instanceId: String): DataTable = {
+        val metricTable: DataTable = readTmpMetrics(s3Location, instanceId)
 
-        writeMerged(metricType, s3Location, instanceId, metricTable)
+        writeMerged(s3Location, instanceId, metricTable)
 
-        deleteTmpMetrics(metricType, s3Location, instanceId)
+        deleteTmpMetrics(s3Location, instanceId)
 
         metricTable
     }
 
-    private def readTmpMetrics(metricType: MetricType, s3Location: S3Location, instanceId: String): DataTable = {
-        logger.info(s"Reading tmp ${instanceId}/${metricType.name} metric files")
-        val objectKeys = listTmpMetrics(metricType, s3Location, instanceId)
+    private def readTmpMetrics(s3Location: S3Location, instanceId: String): DataTable = {
+        logger.info(s"Reading tmp ${instanceId}metric files")
+        val objectKeys = listTmpMetrics(s3Location, instanceId)
 
-        val header = s"t,${metricType.name}"
-        val rows: Seq[String] = objectKeys.map { objectKey =>
+        val metrics: Seq[DataTable] = objectKeys.map { objectKey =>
             val s3Object: S3Object = s3.getObject(s3Location.bucketName, objectKey)
             val myData: BufferedSource = Source.fromInputStream(s3Object.getObjectContent)
-            myData.getLines().mkString
+            val csvStr = myData.getLines().mkString
+            DataTable.fromCsv(instanceId, csvStr, ",")
         }
 
-        val csvStr = (Seq(header) ++ rows).mkString("\n")
-        DataTable.fromCsv(metricType.name, csvStr, ",").distinct("t").sortBy("t")
+        val header = metrics.map(_.header).toSet.size match {
+            case 0 => throw new IllegalArgumentException(s"Couldn't read header: ${metrics.map(_.header).toSet}")
+            case 1 => metrics.head.header
+            case _ => throw new IllegalArgumentException(s"Inconsistent headers: ${metrics.map(_.header).toSet}")
+        }
+
+        val csvStr = (Seq(header) ++ metrics.map(_.toCsvNoHeader(Delimeter))).mkString("\n")
+        DataTable.fromCsv(instanceId, csvStr, Delimeter).distinct("t").sortBy("t")
     }
 
-    private def listTmpMetrics(metricType: MetricType, s3Location: S3Location, instanceId: String): Seq[String] = {
+    private def listTmpMetrics(s3Location: S3Location, instanceId: String): Seq[String] = {
         val sparseDir: String = Paths.get(
             s3Location.path,
             ".tmp",
             appContext.appId,
-            s"${instanceId}",
-            s"${metricType.name}"
+            s"${instanceId}"
         ).toString;
 
         val files = s3.listObjects(s3Location.bucketName, sparseDir).getObjectSummaries
         JavaConverters.asScalaIteratorConverter(files.iterator()).asScala.toSeq.map(_.getKey)
     }
 
-    private def writeMerged(metricType: MetricType, s3Location: S3Location, instanceId: String, metricTable: DataTable): Unit = {
+    private def writeMerged(s3Location: S3Location, instanceId: String, metricTable: DataTable): Unit = {
         val appDir = Paths.get(s3Location.path, this.sparkScopeConf.appName.getOrElse("")).toString
-        val mergedPath: String = Paths.get(appDir, appContext.appId, s"${instanceId}", s"${metricType.name}.csv").toString;
-        logger.info(s"Saving merged ${instanceId}/${metricType.name} metric for file to ${mergedPath}")
+        val mergedPath: String = Paths.get(appDir, appContext.appId, s"${instanceId}.csv").toString;
+        logger.info(s"Saving merged ${instanceId}metric for file to ${mergedPath}")
 
         try {
-            s3.putObject(s3Location.bucketName, mergedPath, metricTable.toCsv(""))
+            s3.putObject(s3Location.bucketName, mergedPath, metricTable.toCsv(Delimeter))
         } catch {
-            case ex: Exception => logger.error(s"Error while saving merged ${instanceId}/${metricType.name} metric for file to ${mergedPath}", ex)
+            case ex: Exception => logger.error(s"Error while saving merged ${instanceId} metric for file to ${mergedPath}", ex)
         }
     }
 
-    private def deleteTmpMetrics(metricType: MetricType, s3Location: S3Location, instanceId: String): Unit = {
-        val objectKeys = listTmpMetrics(metricType, s3Location, instanceId)
+    private def deleteTmpMetrics(s3Location: S3Location, instanceId: String): Unit = {
+        val objectKeys = listTmpMetrics(s3Location, instanceId)
         try {
             val dor = new DeleteObjectsRequest(s3Location.bucketName).withKeys(objectKeys: _*);
             s3.deleteObjects(dor);
@@ -86,6 +92,8 @@ class S3CleanupMetricReader(sparkScopeConf: SparkScopeConf,
 }
 
 object S3CleanupMetricReader {
+    val Delimeter = ","
+
     def apply(sparkScopeConf: SparkScopeConf, appContext: SparkScopeContext)(implicit logger: SparkScopeLogger) : S3CleanupMetricReader = {
         val region = sparkScopeConf.region
         val s3: AmazonS3 = AmazonS3ClientBuilder

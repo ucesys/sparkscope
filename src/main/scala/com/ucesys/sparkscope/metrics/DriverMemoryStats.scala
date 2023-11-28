@@ -1,6 +1,7 @@
 package com.ucesys.sparkscope.metrics
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
+import com.ucesys.sparkscope.common.{JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed}
 import com.ucesys.sparkscope.data.DataTable
 
 case class DriverMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Double, avgHeap: Long, avgHeapPerc: Double, avgNonHeap: Long, maxNonHeap: Long) {
@@ -19,13 +20,13 @@ case class DriverMemoryStats(heapSize: Long, maxHeap: Long, maxHeapPerc: Double,
 object DriverMemoryStats {
     def apply(driverMetricsMerged: DataTable): DriverMemoryStats = {
         DriverMemoryStats(
-            heapSize = driverMetricsMerged.select(JvmHeapMax).max.toLong / BytesInMB,
-            maxHeap = driverMetricsMerged.select(JvmHeapUsed).max.toLong / BytesInMB,
-            maxHeapPerc = f"${driverMetricsMerged.select(JvmHeapUsage).max}%1.5f".toDouble,
-            avgHeap = driverMetricsMerged.select(JvmHeapUsed).avg.toLong / BytesInMB,
-            avgHeapPerc = f"${driverMetricsMerged.select(JvmHeapUsage).avg}%1.5f".toDouble,
-            avgNonHeap = driverMetricsMerged.select(JvmNonHeapUsed).avg.toLong / BytesInMB,
-            maxNonHeap = driverMetricsMerged.select(JvmNonHeapUsed).max.toLong / BytesInMB
+            heapSize = driverMetricsMerged.select(JvmHeapMax.name).max.toLong / BytesInMB,
+            maxHeap = driverMetricsMerged.select(JvmHeapUsed.name).max.toLong / BytesInMB,
+            maxHeapPerc = f"${driverMetricsMerged.select(JvmHeapUsage.name).max}%1.5f".toDouble,
+            avgHeap = driverMetricsMerged.select(JvmHeapUsed.name).avg.toLong / BytesInMB,
+            avgHeapPerc = f"${driverMetricsMerged.select(JvmHeapUsage.name).avg}%1.5f".toDouble,
+            avgNonHeap = driverMetricsMerged.select(JvmNonHeapUsed.name).avg.toLong / BytesInMB,
+            maxNonHeap = driverMetricsMerged.select(JvmNonHeapUsed.name).max.toLong / BytesInMB
         )
     }
 }

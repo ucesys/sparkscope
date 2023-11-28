@@ -144,7 +144,7 @@ class CsvReporterBuilder(val registry: MetricRegistry,
      * @param directory the directory in which the {@code .csv} files will be created
      * @return a {@link CsvReporterBuilder}
      */
-    def build(directory: String, s3Region: Option[String]): AbstractCsvReporter = {
+    def build(directory: String, appName: Option[String], s3Region: Option[String]): AbstractCsvReporter = {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
         if (directory.startsWith("maprfs:/") || directory.startsWith("hdfs:/")) {
@@ -162,7 +162,7 @@ class CsvReporterBuilder(val registry: MetricRegistry,
                 new HadoopFileWriter(SparkHadoopUtil.get.newConfiguration(null))
             )
         } else if (directory.startsWith("s3:/")) {
-            new BufferedS3CsvReporter(
+            new S3CsvReporter(
                 directory,
                 registry,
                 locale,
@@ -189,7 +189,8 @@ class CsvReporterBuilder(val registry: MetricRegistry,
                 filter,
                 executor,
                 shutdownExecutorOnStop,
-                new LocalFileWriter
+                new LocalFileWriter,
+                appName
             )
         }
     }

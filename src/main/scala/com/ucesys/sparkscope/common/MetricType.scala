@@ -9,9 +9,8 @@ case object JvmNonHeapUsed extends MetricType { val name = "jvm.non-heap.used" }
 case object CpuTime extends MetricType { val name = "executor.cpuTime" }
 
 object MetricType {
-    val AllMetricsExecutor: Seq[MetricType] = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, CpuTime)
-    val AllMetricsDriver: Seq[MetricType] = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed)
+    val AllMetricsDriver: Seq[MetricType] = Seq(JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed)
+    val AllMetricsExecutor: Seq[MetricType] = Seq(JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed, CpuTime)
     val AllMetrics = (AllMetricsExecutor ++ AllMetricsDriver).toSet
-
     def fromString(name: String): MetricType = AllMetrics.find(_.name == name).getOrElse(throw new IllegalArgumentException(s"Unknown metric: ${name}"))
 }

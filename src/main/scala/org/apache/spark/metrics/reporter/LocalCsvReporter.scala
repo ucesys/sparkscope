@@ -1,7 +1,8 @@
 package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics._
-import com.ucesys.sparkscope.common.Metric
+import com.ucesys.sparkscope.common.SparkScopeMetric
+import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.file.LocalFileWriter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,7 +17,7 @@ import java.nio.file.Paths
 /**
  * A reporter which creates a comma-separated values file of the measurements for each metric.
  */
-class LocalCsvReporter(directory: String,
+class LocalCsvReporter(rootDir: String,
                        registry: MetricRegistry,
                        locale: Locale,
                        separator: String,
@@ -26,7 +27,8 @@ class LocalCsvReporter(directory: String,
                        filter: MetricFilter,
                        executor: ScheduledExecutorService,
                        shutdownExecutorOnStop: Boolean,
-                       fileWriter: LocalFileWriter)
+                       fileWriter: LocalFileWriter,
+                       appName: Option[String] = None)
   extends AbstractCsvReporter(registry, locale, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop) {
 
     /**
@@ -37,20 +39,24 @@ class LocalCsvReporter(directory: String,
     private val LOGGER: Logger = LoggerFactory.getLogger(this.getClass)
     LOGGER.info("Using LocalCsvReporter")
 
-    override protected[reporter] def report(metric: Metric, header: String, row: String, timestamp: Long): Unit = {
-        LOGGER.debug(s"name: ${metric.fullName}, header: ${header}, row: ${row}")
+    override protected[reporter] def report(appId: String, instance: String, metrics: DataTable, timestamp: Long): Unit = {
+        val row: String = metrics.toCsvNoHeader(separator)
+        LOGGER.info("\n" + metrics.toString)
 
-        val csvFilePath = Paths.get(directory, s"${metric.fullName}.csv").toString
+        val appDir = Paths.get(rootDir, appName.getOrElse(""), appId).toString
+        val csvFilePath = Paths.get(appDir, s"${instance}.csv").toString
 
         try {
-            LOGGER.debug(s"Writing to ${csvFilePath}")
+            LOGGER.info(s"Writing to ${csvFilePath}")
             if (!fileWriter.exists(csvFilePath)) {
-                fileWriter.write(csvFilePath, s"t${separator}${header}\n");
+                fileWriter.makeDir(appDir)
+                fileWriter.write(csvFilePath, metrics.header + "\n");
             }
 
             fileWriter.append(csvFilePath, row);
         } catch {
-            case e: IOException => LOGGER.warn(s"Error writing ${metric.fullName} to local dir ${directory}. ${e}")
+            case e: IOException => LOGGER.warn(s"Error writing ${metrics.name} to local dir ${csvFilePath}. ${e}")
         }
     }
+
 }

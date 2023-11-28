@@ -29,6 +29,7 @@ private[spark] class SparkScopeCsvSink(val property: Properties, val registry: M
   val CSV_KEY_UNIT = "unit"
   val CSV_KEY_DIR = "directory"
   val CSV_KEY_S3_REGION = "region"
+  val CSV_KEY_APP_NAME = "appName"
 
   val CSV_DEFAULT_PERIOD = 10
   val CSV_DEFAULT_UNIT = "SECONDS"
@@ -57,6 +58,7 @@ private[spark] class SparkScopeCsvSink(val property: Properties, val registry: M
     .convertRatesTo(TimeUnit.SECONDS)
     .build(
       pollDir,
+      Option(property.getProperty(CSV_KEY_APP_NAME)),
       Option(property.getProperty(CSV_KEY_S3_REGION))
     )
 

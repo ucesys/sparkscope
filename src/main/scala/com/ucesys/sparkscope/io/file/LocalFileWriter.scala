@@ -2,6 +2,8 @@ package com.ucesys.sparkscope.io.file
 
 import java.io.{File, FileOutputStream, FileWriter, OutputStreamWriter, PrintWriter}
 import java.nio.charset.StandardCharsets.UTF_8
+import java.nio.file.Paths
+import java.nio.file.Files
 
 class LocalFileWriter extends TextFileWriter {
     def write(path: String, content: String): Unit = {
@@ -18,5 +20,9 @@ class LocalFileWriter extends TextFileWriter {
 
     def exists(path: String): Boolean = {
         new File(path).exists()
+    }
+
+    def makeDir(path: String): Unit = {
+        Files.createDirectories(Paths.get(path));
     }
 }

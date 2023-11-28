@@ -17,8 +17,9 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{CpuTime, ExecutorContext, JvmHeapUsed, JvmNonHeapUsed, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
+import com.ucesys.sparkscope.common.MetricUtils.ColCpuUsage
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.metrics.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
@@ -29,40 +30,25 @@ import scala.concurrent.duration._
 class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
     def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: SparkScopeContext): SparkScopeResult = {
-        var driverMetricsMerged: DataTable = driverExecutorMetrics.driverMetrics.head
-        driverExecutorMetrics.driverMetrics.tail.foreach { metric =>
-            driverMetricsMerged = driverMetricsMerged.mergeOn("t", metric)
-        }
-        logger.println(s"\nDisplaying merged metrics for driver:\n${driverMetricsMerged}")
+        logger.println(s"\nDisplaying merged metrics for driver:\n${driverExecutorMetrics.driverMetrics}")
 
         driverExecutorMetrics.executorMetricsMap.foreach { case (id, metrics) =>
-            metrics.foreach { metric => logger.println(s"\nDisplaying ${metric.name} metric for executor=${id}:\n${metric}")
-            }
+            logger.println(s"\nDisplaying metrics for executor=${id}:\n${metrics}")
         }
 
         // Interpolating metrics
-        val executorsMetricsMapInterpolated = interpolateExecutorMetrics(appContext.executorMap, driverExecutorMetrics.executorMetricsMap, appContext)
-        executorsMetricsMapInterpolated.foreach { case (id, metrics) =>
-            metrics.foreach { metric => logger.println(s"\nInterpolated ${metric.name} metric for executor=${id}:\n${metric}") }
-        }
-
-        // For each executor, merge it's respective metrics into a single DataFrame(one for each executor)
-        val executorsMetricsCombinedMap: Map[String, DataTable] = executorsMetricsMapInterpolated.map { case (executorId, metrics) =>
-            var mergedMetrics = metrics.head
-            metrics.tail.foreach(metric => mergedMetrics = mergedMetrics.mergeOn("t", metric))
-            (executorId, mergedMetrics)
-        }
-        executorsMetricsCombinedMap.foreach { case (id, m) => logger.println(s"\nMerged metrics for executor=${id}:\n${m}") }
+        val executorsMetricsMapInterpolated: Map[String, DataTable] = interpolateExecutorMetrics(appContext.executorMap, driverExecutorMetrics.executorMetricsMap, appContext)
+        executorsMetricsMapInterpolated.foreach { case (id, metric) => logger.println(s"\nInterpolated metrics for executor=${id}:\n${metric}")}
 
         // Add cpu usage for each executor
-        val executorsMetricsCombinedMapWithCpuUsage: Map[String, DataTable] = executorsMetricsCombinedMap.map { case (id, metrics) =>
-            val clusterCpuTime = metrics.select(CpuTime).div(NanoSecondsInSec)
+        val executorsMetricsCombinedMapWithCpuUsage: Map[String, DataTable] = executorsMetricsMapInterpolated.map { case (id, metrics) =>
+            val clusterCpuTime = metrics.select(CpuTime.name).div(NanoSecondsInSec)
             val clusterCpuTimeLag = clusterCpuTime.lag
             val clusterCpuTimeDiff = clusterCpuTime.sub(clusterCpuTimeLag)
             val timeLag = metrics.select("t").lag
             val timeElapsed = metrics.select("t").sub(timeLag)
             val cpuUsageAllCores = clusterCpuTimeDiff.div(timeElapsed).rename("cpuUsageAllCores")
-            val cpuUsage = cpuUsageAllCores.div(appContext.executorCores).rename(CpuUsage)
+            val cpuUsage = cpuUsageAllCores.div(appContext.executorCores).rename(ColCpuUsage)
             val metricsWithCpuUsage = metrics.addColumn(cpuUsage).addColumn(cpuUsageAllCores)
             (id, metricsWithCpuUsage)
         }
@@ -123,8 +109,8 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
                 "heapUsed",
                 Seq(
                     DataColumn("t", dt.select("t").values ++ newTimestamps),
-                    DataColumn(JvmHeapUsed, dt.select(JvmHeapUsed).values ++ Seq.fill(newTimestamps.length)("null")),
-                    DataColumn(JvmNonHeapUsed, dt.select(JvmNonHeapUsed).values ++ Seq.fill(newTimestamps.length)("null")),
+                    DataColumn(JvmHeapUsed.name, dt.select(JvmHeapUsed.name).values ++ Seq.fill(newTimestamps.length)("null")),
+                    DataColumn(JvmNonHeapUsed.name, dt.select(JvmNonHeapUsed.name).values ++ Seq.fill(newTimestamps.length)("null")),
                 )
             ).sortBy("t")
             (id, aligned)
@@ -154,13 +140,13 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         SparkScopeResult(
             appContext = appContext,
             stats = SparkScopeStats(
-                driverStats = DriverMemoryStats(driverMetricsMerged),
+                driverStats = DriverMemoryStats(driverExecutorMetrics.driverMetrics),
                 executorStats = executorStats,
                 clusterMemoryStats = clusterMemoryStats,
                 clusterCPUStats = clusterCPUStats
             ),
             metrics = SparkScopeMetrics(
-                driverMetrics = driverMetricsMerged,
+                driverMetrics = driverExecutorMetrics.driverMetrics,
                 executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned),
                 clusterMemoryMetrics = clusterMemoryMetrics,
                 clusterCPUMetrics = clusterCPUMetrics,
@@ -171,8 +157,8 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
     }
 
     private def interpolateExecutorMetrics(executorMap: Map[String, ExecutorContext],
-                                           executorsMetricsMap: Map[String, Seq[DataTable]],
-                                           appContext: SparkScopeContext): Map[String, Seq[DataTable]] = {
+                                           executorsMetricsMap: Map[String, DataTable],
+                                           appContext: SparkScopeContext): Map[String, DataTable] = {
         /*    Interpolating executor metrics to align their timestamps for aggregations. Also adds a "zero row" with start values for when executor was added.
 
                     RAW                      INTERPOLATED
@@ -192,15 +178,15 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
                                             1695358665,200
         */
 
-        val executorsMetricsMapWithZeroRows: Map[String, Seq[DataTable]] = executorsMetricsMap.map { case (id, metrics) =>
-            val metricsWithZeroRows = metrics.map { metric =>
+        val executorsMetricsMapWithZeroRows: Map[String, DataTable] = executorsMetricsMap.map { case (id, metrics) =>
+            val metricsWithZeroRows = {
 
-                val executorStartTime = executorMap(id.toString).addTime / MilliSecondsInSec
+                val executorStartTime = executorMap(id).addTime / MilliSecondsInSec
 
-                if (metric.select("t").values.contains(executorStartTime.toString)) {
-                    metric
+                if (metrics.select("t").values.contains(executorStartTime.toString)) {
+                    metrics
                 } else {
-                    val columnsWithZeroCells = metric.columns.map { col =>
+                    val columnsWithZeroCells: Seq[DataColumn] = metrics.columns.map { col =>
                         val colWithZeroCell: DataColumn = col.name match {
                             case "t" => col.copy(values = Seq(executorStartTime.toString) ++ col.values)
                             case "jvm.heap.max" => col.copy(values = Seq(col.values.head) ++ col.values)
@@ -208,54 +194,52 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
                         }
                         colWithZeroCell
                     }
-                    metric.copy(columns = columnsWithZeroCells)
+                    metrics.copy(columns = columnsWithZeroCells)
                 }
             }
             (id, metricsWithZeroRows)
         }
 
 
-        val allMetricsTimestamps = executorsMetricsMapWithZeroRows.flatMap { case (_, metrics) =>
-            metrics.flatMap(metric => metric.select("t").values.map(_.toLong))
-        }
+        val allMetricsTimestamps = executorsMetricsMapWithZeroRows.flatMap { case (_, metrics) => metrics.select("t").values.map(_.toLong)}
 
         val allTimestamps = (allMetricsTimestamps ++ appContext.stages.flatMap(_.getTimeline)).toSet.toSeq.sorted
 
-        executorsMetricsMapWithZeroRows.map { case (executorId, metricsSeq) =>
-            val metricsInterpolated: Seq[DataTable] = metricsSeq.map(metrics => {
+        executorsMetricsMapWithZeroRows.map { case (executorId, metrics) =>
+            val metricsInterpolated: DataTable = {
                 val localTimestamps = metrics.columns.head.values.map(_.toLong)
                 val missingTimestamps = allTimestamps.filterNot(localTimestamps.contains)
                 val missingTimestampsInRange = missingTimestamps.filter(ts => ts > localTimestamps.min && ts < localTimestamps.max)
 
-                val metricsZipped = (metrics.columns.head.values.map(_.toLong) zip metrics.columns.last.values)
+                val metricsZipped = (localTimestamps zip metrics.toRows.map(_.tail))
 
-                val interpolatedRows: Seq[(Long, String)] = missingTimestampsInRange.flatMap(missingTimestamp => {
-                    val interpolatedValue = metricsZipped.sliding(2)
-                      .flatMap { case Seq((prevTs, prevVal), (nextTs, nextVal)) =>
-                          val interpolatedValue: Option[(Long, String)] = missingTimestamp match {
-                              case ts if (ts > prevTs && ts < nextTs) => {
-                                  val diffPrevToNext = nextTs - prevTs
-                                  val diffToPrev = ts - prevTs
-                                  val diffToNext = nextTs - ts
-                                  val interpolated = (prevVal.toDouble * (diffPrevToNext - diffToPrev) + nextVal.toDouble * (diffPrevToNext - diffToNext)) / diffPrevToNext
-                                  Some((ts, interpolated.toString))
-                              }
-                              case _ => None
-                          }
-                          interpolatedValue
+                val interpolatedRows: Seq[Seq[String]] = missingTimestampsInRange.flatMap(missingTimestamp => {
+                    val interpolatedValue = metricsZipped.sliding(2).flatMap { case Seq((prevTs, prevVals), (nextTs, nextVals)) =>
+                        val interpolatedRows = missingTimestamp match {
+                            case ts if (ts > prevTs && ts < nextTs) => {
+                                val interpolatedRow: Seq[String] = (prevVals zip nextVals).map { case (prevVal, nextVal) =>
+                                    val interpolatedValue: String = {
+                                        val diffPrevToNext = nextTs - prevTs
+                                        val diffToPrev = ts - prevTs
+                                        val diffToNext = nextTs - ts
+                                        val interpolated = (prevVal.toDouble * (diffPrevToNext - diffToPrev) + nextVal.toDouble * (diffPrevToNext - diffToNext)) / diffPrevToNext
+                                        interpolated.toString
+                                    }
+                                    interpolatedValue
+                                }
+                                Some(Seq(ts.toString) ++ interpolatedRow)
+                            }
+                            case _ => None
+                        }
+                        interpolatedRows
                       }.toSeq.headOption
                     interpolatedValue
                 })
 
-                val missingTsDF = DataTable("missingTs",
-                    Seq(
-                        DataColumn(metrics.columns.head.name, interpolatedRows.map { case (ts, _) => ts.toString }),
-                        DataColumn(metrics.columns.last.name, interpolatedRows.map { case (_, value) => value })
-                    ))
-
-                val metricsWithNewTs = metrics.union(missingTsDF).sortBy("t")
+                val missingTsMetrics = DataTable.fromRows("missingTs", metrics.columnsNames, interpolatedRows)
+                val metricsWithNewTs = metrics.union(missingTsMetrics).sortBy("t")
                 metricsWithNewTs
-            })
+            }
             (executorId, metricsInterpolated)
         }
     }
@@ -267,14 +251,4 @@ object SparkScopeAnalyzer {
     private val MilliSecondsInSec: Long = 1000
     val LowCPUUtilizationThreshold: Float = 0.6f
     val LowHeapUtilizationThreshold: Float = 0.6f
-
-    val JvmHeapUsed = "jvm.heap.used" // in bytes
-    val JvmHeapUsage = "jvm.heap.usage" // equals used/max
-    val JvmHeapMax = "jvm.heap.max" // in bytes
-    val JvmNonHeapUsed = "jvm.non-heap.used" // in bytes
-    val CpuTime = "executor.cpuTime" // CPU time computing tasks in nanoseconds
-    val CpuUsage = "cpuUsage"
-
-    val ExecutorCsvMetrics: Seq[String] = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, CpuTime)
-    val DriverCsvMetrics: Seq[String] = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed)
 }

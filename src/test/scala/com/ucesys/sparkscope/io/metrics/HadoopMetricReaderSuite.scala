@@ -43,15 +43,8 @@ class HadoopMetricReaderSuite extends FunSuite with MockFactory with GivenWhenTh
         Then("HadoopFileReader.read should be called with correct path")
         // Skipping for windows due to Paths.get problems for hdfs:/ under windows
         if(SystemUtils.OS_NAME == "Linux") {
-            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
-            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
-            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
-            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.driver.jvm.non-heap.used.csv").returns(jvmHeapDriverCsv)
-
-            metricsReader.readDriver(JvmHeapUsed)
-            metricsReader.readDriver(JvmHeapUsage)
-            metricsReader.readDriver(JvmHeapMax)
-            metricsReader.readDriver(JvmNonHeapUsed)
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}/driver.csv").returns(DriverCsv)
+            metricsReader.readDriver
         }
     }
 
@@ -65,15 +58,9 @@ class HadoopMetricReaderSuite extends FunSuite with MockFactory with GivenWhenTh
         Then("HadoopFileReader.read should be called with correct path")
         // Skipping for windows due to Paths.get problems for hdfs:/ under windows
         if(SystemUtils.OS_NAME == "Linux") {
-            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
-            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
-            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
-            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}.1.jvm.non-heap.used.csv").returns(jvmHeapDriverCsv)
+            (fileReaderMock.read _).expects(s"hdfs:/tmp/csv-metrics/${appContext.appId}/1.csv").returns(Exec1Csv)
 
-            metricsReader.readExecutor(JvmHeapUsed, "1")
-            metricsReader.readExecutor(JvmHeapUsage, "1")
-            metricsReader.readExecutor(JvmHeapMax, "1")
-            metricsReader.readExecutor(JvmNonHeapUsed, "1")
+            metricsReader.readExecutor("1")
         }
     }
 }

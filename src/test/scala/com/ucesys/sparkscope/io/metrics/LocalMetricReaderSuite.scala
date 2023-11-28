@@ -40,15 +40,9 @@ class LocalMetricReaderSuite extends FunSuite with MockFactory with GivenWhenThe
 
         When("calling LocalMetricReader.readDriver")
         Then("LocalFileReader.read should be called with correct path")
-        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.driver.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.driver.jvm.non-heap.used.csv").returns(jvmHeapDriverCsv)
+        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}/driver.csv").returns(DriverCsv)
 
-        metricsReader.readDriver(JvmHeapUsed)
-        metricsReader.readDriver(JvmHeapUsage)
-        metricsReader.readDriver(JvmHeapMax)
-        metricsReader.readDriver(JvmNonHeapUsed)
+        metricsReader.readDriver
     }
 
     test("LocalMetricReader executor metrics test") {
@@ -59,14 +53,8 @@ class LocalMetricReaderSuite extends FunSuite with MockFactory with GivenWhenThe
 
         When("calling LocalFileReader.readDriver")
         Then("LocalFileReader.read should be called with correct path")
-        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.used.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.usage.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.1.jvm.heap.max.csv").returns(jvmHeapDriverCsv)
-        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}.1.jvm.non-heap.used.csv").returns(jvmHeapDriverCsv)
+        (fileReaderMock.read _).expects(s"/tmp/csv-metrics/${appContext.appId}/1.csv").returns(Exec1Csv)
 
-        metricsReader.readExecutor(JvmHeapUsed, "1")
-        metricsReader.readExecutor(JvmHeapUsage, "1")
-        metricsReader.readExecutor(JvmHeapMax, "1")
-        metricsReader.readExecutor(JvmNonHeapUsed, "1")
+        metricsReader.readExecutor("1")
     }
 }

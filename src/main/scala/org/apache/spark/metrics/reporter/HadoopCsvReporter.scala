@@ -1,7 +1,7 @@
 package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics._
-import com.ucesys.sparkscope.common.Metric
+import com.ucesys.sparkscope.common.SparkScopeMetric
 import com.ucesys.sparkscope.io.file.HadoopFileWriter
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.deploy.SparkHadoopUtil
@@ -34,20 +34,20 @@ class HadoopCsvReporter(directory: String,
     private val LOGGER: Logger = LoggerFactory.getLogger(this.getClass)
     LOGGER.info("Using HadoopCsvReporter")
 
-    override protected[reporter] def report(metric: Metric, header: String, row: String, timestamp: Long): Unit = {
-        LOGGER.debug(s"name: ${metric.fullName}, header: ${header}, row: ${row}")
-        val path: Path = new Path(Paths.get(directory, s"${metric.fullName}.csv").toString)
-
-        try {
-            LOGGER.debug(s"Writing to ${path.toString}")
-            if (!fileWriter.exists(path.toString)) {
-                fileWriter.write(path.toString, "t" + separator + header + "\n")
-            }
-
-            LOGGER.debug(s"Writing row: ${row}")
-            fileWriter.append(path.toString, row + "\n")
-        } catch {
-            case e: IOException => LOGGER.warn(s"IOException while writing ${metric.fullName} to ${directory}. ${e}")
-        }
-    }
+//    override protected[reporter] def report(metric: SparkScopeMetric, header: String, row: String, timestamp: Long): Unit = {
+//        LOGGER.debug(s"name: ${metric.fullName}, header: ${header}, row: ${row}")
+//        val path: Path = new Path(Paths.get(directory, s"${metric.fullName}.csv").toString)
+//
+//        try {
+//            LOGGER.debug(s"Writing to ${path.toString}")
+//            if (!fileWriter.exists(path.toString)) {
+//                fileWriter.write(path.toString, "t" + separator + header + "\n")
+//            }
+//
+//            LOGGER.debug(s"Writing row: ${row}")
+//            fileWriter.append(path.toString, row + "\n")
+//        } catch {
+//            case e: IOException => LOGGER.warn(s"IOException while writing ${metric.fullName} to ${directory}. ${e}")
+//        }
+//    }
 }
