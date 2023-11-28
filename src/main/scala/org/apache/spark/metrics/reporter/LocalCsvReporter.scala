@@ -41,13 +41,13 @@ class LocalCsvReporter(rootDir: String,
 
     override protected[reporter] def report(appId: String, instance: String, metrics: DataTable, timestamp: Long): Unit = {
         val row: String = metrics.toCsvNoHeader(separator)
-        LOGGER.info("\n" + metrics.toString)
+        LOGGER.debug("\n" + metrics.toString)
 
         val appDir = Paths.get(rootDir, appName.getOrElse(""), appId).toString
         val csvFilePath = Paths.get(appDir, s"${instance}.csv").toString
 
         try {
-            LOGGER.info(s"Writing to ${csvFilePath}")
+            LOGGER.debug(s"Writing to ${csvFilePath}")
             if (!fileWriter.exists(csvFilePath)) {
                 fileWriter.makeDir(appDir)
                 fileWriter.write(csvFilePath, metrics.header + "\n");

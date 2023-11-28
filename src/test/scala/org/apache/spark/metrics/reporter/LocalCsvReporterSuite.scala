@@ -19,6 +19,7 @@
 package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics.{MetricFilter, MetricRegistry}
+import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.file.LocalFileWriter
 import org.apache.commons.lang.SystemUtils
 import org.mockito.ArgumentMatchers.any
@@ -29,7 +30,18 @@ import java.util.concurrent.{ScheduledExecutorService, TimeUnit}
 
 class LocalCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenThen {
 
-    def createLocalCsvReporter(directory: String, writer: LocalFileWriter = mock[LocalFileWriter]): LocalCsvReporter = {
+    val driverMetricsStr: String =
+        """t,jvm.heap.max,jvm.heap.usage,jvm.heap.used,jvm.non-heap.used
+          |1695358645,954728448,0.29708835490780305,283638704,56840944""".stripMargin
+    val driverMetrics = DataTable.fromCsv("driver", driverMetricsStr, ",")
+
+    val exec1MetricsStr: String =
+        """t,jvm.heap.max,jvm.heap.usage,jvm.heap.used,jvm.non-heap.used,executor.cpuTime
+          |1695358697,838860800,0.21571252822875978,180952784,51120384,29815418742""".stripMargin
+
+    val exec1Metrics: DataTable = DataTable.fromCsv("1", exec1MetricsStr, ",")
+
+    def createLocalCsvReporter(directory: String, writer: LocalFileWriter = mock[LocalFileWriter], appName: Option[String]=None): LocalCsvReporter = {
         new LocalCsvReporter(
             directory,
             new MetricRegistry,
@@ -41,7 +53,8 @@ class LocalCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenThe
             mock[MetricFilter],
             mock[ScheduledExecutorService],
             false,
-            writer
+            writer,
+            appName
         )
     }
 
@@ -54,26 +67,25 @@ class LocalCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenThe
         val localPath = "/tmp/path"
         val localCsvReporter = createLocalCsvReporter(localPath, writerMock)
 
-
         if (SystemUtils.OS_NAME == "Linux") {
             When("calling LocalCsvReporter.report")
-            localCsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "t,value", "%s", 1000)
-            localCsvReporter.report(123, "app-123-456.0.executor.cpuTime", "count", "%d", 999)
+            localCsvReporter.report("app-123-456", "driver", driverMetrics,  123)
+            localCsvReporter.report("app-123-456", "1", exec1Metrics,  123)
 
             Then("Filesystem.exists should be called")
-            verify(writerMock, times(1)).exists("/tmp/path/app-123-456.driver.jvm.heap.used.csv")
-            verify(writerMock, times(1)).exists("/tmp/path/app-123-456.0.executor.cpuTime.csv")
+            verify(writerMock, times(1)).exists("/tmp/path/app-123-456/driver.csv")
+            verify(writerMock, times(1)).exists("/tmp/path/app-123-456/1.csv")
 
             And("New file should not be created")
             verify(writerMock, times(0)).write(any[String], any[String])
 
             And("Row should be appended to file")
-            verify(writerMock, times(1)).append("/tmp/path/app-123-456.driver.jvm.heap.used.csv", "123,1000")
-            verify(writerMock, times(1)).append("/tmp/path/app-123-456.0.executor.cpuTime.csv", "123,999")
+            verify(writerMock, times(1)).append("/tmp/path/app-123-456/driver.csv", driverMetrics.toCsvNoHeader(","))
+            verify(writerMock, times(1)).append("/tmp/path/app-123-456/1.csv", exec1Metrics.toCsvNoHeader(","))
         }
     }
 
-    test("LocalCsvReporter report metrics create") {
+    test("LocalCsvReporter report metrics create file") {
         Given("Local metrics file doesn't exists")
         val writerMock = mock[LocalFileWriter]
         doReturn(false).when(writerMock).exists(any[String])
@@ -84,21 +96,55 @@ class LocalCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenThe
 
         if (SystemUtils.OS_NAME == "Linux") {
             When("calling LocalCsvReporter.report")
-            localCsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "value", "%s", 1000)
-            localCsvReporter.report(123, "app-123-456.0.executor.cpuTime", "count", "%d", 999)
+            localCsvReporter.report("app-123-456", "driver", driverMetrics, 123)
+            localCsvReporter.report("app-123-456", "1", exec1Metrics, 123)
 
             Then("Filesystem.exists should be called")
-            verify(writerMock, times(1)).exists("/tmp/path/app-123-456.driver.jvm.heap.used.csv")
-            verify(writerMock, times(1)).exists("/tmp/path/app-123-456.0.executor.cpuTime.csv")
+            verify(writerMock, times(1)).exists("/tmp/path/app-123-456/driver.csv")
+            verify(writerMock, times(1)).exists("/tmp/path/app-123-456/1.csv")
+
+            And("makeDir should be called with appId dir")
+            verify(writerMock, times(2)).makeDir("/tmp/path/app-123-456")
 
             And("New metrics file should be created")
-            verify(writerMock, times(1)).write("/tmp/path/app-123-456.driver.jvm.heap.used.csv", "t,value\n")
-            verify(writerMock, times(1)).write("/tmp/path/app-123-456.0.executor.cpuTime.csv", "t,count\n")
-
+            verify(writerMock, times(1)).write("/tmp/path/app-123-456/driver.csv", driverMetrics.header + "\n")
+            verify(writerMock, times(1)).write("/tmp/path/app-123-456/1.csv", exec1Metrics.header + "\n")
 
             And("Row should be appended to file")
-            verify(writerMock, times(1)).append("/tmp/path/app-123-456.driver.jvm.heap.used.csv", "123,1000")
-            verify(writerMock, times(1)).append("/tmp/path/app-123-456.0.executor.cpuTime.csv", "123,999")
+            verify(writerMock, times(1)).append("/tmp/path/app-123-456/driver.csv", driverMetrics.toCsvNoHeader(","))
+            verify(writerMock, times(1)).append("/tmp/path/app-123-456/1.csv", exec1Metrics.toCsvNoHeader(","))
+        }
+    }
+
+    test("LocalCsvReporter report metrics create file appName set") {
+        Given("Local metrics file doesn't exists")
+        val writerMock = mock[LocalFileWriter]
+        doReturn(false).when(writerMock).exists(any[String])
+
+        And("local reporter")
+        And("appName is set")
+        val localPath = "/tmp/path"
+        val localCsvReporter = createLocalCsvReporter(localPath, writerMock, Some("my-app"))
+
+        if (SystemUtils.OS_NAME == "Linux") {
+            When("calling LocalCsvReporter.report")
+            localCsvReporter.report("app-123-456", "driver", driverMetrics, 123)
+            localCsvReporter.report("app-123-456", "1", exec1Metrics, 123)
+
+            Then("Filesystem.exists should be called including appName dir")
+            verify(writerMock, times(1)).exists("/tmp/path/my-app/app-123-456/driver.csv")
+            verify(writerMock, times(1)).exists("/tmp/path/my-app/app-123-456/1.csv")
+
+            And("appName dir should be created")
+            verify(writerMock, times(2)).makeDir("/tmp/path/my-app/app-123-456")
+
+            And("New metrics file should be created in appName dir")
+            verify(writerMock, times(1)).write("/tmp/path/my-app/app-123-456/driver.csv", driverMetrics.header + "\n")
+            verify(writerMock, times(1)).write("/tmp/path/my-app/app-123-456/1.csv", exec1Metrics.header + "\n")
+
+            And("Row should be appended to file")
+            verify(writerMock, times(1)).append("/tmp/path/my-app/app-123-456/driver.csv", driverMetrics.toCsvNoHeader(","))
+            verify(writerMock, times(1)).append("/tmp/path/my-app/app-123-456/1.csv", exec1Metrics.toCsvNoHeader(","))
         }
     }
 }
