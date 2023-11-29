@@ -2,14 +2,12 @@ package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics._
 import com.ucesys.sparkscope.common.MetricType.{AllMetricsDriver, AllMetricsExecutor}
-import com.ucesys.sparkscope.common.SparkScopeMetric
+import com.ucesys.sparkscope.common.{SparkScopeLogger, SparkScopeMetric}
 import com.ucesys.sparkscope.data.DataTable
 
 import java.util.Locale
-import java.util.SortedMap
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
-import scala.collection.mutable
 import scala.collection.JavaConverters._
 
 /**
@@ -23,8 +21,8 @@ abstract class AbstractCsvReporter(registry: MetricRegistry,
                                    clock: Clock,
                                    filter: MetricFilter,
                                    executor: ScheduledExecutorService,
-                                   shutdownExecutorOnStop: Boolean
-                                  ) extends ScheduledReporter(registry, "csv-reporter", filter, rateUnit, durationUnit, executor, shutdownExecutorOnStop) {
+                                   shutdownExecutorOnStop: Boolean)
+                                  (implicit logger: SparkScopeLogger) extends ScheduledReporter(registry, "csv-reporter", filter, rateUnit, durationUnit, executor, shutdownExecutorOnStop) {
 
     val DriverHeader: String = (Seq("t") ++ AllMetricsDriver.map(_.name)).mkString(separator)
     val ExecutorHeader: String = (Seq("t") ++ AllMetricsExecutor.map(_.name)).mkString(separator)
@@ -59,13 +57,12 @@ abstract class AbstractCsvReporter(registry: MetricRegistry,
         val formats: String = (Seq("%s") ++ allMetrics.map(_.format)).mkString(separator)
         val formatStr: String = s"%s".formatLocal(locale, formats)
         val row: String = formatStr.formatLocal(locale, values: _*)
+        logger.debug(s"header: ${header}, values: ${values}, formats: ${formats}, formatStr: ${formatStr}, row: ${row}")
 
-        println(s"header: ${header}, values: ${values}, formats: ${formats}, formatStr: ${formatStr}, row: ${row}")
         val metricsTable = DataTable.fromCsvWithoutHeader(s"${appId}.${instance}", row, separator, columns)
+        logger.debug("\n" + metricsTable.toString)
+
         report(gaugeMetrics.head.appId, gaugeMetrics.head.instance, metricsTable, timestamp)
     }
-
-    protected[reporter] def report(timestamp: Long, name: String, header: String, line: String, values: Any*): Unit = ???
-
     protected[reporter] def report(appId: String, instance: String, metrics: DataTable, timestamp: Long): Unit = ???
 }

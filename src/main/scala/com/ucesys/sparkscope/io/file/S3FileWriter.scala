@@ -27,7 +27,7 @@ class S3FileWriter(s3: AmazonS3)(implicit logger: SparkScopeLogger)  extends Tex
 
 object S3FileWriter {
     def apply(region: String)(implicit logger: SparkScopeLogger) : S3FileWriter = {
-        println(s"Creating s3 client for ${region} region")
+        logger.info(s"Creating s3 client for ${region} region")
         val s3: AmazonS3 = AmazonS3ClientBuilder
           .standard
           .withRegion(region)

@@ -1,12 +1,9 @@
 package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics._
-import com.ucesys.sparkscope.common.SparkScopeMetric
+import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.file.HadoopFileWriter
-import org.apache.hadoop.conf.Configuration
-import org.apache.spark.deploy.SparkHadoopUtil
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.nio.file.Paths
 import java.util.concurrent.ScheduledExecutorService
@@ -19,7 +16,7 @@ import java.util.Locale
 /**
  * A reporter which creates a comma-separated values file of the measurements for each metric.
  */
-class HadoopCsvReporter(directory: String,
+class HadoopCsvReporter(rootDir: String,
                         registry: MetricRegistry,
                         locale: Locale,
                         separator: String,
@@ -29,25 +26,29 @@ class HadoopCsvReporter(directory: String,
                         filter: MetricFilter,
                         executor: ScheduledExecutorService,
                         shutdownExecutorOnStop: Boolean,
-                        fileWriter: HadoopFileWriter)
+                        fileWriter: HadoopFileWriter,
+                        appName: Option[String] = None)
+                       (implicit logger: SparkScopeLogger)
   extends AbstractCsvReporter(registry, locale, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop) {
-    private val LOGGER: Logger = LoggerFactory.getLogger(this.getClass)
-    LOGGER.info("Using HadoopCsvReporter")
+    logger.info("Using HadoopCsvReporter")
 
-//    override protected[reporter] def report(metric: SparkScopeMetric, header: String, row: String, timestamp: Long): Unit = {
-//        LOGGER.debug(s"name: ${metric.fullName}, header: ${header}, row: ${row}")
-//        val path: Path = new Path(Paths.get(directory, s"${metric.fullName}.csv").toString)
-//
-//        try {
-//            LOGGER.debug(s"Writing to ${path.toString}")
-//            if (!fileWriter.exists(path.toString)) {
-//                fileWriter.write(path.toString, "t" + separator + header + "\n")
-//            }
-//
-//            LOGGER.debug(s"Writing row: ${row}")
-//            fileWriter.append(path.toString, row + "\n")
-//        } catch {
-//            case e: IOException => LOGGER.warn(s"IOException while writing ${metric.fullName} to ${directory}. ${e}")
-//        }
-//    }
+    protected[reporter] def report(timestamp: Long, name: String, header: String, line: String, values: Any*): Unit = ???
+
+    override protected[reporter] def report(appId: String, instance: String, metrics: DataTable, timestamp: Long): Unit = {
+        logger.info("\n" + metrics.toString)
+        val row: String = metrics.toCsvNoHeader(separator)
+        val path: Path = new Path(Paths.get(rootDir, appName.getOrElse(""), appId, s"${instance}.csv").toString)
+
+        try {
+            logger.debug(s"Writing to ${path.toString}")
+            if (!fileWriter.exists(path.toString)) {
+                fileWriter.write(path.toString, metrics.header + "\n")
+            }
+
+            logger.debug(s"Writing row: ${row}")
+            fileWriter.append(path.toString, row + "\n")
+        } catch {
+            case e: IOException => logger.warn(s"IOException while writing ${instance} to ${path.toString}. ${e}")
+        }
+    }
 }

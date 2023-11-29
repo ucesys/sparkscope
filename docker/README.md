@@ -79,6 +79,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.directory=/tmp/csv-metrics \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
+--conf spark.metrics.conf.*.sink.csv.appName=WordCount \
 --conf spark.executor.cores=2 \
 --conf spark.executor.memory=1800m \
 --conf spark.executor.instances=1 \
@@ -124,8 +125,8 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=s3://ucesys-sparkscope-metrics/metrics/ \
 --conf spark.metrics.conf.*.sink.csv.region=us-east-1 \
---conf spark.sparkscope.app.name=SparkPI \
 --conf spark.sparkscope.html.path=s3://ucesys-sparkscope-metrics/report/ \
+--conf spark.metrics.conf.*.sink.csv.appName=WordCount \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.executor.cores=1 \
@@ -133,7 +134,7 @@ spark-submit \
 --conf spark.executor.instances=2 \
 --conf spark.cores.max=4 \
 --class com.ucesys.sparkscope.WordCount \
-/tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT-tests.jar /tmp/jars/test.txt 20
+/tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT-tests.jar /tmp/jars/test.txt 100
 ```
 
 s3 metrics & eventlog s3

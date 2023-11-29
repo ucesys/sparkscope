@@ -36,19 +36,21 @@ class S3CleanupMetricReader(sparkScopeConf: SparkScopeConf,
     }
 
     private def readTmpMetrics(s3Location: S3Location, instanceId: String): DataTable = {
-        logger.info(s"Reading tmp ${instanceId}metric files")
         val objectKeys = listTmpMetrics(s3Location, instanceId)
 
         val metrics: Seq[DataTable] = objectKeys.map { objectKey =>
+            logger.info(s"Reading ${objectKey} file")
             val s3Object: S3Object = s3.getObject(s3Location.bucketName, objectKey)
             val myData: BufferedSource = Source.fromInputStream(s3Object.getObjectContent)
-            val csvStr = myData.getLines().mkString
-            DataTable.fromCsv(instanceId, csvStr, ",")
+            val csvStr = myData.getLines().mkString("\n")
+            val metrics = DataTable.fromCsv(instanceId, csvStr, ",")
+            logger.debug("\n" + metrics.toString)
+            metrics
         }
 
         val header = metrics.map(_.header).toSet.size match {
-            case 0 => throw new IllegalArgumentException(s"Couldn't read header: ${metrics.map(_.header).toSet}")
             case 1 => metrics.head.header
+            case 0 => throw new IllegalArgumentException(s"Couldn't read header: ${metrics.map(_.header).toSet}")
             case _ => throw new IllegalArgumentException(s"Inconsistent headers: ${metrics.map(_.header).toSet}")
         }
 
@@ -63,6 +65,7 @@ class S3CleanupMetricReader(sparkScopeConf: SparkScopeConf,
             appContext.appId,
             s"${instanceId}"
         ).toString;
+        logger.info(s"Listing instance=${instanceId} metric files from ${sparseDir}")
 
         val files = s3.listObjects(s3Location.bucketName, sparseDir).getObjectSummaries
         JavaConverters.asScalaIteratorConverter(files.iterator()).asScala.toSeq.map(_.getKey)
@@ -71,7 +74,7 @@ class S3CleanupMetricReader(sparkScopeConf: SparkScopeConf,
     private def writeMerged(s3Location: S3Location, instanceId: String, metricTable: DataTable): Unit = {
         val appDir = Paths.get(s3Location.path, this.sparkScopeConf.appName.getOrElse("")).toString
         val mergedPath: String = Paths.get(appDir, appContext.appId, s"${instanceId}.csv").toString;
-        logger.info(s"Saving merged ${instanceId}metric for file to ${mergedPath}")
+        logger.info(s"Saving merged instance=${instanceId} metrics to ${mergedPath}")
 
         try {
             s3.putObject(s3Location.bucketName, mergedPath, metricTable.toCsv(Delimeter))

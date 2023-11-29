@@ -32,8 +32,8 @@ import java.util.concurrent.{ScheduledExecutorService, TimeUnit}
 class HadoopCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenThen {
 
     def createHadoopCsvReporter(directory: String,
-                                writer: HadoopFileWriter = mock[HadoopFileWriter],
-                                logger: SparkScopeLogger = mock[SparkScopeLogger]): HadoopCsvReporter = {
+                                writer: HadoopFileWriter = mock[HadoopFileWriter])
+                               (implicit logger: SparkScopeLogger = mock[SparkScopeLogger]): HadoopCsvReporter = {
         new HadoopCsvReporter(
             directory,
             new MetricRegistry,

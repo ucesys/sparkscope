@@ -19,6 +19,7 @@
 package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics.{MetricFilter, MetricRegistry}
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.file.LocalFileWriter
 import org.apache.commons.lang.SystemUtils
@@ -55,7 +56,7 @@ class LocalCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenThe
             false,
             writer,
             appName
-        )
+        )(mock[SparkScopeLogger])
     }
 
     test("LocalCsvReporter report metrics append") {

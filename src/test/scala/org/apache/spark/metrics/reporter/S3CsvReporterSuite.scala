@@ -20,6 +20,8 @@ package org.apache.spark.metrics.reporter
 
 import com.codahale.metrics.MetricFilter
 import com.codahale.metrics.MetricRegistry
+import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.file.S3FileWriter
 import org.apache.commons.lang.SystemUtils
 import org.mockito.MockitoSugar
@@ -30,6 +32,17 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit;
 
 class S3CsvReporterSuite extends FunSuite with GivenWhenThen with MockitoSugar {
+
+    val driverMetricsStr: String =
+        """t,jvm.heap.max,jvm.heap.usage,jvm.heap.used,jvm.non-heap.used
+          |1695358645,954728448,0.29708835490780305,283638704,56840944""".stripMargin
+    val driverMetrics = DataTable.fromCsv("driver", driverMetricsStr, ",")
+
+    val exec1MetricsStr: String =
+        """t,jvm.heap.max,jvm.heap.usage,jvm.heap.used,jvm.non-heap.used,executor.cpuTime
+          |1695358697,838860800,0.21571252822875978,180952784,51120384,29815418742""".stripMargin
+
+    val exec1Metrics: DataTable = DataTable.fromCsv("1", exec1MetricsStr, ",")
 
     def createS3CsvReporter(directory: String, writerMock: S3FileWriter = mock[S3FileWriter]): S3CsvReporter = {
         new S3CsvReporter(
@@ -44,7 +57,7 @@ class S3CsvReporterSuite extends FunSuite with GivenWhenThen with MockitoSugar {
             mock[ScheduledExecutorService],
             false,
             writerMock
-        )
+        )(mock[SparkScopeLogger])
     }
 
     test("bucket, metricsDir extraction") {
@@ -95,7 +108,7 @@ class S3CsvReporterSuite extends FunSuite with GivenWhenThen with MockitoSugar {
 
         if (SystemUtils.OS_NAME == "Linux") {
             When("s3CsvReporter.report")
-            s3CsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "t,value", "%s", 1000)
+            s3CsvReporter.report("app-123-456", "driver", driverMetrics, 123)
 
             Then("Filesystem.exists should be called")
             verify(writerMock, times(2)).exists("s3://my-bucket/metrics-dir/.tmp/app-123-456/IN_PROGRESS")
@@ -104,7 +117,10 @@ class S3CsvReporterSuite extends FunSuite with GivenWhenThen with MockitoSugar {
             verify(writerMock, times(0)).write("s3://my-bucket/metrics-dir/.tmp/app-123-456/IN_PROGRESS", "")
 
             And("file with single row should be written")
-            verify(writerMock, times(1)).write("s3://my-bucket/metrics-dir/.tmp/app-123-456/driver/jvm.heap.used/jvm.heap.used.123.csv", "123,1000")
+            verify(writerMock, times(1)).write(
+                "s3://my-bucket/metrics-dir/.tmp/app-123-456/driver/driver.123.csv",
+                driverMetrics.toCsv(",")
+            )
         }
     }
 
@@ -119,7 +135,7 @@ class S3CsvReporterSuite extends FunSuite with GivenWhenThen with MockitoSugar {
 
         if (SystemUtils.OS_NAME == "Linux") {
             When("s3CsvReporter.report")
-            s3CsvReporter.report(123, "app-123-456.driver.jvm.heap.used", "t,value", "%s", 1000)
+            s3CsvReporter.report("app-123-456", "1", exec1Metrics, 123)
 
             Then("Filesystem.exists should be called")
             verify(writerMock, times(2)).exists("s3://my-bucket/metrics-dir/.tmp/app-123-456/IN_PROGRESS")

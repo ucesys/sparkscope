@@ -25,7 +25,7 @@ class S3FileReader(s3: AmazonS3)(implicit logger: SparkScopeLogger)  extends Fil
 
 object S3FileReader {
     def apply(region: String)(implicit logger: SparkScopeLogger) : S3FileReader = {
-        println(s"Creating s3 client for ${region} region")
+        logger.info(s"Creating s3 client for ${region} region")
         val s3: AmazonS3 = AmazonS3ClientBuilder
           .standard
           .withRegion(region)
