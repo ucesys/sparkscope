@@ -8,9 +8,8 @@ import com.ucesys.sparkscope.io.file.TextFileWriter
 import com.ucesys.sparkscope.io.report.SeriesColor.{Green, Orange, Purple, Red, Yellow}
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 
-import java.io.{FileWriter, InputStream}
+import java.io.InputStream
 import java.nio.file.Paths
-import java.time.{Instant, LocalDateTime}
 import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
@@ -35,7 +34,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
 
         val rendered = template
           .replace("${sparkScopeSign}", SparkScopeSign)
-          .replace("${appInfo.appName}", sparkScopeConf.appName.getOrElse("None"))
+          .replace("${appInfo.appName}", sparkScopeConf.appName.getOrElse(sparkScopeConf.sparkConf.getOption("spark.app.name").getOrElse("None")))
           .replace("${appInfo.applicationId}", result.appContext.appId)
           .replace("${appInfo.start}", ofEpochSecond(result.appContext.appStartTime / 1000, 0, UTC).toString)
           .replace("${appInfo.end}", result.appContext.appEndTime.map(endTime => ofEpochSecond(endTime/ 1000, 0, UTC).toString).getOrElse("In progress"))
