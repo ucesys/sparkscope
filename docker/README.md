@@ -141,9 +141,9 @@ s3 metrics & eventlog s3
 ```bash
 spark-submit \
 --master spark://spark-master:7077 \
---jars /tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---files /tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=s3a://ucesys-sparkscope-metrics/spark-events \
@@ -166,9 +166,9 @@ s3 metrics & eventlog & html report s3
 ```bash
 spark-submit \
 --master spark://spark-master:7077 \
---jars /tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---files /tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=s3a://ucesys-sparkscope-metrics/spark-events \
@@ -185,7 +185,7 @@ spark-submit \
 --conf spark.executor.instances=2 \
 --conf spark.cores.max=4 \
 --class com.ucesys.sparkscope.WordCount \
-/tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT-tests.jar /tmp/jars/test.txt 2000
+/tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT-tests.jar /tmp/jars/test.txt 2000
 ```
 ### Running SparkScope as standalone app
 ```agsl
