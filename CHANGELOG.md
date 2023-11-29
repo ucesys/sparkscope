@@ -3,7 +3,7 @@
 ## [0.1.5] - 2023-11-29 Metrics spilling optimization
 - Metrics spill refactor
   - we are now spilling single merged csv file per instance containing all metrics instead of 5 separate files(heap used, heap used in %, heap size, non-heap used, cpuTime)
-  - metrics are grouped by appName+appId on storage 
+  - local&hadoop metrics are grouped by appName+appId on storage(just like s3 metrics)
 - All sinks/reporters rewritten from Java to Scala
 
 ## [0.1.4] - 2023-11-23 UI Enhancements
