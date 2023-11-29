@@ -189,5 +189,5 @@ spark-submit \
 ```
 ### Running SparkScope as standalone app
 ```agsl
-java -cp /tmp/jars/sparkscope-spark3-0.1.4-SNAPSHOT.jar:./jars/* com.ucesys.sparkscope.SparkScopeApp --event-log /tmp/spark-events/app-20231102142859-0005
+java -cp /tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT.jar:./jars/* com.ucesys.sparkscope.SparkScopeApp --event-log /tmp/spark-events/app-20231129134104-0001
 ```
