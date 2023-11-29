@@ -51,7 +51,7 @@ class S3CsvReporter(directory: String,
             this.isInit = true;
         }
 
-        logger.info(s"Writing csv: ${instance} metrics to ${inProgressS3Location.getUrl}")
+        logger.debug(s"Writing csv: ${instance} metrics to ${inProgressS3Location.getUrl}")
         if (fileWriter.exists(inProgressS3Location.getUrl)) {
             fileWriter.write(metricS3Location.getUrl, metrics.toCsv(separator))
         }
