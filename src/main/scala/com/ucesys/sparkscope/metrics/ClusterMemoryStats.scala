@@ -1,6 +1,7 @@
 package com.ucesys.sparkscope.metrics
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
+import com.ucesys.sparkscope.common.{JvmHeapUsage, JvmHeapUsed}
 
 case class ClusterMemoryStats(maxHeap: Long,
                               avgHeap: Long,
@@ -33,9 +34,9 @@ object ClusterMemoryStats {
         val avgHeapWastedPerc: Double = 1 - avgHeapPerc
 
         ClusterMemoryStats(
-            maxHeap = clusterMetrics.heapUsed.select(JvmHeapUsed).max.toLong / BytesInMB,
-            avgHeap = clusterMetrics.heapUsed.select(JvmHeapUsed).avg.toLong / BytesInMB,
-            maxHeapPerc = f"${clusterMetrics.heapUsage.select(JvmHeapUsage).max}%1.5f".toDouble,
+            maxHeap = clusterMetrics.heapUsed.select(JvmHeapUsed.name).max.toLong / BytesInMB,
+            avgHeap = clusterMetrics.heapUsed.select(JvmHeapUsed.name).avg.toLong / BytesInMB,
+            maxHeapPerc = f"${clusterMetrics.heapUsage.select(JvmHeapUsage.name).max}%1.5f".toDouble,
             avgHeapPerc = avgHeapPerc,
             avgHeapWastedPerc = avgHeapWastedPerc,
             executorTimeSecs = executorTimeSecs,

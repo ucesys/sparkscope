@@ -1,11 +1,13 @@
 package com.ucesys.sparkscope.data
 
-case class DataTable(name: String, columns: Seq[DataColumn]) {
+case class DataTable(name: String, columns: Seq[DataColumn], delimeter: String=",") {
     def numCols: Int = columns.length
 
     def numRows: Int = columns.headOption.map(x => x.values.length).getOrElse(0)
 
     def columnsNames: Seq[String] = columns.map(_.name)
+
+    def header: String = columns.map(_.name).mkString(delimeter)
 
     def toRows: Seq[Seq[String]] = columns.map(_.values).transpose
 
@@ -14,9 +16,11 @@ case class DataTable(name: String, columns: Seq[DataColumn]) {
     def select(column: String): DataColumn =
         this.columns.find(_.name == column).getOrElse(throw new IllegalArgumentException(s"${column} column does not exist among columns: ${columnsNames}"))
 
-    def select(subColumns: Seq[String]): DataTable = DataTable(this.name, this.columns.filter(col => subColumns.contains(col.name)))
+    def select(subColumns: Seq[String]): DataTable = DataTable(this.name, this.columns.filter(col => subColumns.contains(col.name)), this.delimeter)
 
     def toCsv(delimeter: String): String = this.toRowsWithHeader.map(_.mkString(delimeter)).mkString("\n")
+    def toCsvNoHeader(delimeter: String): String = this.toRows.map(_.mkString(delimeter)).mkString("\n")
+
 
     override def toString: String = {
         val paddedCols = this.columns.map { col =>
@@ -94,6 +98,13 @@ object DataTable {
     def fromCsv(name: String, csvStr: String, delimeter: String, columnNames: Seq[String]): DataTable = {
         val rows = csvStr.replace("\r\n", "\n").split("\n")
         val columnsSeq = rows.tail.map(_.split(delimeter)).transpose
+        val columns = (columnNames zip columnsSeq).map { case (name, values) => DataColumn(name, values) }
+        DataTable(name, columns)
+    }
+
+    def fromCsvWithoutHeader(name: String, csvStr: String, delimeter: String, columnNames: Seq[String]): DataTable = {
+        val rows = csvStr.replace("\r\n", "\n").split("\n")
+        val columnsSeq = rows.map(_.split(delimeter)).transpose
         val columns = (columnNames zip columnsSeq).map { case (name, values) => DataColumn(name, values) }
         DataTable(name, columns)
     }

@@ -38,20 +38,20 @@ SparkScope html report contains the following features:
 
 ## Spark application configuration
 
-| parameter                                    | type      |   sample values                                   |      description                                                                                                              |
-|----------------------------------------------|-----------|---------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| spark.extraListeners                         | mandatory | com.ucesys.sparkscope.SparkScopeJobListener       | spark listener class 
-| spark.metrics.conf.driver.source.jvm.class   | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for driver        
-| spark.metrics.conf.executor.source.jvm.class | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for executor         
-| spark.metrics.conf.*.sink.csv.class          | mandatory | org.apache.spark.metrics.sink.SparkScopeCsvSink   | csv sink class         
-| spark.metrics.conf.*.sink.csv.period         | mandatory | 5                                                 | period of metrics spill         
-| spark.metrics.conf.*.sink.csv.unit           | mandatory | seconds                                           | unit of period of metrics spill             |
-| spark.metrics.conf.*.sink.csv.directory      | mandatory | s3://my-bucket/path/to/metrics                    | path to metrics directory, can be s3,hdfs,maprfs,local                                         |
-| spark.metrics.conf.*.sink.csv.region         | optional  | us-east-1                                         | aws region, required for s3 storage                                    |
-| spark.sparkscope.app.name                    | optional  | MyApp                                             | application name, defaults to "spark.app.name" property value                                                 |
-| spark.sparkscope.html.path                   | optional  | s3://my-bucket/path/to/html/report/dir            | path to which SparkScope html report will be saved                                 |
-| spark.sparkscope.metrics.dir.driver          | optional  | s3://my-bucket/path/to/metrics                    | path to driver csv metrics relative to driver, defaults to "spark.metrics.conf.driver.sink.csv.directory" property value   |
-| spark.sparkscope.metrics.dir.executor        | optional  | s3://my-bucket/path/to/metrics                    | path to executor csv metrics relative to driver, defaults to "spark.metrics.conf.executor.sink.csv.directory" property value  |
+| parameter                                    | type      |   sample values                                   | description                                                                                                                  |
+|----------------------------------------------|-----------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| spark.extraListeners                         | mandatory | com.ucesys.sparkscope.SparkScopeJobListener       | spark listener class                                                                                                         
+| spark.metrics.conf.driver.source.jvm.class   | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for driver                                                                                                
+| spark.metrics.conf.executor.source.jvm.class | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for executor                                                                                              
+| spark.metrics.conf.*.sink.csv.class          | mandatory | org.apache.spark.metrics.sink.SparkScopeCsvSink   | csv sink class                                                                                                               
+| spark.metrics.conf.*.sink.csv.period         | mandatory | 5                                                 | period of metrics spill                                                                                                      
+| spark.metrics.conf.*.sink.csv.unit           | mandatory | seconds                                           | unit of period of metrics spill                                                                                              |
+| spark.metrics.conf.*.sink.csv.directory      | mandatory | s3://my-bucket/path/to/metrics                    | path to metrics directory, can be s3,hdfs,maprfs,local                                                                       |
+| spark.metrics.conf.*.sink.csv.region         | optional  | us-east-1                                         | aws region, required for s3 storage                                                                                          |
+| spark.metrics.conf.*.sink.csv.appName        | optional  | MyApp                                             | application name, also used for grouping metrics                                                                 |
+| spark.sparkscope.html.path                   | optional  | s3://my-bucket/path/to/html/report/dir            | path to which SparkScope html report will be saved                                                                           |
+| spark.sparkscope.metrics.dir.driver          | optional  | s3://my-bucket/path/to/metrics                    | path to driver csv metrics relative to driver, defaults to "spark.metrics.conf.driver.sink.csv.directory" property value     |
+| spark.sparkscope.metrics.dir.executor        | optional  | s3://my-bucket/path/to/metrics                    | path to executor csv metrics relative to driver, defaults to "spark.metrics.conf.executor.sink.csv.directory" property value |
 
 
 
@@ -65,9 +65,9 @@ Note:
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -76,6 +76,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=s3://<bucket-name>/<path-to-metrics-dir> \
 --conf spark.metrics.conf.*.sink.csv.region=<region> \
+--conf spark.metrics.conf.*.sink.csv.appName=My-App \
 --conf spark.sparkscope.html.path=s3://<bucket-name>/<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
@@ -85,9 +86,9 @@ spark-submit \
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -95,6 +96,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.period=5 \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=hdfs://<path-to-metrics-dir> \
+--conf spark.metrics.conf.*.sink.csv.appName=My-App \
 --conf spark.sparkscope.html.path=hdfs://<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
@@ -104,9 +106,9 @@ spark-submit \
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -114,6 +116,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.period=5 \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=<path-to-metrics-dir> \
+--conf spark.metrics.conf.*.sink.csv.appName=My-App \
 --conf spark.sparkscope.html.path=<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
@@ -142,9 +145,9 @@ And specifying path to metrics.properties file in spark-submit command:
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.4-SNAPSHOT.jar,./metrics.properties \
---driver-class-path ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar,./metrics.properties \
+--driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf=./metrics.properties \
 --conf spark.sparkscope.html.path=hdfs://<path-to-html-report-dir> \
@@ -157,22 +160,23 @@ Your application needs to have eventLog and metrics configured(but not the liste
 ```agsl
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.4-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink \
 --conf spark.metrics.conf.*.sink.csv.period=5 \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=<path-to-metrics-dir> \
+--conf spark.metrics.conf.*.sink.csv.appName=My-App \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
 Running sparkscope as java-app
 ```agsl
 java \
--cp ./sparkscope-spark3-0.1.4-SNAPSHOT.jar:$(hadoop classpath) \
+-cp ./sparkscope-spark3-0.1.5-SNAPSHOT.jar:$(hadoop classpath) \
 com.ucesys.sparkscope.SparkScopeApp \
 --event-log <path-to-event-log> \
 --html-path <path-to-html-report-dir> \
