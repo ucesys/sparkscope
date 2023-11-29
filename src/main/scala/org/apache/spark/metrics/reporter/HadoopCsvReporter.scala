@@ -32,7 +32,7 @@ class HadoopCsvReporter(rootDir: String,
     logger.info("Using HadoopCsvReporter")
 
     override protected[reporter] def report(appId: String, instance: String, metrics: DataTable, timestamp: Long): Unit = {
-        logger.info("\n" + metrics.toString)
+        logger.debug("\n" + metrics.toString)
         val row: String = metrics.toCsvNoHeader(separator)
 
         val appDir = Paths.get(rootDir, appName.getOrElse(""), appId).toString

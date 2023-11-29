@@ -1,12 +1,13 @@
 package com.ucesys.sparkscope.io.metrics
 
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext}
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.file.HadoopFileReader
 
 import java.nio.file.Paths
 
-class HadoopMetricReader(sparkScopeConf: SparkScopeConf, fileReader: HadoopFileReader, appContext: SparkScopeContext) extends MetricReader {
+class HadoopMetricReader(sparkScopeConf: SparkScopeConf, fileReader: HadoopFileReader, appContext: SparkScopeContext)
+                        (implicit logger: SparkScopeLogger) extends MetricReader {
     def readDriver: DataTable = {
         readMetric("driver")
     }
@@ -22,6 +23,8 @@ class HadoopMetricReader(sparkScopeConf: SparkScopeConf, fileReader: HadoopFileR
             appContext.appId,
             s"${instance}.csv"
         ).toString.replace("\\", "/")
+        logger.info(s"Reading instance=${instance} metric files from ${metricPath}")
+
         val metricStr = fileReader.read(metricPath)
         DataTable.fromCsv(instance, metricStr, ",").distinct("t").sortBy("t")
     }
