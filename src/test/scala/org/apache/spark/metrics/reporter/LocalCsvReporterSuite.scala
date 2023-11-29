@@ -59,33 +59,6 @@ class LocalCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenThe
         )(mock[SparkScopeLogger])
     }
 
-    test("LocalCsvReporter report metrics append") {
-        Given("Local metrics file already exists")
-        val writerMock = mock[LocalFileWriter]
-        doReturn(true).when(writerMock).exists(any[String])
-
-        And("local reporter")
-        val localPath = "/tmp/path"
-        val localCsvReporter = createLocalCsvReporter(localPath, writerMock)
-
-        if (SystemUtils.OS_NAME == "Linux") {
-            When("calling LocalCsvReporter.report")
-            localCsvReporter.report("app-123-456", "driver", driverMetrics,  123)
-            localCsvReporter.report("app-123-456", "1", exec1Metrics,  123)
-
-            Then("Filesystem.exists should be called")
-            verify(writerMock, times(1)).exists("/tmp/path/app-123-456/driver.csv")
-            verify(writerMock, times(1)).exists("/tmp/path/app-123-456/1.csv")
-
-            And("New file should not be created")
-            verify(writerMock, times(0)).write(any[String], any[String])
-
-            And("Row should be appended to file")
-            verify(writerMock, times(1)).append("/tmp/path/app-123-456/driver.csv", driverMetrics.toCsvNoHeader(","))
-            verify(writerMock, times(1)).append("/tmp/path/app-123-456/1.csv", exec1Metrics.toCsvNoHeader(","))
-        }
-    }
-
     test("LocalCsvReporter report metrics create file") {
         Given("Local metrics file doesn't exists")
         val writerMock = mock[LocalFileWriter]
@@ -146,6 +119,33 @@ class LocalCsvReporterSuite extends FunSuite with MockitoSugar with GivenWhenThe
             And("Row should be appended to file")
             verify(writerMock, times(1)).append("/tmp/path/my-app/app-123-456/driver.csv", driverMetrics.toCsvNoHeader(","))
             verify(writerMock, times(1)).append("/tmp/path/my-app/app-123-456/1.csv", exec1Metrics.toCsvNoHeader(","))
+        }
+    }
+
+    test("LocalCsvReporter report metrics append") {
+        Given("Local metrics file already exists")
+        val writerMock = mock[LocalFileWriter]
+        doReturn(true).when(writerMock).exists(any[String])
+
+        And("local reporter")
+        val localPath = "/tmp/path"
+        val localCsvReporter = createLocalCsvReporter(localPath, writerMock)
+
+        if (SystemUtils.OS_NAME == "Linux") {
+            When("calling LocalCsvReporter.report")
+            localCsvReporter.report("app-123-456", "driver", driverMetrics, 123)
+            localCsvReporter.report("app-123-456", "1", exec1Metrics, 123)
+
+            Then("Filesystem.exists should be called")
+            verify(writerMock, times(1)).exists("/tmp/path/app-123-456/driver.csv")
+            verify(writerMock, times(1)).exists("/tmp/path/app-123-456/1.csv")
+
+            And("New file should not be created")
+            verify(writerMock, times(0)).write(any[String], any[String])
+
+            And("Row should be appended to file")
+            verify(writerMock, times(1)).append("/tmp/path/app-123-456/driver.csv", driverMetrics.toCsvNoHeader(","))
+            verify(writerMock, times(1)).append("/tmp/path/app-123-456/1.csv", exec1Metrics.toCsvNoHeader(","))
         }
     }
 }

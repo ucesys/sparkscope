@@ -8,7 +8,6 @@ import com.ucesys.sparkscope.io.file.HadoopFileWriter
 import java.nio.file.Paths
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
-import org.apache.hadoop.fs.Path
 
 import java.io.IOException
 import java.util.Locale
@@ -32,23 +31,25 @@ class HadoopCsvReporter(rootDir: String,
   extends AbstractCsvReporter(registry, locale, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop) {
     logger.info("Using HadoopCsvReporter")
 
-    protected[reporter] def report(timestamp: Long, name: String, header: String, line: String, values: Any*): Unit = ???
-
     override protected[reporter] def report(appId: String, instance: String, metrics: DataTable, timestamp: Long): Unit = {
         logger.info("\n" + metrics.toString)
         val row: String = metrics.toCsvNoHeader(separator)
-        val path: Path = new Path(Paths.get(rootDir, appName.getOrElse(""), appId, s"${instance}.csv").toString)
+
+        val appDir = Paths.get(rootDir, appName.getOrElse(""), appId).toString
+        val csvFilePath = Paths.get(appDir, s"${instance}.csv").toString
+
 
         try {
-            logger.debug(s"Writing to ${path.toString}")
-            if (!fileWriter.exists(path.toString)) {
-                fileWriter.write(path.toString, metrics.header + "\n")
+            logger.debug(s"Writing to ${csvFilePath}")
+            if (!fileWriter.exists(csvFilePath)) {
+                fileWriter.makeDir(appDir)
+                fileWriter.write(csvFilePath, metrics.header + "\n")
             }
 
             logger.debug(s"Writing row: ${row}")
-            fileWriter.append(path.toString, row + "\n")
+            fileWriter.append(csvFilePath, row + "\n")
         } catch {
-            case e: IOException => logger.warn(s"IOException while writing ${instance} to ${path.toString}. ${e}")
+            case e: IOException => logger.warn(s"IOException while writing ${instance} to ${csvFilePath}. ${e}")
         }
     }
 }

@@ -41,6 +41,10 @@ class HadoopFileWriter(conf: Configuration)(implicit logger: SparkScopeLogger) e
         }
     }
 
+    def makeDir(pathStr: String): Unit = {
+        fs.mkdirs(new Path(pathStr));
+    }
+
     @throws(classOf[IOException])
     def exists(pathStr: String): Boolean = {
         fs.exists(new Path(pathStr))
