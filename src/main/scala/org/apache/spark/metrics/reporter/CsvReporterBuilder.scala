@@ -159,7 +159,8 @@ class CsvReporterBuilder(val registry: MetricRegistry,
                 filter,
                 executor,
                 shutdownExecutorOnStop,
-                new HadoopFileWriter(SparkHadoopUtil.get.newConfiguration(null))
+                new HadoopFileWriter(SparkHadoopUtil.get.newConfiguration(null)),
+                appName
             )
         } else if (directory.startsWith("s3:/")) {
             new S3CsvReporter(

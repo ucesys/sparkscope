@@ -26,7 +26,7 @@ class HadoopCsvReporter(rootDir: String,
                         executor: ScheduledExecutorService,
                         shutdownExecutorOnStop: Boolean,
                         fileWriter: HadoopFileWriter,
-                        appName: Option[String] = None)
+                        appName: Option[String])
                        (implicit logger: SparkScopeLogger)
   extends AbstractCsvReporter(registry, locale, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop) {
     logger.info("Using HadoopCsvReporter")
