@@ -23,7 +23,6 @@ import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.file.LocalFileWriter
 import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
-import com.ucesys.sparkscope.view.HtmlReportGenerator
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 

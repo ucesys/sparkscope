@@ -19,7 +19,7 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.common.{CpuTime, ExecutorContext, JvmHeapUsed, JvmNonHeapUsed, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
-import com.ucesys.sparkscope.common.MetricUtils.ColCpuUsage
+import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.metrics.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
@@ -235,10 +235,10 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
                       }.toSeq.headOption
                     interpolatedValue
                 })
-
-                val missingTsMetrics = DataTable.fromRows("missingTs", metrics.columnsNames, interpolatedRows)
-                val metricsWithNewTs = metrics.union(missingTsMetrics).sortBy("t")
-                metricsWithNewTs
+                interpolatedRows match {
+                    case Seq() => metrics
+                    case _ => metrics.union(DataTable.fromRows("missing", metrics.columnsNames, interpolatedRows)).sortBy(ColTs)
+                }
             }
             (executorId, metricsInterpolated)
         }

@@ -120,15 +120,15 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${chart.driver.memoryOverhead}", driverNonHeapUtilChart.limits.mkString(","))
 
           .replace(
-        "${chart.jvm.executor.heap.timestamps}",
-        metrics.executor.heapUsedMax.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+              "${chart.jvm.executor.heap.timestamps}",
+              metrics.executor.heapUsedMax.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
           .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(metrics.executor.executorMetricsMap, JvmHeapUsed.name))
           .replace("${chart.jvm.executor.heap.allocation}", metrics.executor.heapAllocation.select(JvmHeapMax.name).div(BytesInMB).toDouble.mkString(","))
 
           .replace(
-        "${chart.jvm.executor.non-heap.timestamps}",
-        metrics.executor.nonHeapUsedMax.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+              "${chart.jvm.executor.non-heap.timestamps}",
+              metrics.executor.nonHeapUsedMax.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
           .replace("${chart.jvm.executor.non-heap}", generateExecutorHeapCharts(metrics.executor.executorMetricsMap, JvmNonHeapUsed.name))
 
@@ -198,4 +198,8 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${stats.driver.non-heap.avg}", result.stats.driverStats.avgNonHeap.toString)
           .replace("${stats.driver.non-heap.max}", result.stats.driverStats.maxNonHeap.toString)
     }
+}
+
+object HtmlReportGenerator {
+    val MaxChartPoints: Int = 300
 }

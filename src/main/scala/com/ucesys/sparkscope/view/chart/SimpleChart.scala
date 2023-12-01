@@ -1,22 +1,25 @@
 package com.ucesys.sparkscope.view.chart
 
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.data.DataColumn
-
-case class TimePoint(ts: String, value: String)
+import com.ucesys.sparkscope.view.HtmlReportGenerator.MaxChartPoints
 
 case class SimpleChart(timestamps: Seq[String], values: Seq[String]) extends Chart {
     def labels: Seq[String] = timestamps.map(tsToDt)
 }
 
 object SimpleChart {
-    def apply(tsCol: DataColumn, valueCol: DataColumn, maxPoints: Int=300): SimpleChart = {
+    case class TimePoint(ts: String, value: String)
+
+    def apply(tsCol: DataColumn, valueCol: DataColumn)(implicit logger: SparkScopeLogger): SimpleChart = {
         if(tsCol.size != valueCol.size) {
             throw new IllegalArgumentException(s"Series sizes are different: ${tsCol.size} and ${valueCol.size}")
-        } else if (tsCol.size <= maxPoints) {
+        } else if (tsCol.size <= MaxChartPoints) {
             SimpleChart(tsCol.values, valueCol.values)
         } else {
-            val ratio: Float = tsCol.size.toFloat / maxPoints.toFloat
-            val newPoints: Seq[Int] = (0 until maxPoints)
+            logger.info(s"Limiting chart points from ${tsCol.size} to ${MaxChartPoints}")
+            val ratio: Float = tsCol.size.toFloat / MaxChartPoints.toFloat
+            val newPoints: Seq[Int] = (0 until MaxChartPoints)
             val newChart: Seq[TimePoint] = newPoints.map{ id =>
                 val from: Int = (id*ratio).toInt
                 val to: Int = (from + ratio).toInt
