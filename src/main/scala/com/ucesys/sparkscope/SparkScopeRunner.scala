@@ -21,8 +21,8 @@ import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkSco
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.io.metrics.MetricsLoaderFactory
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
-import com.ucesys.sparkscope.io.report.ReportGeneratorFactory
 import com.ucesys.sparkscope.metrics.SparkScopeResult
+import com.ucesys.sparkscope.view.ReportGeneratorFactory
 import org.apache.spark.SparkConf
 
 import java.io.FileNotFoundException

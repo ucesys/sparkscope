@@ -146,11 +146,11 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
                 clusterCPUStats = clusterCPUStats
             ),
             metrics = SparkScopeMetrics(
-                driverMetrics = driverExecutorMetrics.driverMetrics,
-                executorMemoryMetrics = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned),
-                clusterMemoryMetrics = clusterMemoryMetrics,
-                clusterCPUMetrics = clusterCPUMetrics,
-                stageMetrics = StageMetrics(appContext.stages, allTimestamps, clusterCPUMetrics.clusterCapacity)
+                driver = driverExecutorMetrics.driverMetrics,
+                executor = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned),
+                clusterMemory = clusterMemoryMetrics,
+                clusterCpu= clusterCPUMetrics,
+                stage = StageMetrics(appContext.stages, allTimestamps, clusterCPUMetrics.clusterCapacity)
             ),
             warnings = warnings.flatten
         )

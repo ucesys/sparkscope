@@ -1,12 +1,14 @@
-package com.ucesys.sparkscope.io.report
+package com.ucesys.sparkscope.view
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
-import com.ucesys.sparkscope.common.{JvmHeapUsed, JvmNonHeapUsed, SparkScopeConf, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed, SparkScopeConf, SparkScopeLogger}
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.file.TextFileWriter
-import com.ucesys.sparkscope.io.report.SeriesColor.{Green, Orange, Purple, Red, Yellow}
-import com.ucesys.sparkscope.metrics.SparkScopeResult
+import SeriesColor.{Green, Orange, Purple, Red, Yellow}
+import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
+import com.ucesys.sparkscope.metrics.{SparkScopeMetrics, SparkScopeResult}
+import com.ucesys.sparkscope.view.chart.{LimitedChart, SimpleChart}
 
 import java.io.InputStream
 import java.nio.file.Paths
@@ -43,9 +45,8 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${warnings}", warningsStr)
           .replace("${sparkConf}", sparkScopeConf.sparkConf.getAll.map { case (key, value) => s"${key}: ${value}" }.mkString("\n"))
           .replace("${sparklens}", sparklensResults.mkString("\n"))
-        //      .replace("${version}", getClass.getPackage.getImplementationVersion)
 
-        val renderedCharts = renderCharts(rendered, result)
+        val renderedCharts = renderCharts(rendered, result.metrics)
         val renderedStats = renderStats(renderedCharts, result)
 
         val outputPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appContext.appId}.html")
@@ -53,58 +54,88 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
         logger.info(s"Wrote HTML report file to ${outputPath}")
     }
 
-    def renderCharts(template: String, result: SparkScopeResult): String = {
+    def renderCharts(template: String, metrics: SparkScopeMetrics): String = {
+        val cpuUtilChart = SimpleChart(
+            metrics.clusterCpu.clusterCpuUsage.select(ColTs),
+            metrics.clusterCpu.clusterCpuUsage.select(ColCpuUsage).mul(100)
+        )
+        val heapUtilChart = SimpleChart(
+            metrics.clusterMemory.heapUsage.select(ColTs),
+            metrics.clusterMemory.heapUsage.select(JvmHeapUsage.name).mul(100)
+        )
+
+        val numExecutorsChart = SimpleChart(
+            metrics.clusterCpu.numExecutors.select(ColTs),
+            metrics.clusterCpu.numExecutors.select("cnt")
+        )
+
+        val cpuUtilsVsCapacityChart = LimitedChart(
+            metrics.clusterCpu.clusterCpuUsage.select(ColTs),
+            metrics.clusterCpu.clusterCpuUsageSum.select("cpuUsageAllCores"),
+            metrics.clusterCpu.clusterCapacity.select("totalCores")
+        )
+
+        val heapUtilVsSizeChart = LimitedChart(
+            metrics.clusterMemory.heapUsed.select(ColTs),
+            metrics.clusterMemory.heapUsed.select(JvmHeapUsed.name).div(BytesInMB),
+            metrics.clusterMemory.heapMax.select(JvmHeapMax.name).div(BytesInMB)
+        )
+
+        val driverHeapUtilChart = LimitedChart(
+            metrics.driver.select(ColTs),
+            metrics.driver.select(JvmHeapUsed.name).div(BytesInMB),
+            metrics.driver.select(JvmHeapMax.name).div(BytesInMB)
+        )
+
+        val driverNonHeapUtilChart = LimitedChart(
+            metrics.driver.select(ColTs),
+            metrics.driver.select("jvm.non-heap.used").div(BytesInMB),
+            metrics.driver.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead")
+        )
+
         template
-          .replace("${chart.cluster.cpu.util}", result.metrics.clusterCPUMetrics.clusterCpuUsage.select("cpuUsage").mul(100).values.mkString(","))
+          .replace("${chart.cluster.cpu.util}", cpuUtilChart.values.mkString(","))
+          .replace("${chart.cluster.cpu.util.timestamps}", cpuUtilChart.labels.mkString(","))
+
+          .replace("${chart.jvm.cluster.heap.usage}", heapUtilChart.values.mkString(","))
+          .replace("${chart.jvm.cluster.heap.usage.timestamps}", heapUtilChart.labels.mkString(","))
+
+          .replace("${chart.cluster.cpu.capacity}", cpuUtilsVsCapacityChart.limits.mkString(","))
+          .replace("${chart.cluster.cpu.usage}", cpuUtilsVsCapacityChart.values.mkString(","))
+          .replace("${chart.cluster.cpu.usage.timestamps}", cpuUtilsVsCapacityChart.labels.mkString(","))
+
+          .replace("${chart.jvm.cluster.heap.used}", heapUtilVsSizeChart.values.mkString(","))
+          .replace("${chart.jvm.cluster.heap.max}",heapUtilVsSizeChart.limits.mkString(","))
+          .replace("${chart.jvm.cluster.heap.timestamps}", heapUtilVsSizeChart.labels.mkString(","))
+
+          .replace("${chart.cluster.numExecutors.timestamps}", numExecutorsChart.labels.mkString(","))
+          .replace("${chart.cluster.numExecutors}",numExecutorsChart.values.mkString(","))
+
+          .replace("${chart.jvm.driver.heap.timestamps}", driverHeapUtilChart.labels.mkString(","))
+          .replace("${chart.jvm.driver.heap.used}", driverHeapUtilChart.values.mkString(","))
+          .replace("${chart.jvm.driver.heap.size}", driverHeapUtilChart.limits.mkString(","))
+
+          .replace("${chart.jvm.driver.non-heap.timestamps}", driverNonHeapUtilChart.labels.mkString(","))
+          .replace("${chart.jvm.driver.non-heap.used}", driverNonHeapUtilChart.values.mkString(","))
+          .replace("${chart.driver.memoryOverhead}", driverNonHeapUtilChart.limits.mkString(","))
+
           .replace(
-              "${chart.cluster.cpu.util.timestamps}",
-              result.metrics.clusterCPUMetrics.clusterCpuUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        "${chart.jvm.executor.heap.timestamps}",
+        metrics.executor.heapUsedMax.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
-          .replace("${chart.cluster.cpu.capacity}", result.metrics.clusterCPUMetrics.clusterCapacity.select("totalCores").values.mkString(","))
-          .replace("${chart.cluster.cpu.usage}", result.metrics.clusterCPUMetrics.clusterCpuUsageSum.select("cpuUsageAllCores").values.mkString(","))
+          .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(metrics.executor.executorMetricsMap, JvmHeapUsed.name))
+          .replace("${chart.jvm.executor.heap.allocation}", metrics.executor.heapAllocation.select(JvmHeapMax.name).div(BytesInMB).toDouble.mkString(","))
+
           .replace(
-              "${chart.cluster.cpu.usage.timestamps}",
-              result.metrics.clusterCPUMetrics.clusterCpuUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
+        "${chart.jvm.executor.non-heap.timestamps}",
+        metrics.executor.nonHeapUsedMax.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
-          .replace("${chart.jvm.cluster.heap.usage}", result.metrics.clusterMemoryMetrics.heapUsage.select("jvm.heap.usage").mul(100).values.mkString(","))
-          .replace(
-              "${chart.jvm.cluster.heap.usage.timestamps}",
-              result.metrics.clusterMemoryMetrics.heapUsage.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-          )
-          .replace("${chart.jvm.cluster.heap.used}", result.metrics.clusterMemoryMetrics.heapUsed.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
-          .replace("${chart.jvm.cluster.heap.max}", result.metrics.clusterMemoryMetrics.heapMax.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
-          .replace(
-              "${chart.jvm.cluster.heap.timestamps}",
-              result.metrics.clusterMemoryMetrics.heapUsed.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-          )
-          .replace(
-              "${chart.jvm.executor.heap.timestamps}",
-              result.metrics.executorMemoryMetrics.heapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-          )
-          .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmHeapUsed.name))
-          .replace("${chart.jvm.executor.heap.allocation}", result.metrics.executorMemoryMetrics.heapAllocation.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
-          .replace(
-              "${chart.jvm.executor.non-heap.timestamps}",
-              result.metrics.executorMemoryMetrics.nonHeapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-          )
-          .replace("${chart.jvm.executor.non-heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmNonHeapUsed.name))
-          .replace("${chart.executor.memoryOverhead}", result.metrics.executorMemoryMetrics.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
-          .replace(
-              "${chart.jvm.driver.heap.timestamps}",
-              result.metrics.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-          )
-          .replace("${chart.jvm.driver.heap.size}", result.metrics.driverMetrics.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
-          .replace("${chart.jvm.driver.heap.used}", result.metrics.driverMetrics.select("jvm.heap.used").div(BytesInMB).toDouble.mkString(","))
-          .replace(
-              "${chart.jvm.driver.non-heap.timestamps}",
-              result.metrics.driverMetrics.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-          )
-          .replace("${chart.jvm.driver.non-heap.used}", result.metrics.driverMetrics.select("jvm.non-heap.used").div(BytesInMB).toDouble.mkString(","))
-          .replace("${chart.driver.memoryOverhead}", result.metrics.driverMetrics.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
-          .replace("${chart.cluster.numExecutors.timestamps}", result.metrics.clusterCPUMetrics.numExecutors.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
-          .replace("${chart.cluster.numExecutors}", result.metrics.clusterCPUMetrics.numExecutors.select("cnt").toDouble.mkString(","))
-          .replace("${chart.stages.timestamps}", result.metrics.stageMetrics.stageTimeline.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
-          .replace("${chart.stages}", generateStages(result.metrics.stageMetrics.stageTimeline.columns.filter(_.name !="t")))
+          .replace("${chart.jvm.executor.non-heap}", generateExecutorHeapCharts(metrics.executor.executorMetricsMap, JvmNonHeapUsed.name))
+
+          .replace("${chart.executor.memoryOverhead}", metrics.executor.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
+
+          .replace("${chart.stages.timestamps}", metrics.stage.stageTimeline.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
+          .replace("${chart.stages}", generateStages(metrics.stage.stageTimeline.columns.filter(_.name !=ColTs)))
     }
 
 

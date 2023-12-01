@@ -2,8 +2,8 @@ package com.ucesys.sparkscope.metrics
 
 import com.ucesys.sparkscope.data.DataTable
 
-case class SparkScopeMetrics(driverMetrics: DataTable,
-                             executorMemoryMetrics: ExecutorMemoryMetrics,
-                             clusterMemoryMetrics: ClusterMemoryMetrics,
-                             clusterCPUMetrics: ClusterCPUMetrics,
-                             stageMetrics: StageMetrics)
+case class SparkScopeMetrics(driver: DataTable,
+                             executor: ExecutorMemoryMetrics,
+                             clusterMemory: ClusterMemoryMetrics,
+                             clusterCpu: ClusterCPUMetrics,
+                             stage: StageMetrics)
