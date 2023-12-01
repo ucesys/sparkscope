@@ -123,6 +123,49 @@ object TestHelpers extends FunSuite with MockFactory {
 
     val missingMetricsWarning = MissingMetricsWarning(Seq("1", "2", "3", "4", "5"), Seq("1", "2", "3", "5"))
 
+    val Stages = Seq(
+        StageContext("1", 1695358645L, 1695358671L, 200),
+        StageContext("2", 1695358645L, 1695358700L, 500),
+        StageContext("3", 1695358645L, 1695358660L, 100),
+        StageContext("4", 1695358660L, 1695358671L, 200),
+        StageContext("5", 1695358671L, 1695358700L, 100),
+        StageContext("6", 1695358645L, 1695358655L, 200),
+        StageContext("7", 1695358655L, 1695358700L, 500),
+        StageContext("8", 1695358665L, 1695358680L, 100),
+        StageContext("9", 1695358670L, 1695358675L, 100),
+        StageContext("10", 1695358675L, 1695357200L, 200),
+        StageContext("11", 1695358675L, 1695358671L, 300),
+        StageContext("12", 1695358675L, 1695358700L, 400),
+        StageContext("13", 1695358645L, 1695358660L, 50),
+        StageContext("14", 1695358660L, 1695358671L, 100),
+        StageContext("15", 1695358671L, 1695358700L, 250),
+        StageContext("16", 1695358645L, 1695358655L, 50),
+        StageContext("17", 1695358655L, 1695358700L, 300),
+        StageContext("18", 1695358665L, 1695358680L, 200),
+        StageContext("19", 1695358670L, 1695358675L, 100),
+        StageContext("20", 1695358675L, 1695357200L, 300),
+        StageContext("21", 1695358675L, 1695358671L, 100),
+        StageContext("22", 1695358675L, 1695358700L, 300),
+        StageContext("23", 1695358645L, 1695358660L, 500),
+        StageContext("24", 1695358660L, 1695358671L, 100),
+        StageContext("25", 1695358671L, 1695358700L, 100),
+        StageContext("26", 1695358645L, 1695358655L, 100),
+        StageContext("27", 1695358655L, 1695358700L, 400),
+        StageContext("28", 1695358665L, 1695358680L, 300),
+        StageContext("29", 1695358670L, 1695358675L, 300),
+        StageContext("30", 1695358675L, 1695357200L, 200),
+        StageContext("31", 1695358675L, 1695358671L, 100),
+        StageContext("32", 1695358675L, 1695358700L, 200),
+        StageContext("33", 1695358645L, 1695358660L, 200),
+        StageContext("34", 1695358660L, 1695358671L, 100),
+        StageContext("35", 1695358671L, 1695358700L, 50),
+        StageContext("36", 1695358645L, 1695358655L, 300),
+        StageContext("37", 1695358655L, 1695358700L, 400),
+        StageContext("38", 1695358665L, 1695358680L, 200),
+        StageContext("39", 1695358670L, 1695358675L, 100),
+        StageContext("40", 1695358675L, 1695357200L, 100)
+    )
+
     def getAppId: String = s"app-${System.currentTimeMillis()}"
 
     def mockAppContext(appName: String): SparkScopeContext = {
@@ -133,25 +176,12 @@ object TestHelpers extends FunSuite with MockFactory {
             "5" -> ExecutorContext("5", 1, 1695358687000L, Some(1695358700000L))
         )
 
-        val stages = Seq(
-            StageContext("1", 1695358645L, 1695358671L, 200),
-            StageContext("2", 1695358645L, 1695358700L, 500),
-            StageContext("3", 1695358645L, 1695358660L, 100),
-            StageContext("4", 1695358660L, 1695358671L, 200),
-            StageContext("5", 1695358671L, 1695358700L, 100),
-            StageContext("6", 1695358645L, 1695358655L, 200),
-            StageContext("7", 1695358655L, 1695358700L, 500),
-            StageContext("8", 1695358665L, 1695358680L, 100),
-            StageContext("9", 1695358670L, 1695358675L, 200),
-            StageContext("10", 1695358675L, 1695357200L, 100)
-        )
-
         SparkScopeContext(
             s"${getAppId}-${appName}",
             StartTime,
             Some(EndTime),
             executorMap,
-            stages
+            Stages
         )
     }
 
@@ -168,7 +198,7 @@ object TestHelpers extends FunSuite with MockFactory {
             StartTime,
             Some(EndTime),
             executorMap,
-            Seq.empty
+            Stages
         )
     }
 
@@ -198,7 +228,7 @@ object TestHelpers extends FunSuite with MockFactory {
             StartTime,
             Some(EndTime),
             executorMap,
-            Seq.empty
+            Stages
         )
     }
 
