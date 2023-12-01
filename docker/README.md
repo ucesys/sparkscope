@@ -173,7 +173,7 @@ spark-submit \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=s3a://ucesys-sparkscope-metrics/spark-events \
 --conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink \
---conf spark.metrics.conf.*.sink.csv.period=5 \
+--conf spark.metrics.conf.*.sink.csv.period=1 \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=s3://ucesys-sparkscope-metrics/metrics/ \
 --conf spark.metrics.conf.*.sink.csv.region=us-east-1 \
@@ -185,7 +185,7 @@ spark-submit \
 --conf spark.executor.instances=2 \
 --conf spark.cores.max=4 \
 --class com.ucesys.sparkscope.WordCount \
-/tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT-tests.jar /tmp/jars/test.txt 2000
+/tmp/jars/sparkscope-spark3-0.1.5-SNAPSHOT-tests.jar ./long.txt 2000
 ```
 ### Running SparkScope as standalone app
 ```agsl
