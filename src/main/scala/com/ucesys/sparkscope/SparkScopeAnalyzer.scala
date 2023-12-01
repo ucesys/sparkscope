@@ -246,7 +246,6 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 }
 
 object SparkScopeAnalyzer {
-    val BytesInMB: Long = 1024L * 1024L
     val NanoSecondsInSec: Long = 1000000000
     private val MilliSecondsInSec: Long = 1000
     val LowCPUUtilizationThreshold: Float = 0.6f

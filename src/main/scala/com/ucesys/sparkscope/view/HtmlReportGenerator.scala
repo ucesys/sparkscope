@@ -1,14 +1,12 @@
 package com.ucesys.sparkscope.view
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.common.{JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed, SparkScopeConf, SparkScopeLogger}
-import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.file.TextFileWriter
-import SeriesColor.{Green, Orange, Purple, Red, Yellow}
+import com.ucesys.sparkscope.common.MemorySize.BytesInMB
 import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
 import com.ucesys.sparkscope.metrics.{SparkScopeMetrics, SparkScopeResult}
-import com.ucesys.sparkscope.view.chart.{LimitedChart, SimpleChart}
+import com.ucesys.sparkscope.view.chart.{ExecutorChart, LimitedChart, SimpleChart, StageChart}
 
 import java.io.InputStream
 import java.nio.file.Paths
@@ -93,6 +91,22 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
             metrics.driver.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead")
         )
 
+        val stageChart = StageChart(metrics.stage.stageTimeline)
+
+        val executorHeapChart = ExecutorChart(
+            metrics.executor.heapUsedMax.select(ColTs),
+            metrics.executor.heapAllocation.select(JvmHeapMax.name).div(BytesInMB),
+            metrics.executor.executorMetricsMap,
+            JvmHeapUsed.name
+        )
+
+        val executorNonHeapChart = ExecutorChart(
+            metrics.executor.nonHeapUsedMax.select(ColTs),
+            metrics.executor.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead"),
+            metrics.executor.executorMetricsMap,
+            JvmNonHeapUsed.name
+        )
+
         template
           .replace("${chart.cluster.cpu.util}", cpuUtilChart.values.mkString(","))
           .replace("${chart.cluster.cpu.util.timestamps}", cpuUtilChart.labels.mkString(","))
@@ -119,61 +133,16 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${chart.jvm.driver.non-heap.used}", driverNonHeapUtilChart.values.mkString(","))
           .replace("${chart.driver.memoryOverhead}", driverNonHeapUtilChart.limits.mkString(","))
 
-          .replace(
-              "${chart.jvm.executor.heap.timestamps}",
-              metrics.executor.heapUsedMax.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-          )
-          .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(metrics.executor.executorMetricsMap, JvmHeapUsed.name))
-          .replace("${chart.jvm.executor.heap.allocation}", metrics.executor.heapAllocation.select(JvmHeapMax.name).div(BytesInMB).toDouble.mkString(","))
+          .replace("${chart.stages.timestamps}", stageChart.labels.mkString(","))
+          .replace("${chart.stages}", stageChart.datasets)
 
-          .replace(
-              "${chart.jvm.executor.non-heap.timestamps}",
-              metrics.executor.nonHeapUsedMax.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
-          )
-          .replace("${chart.jvm.executor.non-heap}", generateExecutorHeapCharts(metrics.executor.executorMetricsMap, JvmNonHeapUsed.name))
+          .replace("${chart.jvm.executor.heap.timestamps}", executorHeapChart.labels.mkString(","))
+          .replace("${chart.jvm.executor.heap}", executorHeapChart.datasets)
+          .replace("${chart.jvm.executor.heap.allocation}", executorHeapChart.limits.mkString(","))
 
-          .replace("${chart.executor.memoryOverhead}", metrics.executor.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
-
-          .replace("${chart.stages.timestamps}", metrics.stage.stageTimeline.select(ColTs).values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(","))
-          .replace("${chart.stages}", generateStages(metrics.stage.stageTimeline.columns.filter(_.name !=ColTs)))
-    }
-
-
-    def generateStages(stageCol: Seq[DataColumn]): String = {
-        stageCol.map(generateStageData).mkString("[", ",", "]")
-    }
-
-    def generateStageData(stageCol: DataColumn): String = {
-        val color = SeriesColor.randomColorModulo(stageCol.name.toInt, Seq(Green, Red, Yellow, Purple, Orange))
-        s"""{
-          |             data: [${stageCol.values.mkString(",")}],
-          |             label: "stageId=${stageCol.name}",
-          |             borderColor: "${color.borderColor}",
-          |             backgroundColor: "${color.backgroundColor}",
-          |             lineTension: 0.0,
-          |             fill: true,
-          |             pointRadius: 1,
-          |             pointHoverRadius: 8,
-          |}""".stripMargin
-    }
-
-
-    def generateExecutorHeapCharts(executorMetricsMap: Map[String, DataTable], metricName: String): String = {
-        executorMetricsMap.map{case (id, metrics) =>  generateExecutorChart(id, metrics.select(metricName).div(BytesInMB))}.mkString(",")
-    }
-    def generateExecutorChart(executorId: String, col: DataColumn): String = {
-        val color = SeriesColor.randomColorModulo(executorId.toInt, Seq(Green, Red, Yellow, Purple, Orange))
-
-        s"""
-          |{
-          |             data: [${col.values.mkString(",")}],
-          |             label: "executorId=${executorId}",
-          |             borderColor: "${color.borderColor}",
-          |             backgroundColor: "${color.backgroundColor}",
-          |             fill: false,
-          |             pointRadius: 1,
-          |             pointHoverRadius: 8,
-          |}""".stripMargin
+          .replace("${chart.jvm.executor.non-heap.timestamps}", executorNonHeapChart.labels.mkString(","))
+          .replace("${chart.jvm.executor.non-heap}",executorNonHeapChart.datasets)
+          .replace("${chart.executor.memoryOverhead}", executorNonHeapChart.limits.mkString(","))
     }
 
     def renderStats(template: String, result: SparkScopeResult): String = {
@@ -202,4 +171,6 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
 
 object HtmlReportGenerator {
     val MaxChartPoints: Int = 300
+    val MaxStageChartPoints: Int = 2000
+    val MaxExecutorChartPoints: Int = 2000
 }

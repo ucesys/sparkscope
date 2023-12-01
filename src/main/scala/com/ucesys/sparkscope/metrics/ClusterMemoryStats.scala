@@ -1,6 +1,7 @@
 package com.ucesys.sparkscope.metrics
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
+import com.ucesys.sparkscope.common.MemorySize.BytesInMB
 import com.ucesys.sparkscope.common.{JvmHeapUsage, JvmHeapUsed}
 
 case class ClusterMemoryStats(maxHeap: Long,
