@@ -96,15 +96,13 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
         val executorHeapChart = ExecutorChart(
             metrics.executor.heapUsedMax.select(ColTs),
             metrics.executor.heapAllocation.select(JvmHeapMax.name).div(BytesInMB),
-            metrics.executor.executorMetricsMap,
-            JvmHeapUsed.name
+            metrics.executor.executorMetricsMap.map { case (id, metrics) => metrics.select(JvmHeapUsed.name).div(BytesInMB).rename(id) }.toSeq
         )
 
         val executorNonHeapChart = ExecutorChart(
             metrics.executor.nonHeapUsedMax.select(ColTs),
             metrics.executor.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead"),
-            metrics.executor.executorMetricsMap,
-            JvmNonHeapUsed.name
+            metrics.executor.executorMetricsMap.map { case (id, metrics) => metrics.select(JvmNonHeapUsed.name).div(BytesInMB).rename(id) }.toSeq
         )
 
         template
