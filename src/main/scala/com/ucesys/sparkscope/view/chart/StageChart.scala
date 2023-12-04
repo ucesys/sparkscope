@@ -22,7 +22,7 @@ object StageChart {
         if(stageCols.exists(_.size != tsCol.size)) {
             throw new IllegalArgumentException(s"Stage series sizes are different: ${Seq(tsCol.size) ++ stageCols.map(_.size)}")
         } else if (stageCols.map(_.size).sum <= MaxStageChartPoints) {
-            logger.info(s"Number of total data points is less than maximum. Rendering all data points. ${stageCols.map(_.size).sum} < ${MaxStageChartPoints}")
+            logger.info(s"Number of total stage data points is less than maximum. Rendering all data points. ${stageCols.map(_.size).sum} < ${MaxStageChartPoints}")
             StageChart(tsCol.values, stageCols.map(generateChart).mkString("[", ",", "]"))
         } else {
             logger.info(s"Limiting total stage chart points from ${stageCols.map(_.size).sum} to ${MaxStageChartPoints}")
