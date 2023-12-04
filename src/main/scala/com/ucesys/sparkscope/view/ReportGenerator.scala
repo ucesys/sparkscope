@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.io.report
+package com.ucesys.sparkscope.view
 
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 

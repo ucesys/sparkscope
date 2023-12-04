@@ -45,7 +45,9 @@ case class DataTable(name: String, columns: Seq[DataColumn], delimeter: String="
     }
 
     def union(other: DataTable): DataTable = {
-        assert(this.columns.map(_.name) == other.columns.map(_.name), "Unioned tables must have the same columns!")
+        if(this.columns.map(_.name) != other.columns.map(_.name)) {
+            throw new IllegalArgumentException(s"Unioned tables must have the same columns! ${this.columns.map(_.name)} != ${other.columns.map(_.name)}")
+        }
         val rows = (this.toRows ++ other.toRows)
         DataTable.fromRows(this.name, this.columnsNames, rows)
     }
@@ -89,6 +91,9 @@ object DataTable {
 
     def fromCsv(name: String, csvStr: String, delimeter: String): DataTable = {
         val rows = csvStr.replace("\r\n", "\n").split("\n")
+        if (rows.isEmpty) {
+            throw new IllegalArgumentException(s"Cannot create DataTable from 0 rows!")
+        }
         val header = rows.head.split(delimeter)
         val columnsSeq = rows.tail.map(_.split(delimeter)).transpose
         val columns = (header zip columnsSeq).map { case (name, values) => DataColumn(name, values) }
@@ -97,6 +102,9 @@ object DataTable {
 
     def fromCsv(name: String, csvStr: String, delimeter: String, columnNames: Seq[String]): DataTable = {
         val rows = csvStr.replace("\r\n", "\n").split("\n")
+        if (rows.isEmpty) {
+            throw new IllegalArgumentException(s"Cannot create DataTable from 0 rows!")
+        }
         val columnsSeq = rows.tail.map(_.split(delimeter)).transpose
         val columns = (columnNames zip columnsSeq).map { case (name, values) => DataColumn(name, values) }
         DataTable(name, columns)
@@ -104,12 +112,18 @@ object DataTable {
 
     def fromCsvWithoutHeader(name: String, csvStr: String, delimeter: String, columnNames: Seq[String]): DataTable = {
         val rows = csvStr.replace("\r\n", "\n").split("\n")
+        if (rows.isEmpty) {
+            throw new IllegalArgumentException(s"Cannot create DataTable from 0 rows!")
+        }
         val columnsSeq = rows.map(_.split(delimeter)).transpose
         val columns = (columnNames zip columnsSeq).map { case (name, values) => DataColumn(name, values) }
         DataTable(name, columns)
     }
 
     def fromRows(name: String, columnNames: Seq[String], rows: Seq[Seq[String]]): DataTable = {
+        if (rows.isEmpty) {
+            throw new IllegalArgumentException(s"Cannot create DataTable from 0 rows!")
+        }
         val columns = (columnNames zip rows.transpose).map { case (name, col) => DataColumn(name, col) }
         DataTable(name, columns)
     }
