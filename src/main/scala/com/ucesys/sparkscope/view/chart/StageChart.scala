@@ -25,9 +25,9 @@ object StageChart {
             logger.info(s"Number of total stage data points is less than maximum. Rendering all data points. ${stageCols.map(_.size).sum} < ${MaxStageChartPoints}")
             StageChart(tsCol.values, stageCols.map(generateChart).mkString("[", ",", "]"))
         } else {
-            logger.info(s"Limiting total stage chart points from ${stageCols.map(_.size).sum} to ${MaxStageChartPoints}")
+            logger.info(s"Decreasing total number of rendered data points for all stage charts from ${stageCols.map(_.size).sum} to ${MaxStageChartPoints}")
             val desiredSingleChartPoints: Int = MaxStageChartPoints / stageCols.length
-            logger.info(s"Limiting every stage chart points from ${stageCols.headOption.map(_.size).getOrElse(0)} to ${desiredSingleChartPoints}")
+            logger.info(s"Decreasing number of rendered data points per stage chart from ${stageCols.headOption.map(_.size).getOrElse(0)} to ${desiredSingleChartPoints}")
 
             decreaseDataPoints(tsCol, stageCols, desiredSingleChartPoints) match {
                 case (newTsCol, newStageCols) => StageChart(newTsCol.values, newStageCols.map(generateChart).mkString("[", ",", "]"))

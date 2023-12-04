@@ -21,9 +21,9 @@ object ExecutorChart {
             logger.info(s"Number of total executor data points is less than maximum. Rendering all data points. ${executorCols.map(_.size).sum} < ${MaxExecutorChartPoints}")
             ExecutorChart(tsCol.values, limitsCol.values, executorCols.map(generateChart).mkString(","))
         } else {
-            logger.info(s"Limiting total executor chart points from ${executorCols.map(_.size).sum} to ${MaxExecutorChartPoints}")
+            logger.info(s"Decreasing total number of rendered data points for all executor charts from ${executorCols.map(_.size).sum} to ${MaxExecutorChartPoints}")
             val desiredSingleChartPoints: Int = MaxExecutorChartPoints / executorCols.length
-            logger.info(s"Limiting every executor chart points from ${executorCols.headOption.map(_.size).getOrElse(0)} to ${desiredSingleChartPoints}")
+            logger.info(s"Decreasing number of rendered data points per executor chart from ${executorCols.headOption.map(_.size).getOrElse(0)} to ${desiredSingleChartPoints}")
 
             decreaseDataPoints(tsCol, executorCols, desiredSingleChartPoints) match {
                 case (newTsCol, newCols) => ExecutorChart(newTsCol.values, limitsCol.values, newCols.map(generateChart).mkString(","))
