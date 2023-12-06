@@ -456,22 +456,41 @@ ${sparkScopeSign}
     var myChart = new Chart(ctx, {
        type: 'line',
        data: {
-         labels: [${chart.stages.timestamps}],
-         datasets: ${chart.stages}
+         labels: [${chart.tasks.timestamps}],
+          datasets: [
+           {
+             data: [${chart.tasks.capacity}],
+             label: "Total Cores available",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             responsive: true,
+             lineTension: 0.0,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+            {
+             data: [${chart.tasks}],
+             label: "Number of tasks",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             responsive: true,
+             lineTension: 0.0,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
        },
         options: {
             title: {
                 display: true,
-                text: "Number of Tasks per Stage",
+                text: "Number of Tasks vs CPU Capacity",
                 fontSize: 16
-            },
-            legend: {
-                display: false
             },
             scales: {
                 yAxes: [{
                     display: true,
-                    stacked: true,
                     ticks: {
                         beginAtZero: true
                     }

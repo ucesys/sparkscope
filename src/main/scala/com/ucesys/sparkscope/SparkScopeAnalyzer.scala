@@ -150,7 +150,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
                 executor = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned),
                 clusterMemory = clusterMemoryMetrics,
                 clusterCpu= clusterCPUMetrics,
-                stage = StageMetrics(appContext.stages, allTimestamps, clusterCPUMetrics.clusterCapacity)
+                stage = StageMetrics(appContext.stages, allTimestamps)
             ),
             warnings = warnings.flatten
         )
