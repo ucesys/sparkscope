@@ -54,6 +54,10 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         val htmlPath = Paths.get(TestDir, result.appContext.appId + ".html")
         assert(Files.exists(htmlPath))
 
+        And("log file is created")
+        val logPath = Paths.get(TestDir, result.appContext.appId + ".log")
+        assert(Files.exists(logPath))
+
         And("all templated files(${}) were properly ingested")
         assert(!new String(Files.readAllBytes(htmlPath)).contains("${"))
     }
@@ -76,6 +80,10 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         Then("html report is created")
         val htmlPath = Paths.get(TestDir, result.appContext.appId + ".html")
         assert(Files.exists(htmlPath))
+
+        And("log file is created")
+        val logPath = Paths.get(TestDir, result.appContext.appId + ".log")
+        assert(Files.exists(logPath))
 
         And("all templated files(${}) were properly ingested")
         assert(!new String(Files.readAllBytes(htmlPath)).contains("${"))
