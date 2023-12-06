@@ -91,8 +91,6 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
             metrics.driver.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead")
         )
 
-        val stageChart = StageChart(metrics.stage.stageTimeline)
-
         val executorHeapChart = ExecutorChart(
             metrics.executor.heapUsedMax.select(ColTs),
             metrics.executor.heapAllocation.select(JvmHeapMax.name).div(BytesInMB),
@@ -103,6 +101,12 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
             metrics.executor.nonHeapUsedMax.select(ColTs),
             metrics.executor.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead"),
             metrics.executor.executorMetricsMap.map { case (id, metrics) => metrics.select(JvmNonHeapUsed.name).div(BytesInMB).rename(id) }.toSeq
+        )
+
+        val tasksChart = LimitedChart(
+            metrics.clusterCpu.clusterCapacity.select(ColTs),
+            metrics.stage.numberOfTasks,
+            metrics.clusterCpu.clusterCapacity.select("totalCores")
         )
 
         template
@@ -131,8 +135,9 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${chart.jvm.driver.non-heap.used}", driverNonHeapUtilChart.values.mkString(","))
           .replace("${chart.driver.memoryOverhead}", driverNonHeapUtilChart.limits.mkString(","))
 
-          .replace("${chart.stages.timestamps}", stageChart.labels.mkString(","))
-          .replace("${chart.stages}", stageChart.datasets)
+          .replace("${chart.tasks.timestamps}", tasksChart.labels.mkString(","))
+          .replace("${chart.tasks}", tasksChart.values.mkString(","))
+          .replace("${chart.tasks.capacity}", tasksChart.limits.mkString(","))
 
           .replace("${chart.jvm.executor.heap.timestamps}", executorHeapChart.labels.mkString(","))
           .replace("${chart.jvm.executor.heap}", executorHeapChart.datasets)
