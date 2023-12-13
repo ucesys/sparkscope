@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.common
 
-import com.ucesys.sparklens.timespan.ExecutorTimeSpan
+import com.ucesys.sparkscope.timespan.ExecutorTimeSpan
 
 case class ExecutorContext(executorId: String,
                            cores: Long,

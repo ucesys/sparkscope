@@ -94,35 +94,3 @@ curl https://repo1.maven.org/maven2/org/apache/spark/spark-examples_2.10/1.1.1/s
 curl https://repos.spark-packages.org/qubole/sparklens/0.3.2-s_2.11/sparklens-0.3.2-s_2.11.jar --output ./docker/lib/sparklens-0.3.2-s_2.11.jar
 curl https://repo1.maven.org/maven2/org/apache/httpcomponents/httpmime/4.5.14/httpmime-4.5.14.jar --output ./docker/lib/httpmime-4.5.14.jar
 ```
-
-Run sample application, Sparklens report should be generated to stdout:
-```
-spark-submit \
---jars /tmp/jars/sparklens-0.3.2-s_2.11.jar  \
---master spark://spark-master:7077 \
---conf spark.extraListeners=com.ucesys.sparklens.QuboleJobListener \
---conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \
---conf spark.eventLog.enabled=true \
---conf spark.eventLog.dir=/tmp/spark-events \
---conf spark.metrics.conf=/tmp/metrics.properties \
---conf spark.executor.cores=1 \
---conf spark.executor.memory=900m \
---conf spark.executor.instances=4 \
---class org.apache.spark.examples.SparkPi \
-/tmp/jars/spark-examples_2.10-1.1.1.jar 5000
-```
-
-Run with email generation(fails due to qubole sparklens endpoint being down)  
-
-```
-spark-submit \
---jars /tmp/jars/sparklens-0.3.2-s_2.11.jar,/tmp/jars/httpmime-4.5.14.jar \
---class org.apache.spark.examples.SparkPi \
---master spark://spark-master:7077 \
---conf spark.extraListeners=com.qubole.sparklens.QuboleJobListener \
---conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp/derby \
---conf spark.eventLog.enabled=true \
---conf spark.eventLog.dir=/tmp/spark-events \
---conf spark.sparklens.report.email=piotr.sobczak@ucesys.com
-/tmp/jars/spark-examples_2.10-1.1.1.jar 1000
-```

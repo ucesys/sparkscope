@@ -1,7 +1,5 @@
 package com.ucesys.sparkscope.common
 
-import com.ucesys.sparklens.common.AppContext
-
 case class SparkScopeContext(appId: String,
                              appStartTime: Long,
                              appEndTime: Option[Long],

@@ -60,8 +60,7 @@ object SparkScopeApp {
             sparkScopeAnalyzer,
             propertiesLoaderFactory,
             metricsLoaderFactory,
-            reportGeneratorFactory,
-            Seq.empty
+            reportGeneratorFactory
         )
         sparkScopeRunner.run()
     }

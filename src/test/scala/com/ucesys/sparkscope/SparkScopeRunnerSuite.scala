@@ -57,8 +57,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             new PropertiesLoaderFactory,
             metricsLoaderFactory,
-            new ReportGeneratorFactory,
-            SparkLensOutput
+            new ReportGeneratorFactory
         )
 
         When("SparkScopeRunner.run")
@@ -90,8 +89,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             new PropertiesLoaderFactory,
             metricsLoaderFactory,
-            new ReportGeneratorFactory,
-            SparkLensOutput
+            new ReportGeneratorFactory
         )
 
         When("SparkScopeRunner.run")
@@ -122,8 +120,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
-            new ReportGeneratorFactory,
-            SparkLensOutput
+            new ReportGeneratorFactory
         )
 
         When("SparkScopeRunner.run")
@@ -151,8 +148,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
-            new ReportGeneratorFactory,
-            SparkLensOutput
+            new ReportGeneratorFactory
         )
 
         When("SparkScopeRunner.runAnalysis")
@@ -224,8 +220,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
-            new ReportGeneratorFactory,
-            SparkLensOutput
+            new ReportGeneratorFactory
         )
 
         When("SparkScopeRunner.run")
@@ -297,8 +292,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
-            new ReportGeneratorFactory,
-            SparkLensOutput
+            new ReportGeneratorFactory
         )
 
         When("SparkScopeRunner.run")

@@ -16,7 +16,7 @@ import scala.concurrent.duration._
 
 class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWriter)
                          (implicit logger: SparkScopeLogger) extends ReportGenerator {
-    override def generate(result: SparkScopeResult, sparklensResults: Seq[String]): Unit = {
+    override def generate(result: SparkScopeResult): Unit = {
         val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
         val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
         val duration: Option[FiniteDuration] = result.appContext.appEndTime.map(endTime => (endTime - result.appContext.appStartTime).milliseconds)
@@ -41,7 +41,6 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${appInfo.duration}", durationStr)
           .replace("${warnings}", warningsStr)
           .replace("${sparkConf}", sparkScopeConf.sparkConf.getAll.map { case (key, value) => s"${key}: ${value}" }.mkString("\n"))
-          .replace("${sparklens}", sparklensResults.mkString("\n"))
 
         val renderedCharts = renderCharts(rendered, result.metrics)
         val renderedStats = renderStats(renderedCharts, result)

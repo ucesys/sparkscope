@@ -48,7 +48,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
 
         When("calling HtmlReportGenerator.generate")
-        htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
+        htmlReportGenerator.generate(result)
 
         Then("html report is created")
         val htmlPath = Paths.get(TestDir, result.appContext.appId + ".html")
@@ -75,7 +75,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)
 
         When("calling HtmlReportGenerator.generate")
-        htmlReportGenerator.generate(result, Seq("Executor Timeline", "Sparkscope text"))
+        htmlReportGenerator.generate(result)
 
         Then("html report is created")
         val htmlPath = Paths.get(TestDir, result.appContext.appId + ".html")
@@ -89,4 +89,3 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         assert(!new String(Files.readAllBytes(htmlPath)).contains("${"))
     }
 }
-

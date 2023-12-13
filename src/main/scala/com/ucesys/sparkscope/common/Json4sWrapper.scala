@@ -15,7 +15,7 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparklens.common
+package com.ucesys.sparkscope.common
 
 import org.json4s.StringInput
 

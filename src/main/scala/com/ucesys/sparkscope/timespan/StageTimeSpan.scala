@@ -14,9 +14,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.ucesys.sparklens.timespan
+package com.ucesys.sparkscope.timespan
 
-import com.ucesys.sparklens.common.{AggregateMetrics, Json4sWrapper}
+import com.ucesys.sparkscope.common.{AggregateMetrics, Json4sWrapper}
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.scheduler.TaskInfo
 import org.json4s.DefaultFormats

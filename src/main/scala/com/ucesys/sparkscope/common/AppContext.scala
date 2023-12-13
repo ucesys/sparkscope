@@ -14,14 +14,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.ucesys.sparklens.common
+package com.ucesys.sparkscope.common
 
-import com.ucesys.sparklens.timespan._
-import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan, TimeSpan}
-import org.json4s.DefaultFormats
+import com.ucesys.sparkscope.timespan._
 import org.json4s.JsonAST.JValue
 import org.json4s.jackson.Serialization
-import org.json4s.MappingException
+import org.json4s.{DefaultFormats, MappingException}
 
 import scala.collection.mutable
 

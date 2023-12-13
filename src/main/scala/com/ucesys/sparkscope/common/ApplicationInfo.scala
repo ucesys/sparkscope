@@ -14,7 +14,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.ucesys.sparklens.common
+package com.ucesys.sparkscope.common
 
 import org.json4s.DefaultFormats
 import org.json4s.JsonAST.JValue

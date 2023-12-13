@@ -34,8 +34,7 @@ class SparkScopeRunner(appContext: SparkScopeContext,
                        sparkScopeAnalyzer: SparkScopeAnalyzer,
                        propertiesLoaderFactory: PropertiesLoaderFactory,
                        metricsLoaderFactory: MetricsLoaderFactory,
-                       reportGeneratorFactory: ReportGeneratorFactory,
-                       sparklensResults: Seq[String])
+                       reportGeneratorFactory: ReportGeneratorFactory)
                       (implicit logger: SparkScopeLogger) {
     def run(): Unit = {
         logger.info(SparkScopeSign)
@@ -51,7 +50,7 @@ class SparkScopeRunner(appContext: SparkScopeContext,
             logger.info(s"${sparkScopeResult.stats.clusterMemoryStats}\n")
             logger.info(s"${sparkScopeResult.stats.clusterCPUStats}\n")
 
-            reportGeneratorFactory.get(sparkScopeConf).generate(sparkScopeResult, sparklensResults)
+            reportGeneratorFactory.get(sparkScopeConf).generate(sparkScopeResult)
         } catch {
             case ex: FileNotFoundException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
             case ex: NoSuchFileException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)

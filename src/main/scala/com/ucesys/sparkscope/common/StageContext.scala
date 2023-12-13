@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope.common
 
-import com.ucesys.sparklens.timespan.StageTimeSpan
 import com.ucesys.sparkscope.event.{StageCompletedEvent, StageSubmittedEvent}
+import com.ucesys.sparkscope.timespan.StageTimeSpan
 
 case class StageContext(stageId: String, startTime: Long, endTime: Long, numberOfTasks: Long) {
     def getTimeline: Seq[Long] = Seq(getTimelineStart, (getTimelineStart + getTimelineEnd) / 2, getTimelineEnd)

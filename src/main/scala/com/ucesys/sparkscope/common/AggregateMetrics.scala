@@ -15,15 +15,14 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparklens.common
-
-import java.util.Locale
+package com.ucesys.sparkscope.common
 
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.scheduler.TaskInfo
 import org.json4s.DefaultFormats
 import org.json4s.JsonAST.JValue
 
+import java.util.Locale
 import scala.collection.mutable
 
 /*

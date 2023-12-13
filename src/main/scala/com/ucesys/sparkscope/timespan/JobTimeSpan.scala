@@ -15,9 +15,9 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparklens.timespan
+package com.ucesys.sparkscope.timespan
 
-import com.ucesys.sparklens.common.{AggregateMetrics, AppContext}
+import com.ucesys.sparkscope.common.{AggregateMetrics, AppContext}
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.scheduler.TaskInfo
 import org.json4s.DefaultFormats

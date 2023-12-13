@@ -17,20 +17,201 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparklens.QuboleJobListener
-import com.ucesys.sparklens.analyzer.AppAnalyzer
-import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparkscope.common.SparkScopeContext
+// TODO GET RID OF
+
+import com.ucesys.sparkscope.common.{AggregateMetrics, AppContext, ApplicationInfo, SparkScopeContext}
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
+import com.ucesys.sparkscope.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import com.ucesys.sparkscope.view.ReportGeneratorFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 
-class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(sparkConf: SparkConf) {
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
+
+class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
 
     implicit val logger = new SparkScopeLogger
+
+    protected val appInfo = new ApplicationInfo()
+    protected val executorMap = new mutable.HashMap[String, ExecutorTimeSpan]()
+    protected val hostMap = new mutable.HashMap[String, HostTimeSpan]()
+    protected val jobMap = new mutable.HashMap[Long, JobTimeSpan]
+    protected val jobSQLExecIDMap = new mutable.HashMap[Long, Long]
+    protected val stageMap = new mutable.HashMap[Int, StageTimeSpan]
+    protected val stageIDToJobID = new mutable.HashMap[Int, Long]
+    protected val failedStages = new ListBuffer[String]
+    protected val appMetrics = new AggregateMetrics()
+
+    private def hostCount(): Int = hostMap.size
+
+    private def executorCount(): Int = executorMap.size
+
+    private def coresPerExecutor(): Int = {
+        // just for the fun
+        executorMap.values.map(x => x.cores).sum / executorMap.size
+    }
+
+    private def executorsForHost(hostID: String): Seq[String] = {
+        executorMap.values.filter(_.hostID.equals(hostID)).map(x => x.executorID).toSeq
+    }
+
+    private def executorsPerHost(): Double = {
+        executorCount() / hostCount()
+    }
+
+    private def appAggregateMetrics(): AggregateMetrics = appMetrics
+
+    private def hostAggregateMetrics(hostID: String): Option[AggregateMetrics] = {
+        hostMap.get(hostID).map(x => x.hostMetrics)
+    }
+
+    private def executorAggregateMetrics(executorID: String): Option[AggregateMetrics] = {
+        executorMap.get(executorID).map(x => x.executorMetrics)
+    }
+
+    private def driverTimePercentage(): Option[Double] = {
+        if (appInfo.endTime == 0) {
+            return None
+        }
+        val totalTime = appInfo.endTime - appInfo.startTime
+        val jobTime = jobMap.values.map(x => (x.endTime - x.startTime)).sum
+        Some((totalTime - jobTime) / totalTime)
+    }
+
+    private def jobTimePercentage(): Option[Double] = {
+        if (appInfo.endTime == 0) {
+            return None
+        }
+        val appTime = appInfo.endTime - appInfo.startTime
+        val jobTime = jobMap.values.map(x => (x.endTime - x.startTime)).sum
+        Some(jobTime / appTime)
+    }
+
+    override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = {
+        val taskMetrics = taskEnd.taskMetrics
+        val taskInfo = taskEnd.taskInfo
+
+        if (taskMetrics == null) return
+
+        //update app metrics
+        appMetrics.update(taskMetrics, taskInfo)
+        val executorTimeSpan = executorMap.get(taskInfo.executorId)
+        if (executorTimeSpan.isDefined) {
+            //update the executor metrics
+            executorTimeSpan.get.updateAggregateTaskMetrics(taskMetrics, taskInfo)
+        }
+        val hostTimeSpan = hostMap.get(taskInfo.host)
+        if (hostTimeSpan.isDefined) {
+            //also update the host metrics
+            hostTimeSpan.get.updateAggregateTaskMetrics(taskMetrics, taskInfo)
+        }
+
+        val stageTimeSpan = stageMap.get(taskEnd.stageId)
+        if (stageTimeSpan.isDefined) {
+            //update stage metrics
+            stageTimeSpan.get.updateAggregateTaskMetrics(taskMetrics, taskInfo)
+            stageTimeSpan.get.updateTasks(taskInfo, taskMetrics)
+        }
+        val jobID = stageIDToJobID.get(taskEnd.stageId)
+        if (jobID.isDefined) {
+            val jobTimeSpan = jobMap.get(jobID.get)
+            if (jobTimeSpan.isDefined) {
+                //update job metrics
+                jobTimeSpan.get.updateAggregateTaskMetrics(taskMetrics, taskInfo)
+            }
+        }
+
+        if (taskEnd.taskInfo.failed) {
+            //println(s"\nTask Failed \n ${taskEnd.reason}"
+        }
+    }
+
+    override def onApplicationStart(applicationStart: SparkListenerApplicationStart): Unit = {
+        //println(s"Application ${applicationStart.appId} started at ${applicationStart.time}")
+        appInfo.applicationID = applicationStart.appId.getOrElse("NA")
+        appInfo.startTime = applicationStart.time
+    }
+
+    override def onExecutorAdded(executorAdded: SparkListenerExecutorAdded): Unit = {
+        val executorTimeSpan = executorMap.get(executorAdded.executorId)
+        if (!executorTimeSpan.isDefined) {
+            val timeSpan = new ExecutorTimeSpan(executorAdded.executorId,
+                executorAdded.executorInfo.executorHost,
+                executorAdded.executorInfo.totalCores)
+            timeSpan.setStartTime(executorAdded.time)
+            executorMap(executorAdded.executorId) = timeSpan
+        }
+        val hostTimeSpan = hostMap.get(executorAdded.executorInfo.executorHost)
+        if (!hostTimeSpan.isDefined) {
+            val executorHostTimeSpan = new HostTimeSpan(executorAdded.executorInfo.executorHost)
+            executorHostTimeSpan.setStartTime(executorAdded.time)
+            hostMap(executorAdded.executorInfo.executorHost) = executorHostTimeSpan
+        }
+    }
+
+    override def onExecutorRemoved(executorRemoved: SparkListenerExecutorRemoved): Unit = {
+        val executorTimeSpan = executorMap(executorRemoved.executorId)
+        executorTimeSpan.setEndTime(executorRemoved.time)
+        //We don't get any event for host. Will not try to check when the hosts go out of service
+    }
+
+    override def onJobStart(jobStart: SparkListenerJobStart) {
+        val jobTimeSpan = new JobTimeSpan(jobStart.jobId)
+        jobTimeSpan.setStartTime(jobStart.time)
+        jobMap(jobStart.jobId) = jobTimeSpan
+        jobStart.stageIds.foreach(stageID => {
+            stageIDToJobID(stageID) = jobStart.jobId
+        })
+        val sqlExecutionID = jobStart.properties.getProperty("spark.sql.execution.id")
+        if (sqlExecutionID != null && !sqlExecutionID.isEmpty) {
+            jobSQLExecIDMap(jobStart.jobId) = sqlExecutionID.toLong
+        }
+    }
+
+    override def onJobEnd(jobEnd: SparkListenerJobEnd): Unit = {
+        val jobTimeSpan = jobMap(jobEnd.jobId)
+        jobTimeSpan.setEndTime(jobEnd.time)
+    }
+
+    override def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted): Unit = {
+        if (!stageMap.get(stageSubmitted.stageInfo.stageId).isDefined) {
+            val stageTimeSpan = new StageTimeSpan(stageSubmitted.stageInfo.stageId,
+                stageSubmitted.stageInfo.numTasks)
+            stageTimeSpan.setParentStageIDs(stageSubmitted.stageInfo.parentIds)
+            if (stageSubmitted.stageInfo.submissionTime.isDefined) {
+                stageTimeSpan.setStartTime(stageSubmitted.stageInfo.submissionTime.get)
+            }
+            stageMap(stageSubmitted.stageInfo.stageId) = stageTimeSpan
+        }
+    }
+
+    override def onStageCompleted(stageCompleted: SparkListenerStageCompleted): Unit = {
+        val stageTimeSpan = stageMap(stageCompleted.stageInfo.stageId)
+        if (stageCompleted.stageInfo.completionTime.isDefined) {
+            stageTimeSpan.setEndTime(stageCompleted.stageInfo.completionTime.get)
+        }
+        if (stageCompleted.stageInfo.submissionTime.isDefined) {
+            stageTimeSpan.setStartTime(stageCompleted.stageInfo.submissionTime.get)
+        }
+
+        if (stageCompleted.stageInfo.failureReason.isDefined) {
+            //stage failed
+            val si = stageCompleted.stageInfo
+            failedStages +=
+              s""" Stage ${si.stageId} attempt ${si.attemptNumber} in job ${stageIDToJobID(si.stageId)} failed.
+                        Stage tasks: ${si.numTasks}
+                        """
+            stageTimeSpan.finalUpdate()
+        } else {
+            val jobID = stageIDToJobID(stageCompleted.stageInfo.stageId)
+            val jobTimeSpan = jobMap(jobID)
+            jobTimeSpan.addStage(stageTimeSpan)
+            stageTimeSpan.finalUpdate()
+        }
+    }
 
     override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
         appInfo.endTime = applicationEnd.time
@@ -61,14 +242,6 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
             stageIDToJobID
         )
 
-        val sparklensResults: Seq[String] = try {
-            AppAnalyzer.startAnalyzers(appContext)
-        } catch {
-            case ex: Exception =>
-                println("Sparklens has thrown an exception" + ex, ex)
-                Seq.empty
-        }
-
         val sparkScopeRunner = new SparkScopeRunner(
             SparkScopeContext(appContext),
             sparkConf,
@@ -76,8 +249,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
             new SparkScopeAnalyzer,
             new PropertiesLoaderFactory,
             new MetricsLoaderFactory(new MetricReaderFactory(offline = false)),
-            new ReportGeneratorFactory,
-            sparklensResults
+            new ReportGeneratorFactory
         )
         sparkScopeRunner.run()
     }
