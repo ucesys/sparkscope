@@ -15,57 +15,31 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.timespan
+package com.ucesys.sparkscope.timeline
 
 import com.ucesys.sparkscope.common.AggregateMetrics
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.scheduler.TaskInfo
-import org.json4s.DefaultFormats
-import org.json4s.JsonAST.JValue
 
-import scala.collection.mutable
-
-class ExecutorTimeSpan(val executorID: String,
+class ExecutorTimeline(val executorID: String,
                        val hostID: String,
-                       val cores: Int) extends TimeSpan {
+                       val cores: Int) extends Timeline {
   var executorMetrics = new AggregateMetrics()
 
   def updateAggregateTaskMetrics (taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
     executorMetrics.update(taskMetrics, taskInfo)
   }
 
-  override def getMap(): Map[String, _ <: Any] = {
-    implicit val formats = DefaultFormats
-
+  override def getMap: Map[String, _ <: Any] = {
     Map("executorID" -> executorID, "hostID" -> hostID, "cores" -> cores, "executorMetrics" ->
-      executorMetrics.getMap()) ++ super.getStartEndTime()
+      executorMetrics.getMap()) ++ super.getStartEndTime
   }
 }
 
-object ExecutorTimeSpan {
-  def apply(executorID: String, hostID: String, cores: Int, startTime: Long, endTime: Long): ExecutorTimeSpan = {
-    val timeSpan = new ExecutorTimeSpan(executorID, hostID, cores)
-    timeSpan.setStartTime(startTime)
+object ExecutorTimeline {
+  def apply(executorID: String, hostID: String, cores: Int, startTime: Long, endTime: Long): ExecutorTimeline = {
+    val timeSpan = new ExecutorTimeline(executorID, hostID, cores)
     timeSpan.setEndTime(endTime)
     timeSpan
-  }
-  def getTimeSpan(json: Map[String, JValue]): mutable.HashMap[String, ExecutorTimeSpan] = {
-
-    implicit val formats = DefaultFormats
-    val map = new mutable.HashMap[String, ExecutorTimeSpan]
-
-    json.keys.map(key => {
-      val value = json.get(key).get
-      val timeSpan = new ExecutorTimeSpan(
-        (value \ "executorID").extract[String],
-        (value \ "hostID").extract[String],
-        (value \ "cores").extract[Int]
-      )
-      timeSpan.executorMetrics = AggregateMetrics.getAggregateMetrics((value
-              \ "executorMetrics").extract[JValue])
-      timeSpan.addStartEnd(value)
-      map.put(key, timeSpan)
-    })
-    map
   }
 }

@@ -212,7 +212,7 @@ class AggregateMetrics() {
   }
 
   def getMap(): Map[String, Any] = {
-    Map("count" -> count, "map" -> map.keys.map(key => (key.toString, map.get(key).get.getMap())).toMap)
+    Map("count" -> count, "map" -> map.keys.map(key => (key.toString, map(key).getMap())).toMap)
   }
 }
 
@@ -248,7 +248,7 @@ object AggregateMetrics extends Enumeration {
     val map = (json \ "map").extract[Map[String, JValue]]
 
     map.keys.foreach(key => metrics.map.put(withName(key),
-      AggregateValue.getValue(map.get(key).get)))
+      AggregateValue.getValue(map(key))))
 
     metrics
   }

@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.common
 
-import com.ucesys.sparkscope.timespan.ExecutorTimeSpan
+import com.ucesys.sparkscope.timeline.ExecutorTimeline
 
 case class ExecutorContext(executorId: String,
                            cores: Long,
@@ -18,7 +18,7 @@ case class ExecutorContext(executorId: String,
 }
 
 object ExecutorContext {
-    def apply(executorTimeSpan: ExecutorTimeSpan): ExecutorContext = {
+    def apply(executorTimeSpan: ExecutorTimeline): ExecutorContext = {
         val removeTime: Option[Long] = executorTimeSpan.endTime match {
             case 0 => None
             case _ => Some(executorTimeSpan.endTime)

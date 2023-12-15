@@ -23,7 +23,7 @@ import com.ucesys.sparkscope.common.{AggregateMetrics, AppContext, ApplicationIn
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
-import com.ucesys.sparkscope.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
+import com.ucesys.sparkscope.timeline.{ExecutorTimeline, HostTimeline, JobTimeline, StageTimeline}
 import com.ucesys.sparkscope.view.ReportGeneratorFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
@@ -36,11 +36,11 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
     implicit val logger = new SparkScopeLogger
 
     protected val appInfo = new ApplicationInfo()
-    protected val executorMap = new mutable.HashMap[String, ExecutorTimeSpan]()
-    protected val hostMap = new mutable.HashMap[String, HostTimeSpan]()
-    protected val jobMap = new mutable.HashMap[Long, JobTimeSpan]
+    protected val executorMap = new mutable.HashMap[String, ExecutorTimeline]()
+    protected val hostMap = new mutable.HashMap[String, HostTimeline]()
+    protected val jobMap = new mutable.HashMap[Long, JobTimeline]
     protected val jobSQLExecIDMap = new mutable.HashMap[Long, Long]
-    protected val stageMap = new mutable.HashMap[Int, StageTimeSpan]
+    protected val stageMap = new mutable.HashMap[Int, StageTimeline]
     protected val stageIDToJobID = new mutable.HashMap[Int, Long]
     protected val failedStages = new ListBuffer[String]
     protected val appMetrics = new AggregateMetrics()
@@ -138,7 +138,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
     override def onExecutorAdded(executorAdded: SparkListenerExecutorAdded): Unit = {
         val executorTimeSpan = executorMap.get(executorAdded.executorId)
         if (!executorTimeSpan.isDefined) {
-            val timeSpan = new ExecutorTimeSpan(executorAdded.executorId,
+            val timeSpan = new ExecutorTimeline(executorAdded.executorId,
                 executorAdded.executorInfo.executorHost,
                 executorAdded.executorInfo.totalCores)
             timeSpan.setStartTime(executorAdded.time)
@@ -146,7 +146,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
         }
         val hostTimeSpan = hostMap.get(executorAdded.executorInfo.executorHost)
         if (!hostTimeSpan.isDefined) {
-            val executorHostTimeSpan = new HostTimeSpan(executorAdded.executorInfo.executorHost)
+            val executorHostTimeSpan = new HostTimeline(executorAdded.executorInfo.executorHost)
             executorHostTimeSpan.setStartTime(executorAdded.time)
             hostMap(executorAdded.executorInfo.executorHost) = executorHostTimeSpan
         }
@@ -159,7 +159,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
     }
 
     override def onJobStart(jobStart: SparkListenerJobStart) {
-        val jobTimeSpan = new JobTimeSpan(jobStart.jobId)
+        val jobTimeSpan = new JobTimeline(jobStart.jobId)
         jobTimeSpan.setStartTime(jobStart.time)
         jobMap(jobStart.jobId) = jobTimeSpan
         jobStart.stageIds.foreach(stageID => {
@@ -178,7 +178,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
 
     override def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted): Unit = {
         if (!stageMap.get(stageSubmitted.stageInfo.stageId).isDefined) {
-            val stageTimeSpan = new StageTimeSpan(stageSubmitted.stageInfo.stageId,
+            val stageTimeSpan = new StageTimeline(stageSubmitted.stageInfo.stageId,
                 stageSubmitted.stageInfo.numTasks)
             stageTimeSpan.setParentStageIDs(stageSubmitted.stageInfo.parentIds)
             if (stageSubmitted.stageInfo.submissionTime.isDefined) {

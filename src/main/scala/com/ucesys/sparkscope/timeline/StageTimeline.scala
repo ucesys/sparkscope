@@ -14,21 +14,15 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.ucesys.sparkscope.timespan
+package com.ucesys.sparkscope.timeline
 
-import com.ucesys.sparkscope.common.{AggregateMetrics, Json4sWrapper}
+import com.ucesys.sparkscope.common.AggregateMetrics
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.scheduler.TaskInfo
-import org.json4s.DefaultFormats
-import org.json4s.JsonAST.JValue
 
 import scala.collection.mutable
 
-/*
-This keeps track of data per stage
-*/
-
-class StageTimeSpan(val stageID: Int, val numberOfTasks: Long) extends TimeSpan {
+class StageTimeline(val stageID: Int, val numberOfTasks: Long) extends Timeline {
   var stageMetrics  = new AggregateMetrics()
   var tempTaskTimes = new mutable.ListBuffer[( Long, Long, Long)]
   var minTaskLaunchTime = Long.MaxValue
@@ -61,7 +55,7 @@ class StageTimeSpan(val stageID: Int, val numberOfTasks: Long) extends TimeSpan 
 
   def finalUpdate(): Unit = {
     //min time for stage is when its tasks started not when it is submitted
-    setStartTime(minTaskLaunchTime)
+    this.startTime = minTaskLaunchTime
     setEndTime(maxTaskFinishTime)
 
     taskExecutionTimes = new Array[Int](tempTaskTimes.size)
@@ -93,9 +87,7 @@ class StageTimeSpan(val stageID: Int, val numberOfTasks: Long) extends TimeSpan 
     tempTaskTimes.clear()
   }
 
-  override def getMap(): Map[String, _ <: Any] = {
-    implicit val formats = DefaultFormats
-
+  override def getMap: Map[String, _ <: Any] = {
     Map(
       "stageID" -> stageID,
       "numberOfTasks" -> numberOfTasks,
@@ -105,41 +97,6 @@ class StageTimeSpan(val stageID: Int, val numberOfTasks: Long) extends TimeSpan 
       "parentStageIDs" -> parentStageIDs.mkString("[", ",", "]"),
       "taskExecutionTimes" -> taskExecutionTimes.mkString("[", ",", "]"),
       "taskPeakMemoryUsage" -> taskPeakMemoryUsage.mkString("[", ",", "]")
-    ) ++ super.getStartEndTime()
+    ) ++ super.getStartEndTime
   }
-}
-
-object StageTimeSpan {
-
-  def getTimeSpan(json: Map[String, JValue]): mutable.HashMap[Int, StageTimeSpan] = {
-    implicit val formats = DefaultFormats
-
-    val map = new mutable.HashMap[Int, StageTimeSpan]
-
-    json.keys.map(key => {
-      val value = json.get(key).get
-      val timeSpan = new StageTimeSpan(
-        (value \ "stageID").extract[Int],
-        (value  \ "numberOfTasks").extract[Long]
-      )
-      timeSpan.stageMetrics = AggregateMetrics.getAggregateMetrics((value \ "stageMetrics")
-              .extract[JValue])
-      timeSpan.minTaskLaunchTime = (value \ "minTaskLaunchTime").extract[Long]
-      timeSpan.maxTaskFinishTime = (value \ "maxTaskFinishTime").extract[Long]
-
-
-      timeSpan.parentStageIDs = Json4sWrapper.parse((value \ "parentStageIDs").extract[String]).extract[List[Int]]
-      timeSpan.taskExecutionTimes = Json4sWrapper.parse((value \ "taskExecutionTimes").extract[String])
-        .extract[List[Int]].toArray
-
-      timeSpan.taskPeakMemoryUsage = Json4sWrapper.parse((value \ "taskPeakMemoryUsage").extract[String])
-        .extract[List[Long]].toArray
-
-      timeSpan.addStartEnd(value)
-
-      map.put(key.toInt, timeSpan)
-    })
-    map
-  }
-
 }

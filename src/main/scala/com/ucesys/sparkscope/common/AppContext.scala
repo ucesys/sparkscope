@@ -16,7 +16,7 @@
 */
 package com.ucesys.sparkscope.common
 
-import com.ucesys.sparkscope.timespan._
+import com.ucesys.sparkscope.timeline._
 import org.json4s.JsonAST.JValue
 import org.json4s.jackson.Serialization
 import org.json4s.{DefaultFormats, MappingException}
@@ -25,11 +25,11 @@ import scala.collection.mutable
 
 case class AppContext(appInfo:        ApplicationInfo,
                       appMetrics:     AggregateMetrics,
-                      hostMap:        mutable.HashMap[String, HostTimeSpan],
-                      executorMap:    mutable.HashMap[String, ExecutorTimeSpan],
-                      jobMap:         mutable.HashMap[Long, JobTimeSpan],
+                      hostMap:        mutable.HashMap[String, HostTimeline],
+                      executorMap:    mutable.HashMap[String, ExecutorTimeline],
+                      jobMap:         mutable.HashMap[Long, JobTimeline],
                       jobSQLExecIdMap:mutable.HashMap[Long, Long],
-                      stageMap:       mutable.HashMap[Int, StageTimeSpan],
+                      stageMap:       mutable.HashMap[Int, StageTimeline],
                       stageIDToJobID: mutable.HashMap[Int, Long]) {
 
   def filterByStartAndEndTime(startTime: Long, endTime: Long): AppContext = {
@@ -68,7 +68,7 @@ case class AppContext(appInfo:        ApplicationInfo,
 
 object AppContext {
 
-  def getMaxConcurrent[Span <: TimeSpan](map: mutable.HashMap[String, Span],
+  def getMaxConcurrent[Span <: Timeline](map: mutable.HashMap[String, Span],
                                          appContext: AppContext = null): Long = {
 
     // sort all start and end times on basis of timing
@@ -109,40 +109,24 @@ object AppContext {
     }
   }
 
-  def getMap[T](map: mutable.HashMap[T, _ <: TimeSpan]): Map[String, Any] = {
+  def getMap[T](map: mutable.HashMap[T, _ <: Timeline]): Map[String, Any] = {
     if (map.isEmpty) {
       Map.empty[String, Any]
     } else {
       map.keys.last match {
         case _: String | _: Long | _: Int =>
-          map.keys.map(key => (key.toString, map.get(key).get.getMap())).toMap
+          map.keys.map(key => (key.toString, map(key).getMap)).toMap
         case _ => throw new RuntimeException("Unknown map key type")
       }
     }
   }
-
-  def getContext(json: JValue): AppContext = {
-
-    implicit val formats = DefaultFormats
-
-    new AppContext(
-      ApplicationInfo.getObject((json \ "appInfo").extract[JValue]),
-      AggregateMetrics.getAggregateMetrics((json \ "appMetrics").extract[JValue]),
-      HostTimeSpan.getTimeSpan((json \ "hostMap").extract[Map[String, JValue]]),
-      ExecutorTimeSpan.getTimeSpan((json \ "executorMap").extract[Map[String, JValue]]),
-      JobTimeSpan.getTimeSpan((json \ "jobMap").extract[Map[String, JValue]]),
-      getJobSQLExecIdMap(json, new mutable.HashMap[Long, Long]),
-      StageTimeSpan.getTimeSpan((json \ "stageMap").extract[Map[String, JValue]]),
-      getJobToStageMap((json \ "stageIDToJobID").extract[Map[Int, JValue]])
-    )
-}
 
   private def getJobToStageMap(json: Map[Int, JValue]): mutable.HashMap[Int, Long] = {
     implicit val formats = DefaultFormats
     val map = new mutable.HashMap[Int, Long]()
 
     json.keys.map(key => {
-      map.put(key, json.get(key).get.extract[Long])
+      map.put(key, json(key).extract[Long])
     })
     map
   }
@@ -152,7 +136,7 @@ object AppContext {
     val map = new mutable.HashMap[Long, Long]()
 
     json.keys.map(key => {
-      map.put(key, json.get(key).get.extract[Long])
+      map.put(key, json(key).extract[Long])
     })
     map
   }

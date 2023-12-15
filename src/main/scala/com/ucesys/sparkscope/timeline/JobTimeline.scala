@@ -15,15 +15,13 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.timespan
+package com.ucesys.sparkscope.timeline
 
 import com.ucesys.sparkscope.common.{AggregateMetrics, AppContext}
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.scheduler.TaskInfo
-import org.json4s.DefaultFormats
-import org.json4s.JsonAST.JValue
 
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 
 
 /*
@@ -35,11 +33,11 @@ import scala.collection.{immutable, mutable}
 * @param jobID
 */
 
-class JobTimeSpan(val jobID: Long) extends TimeSpan {
+class JobTimeline(val jobID: Long) extends Timeline {
   var jobMetrics = new AggregateMetrics()
-  var stageMap = new mutable.HashMap[Int, StageTimeSpan]()
+  var stageMap = new mutable.HashMap[Int, StageTimeline]()
 
-  def addStage(stage: StageTimeSpan): Unit = {
+  def addStage(stage: StageTimeline): Unit = {
     stageMap (stage.stageID) = stage
   }
   def updateAggregateTaskMetrics (taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
@@ -50,7 +48,7 @@ class JobTimeSpan(val jobID: Long) extends TimeSpan {
   This function computes the minimum time it would take to run this job.
   The computation takes into account the parallel stages.
    */
-  def computeCriticalTimeForJob(): Long = {
+  def computeCriticalTimeForJob: Long = {
     if (stageMap.isEmpty) {
       0L
     }else {
@@ -82,33 +80,10 @@ class JobTimeSpan(val jobID: Long) extends TimeSpan {
     }
   }
 
-  override def getMap(): Map[String, _ <: Any] = {
-    implicit val formats = DefaultFormats
-
+  override def getMap: Map[String, _ <: Any] = {
     Map(
       "jobID" -> jobID,
       "jobMetrics" -> jobMetrics.getMap,
-      "stageMap" -> AppContext.getMap(stageMap)) ++ super.getStartEndTime()
-  }
-}
-
-object JobTimeSpan {
-  def getTimeSpan(json: Map[String, JValue]): mutable.HashMap[Long, JobTimeSpan] = {
-    implicit val formats = DefaultFormats
-    val map = new mutable.HashMap[Long, JobTimeSpan]
-
-    json.keys.map(key => {
-      val value = json.get(key).get.extract[JValue]
-      val timeSpan = new JobTimeSpan((value \ "jobID").extract[Long])
-
-      timeSpan.jobMetrics = AggregateMetrics.getAggregateMetrics((value \ "jobMetrics")
-              .extract[JValue])
-      timeSpan.stageMap = StageTimeSpan.getTimeSpan((value \ "stageMap").extract[
-        immutable.Map[String, JValue]])
-      timeSpan.addStartEnd(value)
-      map.put(key.toLong, timeSpan)
-
-    })
-    map
+      "stageMap" -> AppContext.getMap(stageMap)) ++ super.getStartEndTime
   }
 }
