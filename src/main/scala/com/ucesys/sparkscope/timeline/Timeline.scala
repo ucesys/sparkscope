@@ -17,28 +17,27 @@
 package com.ucesys.sparkscope.timeline
 
 trait Timeline {
-    var startTime: Long = 0
-    var endTime: Long = 0
+    private var startTime: Option[Long] = None
+    private var endTime: Option[Long] = None
 
-    def setEndTime(time: Long): Unit = {
+    def getEndTime: Option[Long] = endTime
+    def getStartTime: Option[Long] = startTime
+
+    private[sparkscope] def setEndTime(time: Long): Unit = {
+        endTime = Some(time)
+    }
+
+    private[sparkscope] def setEndTime(time: Option[Long]): Unit = {
         endTime = time
     }
 
-    def setStartTime(time: Long): Unit = {
-        startTime = time
+    private[sparkscope] def setStartTime(time: Long): Unit = {
+        startTime = Some(time)
     }
 
-    def isFinished: Boolean = (endTime != 0 && startTime != 0)
+    def duration: Option[Long] = endTime.flatMap(end => startTime.map(start => end - start))
 
-    def duration: Option[Long] = {
-        if (isFinished) {
-            Some(endTime - startTime)
-        } else {
-            None
-        }
-    }
-
-    def getStartEndTime: Map[String, Long] = Map("startTime" -> startTime, "endTime" -> endTime)
+    def getStartEndTime: Map[String, Long] = Map("startTime" -> startTime.getOrElse(0L), "endTime" -> endTime.getOrElse(0L))
 
     def getMap: Map[String, _ <: Any]
 }

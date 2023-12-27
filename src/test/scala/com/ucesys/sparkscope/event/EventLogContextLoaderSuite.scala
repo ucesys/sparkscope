@@ -17,12 +17,13 @@
 */
 
 package com.ucesys.sparkscope.event
-
 import com.ucesys.sparkscope.SparkScopeArgs
 import com.ucesys.sparkscope.SparkScopeConfLoader._
-import com.ucesys.sparkscope.common.{SparkScopeLogger, StageContext}
+import com.ucesys.sparkscope.TestHelpers.stageTimeline
+import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.file.FileReaderFactory
 import com.ucesys.sparkscope.io.metrics.MetricReaderFactory
+import com.ucesys.sparkscope.timeline.StageTimeline
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
@@ -49,11 +50,11 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("0").getStartTime.get == 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").getEndTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("1").getStartTime.get == 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").getEndTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
@@ -76,11 +77,11 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("0").getStartTime.get== 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").getEndTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("1").getStartTime.get== 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").getEndTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
@@ -103,11 +104,11 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").removeTime.get == 1698236102012L)
+        assert(eventLogContext.appContext.executorMap("0").getStartTime.get== 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").getEndTime.get == 1698236102012L)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").removeTime.get == 1698236103345L)
+        assert(eventLogContext.appContext.executorMap("1").getStartTime.get== 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").getEndTime.get == 1698236103345L)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
@@ -131,11 +132,11 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").removeTime.get == 1698236102012L)
+        assert(eventLogContext.appContext.executorMap("0").getStartTime.get== 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").getEndTime.get == 1698236102012L)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").removeTime.get == 1698236103345L)
+        assert(eventLogContext.appContext.executorMap("1").getStartTime.get== 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").getEndTime.get == 1698236103345L)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
@@ -158,11 +159,11 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("0").getStartTime.get== 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").getEndTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("1").getStartTime.get== 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").getEndTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
@@ -190,11 +191,11 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 2)
-        assert(eventLogContext.appContext.executorMap("0").addTime == 1698236098507L)
-        assert(eventLogContext.appContext.executorMap("0").removeTime.get == 1698236102012L)
+        assert(eventLogContext.appContext.executorMap("0").getStartTime.get== 1698236098507L)
+        assert(eventLogContext.appContext.executorMap("0").getEndTime.get == 1698236102012L)
         assert(eventLogContext.appContext.executorMap("0").cores == 2)
-        assert(eventLogContext.appContext.executorMap("1").addTime == 1698236098540L)
-        assert(eventLogContext.appContext.executorMap("1").removeTime.get == 1698236103345L)
+        assert(eventLogContext.appContext.executorMap("1").getStartTime.get== 1698236098540L)
+        assert(eventLogContext.appContext.executorMap("1").getEndTime.get == 1698236103345L)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
 
         And("SparkConf should be read from env update event")
@@ -221,16 +222,16 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("Stages be read from stage subbmitted/completed events")
         assert(eventLogContext.appContext.stages.length == 10)
-        assert(eventLogContext.appContext.stages.head == StageContext("0", 1700654082, 1700654087, 2))
-        assert(eventLogContext.appContext.stages(1) == StageContext("1", 1700654088, 1700654089, 2))
-        assert(eventLogContext.appContext.stages(2) == StageContext("3", 1700654090, 1700654093, 20))
-        assert(eventLogContext.appContext.stages(3) == StageContext("6", 1700654093, 1700654094, 1))
-        assert(eventLogContext.appContext.stages(4) == StageContext("7", 1700654094, 1700654096, 2))
-        assert(eventLogContext.appContext.stages(5) == StageContext("8", 1700654094, 1700654095, 4))
-        assert(eventLogContext.appContext.stages(6) == StageContext("10", 1700654096, 1700654099, 20))
-        assert(eventLogContext.appContext.stages(7) == StageContext("13", 1700654099, 1700654099, 1))
-        assert(eventLogContext.appContext.stages(8) == StageContext("16", 1700654099, 1700654099, 1))
-        assert(eventLogContext.appContext.stages(9) == StageContext("20", 1700654099, 1700654100, 1))
+        assert(eventLogContext.appContext.stages.head == stageTimeline(0, 1700654082, 1700654087, 2))
+        assert(eventLogContext.appContext.stages(1) == stageTimeline(1, 1700654088, 1700654089, 2))
+        assert(eventLogContext.appContext.stages(2) == stageTimeline(3, 1700654090, 1700654093, 20, Seq(2)))
+        assert(eventLogContext.appContext.stages(3) == stageTimeline(6, 1700654093, 1700654094, 1, Seq(5)))
+        assert(eventLogContext.appContext.stages(4) == stageTimeline(7, 1700654094, 1700654096, 2))
+        assert(eventLogContext.appContext.stages(5) == stageTimeline(8, 1700654094, 1700654095, 4))
+        assert(eventLogContext.appContext.stages(6) == stageTimeline(10, 1700654096, 1700654099, 20, Seq(9)))
+        assert(eventLogContext.appContext.stages(7) == stageTimeline(13, 1700654099, 1700654099, 1, Seq(12)))
+        assert(eventLogContext.appContext.stages(8) == stageTimeline(16, 1700654099, 1700654099, 1, Seq(15)))
+        assert(eventLogContext.appContext.stages(9) == stageTimeline(20, 1700654099, 1700654100, 1, Seq(19)))
     }
 
     test("EventLogContextLoader running stages not completed test") {
@@ -249,15 +250,15 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
 
         And("Stages be read from stage subbmitted/completed events")
         assert(eventLogContext.appContext.stages.length == 9)
-        assert(eventLogContext.appContext.stages.head == StageContext("0", 1700654082, 1700654087, 2))
-        assert(eventLogContext.appContext.stages(1) == StageContext("1", 1700654088, 1700654089, 2))
-        assert(eventLogContext.appContext.stages(2) == StageContext("3", 1700654090, 1700654093, 20))
-        assert(eventLogContext.appContext.stages(3) == StageContext("6", 1700654093, 1700654094, 1))
-        assert(eventLogContext.appContext.stages(4) == StageContext("7", 1700654094, 1700654096, 2))
-        assert(eventLogContext.appContext.stages(5) == StageContext("8", 1700654094, 1700654095, 4))
-        assert(eventLogContext.appContext.stages(6) == StageContext("10", 1700654096, 1700654099, 20))
-        assert(eventLogContext.appContext.stages(7) == StageContext("13", 1700654099, 1700654099, 1))
-        assert(eventLogContext.appContext.stages(8) == StageContext("16", 1700654099, 1700654099, 1))
+        assert(eventLogContext.appContext.stages.head == stageTimeline(0, 1700654082, 1700654087, 2))
+        assert(eventLogContext.appContext.stages(1) == stageTimeline(1, 1700654088, 1700654089, 2))
+        assert(eventLogContext.appContext.stages(2) == stageTimeline(3, 1700654090, 1700654093, 20, Seq(2)))
+        assert(eventLogContext.appContext.stages(3) == stageTimeline(6, 1700654093, 1700654094, 1, Seq(5)))
+        assert(eventLogContext.appContext.stages(4) == stageTimeline(7, 1700654094, 1700654096, 2))
+        assert(eventLogContext.appContext.stages(5) == stageTimeline(8, 1700654094, 1700654095, 4))
+        assert(eventLogContext.appContext.stages(6) == stageTimeline(10, 1700654096, 1700654099, 20, Seq(9)))
+        assert(eventLogContext.appContext.stages(7) == stageTimeline(13, 1700654099, 1700654099, 1, Seq(12)))
+        assert(eventLogContext.appContext.stages(8) == stageTimeline(16, 1700654099, 1700654099, 1, Seq(15)))
     }
 
     test("EventLogContextLoader corrupted events test") {
@@ -278,20 +279,20 @@ class EventLogContextLoaderSuite extends FunSuite with MockFactory with GivenWhe
         And("Corrupted stage events should be ignored")
         And("Stages be read from stage submitted/completed events")
         assert(eventLogContext.appContext.stages.length == 8)
-        assert(eventLogContext.appContext.stages.head == StageContext("0", 1700654082, 1700654087, 2))
-        assert(eventLogContext.appContext.stages(1) == StageContext("1", 1700654088, 1700654089, 2))
-        assert(eventLogContext.appContext.stages(2) == StageContext("3", 1700654090, 1700654093, 20))
-        assert(eventLogContext.appContext.stages(3) == StageContext("6", 1700654093, 1700654094, 1))
-        assert(eventLogContext.appContext.stages(4) == StageContext("7", 1700654094, 1700654096, 2))
-        assert(eventLogContext.appContext.stages(5) == StageContext("8", 1700654094, 1700654095, 4))
-        assert(eventLogContext.appContext.stages(6) == StageContext("10", 1700654096, 1700654099, 20))
-        assert(eventLogContext.appContext.stages(7) == StageContext("13", 1700654099, 1700654099, 1))
+        assert(eventLogContext.appContext.stages.head == stageTimeline(0, 1700654082, 1700654087, 2))
+        assert(eventLogContext.appContext.stages(1) == stageTimeline(1, 1700654088, 1700654089, 2))
+        assert(eventLogContext.appContext.stages(2) == stageTimeline(3, 1700654090, 1700654093, 20, Seq(2)))
+        assert(eventLogContext.appContext.stages(3) == stageTimeline(6, 1700654093, 1700654094, 1, Seq(5)))
+        assert(eventLogContext.appContext.stages(4) == stageTimeline(7, 1700654094, 1700654096, 2))
+        assert(eventLogContext.appContext.stages(5) == stageTimeline(8, 1700654094, 1700654095, 4))
+        assert(eventLogContext.appContext.stages(6) == stageTimeline(10, 1700654096, 1700654099, 20, Seq(9)))
+        assert(eventLogContext.appContext.stages(7) == stageTimeline(13, 1700654099, 1700654099, 1, Seq(12)))
 
         And("Corrupted executor events should be ignored")
         And("Executor timeline should be read from executor add/remove events")
         assert(eventLogContext.appContext.executorMap.size == 1)
-        assert(eventLogContext.appContext.executorMap("1").addTime == 1700654079478L)
-        assert(eventLogContext.appContext.executorMap("1").removeTime.isEmpty)
+        assert(eventLogContext.appContext.executorMap("1").getStartTime.get== 1700654079478L)
+        assert(eventLogContext.appContext.executorMap("1").getEndTime.isEmpty)
         assert(eventLogContext.appContext.executorMap("1").cores == 2)
     }
 

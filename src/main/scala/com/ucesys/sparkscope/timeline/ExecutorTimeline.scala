@@ -17,29 +17,45 @@
 
 package com.ucesys.sparkscope.timeline
 
-import com.ucesys.sparkscope.common.AggregateMetrics
+import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.listener.AggregateMetrics
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.scheduler.TaskInfo
 
-class ExecutorTimeline(val executorID: String,
-                       val hostID: String,
-                       val cores: Int) extends Timeline {
-  var executorMetrics = new AggregateMetrics()
+class ExecutorTimeline(val executorId: String, val hostId: Option[String], val cores: Int) extends Timeline {
+    var executorMetrics = new AggregateMetrics()
 
-  def updateAggregateTaskMetrics (taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
-    executorMetrics.update(taskMetrics, taskInfo)
-  }
+    def updateAggregateTaskMetrics(taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
+        executorMetrics.update(taskMetrics, taskInfo)
+    }
 
-  override def getMap: Map[String, _ <: Any] = {
-    Map("executorID" -> executorID, "hostID" -> hostID, "cores" -> cores, "executorMetrics" ->
-      executorMetrics.getMap()) ++ super.getStartEndTime
-  }
+    override def getMap: Map[String, _ <: Any] = {
+        Map("executorId" -> executorId, "hostId" -> hostId, "cores" -> cores, "executorMetrics" ->
+          executorMetrics.getMap()) ++ super.getStartEndTime
+    }
+
+    def upTime(lastMetricTimeMs: Long)(implicit logger: SparkScopeLogger): Long = {
+        val executorEndTime: Long = getEndTime match {
+            case Some(time) => time
+            case None =>
+                logger.info(s"Missing remove time for executorId=${executorId}, using last metric timestamp to calculate uptime")
+                lastMetricTimeMs*1000
+        }
+        getStartTime.map(startTime => executorEndTime - startTime).getOrElse(0L)
+    }
 }
 
 object ExecutorTimeline {
-  def apply(executorID: String, hostID: String, cores: Int, startTime: Long, endTime: Long): ExecutorTimeline = {
-    val timeSpan = new ExecutorTimeline(executorID, hostID, cores)
-    timeSpan.setEndTime(endTime)
-    timeSpan
-  }
+    def apply(executorId: String, hostId: Option[String], cores: Int, startTime: Long): ExecutorTimeline = {
+        val timeSpan = new ExecutorTimeline(executorId, hostId, cores)
+        timeSpan.setStartTime(startTime)
+        timeSpan
+    }
+
+    def apply(executorId: String, cores: Int, startTime: Long, endTime: Option[Long]): ExecutorTimeline = {
+        val timeSpan = new ExecutorTimeline(executorId, None, cores)
+        timeSpan.setStartTime(startTime)
+        timeSpan.setEndTime(endTime)
+        timeSpan
+    }
 }

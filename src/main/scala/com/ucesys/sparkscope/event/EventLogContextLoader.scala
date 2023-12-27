@@ -2,12 +2,17 @@ package com.ucesys.sparkscope.event
 
 import com.ucesys.sparkscope.SparkScopeArgs
 import com.ucesys.sparkscope.SparkScopeConfLoader._
-import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger, StageContext}
+import com.ucesys.sparkscope.common.{SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.event.EventLogContextLoader._
 import com.ucesys.sparkscope.io.file.FileReaderFactory
+import com.ucesys.sparkscope.timeline.{ExecutorTimeline, StageTimeline}
 import org.apache.spark.SparkConf
+import org.apache.spark.SparkEventParser
+import org.apache.spark.scheduler.{SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerEnvironmentUpdate, SparkListenerExecutorAdded, SparkListenerExecutorRemoved, SparkListenerStageCompleted, SparkListenerStageSubmitted}
+import org.json4s.DefaultFormats
 
-import scala.util.parsing.json.JSON
+import org.json4s._
+import org.json4s.jackson.JsonMethods
 
 class EventLogContextLoader(implicit logger: SparkScopeLogger) {
     def load(fileReaderFactory: FileReaderFactory, args: SparkScopeArgs): EventLogContext = {
@@ -18,51 +23,44 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         val eventLogJsonSeqPreFiltered: Seq[String] = eventLogJsonStrSeq.filter(event => AllEvents.exists(event.contains))
         logger.info(s"Prefiltered ${eventLogJsonSeqPreFiltered.length} events")
 
-        val eventLogJsonSeq = eventLogJsonSeqPreFiltered.flatMap(JSON.parseFull(_).map(_.asInstanceOf[Map[String, Any]]))
-        logger.info(s"Parsed ${eventLogJsonSeq.length} events")
+        implicit val formats = DefaultFormats
+        val sparkEvents = eventLogJsonSeqPreFiltered.map(JsonMethods.parse(_)).flatMap(SparkEventParser.parse(_))
+        logger.info(s"Parsed ${sparkEvents.length} events")
 
-        val eventLogJsonSeqFiltered = eventLogJsonSeq.filter(mapObj => AllEvents.contains(mapObj(ColEvent).asInstanceOf[String]))
-        logger.info(s"Filtered ${eventLogJsonSeqFiltered.length} events")
+        val appStartEvent = sparkEvents.collectFirst { case e: SparkListenerApplicationStart => e }
+        val appEndEvent = sparkEvents.collectFirst { case e: SparkListenerApplicationEnd => e }
+        val envUpdateEvent = sparkEvents.collectFirst { case e: SparkListenerEnvironmentUpdate => e }
+        val execAddedEvents = sparkEvents.collect { case e: SparkListenerExecutorAdded => e }
+        val execRemovedEvents = sparkEvents.collect { case e: SparkListenerExecutorRemoved => e }
+        val stageSubmittedEvents = sparkEvents.collect { case e: SparkListenerStageSubmitted => e }
+        val stageCompletedEvents = sparkEvents.collect { case e: SparkListenerStageCompleted => e }
 
-        val appStartEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventAppStart).map(ApplicationStartEvent(_))
-        val appEndEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventAppEnd).map(ApplicationEndEvent(_))
-        val envUpdateEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventEnvUpdate).map(EnvUpdateEvent(_))
-        val execAddedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorAdded).flatMap(ExecutorAddedEvent(_))
-        val execRemovedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorRemoved).flatMap(ExecutorRemovedEvent(_))
-        val stageSubmittedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventStageSubmitted).flatMap(StageSubmittedEvent(_))
-        val stageCompletedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventStageCompleted).flatMap(StageCompletedEvent(_))
-
-        val stages: Seq[StageContext] = stageSubmittedEvents.flatMap { stageSubmission =>
-            val stageCompletion = stageCompletedEvents.find(_.stageId == stageSubmission.stageId)
+        val stages: Seq[StageTimeline] = stageSubmittedEvents.flatMap { stageSubmission =>
+            val stageCompletion = stageCompletedEvents.find(_.stageInfo.stageId == stageSubmission.stageInfo.stageId)
             stageCompletion match {
-                case Some(stageCompletion) => Some(StageContext(stageSubmission, stageCompletion))
+                case Some(stageCompletion) => Some(StageTimeline(stageSubmission, stageCompletion))
                 case None => None
             }
         }
 
-        val executorMap: Map[String, ExecutorContext] = execAddedEvents.map { execAddedEvent =>
+        val executorMap: Map[String, ExecutorTimeline] = execAddedEvents.map { execAddedEvent =>
             (
                 execAddedEvent.executorId,
-                ExecutorContext(
+                ExecutorTimeline(
                     executorId=execAddedEvent.executorId,
-                    cores=execAddedEvent.cores,
-                    addTime=execAddedEvent.ts,
-                    removeTime=execRemovedEvents.find(_.executorId == execAddedEvent.executorId).map(_.ts)
+                    cores=execAddedEvent.executorInfo.totalCores,
+                    startTime=execAddedEvent.time,
+                    endTime=execRemovedEvents.find(_.executorId == execAddedEvent.executorId).map(_.time)
                 )
             )
         }.toMap
 
-        if (appStartEvent.isEmpty || appStartEvent.get.appId.isEmpty || appStartEvent.get.ts.isEmpty) {
+        if (appStartEvent.isEmpty || appStartEvent.get.appId.isEmpty) {
             logger.error(s"Error during parsing of Application Start Event(${appStartEvent})")
             throw new IllegalArgumentException(s"Error during parsing of Application Start Event(${appStartEvent})")
         }
 
-        if (appEndEvent.nonEmpty && appEndEvent.get.ts.isEmpty) {
-            logger.error(s"Error during parsing of Application End Event(${appEndEvent})")
-            throw new IllegalArgumentException(s"Error during parsing of Application End Event(${appEndEvent})")
-        }
-
-        if (envUpdateEvent.isEmpty || envUpdateEvent.get.sparkConf.isEmpty) {
+        if (envUpdateEvent.isEmpty || envUpdateEvent.get.environmentDetails.isEmpty) {
             logger.error(s"Error during parsing of Environment Update Event(${envUpdateEvent})")
             throw new IllegalArgumentException(s"Error during parsing of Environment Update Event(${envUpdateEvent})")
         }
@@ -72,7 +70,7 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         }
 
         val sparkConf = new SparkConf(false)
-        envUpdateEvent.get.sparkConf.get.foreach { case (key, value) => sparkConf.set(key, value) }
+        envUpdateEvent.get.environmentDetails.get("Spark Properties").foreach(_.foreach { case (key, value) => sparkConf.set(key, value) })
 
         // Overriding SparkConf with input args if specified
         args.driverMetrics.map(sparkConf.set(SparkScopePropertyDriverMetricsDir, _))
@@ -82,8 +80,8 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         // App Context
         val appContext = SparkScopeContext(
             appId=appStartEvent.get.appId.get,
-            appStartTime=appStartEvent.get.ts.get,
-            appEndTime=appEndEvent.flatMap(_.ts),
+            appStartTime=appStartEvent.get.time,
+            appEndTime=appEndEvent.map(_.time),
             executorMap,
             stages = stages
         )

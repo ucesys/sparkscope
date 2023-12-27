@@ -17,26 +17,34 @@
 
 package com.ucesys.sparkscope.timeline
 
-import com.ucesys.sparkscope.common.AggregateMetrics
+import com.ucesys.sparkscope.listener.AggregateMetrics
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.scheduler.TaskInfo
 
 class HostTimeline(val hostID: String) extends Timeline {
-  var hostMetrics = new AggregateMetrics()
+    var hostMetrics = new AggregateMetrics()
 
-/*
-We don't get any event when host is lost.
-TODO: may be mark all host end time when execution is stopped
- */
-  override def duration: Option[Long] = {
-    Some(super.duration.getOrElse(System.currentTimeMillis() - startTime))
-  }
+    override def duration: Option[Long] = {
+        if (getEndTime.nonEmpty) {
+            super.duration
+        } else {
+            Some(System.currentTimeMillis() - getStartTime.getOrElse(0L))
+        }
+    }
 
-  def updateAggregateTaskMetrics (taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
-    hostMetrics.update(taskMetrics, taskInfo)
-  }
-  override def getMap: Map[String, _ <: Any] = {
-    Map("hostID" -> hostID, "hostMetrics" -> hostMetrics.getMap) ++ super.getStartEndTime
-  }
+    def updateAggregateTaskMetrics(taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
+        hostMetrics.update(taskMetrics, taskInfo)
+    }
 
+    override def getMap: Map[String, _ <: Any] = {
+        Map("hostID" -> hostID, "hostMetrics" -> hostMetrics.getMap) ++ super.getStartEndTime
+    }
+}
+
+object HostTimeline {
+    def apply(hostID: String, startTime: Long): HostTimeline = {
+        val timeSpan = new HostTimeline(hostID)
+        timeSpan.setStartTime(startTime)
+        timeSpan
+    }
 }

@@ -16,87 +16,101 @@
 */
 package com.ucesys.sparkscope.timeline
 
-import com.ucesys.sparkscope.common.AggregateMetrics
+import com.ucesys.sparkscope.listener.AggregateMetrics
 import org.apache.spark.executor.TaskMetrics
-import org.apache.spark.scheduler.TaskInfo
+import org.apache.spark.scheduler.{SparkListenerStageCompleted, SparkListenerStageSubmitted, TaskInfo}
 
 import scala.collection.mutable
 
-class StageTimeline(val stageID: Int, val numberOfTasks: Long) extends Timeline {
-  var stageMetrics  = new AggregateMetrics()
-  var tempTaskTimes = new mutable.ListBuffer[( Long, Long, Long)]
-  var minTaskLaunchTime = Long.MaxValue
-  var maxTaskFinishTime = 0L
-  var parentStageIDs:Seq[Int] = null
+case class TaskExecutionTime(taskId: Long, executionTime: Long)
 
-  // we keep execution time of each task
-  var taskExecutionTimes  = Array.emptyIntArray
-  var taskPeakMemoryUsage = Array.emptyLongArray
+case class StageTimeline(stageId: Int, startTime: Option[Long], numberOfTasks: Long, parentStageIds: Seq[Int] = Seq.empty, endTime: Option[Long] = None) {
+    var stageMetrics = new AggregateMetrics()
+    var tempTaskTimes = new mutable.ListBuffer[TaskExecutionTime]
+    var minTaskLaunchTime = Long.MaxValue
+    var maxTaskFinishTime = 0L
 
-  def updateAggregateTaskMetrics (taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
-    stageMetrics.update(taskMetrics, taskInfo)
-  }
+    // we keep execution time of each task
+    var taskExecutionTimes = Array.emptyIntArray
 
-  def setParentStageIDs(parentIDs: Seq[Int]): Unit = {
-    parentStageIDs = parentIDs
-  }
+    def getTimeline: Seq[Long] = Seq(getTimelineStart, getTimelineCentre, getTimelineEnd).flatten
+    def getTimelineStart: Option[Long] = startTime.map(_ - 1)
+    def getTimelineEnd: Option[Long] = endTime.map(_ + 1)
+    def getTimelineCentre: Option[Long] = getTimelineStart.flatMap(start => getTimelineEnd.map(end => (start + end) / 2))
 
-  def updateTasks(taskInfo: TaskInfo, taskMetrics: TaskMetrics): Unit = {
-    if (taskInfo != null && taskMetrics != null) {
-      tempTaskTimes += ((taskInfo.taskId, taskMetrics.executorRunTime, taskMetrics.peakExecutionMemory))
-      if (taskInfo.launchTime < minTaskLaunchTime) {
-        minTaskLaunchTime = taskInfo.launchTime
-      }
-      if (taskInfo.finishTime > maxTaskFinishTime) {
-        maxTaskFinishTime = taskInfo.finishTime
-      }
-    }
-  }
-
-  def finalUpdate(): Unit = {
-    //min time for stage is when its tasks started not when it is submitted
-    this.startTime = minTaskLaunchTime
-    setEndTime(maxTaskFinishTime)
-
-    taskExecutionTimes = new Array[Int](tempTaskTimes.size)
-
-    var currentIndex = 0
-    tempTaskTimes.sortWith(( left, right)  => left._1 < right._1)
-      .foreach( x => {
-        taskExecutionTimes( currentIndex) = x._2.toInt
-        currentIndex += 1
-      })
-
-    val countPeakMemoryUsage = {
-      if (tempTaskTimes.size > 64) {
-         64
-      }else {
-        tempTaskTimes.size
-      }
+    def hasTimePoint(ts: Long): Boolean = {
+        hasTimePointInside(ts) || hasEdgeTimePoint(ts)
     }
 
-    taskPeakMemoryUsage = tempTaskTimes
-      .map( x => x._3)
-      .sortWith( (a, b) => a > b)
-      .take(countPeakMemoryUsage).toArray
+    def hasTimePointInside(ts: Long): Boolean = {
+        getTimelineStart.flatMap(start => getTimelineEnd.map(end => ts > start && ts < end)).getOrElse(false)
+    }
 
-    /*
-    Clean the tempTaskTimes. We don't want to keep all this objects hanging around for
-    long time
-     */
-    tempTaskTimes.clear()
-  }
+    def hasEdgeTimePoint(ts: Long): Boolean = {
+        getTimelineStart.flatMap(start => getTimelineEnd.map(end => ts == start || ts == end)).getOrElse(false)
+    }
 
-  override def getMap: Map[String, _ <: Any] = {
-    Map(
-      "stageID" -> stageID,
-      "numberOfTasks" -> numberOfTasks,
-      "stageMetrics" -> stageMetrics.getMap(),
-      "minTaskLaunchTime" -> minTaskLaunchTime,
-      "maxTaskFinishTime" -> maxTaskFinishTime,
-      "parentStageIDs" -> parentStageIDs.mkString("[", ",", "]"),
-      "taskExecutionTimes" -> taskExecutionTimes.mkString("[", ",", "]"),
-      "taskPeakMemoryUsage" -> taskPeakMemoryUsage.mkString("[", ",", "]")
-    ) ++ super.getStartEndTime
-  }
+    def updateAggregateTaskMetrics(taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
+        stageMetrics.update(taskMetrics, taskInfo)
+    }
+
+    def updateTasks(taskInfo: TaskInfo, taskMetrics: TaskMetrics): Unit = {
+        if (taskInfo != null && taskMetrics != null) {
+            tempTaskTimes += TaskExecutionTime(taskInfo.taskId, taskMetrics.executorRunTime)
+            if (taskInfo.launchTime < minTaskLaunchTime) {
+                minTaskLaunchTime = taskInfo.launchTime
+            }
+            if (taskInfo.finishTime > maxTaskFinishTime) {
+                maxTaskFinishTime = taskInfo.finishTime
+            }
+        }
+    }
+
+    def complete(stageCompleted: SparkListenerStageCompleted): StageTimeline = {
+        taskExecutionTimes = tempTaskTimes
+          .sortWith((left, right) => left.taskId < right.taskId)
+          .map(x => x.executionTime.toInt)
+          .toArray
+
+        tempTaskTimes.clear()
+
+        this.copy(
+            startTime = Some(this.startTime.getOrElse(stageCompleted.stageInfo.submissionTime.getOrElse(minTaskLaunchTime))),
+            endTime = Some(this.endTime.getOrElse(stageCompleted.stageInfo.completionTime.getOrElse(maxTaskFinishTime)))
+        )
+    }
+
+    def getMap: Map[String, _ <: Any] = {
+        Map(
+            "stageID" -> stageId,
+            "numberOfTasks" -> numberOfTasks,
+            "stageMetrics" -> stageMetrics.getMap(),
+            "minTaskLaunchTime" -> minTaskLaunchTime,
+            "maxTaskFinishTime" -> maxTaskFinishTime,
+            "parentStageIDs" -> parentStageIds.mkString("[", ",", "]"),
+            "taskExecutionTimes" -> taskExecutionTimes.mkString("[", ",", "]"),
+        ) ++ Map("startTime" -> startTime, "endTime" -> endTime.getOrElse(0L))
+    }
+}
+
+object StageTimeline {
+    def apply(stageSubmitted: SparkListenerStageSubmitted): StageTimeline = {
+        new StageTimeline(
+            stageSubmitted.stageInfo.stageId,
+            stageSubmitted.stageInfo.submissionTime.map(_ / 1000L),
+            stageSubmitted.stageInfo.numTasks,
+            stageSubmitted.stageInfo.parentIds,
+            None
+        )
+    }
+
+    def apply(stageSubmitted: SparkListenerStageSubmitted, stageCompleted: SparkListenerStageCompleted): StageTimeline = {
+        new StageTimeline(
+            stageSubmitted.stageInfo.stageId,
+            stageSubmitted.stageInfo.submissionTime.map(_ / 1000L),
+            stageSubmitted.stageInfo.numTasks,
+            stageSubmitted.stageInfo.parentIds,
+            stageCompleted.stageInfo.completionTime.map(_ / 1000L),
+        )
+    }
 }

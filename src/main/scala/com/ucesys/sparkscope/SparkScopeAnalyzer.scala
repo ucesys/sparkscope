@@ -17,12 +17,13 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.common.{CpuTime, ExecutorContext, JvmHeapUsed, JvmNonHeapUsed, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{CpuTime, JvmHeapUsed, JvmNonHeapUsed, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.metrics.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
+import com.ucesys.sparkscope.timeline.ExecutorTimeline
 import com.ucesys.sparkscope.warning.{CPUUtilWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
 
 import scala.concurrent.duration._
@@ -76,13 +77,13 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         val executorMapWithMetrics = appContext.executorMap.filter { case (id, _) => driverExecutorMetrics.executorMetricsMap.contains(id) }
 
         val executorTimelineRows: Seq[Seq[String]] = executorMapWithMetrics.map {
-            case (id, executorContext) =>
+            case (id, executorTimeline) =>
                 val lastMetricTime = executorsMetricsCombinedMapWithExecId(id).select("t").max.toLong
-                val uptime = executorContext.upTime(lastMetricTime)
+                val uptime = executorTimeline.upTime(lastMetricTime)
                 Seq(
                     id,
-                    executorContext.addTime.toString,
-                    executorContext.removeTime.map(_.toString).getOrElse("null"),
+                    executorTimeline.getStartTime.toString,
+                    executorTimeline.getEndTime.map(_.toString).getOrElse("null"),
                     lastMetricTime.toString,
                     uptime.toString
                 )
@@ -156,7 +157,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         )
     }
 
-    private def interpolateExecutorMetrics(executorMap: Map[String, ExecutorContext],
+    private def interpolateExecutorMetrics(executorMap: Map[String, ExecutorTimeline],
                                            executorsMetricsMap: Map[String, DataTable],
                                            appContext: SparkScopeContext): Map[String, DataTable] = {
         /*    Interpolating executor metrics to align their timestamps for aggregations. Also adds a "zero row" with start values for when executor was added.
@@ -181,7 +182,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         val executorsMetricsMapWithZeroRows: Map[String, DataTable] = executorsMetricsMap.map { case (id, metrics) =>
             val metricsWithZeroRows = {
 
-                val executorStartTime = executorMap(id).addTime / MilliSecondsInSec
+                val executorStartTime = executorMap(id).getStartTime.map(startTime => startTime / MilliSecondsInSec).getOrElse(0L)
 
                 if (metrics.select("t").values.contains(executorStartTime.toString)) {
                     metrics

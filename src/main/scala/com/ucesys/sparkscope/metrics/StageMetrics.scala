@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.metrics
 
-import com.ucesys.sparkscope.common.StageContext
+import com.ucesys.sparkscope.timeline.StageTimeline
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 
 case class StageMetrics(stageTimeline: DataTable, numberOfTasks: DataColumn) {
@@ -13,24 +13,24 @@ case class StageMetrics(stageTimeline: DataTable, numberOfTasks: DataColumn) {
 }
 
 object StageMetrics {
-    def apply(stages: Seq[StageContext], allTimestamps: Seq[String]): StageMetrics = {
-        val stageColumns: Seq[DataColumn] = stages.map { stage =>
+    def apply(stages: Seq[StageTimeline], allTimestamps: Seq[String]): StageMetrics = {
+        val stageColumns: Seq[DataColumn] = stages.map { stageTimeline =>
             val colVals: Seq[String] = allTimestamps.map(_.toLong).map { ts =>
-                if (ts > stage.getTimelineStart && ts < stage.getTimelineEnd) {
-                    stage.numberOfTasks.toString
-                } else if (ts == stage.getTimelineStart || ts == stage.getTimelineEnd) {
+                if (stageTimeline.hasTimePointInside(ts)) {
+                    stageTimeline.numberOfTasks.toString
+                } else if (stageTimeline.hasEdgeTimePoint(ts)) {
                     "0"
                 } else {
                     "null"
                 }
             }
-            DataColumn(stage.stageId, colVals)
+            DataColumn(stageTimeline.stageId.toString, colVals)
         }
 
         val numberOfTasksVals: Seq[String] = allTimestamps.map(_.toLong).map { ts =>
-            val numberOfTasksSum: Long = stages.map { stage =>
-                if (ts >= stage.getTimelineStart && ts <= stage.getTimelineEnd) {
-                    stage.numberOfTasks
+            val numberOfTasksSum: Long = stages.map { stageTimeline =>
+                if (stageTimeline.hasTimePoint(ts)) {
+                    stageTimeline.numberOfTasks
                 } else {
                     0L
                 }

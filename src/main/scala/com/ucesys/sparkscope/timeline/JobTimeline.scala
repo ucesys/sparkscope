@@ -17,7 +17,7 @@
 
 package com.ucesys.sparkscope.timeline
 
-import com.ucesys.sparkscope.common.{AggregateMetrics, AppContext}
+import com.ucesys.sparkscope.listener.AggregateMetrics
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.scheduler.TaskInfo
 
@@ -34,56 +34,55 @@ import scala.collection.mutable
 */
 
 class JobTimeline(val jobID: Long) extends Timeline {
-  var jobMetrics = new AggregateMetrics()
-  var stageMap = new mutable.HashMap[Int, StageTimeline]()
+    var jobMetrics = new AggregateMetrics()
+    var stageMap = new mutable.HashMap[Int, StageTimeline]()
 
-  def addStage(stage: StageTimeline): Unit = {
-    stageMap (stage.stageID) = stage
-  }
-  def updateAggregateTaskMetrics (taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
-    jobMetrics.update(taskMetrics, taskInfo)
-  }
-
-  /*
-  This function computes the minimum time it would take to run this job.
-  The computation takes into account the parallel stages.
-   */
-  def computeCriticalTimeForJob: Long = {
-    if (stageMap.isEmpty) {
-      0L
-    }else {
-      val maxStageID = stageMap.map(x => x._1).max
-      val data = stageMap.map(x =>
-        (x._1,
-          (
-            x._2.parentStageIDs,
-            x._2.stageMetrics.map(AggregateMetrics.executorRuntime).max
-          )
-        )
-      )
-      criticalTime(maxStageID, data)
+    def addStage(stage: StageTimeline): Unit = {
+        stageMap(stage.stageId) = stage
     }
-  }
 
-  /*
-  recursive function to compute critical time starting from the last stage
-   */
-  private def criticalTime(stageID: Int, data: mutable.HashMap[Int, (Seq[Int], Long)]): Long = {
-    //Provide 0 value for
-    val stageData = data.getOrElse(stageID, (List.empty[Int], 0L))
-    stageData._2 + {
-      if (stageData._1.size == 0) {
-        0L
-      }else {
-        stageData._1.map(x => criticalTime(x, data)).max
-      }
+    def updateAggregateTaskMetrics(taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
+        jobMetrics.update(taskMetrics, taskInfo)
     }
-  }
 
-  override def getMap: Map[String, _ <: Any] = {
-    Map(
-      "jobID" -> jobID,
-      "jobMetrics" -> jobMetrics.getMap,
-      "stageMap" -> AppContext.getMap(stageMap)) ++ super.getStartEndTime
-  }
+    /*
+    This function computes the minimum time it would take to run this job.
+    The computation takes into account the parallel stages.
+     */
+    def computeCriticalTimeForJob: Option[Long] = {
+        if (stageMap.isEmpty) {
+            None
+        } else {
+            val maxStageID = stageMap.keys.max
+            Some(criticalTime(maxStageID))
+        }
+    }
+
+    private def criticalTime(stageID: Int): Long = {
+        val stageTimeline =  stageMap.get(stageID)
+        val parentStageIDs = stageTimeline.map(_.parentStageIds).getOrElse(List.empty[Int])
+        val maxExecutorRuntime = stageTimeline.map(_.stageMetrics.map(AggregateMetrics.executorRuntime).max).getOrElse(0L)
+
+        val parentStagesCriticalTime = parentStageIDs match {
+            case Seq() => 0L
+            case _ => parentStageIDs.map(parentStageId => criticalTime(parentStageId)).max
+        }
+        maxExecutorRuntime + parentStagesCriticalTime
+    }
+
+    override def getMap: Map[String, _ <: Any] = {
+        Map(
+            "jobID" -> jobID,
+            "jobMetrics" -> jobMetrics.getMap,
+            "stageMap" -> stageMap.map{ case (stageId, stageTimeline) => (stageId.toString, stageTimeline.getMap) }.toMap
+        ) ++ super.getStartEndTime
+    }
+}
+
+object JobTimeline {
+    def apply(jobID: Long, startTime: Long): JobTimeline = {
+        val timeSpan = new JobTimeline(jobID)
+        timeSpan.setStartTime(startTime)
+        timeSpan
+    }
 }
