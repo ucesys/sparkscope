@@ -30,12 +30,11 @@ case class StageTimeline(stageId: Int, startTime: Option[Long], numberOfTasks: L
     var minTaskLaunchTime = Long.MaxValue
     var maxTaskFinishTime = 0L
 
-    // we keep execution time of each task
     var taskExecutionTimes = Array.emptyIntArray
 
     def getTimeline: Seq[Long] = Seq(getTimelineStart, getTimelineCentre, getTimelineEnd).flatten
-    def getTimelineStart: Option[Long] = startTime.map(_ - 1)
-    def getTimelineEnd: Option[Long] = endTime.map(_ + 1)
+    def getTimelineStart: Option[Long] = startTime.map(start => (start / 1000L) - 1)
+    def getTimelineEnd: Option[Long] = endTime.map(end => (end / 1000L) + 1)
     def getTimelineCentre: Option[Long] = getTimelineStart.flatMap(start => getTimelineEnd.map(end => (start + end) / 2))
 
     def hasTimePoint(ts: Long): Boolean = {
@@ -66,7 +65,7 @@ case class StageTimeline(stageId: Int, startTime: Option[Long], numberOfTasks: L
         }
     }
 
-    def complete(stageCompleted: SparkListenerStageCompleted): StageTimeline = {
+    def end(stageCompleted: SparkListenerStageCompleted): StageTimeline = {
         taskExecutionTimes = tempTaskTimes
           .sortWith((left, right) => left.taskId < right.taskId)
           .map(x => x.executionTime.toInt)
@@ -79,38 +78,15 @@ case class StageTimeline(stageId: Int, startTime: Option[Long], numberOfTasks: L
             endTime = Some(this.endTime.getOrElse(stageCompleted.stageInfo.completionTime.getOrElse(maxTaskFinishTime)))
         )
     }
-
-    def getMap: Map[String, _ <: Any] = {
-        Map(
-            "stageID" -> stageId,
-            "numberOfTasks" -> numberOfTasks,
-            "stageMetrics" -> stageMetrics.getMap(),
-            "minTaskLaunchTime" -> minTaskLaunchTime,
-            "maxTaskFinishTime" -> maxTaskFinishTime,
-            "parentStageIDs" -> parentStageIds.mkString("[", ",", "]"),
-            "taskExecutionTimes" -> taskExecutionTimes.mkString("[", ",", "]"),
-        ) ++ Map("startTime" -> startTime, "endTime" -> endTime.getOrElse(0L))
-    }
 }
 
 object StageTimeline {
     def apply(stageSubmitted: SparkListenerStageSubmitted): StageTimeline = {
         new StageTimeline(
             stageSubmitted.stageInfo.stageId,
-            stageSubmitted.stageInfo.submissionTime.map(_ / 1000L),
+            stageSubmitted.stageInfo.submissionTime,
             stageSubmitted.stageInfo.numTasks,
-            stageSubmitted.stageInfo.parentIds,
-            None
-        )
-    }
-
-    def apply(stageSubmitted: SparkListenerStageSubmitted, stageCompleted: SparkListenerStageCompleted): StageTimeline = {
-        new StageTimeline(
-            stageSubmitted.stageInfo.stageId,
-            stageSubmitted.stageInfo.submissionTime.map(_ / 1000L),
-            stageSubmitted.stageInfo.numTasks,
-            stageSubmitted.stageInfo.parentIds,
-            stageCompleted.stageInfo.completionTime.map(_ / 1000L),
+            stageSubmitted.stageInfo.parentIds
         )
     }
 }

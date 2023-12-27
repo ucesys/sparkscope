@@ -82,8 +82,8 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
                 val uptime = executorTimeline.upTime(lastMetricTime)
                 Seq(
                     id,
-                    executorTimeline.getStartTime.toString,
-                    executorTimeline.getEndTime.map(_.toString).getOrElse("null"),
+                    executorTimeline.startTime.toString,
+                    executorTimeline.endTime.map(_.toString).getOrElse("null"),
                     lastMetricTime.toString,
                     uptime.toString
                 )
@@ -182,7 +182,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         val executorsMetricsMapWithZeroRows: Map[String, DataTable] = executorsMetricsMap.map { case (id, metrics) =>
             val metricsWithZeroRows = {
 
-                val executorStartTime = executorMap(id).getStartTime.map(startTime => startTime / MilliSecondsInSec).getOrElse(0L)
+                val executorStartTime = executorMap(id).startTime / MilliSecondsInSec
 
                 if (metrics.select("t").values.contains(executorStartTime.toString)) {
                     metrics

@@ -125,46 +125,46 @@ object TestHelpers extends FunSuite with MockFactory {
     val missingMetricsWarning = MissingMetricsWarning(Seq("1", "2", "3", "4", "5"), Seq("1", "2", "3", "5"))
 
     val Stages = Seq(
-        stageTimeline(1, 1695358645L, 1695358671L, 200),
-        stageTimeline(2, 1695358645L, 1695358700L, 500),
-        stageTimeline(3, 1695358645L, 1695358660L, 100),
-        stageTimeline(4, 1695358660L, 1695358671L, 200),
-        stageTimeline(5, 1695358671L, 1695358700L, 100),
-        stageTimeline(6, 1695358645L, 1695358655L, 200),
-        stageTimeline(7, 1695358655L, 1695358700L, 500),
-        stageTimeline(8, 1695358665L, 1695358680L, 100),
-        stageTimeline(9, 1695358670L, 1695358675L, 100),
-        stageTimeline(10, 1695358675L, 1695357200L, 200),
-        stageTimeline(11, 1695358675L, 1695358671L, 300),
-        stageTimeline(12, 1695358675L, 1695358700L, 400),
-        stageTimeline(13, 1695358645L, 1695358660L, 50),
-        stageTimeline(14, 1695358660L, 1695358671L, 100),
-        stageTimeline(15, 1695358671L, 1695358700L, 250),
-        stageTimeline(16, 1695358645L, 1695358655L, 50),
-        stageTimeline(17, 1695358655L, 1695358700L, 300),
-        stageTimeline(18, 1695358665L, 1695358680L, 200),
-        stageTimeline(19, 1695358670L, 1695358675L, 100),
-        stageTimeline(20, 1695358675L, 1695357200L, 300),
-        stageTimeline(21, 1695358675L, 1695358671L, 100),
-        stageTimeline(22, 1695358675L, 1695358700L, 300),
-        stageTimeline(23, 1695358645L, 1695358660L, 500),
-        stageTimeline(24, 1695358660L, 1695358671L, 100),
-        stageTimeline(25, 1695358671L, 1695358700L, 100),
-        stageTimeline(26, 1695358645L, 1695358655L, 100),
-        stageTimeline(27, 1695358655L, 1695358700L, 400),
-        stageTimeline(28, 1695358665L, 1695358680L, 300),
-        stageTimeline(29, 1695358670L, 1695358675L, 300),
-        stageTimeline(30, 1695358675L, 1695357200L, 200),
-        stageTimeline(31, 1695358675L, 1695358671L, 100),
-        stageTimeline(32, 1695358675L, 1695358700L, 200),
-        stageTimeline(33, 1695358645L, 1695358660L, 200),
-        stageTimeline(34, 1695358660L, 1695358671L, 100),
-        stageTimeline(35, 1695358671L, 1695358700L, 50),
-        stageTimeline(36, 1695358645L, 1695358655L, 300),
-        stageTimeline(37, 1695358655L, 1695358700L, 400),
-        stageTimeline(38, 1695358665L, 1695358680L, 200),
-        stageTimeline(39, 1695358670L, 1695358675L, 100),
-        stageTimeline(40, 1695358675L, 1695357200L, 100)
+        stageTimeline(1, 1695358645000L, 1695358671000L, 200),
+        stageTimeline(2, 1695358645000L, 1695358700000L, 500),
+        stageTimeline(3, 1695358645000L, 1695358660000L, 100),
+        stageTimeline(4, 1695358660000L, 1695358671000L, 200),
+        stageTimeline(5, 1695358671000L, 1695358700000L, 100),
+        stageTimeline(6, 1695358645000L, 1695358655000L, 200),
+        stageTimeline(7, 1695358655000L, 1695358700000L, 500),
+        stageTimeline(8, 1695358665000L, 1695358680000L, 100),
+        stageTimeline(9, 1695358670000L, 1695358675000L, 100),
+        stageTimeline(10, 1695358675000L, 1695357200000L, 200),
+        stageTimeline(11, 1695358675000L, 1695358671000L, 300),
+        stageTimeline(12, 1695358675000L, 1695358700000L, 400),
+        stageTimeline(13, 1695358645000L, 1695358660000L, 50),
+        stageTimeline(14, 1695358660000L, 1695358671000L, 100),
+        stageTimeline(15, 1695358671000L, 1695358700000L, 250),
+        stageTimeline(16, 1695358645000L, 1695358655000L, 50),
+        stageTimeline(17, 1695358655000L, 1695358700000L, 300),
+        stageTimeline(18, 1695358665000L, 1695358680000L, 200),
+        stageTimeline(19, 1695358670000L, 1695358675000L, 100),
+        stageTimeline(20, 1695358675000L, 1695357200000L, 300),
+        stageTimeline(21, 1695358675000L, 1695358671000L, 100),
+        stageTimeline(22, 1695358675000L, 1695358700000L, 300),
+        stageTimeline(23, 1695358645000L, 1695358660000L, 500),
+        stageTimeline(24, 1695358660000L, 1695358671000L, 100),
+        stageTimeline(25, 1695358671000L, 1695358700000L, 100),
+        stageTimeline(26, 1695358645000L, 1695358655000L, 100),
+        stageTimeline(27, 1695358655000L, 1695358700000L, 400),
+        stageTimeline(28, 1695358665000L, 1695358680000L, 300),
+        stageTimeline(29, 1695358670000L, 1695358675000L, 300),
+        stageTimeline(30, 1695358675000L, 1695357200000L, 200),
+        stageTimeline(31, 1695358675000L, 1695358671000L, 100),
+        stageTimeline(32, 1695358675000L, 1695358700000L, 200),
+        stageTimeline(33, 1695358645000L, 1695358660000L, 200),
+        stageTimeline(34, 1695358660000L, 1695358671000L, 100),
+        stageTimeline(35, 1695358671000L, 1695358700000L, 50),
+        stageTimeline(36, 1695358645000L, 1695358655000L, 300),
+        stageTimeline(37, 1695358655000L, 1695358700000L, 400),
+        stageTimeline(38, 1695358665000L, 1695358680000L, 200),
+        stageTimeline(39, 1695358670000L, 1695358675000L, 100),
+        stageTimeline(40, 1695358675000L, 1695357200000L, 100)
     )
 
     def stageTimeline(stageId: Int, start: Long, end: Long, numTasks: Long, parentsStages: Seq[Int] = Seq.empty): StageTimeline = {
@@ -175,10 +175,10 @@ object TestHelpers extends FunSuite with MockFactory {
 
     def mockAppContext(appName: String): SparkScopeContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
-            "1" -> ExecutorTimeline("1", 1, 1695358645000L, Some(1695358700000L)),
-            "2" -> ExecutorTimeline("2", 1, 1695358645000L, Some(1695358700000L)),
-            "3" -> ExecutorTimeline("3", 1, 1695358671000L, Some(1695358700000L)),
-            "5" -> ExecutorTimeline("5", 1, 1695358687000L, Some(1695358700000L))
+            "1" -> ExecutorTimeline("1", "1",1, 1695358645000L, Some(1695358700000L)),
+            "2" -> ExecutorTimeline("2", "2",1, 1695358645000L, Some(1695358700000L)),
+            "3" -> ExecutorTimeline("3", "3",1, 1695358671000L, Some(1695358700000L)),
+            "5" -> ExecutorTimeline("5", "5",1, 1695358687000L, Some(1695358700000L))
         )
 
         SparkScopeContext(
@@ -192,10 +192,10 @@ object TestHelpers extends FunSuite with MockFactory {
 
     def mockAppContextExecutorsNotRemoved(appName: String): SparkScopeContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
-            "1" -> ExecutorTimeline("1", 1, 1695358645000L, None),
-            "2" -> ExecutorTimeline("2", 1, 1695358645000L, None),
-            "3" -> ExecutorTimeline("3", 1, 1695358671000L, None),
-            "5" -> ExecutorTimeline("5", 1, 1695358687000L, None)
+            "1" -> ExecutorTimeline("1", "1",1, 1695358645000L, None),
+            "2" -> ExecutorTimeline("2", "2",1, 1695358645000L, None),
+            "3" -> ExecutorTimeline("3", "3",1, 1695358671000L, None),
+            "5" -> ExecutorTimeline("5", "5",1, 1695358687000L, None)
         )
 
         SparkScopeContext(
@@ -210,22 +210,22 @@ object TestHelpers extends FunSuite with MockFactory {
     def mockAppContextMissingExecutorMetrics(appName: String): SparkScopeContext = {
         mockAppContext(appName).copy(
             executorMap = Map(
-                "1" -> ExecutorTimeline("1", 1, 1695358645000L, Some(1695358700000L)),
-                "2" -> ExecutorTimeline("2", 1, 1695358645000L, Some(1695358700000L)),
-                "3" -> ExecutorTimeline("3", 1, 1695358671000L, Some(1695358700000L)),
-                "5" -> ExecutorTimeline("5", 1, 1695358687000L, Some(1695358700000L)),
-                "6" -> ExecutorTimeline("6", 1, 1695358687000L, Some(1695358700000L))
+                "1" -> ExecutorTimeline("1", "1", 1, 1695358645000L, Some(1695358700000L)),
+                "2" -> ExecutorTimeline("2", "2", 1, 1695358645000L, Some(1695358700000L)),
+                "3" -> ExecutorTimeline("3", "3", 1, 1695358671000L, Some(1695358700000L)),
+                "5" -> ExecutorTimeline("5", "5", 1, 1695358687000L, Some(1695358700000L)),
+                "6" -> ExecutorTimeline("6", "6", 1, 1695358687000L, Some(1695358700000L))
             )
         )
     }
 
     def mockAppContextWithDownscaling(appName: String): SparkScopeContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
-            "1" -> ExecutorTimeline("1", 1, 1695358645000L, Some(1695358700000L)),
-            "2" -> ExecutorTimeline("2", 1, 1695358645000L, Some(1695358700000L)),
-            "3" -> ExecutorTimeline("3", 1, 1695358671000L, Some(1695358700000L)),
-            "5" -> ExecutorTimeline("5", 1, 1695358687000L, Some(1695358700000L)),
-            "7" -> ExecutorTimeline("7", 1, 1695358687000L, Some(1695358715000L))
+            "1" -> ExecutorTimeline("1", "1", 1, 1695358645000L, Some(1695358700000L)),
+            "2" -> ExecutorTimeline("2", "2", 1, 1695358645000L, Some(1695358700000L)),
+            "3" -> ExecutorTimeline("3", "3", 1, 1695358671000L, Some(1695358700000L)),
+            "5" -> ExecutorTimeline("5", "5", 1, 1695358687000L, Some(1695358700000L)),
+            "7" -> ExecutorTimeline("7", "7", 1, 1695358687000L, Some(1695358715000L))
         )
 
         SparkScopeContext(
@@ -239,11 +239,11 @@ object TestHelpers extends FunSuite with MockFactory {
 
     def mockAppContextWithDownscalingMuticore(appName: String, appId: String = getAppId): SparkScopeContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
-            "1" -> ExecutorTimeline("1", 2, 1695358645000L, Some(1695358700000L)),
-            "2" -> ExecutorTimeline("2", 2, 1695358645000L, Some(1695358700000L)),
-            "3" -> ExecutorTimeline("3", 2, 1695358671000L, Some(1695358700000L)),
-            "5" -> ExecutorTimeline("5", 2, 1695358687000L, Some(1695358700000L)),
-            "7" -> ExecutorTimeline("7", 2, 1695358687000L, Some(1695358715000L))
+            "1" -> ExecutorTimeline("1", "1", 2, 1695358645000L, Some(1695358700000L)),
+            "2" -> ExecutorTimeline("2", "2", 2, 1695358645000L, Some(1695358700000L)),
+            "3" -> ExecutorTimeline("3", "3", 2, 1695358671000L, Some(1695358700000L)),
+            "5" -> ExecutorTimeline("5", "5", 2, 1695358687000L, Some(1695358700000L)),
+            "7" -> ExecutorTimeline("7", "7", 2, 1695358687000L, Some(1695358715000L))
         )
 
         SparkScopeContext(

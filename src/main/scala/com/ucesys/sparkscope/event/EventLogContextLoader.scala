@@ -30,29 +30,20 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         val appStartEvent = sparkEvents.collectFirst { case e: SparkListenerApplicationStart => e }
         val appEndEvent = sparkEvents.collectFirst { case e: SparkListenerApplicationEnd => e }
         val envUpdateEvent = sparkEvents.collectFirst { case e: SparkListenerEnvironmentUpdate => e }
-        val execAddedEvents = sparkEvents.collect { case e: SparkListenerExecutorAdded => e }
+        val executorTimelines = sparkEvents.collect { case e: SparkListenerExecutorAdded => e }.map(ExecutorTimeline(_))
         val execRemovedEvents = sparkEvents.collect { case e: SparkListenerExecutorRemoved => e }
-        val stageSubmittedEvents = sparkEvents.collect { case e: SparkListenerStageSubmitted => e }
+        val stageTimelines = sparkEvents.collect { case e: SparkListenerStageSubmitted => e }.map(StageTimeline(_))
         val stageCompletedEvents = sparkEvents.collect { case e: SparkListenerStageCompleted => e }
 
-        val stages: Seq[StageTimeline] = stageSubmittedEvents.flatMap { stageSubmission =>
-            val stageCompletion = stageCompletedEvents.find(_.stageInfo.stageId == stageSubmission.stageInfo.stageId)
-            stageCompletion match {
-                case Some(stageCompletion) => Some(StageTimeline(stageSubmission, stageCompletion))
-                case None => None
-            }
+        val stageTimelinesEnded: Seq[StageTimeline] = stageTimelines.flatMap { stageTimeline =>
+            stageCompletedEvents.find(_.stageInfo.stageId == stageTimeline.stageId).map(stageTimeline.end)
         }
 
-        val executorMap: Map[String, ExecutorTimeline] = execAddedEvents.map { execAddedEvent =>
-            (
-                execAddedEvent.executorId,
-                ExecutorTimeline(
-                    executorId=execAddedEvent.executorId,
-                    cores=execAddedEvent.executorInfo.totalCores,
-                    startTime=execAddedEvent.time,
-                    endTime=execRemovedEvents.find(_.executorId == execAddedEvent.executorId).map(_.time)
-                )
-            )
+        val executorMap: Map[String, ExecutorTimeline] = executorTimelines.map { executorTimeline =>
+            execRemovedEvents.find(_.executorId == executorTimeline.executorId) match {
+                case Some(executorRemoved) => (executorTimeline.executorId, executorTimeline.end(executorRemoved))
+                case None => (executorTimeline.executorId, executorTimeline)
+            }
         }.toMap
 
         if (appStartEvent.isEmpty || appStartEvent.get.appId.isEmpty) {
@@ -83,7 +74,7 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
             appStartTime=appStartEvent.get.time,
             appEndTime=appEndEvent.map(_.time),
             executorMap,
-            stages = stages
+            stages = stageTimelinesEnded
         )
 
         EventLogContext(sparkConf, appContext)
