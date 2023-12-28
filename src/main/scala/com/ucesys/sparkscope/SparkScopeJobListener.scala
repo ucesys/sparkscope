@@ -17,10 +17,8 @@
 
 package com.ucesys.sparkscope
 
-// TODO GET RID OF
-
 import com.ucesys.sparkscope.listener.{AggregateMetrics, StageFailure}
-import com.ucesys.sparkscope.common.{SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
 import com.ucesys.sparkscope.timeline.{ExecutorTimeline, JobTimeline, StageTimeline}
@@ -33,21 +31,23 @@ import scala.collection.mutable.ListBuffer
 
 class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
 
-    implicit val logger = new SparkScopeLogger
+    implicit private val logger = new SparkScopeLogger
 
-    private var applicationStartEvent: Option[SparkListenerApplicationStart] = None
-    protected val executorMap = new mutable.HashMap[String, ExecutorTimeline]()
-    protected val jobMap = new mutable.HashMap[Long, JobTimeline]
-    protected val stageMap = new mutable.HashMap[Int, StageTimeline]
-    protected val stageIDToJobID = new mutable.HashMap[Int, Long]
-    protected val failedStages = new ListBuffer[StageFailure]
-    protected val appMetrics = new AggregateMetrics()
+    private[sparkscope] var applicationStartEvent: Option[SparkListenerApplicationStart] = None
+    private[sparkscope] val executorMap = new mutable.HashMap[String, ExecutorTimeline]
+    private[sparkscope] val jobMap = new mutable.HashMap[Long, JobTimeline]
+    private[sparkscope] val stageMap = new mutable.HashMap[Int, StageTimeline]
+    private[sparkscope] val appMetrics = new AggregateMetrics()
+    private val failedStages = new ListBuffer[StageFailure]
 
-    private def appAggregateMetrics(): AggregateMetrics = appMetrics
-
-    private def executorAggregateMetrics(executorID: String): Option[AggregateMetrics] = {
-        executorMap.get(executorID).map(x => x.executorMetrics)
-    }
+    private[sparkscope] val sparkScopeRunner = new SparkScopeRunner(
+        sparkConf,
+        new SparkScopeConfLoader,
+        new SparkScopeAnalyzer,
+        new PropertiesLoaderFactory,
+        new MetricsLoaderFactory(new MetricReaderFactory(offline = false)),
+        new ReportGeneratorFactory
+    )
 
     private def getDriverTimePercentage(endTime: Option[Long]): Option[Double] = {
         getJobTimePercentage(endTime).map(jobTimePercentage => 1 - jobTimePercentage)
@@ -61,28 +61,8 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
             Some(jobTime / appTime)
     }
 
-    override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = {
-        val taskMetrics = taskEnd.taskMetrics
-        val taskInfo = taskEnd.taskInfo
-
-        if (taskMetrics != null) {
-            // UPDATE APP TASK METRICS
-            appMetrics.update(taskMetrics, taskInfo)
-
-            // UPDATE EXECUTOR AGG TASK METRICS
-            executorMap.get(taskInfo.executorId).foreach(_.updateAggregateTaskMetrics(taskMetrics, taskInfo))
-
-            // UPDATE STAGE AGG TASK METRICS
-            stageMap.get(taskEnd.stageId).foreach { stageTimeSpan =>
-                stageTimeSpan.updateAggregateTaskMetrics(taskMetrics, taskInfo)
-                stageTimeSpan.updateTasks(taskInfo, taskMetrics)
-            }
-
-            // UPDATE JOB AGG TASK METRICS
-            stageIDToJobID.get(taskEnd.stageId).foreach { jobID =>
-                jobMap.get(jobID).foreach(_.updateAggregateTaskMetrics(taskMetrics, taskInfo))
-            }
-        }
+    override def onTaskEnd(end: SparkListenerTaskEnd): Unit = {
+        appMetrics.update(end.taskMetrics, end.taskInfo)
     }
 
     override def onApplicationStart(applicationStart: SparkListenerApplicationStart): Unit = {
@@ -98,8 +78,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
     }
 
     override def onJobStart(jobStart: SparkListenerJobStart) {
-        jobMap(jobStart.jobId) = JobTimeline(jobStart.jobId, jobStart.time)
-        jobStart.stageIds.foreach(stageID => stageIDToJobID(stageID) = jobStart.jobId)
+        jobMap(jobStart.jobId) = JobTimeline(jobStart)
     }
 
     override def onJobEnd(jobEnd: SparkListenerJobEnd): Unit = {
@@ -118,43 +97,22 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
 
         if (stageCompleted.stageInfo.failureReason.nonEmpty) {
             val stageInfo = stageCompleted.stageInfo
-            failedStages += StageFailure(stageInfo.stageId, stageInfo.attemptNumber, stageIDToJobID(stageInfo.stageId), stageInfo.numTasks)
-        } else {
-            stageIDToJobID.get(stageCompleted.stageInfo.stageId).foreach(jobID =>
-                jobMap.get(jobID).foreach(_.addStage(stageTimelineCompleted))
-            )
+            val jobId = jobMap.find{case (_, jobTimeline) => jobTimeline.stages.contains(stageInfo.stageId)}.map{case (jobId, _) => jobId}
+            failedStages += StageFailure(stageInfo.stageId, stageInfo.attemptNumber, jobId, stageInfo.numTasks)
         }
     }
+
     override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
-
-        jobMap.foreach { case(jobId, jobTimeline) => {
-            if (jobTimeline.endTime.isEmpty) {
-                if (jobTimeline.stageMap.nonEmpty) {
-                    val lastStageEndTime: Long = jobTimeline.stageMap.map { case (_, stageTimeline) => stageTimeline.endTime.getOrElse(0L) }.max
-                    jobMap(jobId) = jobMap(jobId).copy(endTime = Some(lastStageEndTime))
-                } else {
-                    jobMap(jobId) = jobMap(jobId).copy(endTime = Some(applicationEnd.time))
-                }
-            }
-        }}
-
         val appStartEvent = applicationStartEvent.getOrElse(throw new IllegalArgumentException("App start event is empty"))
 
-        val sparkScopeRunner = new SparkScopeRunner(
-            SparkScopeContext(
-                appId = appStartEvent.appId.getOrElse(throw new IllegalArgumentException("App Id is empty")),
-                appStartTime = appStartEvent.time,
-                appEndTime = Option(applicationEnd.time),
-                executorMap = executorMap.toMap,
-                stages = stageMap.values.toSeq
-            ),
-            sparkConf,
-            new SparkScopeConfLoader,
-            new SparkScopeAnalyzer,
-            new PropertiesLoaderFactory,
-            new MetricsLoaderFactory(new MetricReaderFactory(offline = false)),
-            new ReportGeneratorFactory
+        val appContext = AppContext(
+            appId = appStartEvent.appId.getOrElse(throw new IllegalArgumentException("App Id is empty")),
+            appStartTime = appStartEvent.time,
+            appEndTime = Option(applicationEnd.time),
+            executorMap = executorMap.toMap,
+            stages = stageMap.values.toSeq
         )
-        sparkScopeRunner.run()
+
+        sparkScopeRunner.run(appContext)
     }
 }

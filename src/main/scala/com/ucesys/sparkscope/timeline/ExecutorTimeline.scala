@@ -18,18 +18,10 @@
 package com.ucesys.sparkscope.timeline
 
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.listener.AggregateMetrics
-import org.apache.spark.executor.TaskMetrics
-import org.apache.spark.scheduler.{SparkListenerExecutorAdded, SparkListenerExecutorRemoved, TaskInfo}
+import org.apache.spark.scheduler.{SparkListenerExecutorAdded, SparkListenerExecutorRemoved}
 
 case class ExecutorTimeline(executorId: String, hostId: String, cores: Int, startTime: Long, endTime: Option[Long] = None) {
-    var executorMetrics = new AggregateMetrics()
-
-    def updateAggregateTaskMetrics(taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
-        executorMetrics.update(taskMetrics, taskInfo)
-    }
-
-    def upTime(lastMetricTimeMs: Long)(implicit logger: SparkScopeLogger): Long = {
+    def duration(lastMetricTimeMs: Long)(implicit logger: SparkScopeLogger): Long = {
         val executorEndTime: Long = endTime match {
             case Some(time) => time
             case None =>

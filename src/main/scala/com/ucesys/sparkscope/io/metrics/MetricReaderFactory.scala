@@ -1,12 +1,12 @@
 package com.ucesys.sparkscope.io.metrics
 
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{SparkScopeConf, AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.io.file.FSPrefixes.HadoopFSPrefixes
 import com.ucesys.sparkscope.io.file.{HadoopFileReader, LocalFileReader}
 
 class MetricReaderFactory(offline: Boolean) {
 
-    def getMetricReader(sparkScopeConf: SparkScopeConf, appContext: SparkScopeContext)
+    def getMetricReader(sparkScopeConf: SparkScopeConf, appContext: AppContext)
                        (implicit logger: SparkScopeLogger): MetricReader = {
         if (HadoopFSPrefixes.exists(sparkScopeConf.driverMetricsDir.startsWith)) {
             new HadoopMetricReader(sparkScopeConf, new HadoopFileReader, appContext)

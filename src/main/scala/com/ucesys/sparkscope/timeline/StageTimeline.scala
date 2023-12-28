@@ -16,22 +16,9 @@
 */
 package com.ucesys.sparkscope.timeline
 
-import com.ucesys.sparkscope.listener.AggregateMetrics
-import org.apache.spark.executor.TaskMetrics
-import org.apache.spark.scheduler.{SparkListenerStageCompleted, SparkListenerStageSubmitted, TaskInfo}
-
-import scala.collection.mutable
-
-case class TaskExecutionTime(taskId: Long, executionTime: Long)
+import org.apache.spark.scheduler.{SparkListenerStageCompleted, SparkListenerStageSubmitted}
 
 case class StageTimeline(stageId: Int, startTime: Option[Long], numberOfTasks: Long, parentStageIds: Seq[Int] = Seq.empty, endTime: Option[Long] = None) {
-    var stageMetrics = new AggregateMetrics()
-    var tempTaskTimes = new mutable.ListBuffer[TaskExecutionTime]
-    var minTaskLaunchTime = Long.MaxValue
-    var maxTaskFinishTime = 0L
-
-    var taskExecutionTimes = Array.emptyIntArray
-
     def getTimeline: Seq[Long] = Seq(getTimelineStart, getTimelineCentre, getTimelineEnd).flatten
     def getTimelineStart: Option[Long] = startTime.map(start => (start / 1000L) - 1)
     def getTimelineEnd: Option[Long] = endTime.map(end => (end / 1000L) + 1)
@@ -49,33 +36,14 @@ case class StageTimeline(stageId: Int, startTime: Option[Long], numberOfTasks: L
         getTimelineStart.flatMap(start => getTimelineEnd.map(end => ts == start || ts == end)).getOrElse(false)
     }
 
-    def updateAggregateTaskMetrics(taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
-        stageMetrics.update(taskMetrics, taskInfo)
-    }
-
-    def updateTasks(taskInfo: TaskInfo, taskMetrics: TaskMetrics): Unit = {
-        if (taskInfo != null && taskMetrics != null) {
-            tempTaskTimes += TaskExecutionTime(taskInfo.taskId, taskMetrics.executorRunTime)
-            if (taskInfo.launchTime < minTaskLaunchTime) {
-                minTaskLaunchTime = taskInfo.launchTime
-            }
-            if (taskInfo.finishTime > maxTaskFinishTime) {
-                maxTaskFinishTime = taskInfo.finishTime
-            }
-        }
-    }
-
     def end(stageCompleted: SparkListenerStageCompleted): StageTimeline = {
-        taskExecutionTimes = tempTaskTimes
-          .sortWith((left, right) => left.taskId < right.taskId)
-          .map(x => x.executionTime.toInt)
-          .toArray
-
-        tempTaskTimes.clear()
-
         this.copy(
-            startTime = Some(this.startTime.getOrElse(stageCompleted.stageInfo.submissionTime.getOrElse(minTaskLaunchTime))),
-            endTime = Some(this.endTime.getOrElse(stageCompleted.stageInfo.completionTime.getOrElse(maxTaskFinishTime)))
+            startTime = Some(this.startTime.getOrElse(stageCompleted.stageInfo.submissionTime.getOrElse(
+                throw new IllegalArgumentException("Stage submission time empty!")))
+            ),
+            endTime = Some(this.endTime.getOrElse(stageCompleted.stageInfo.completionTime.getOrElse(
+                throw new IllegalArgumentException("Stage completion time empty!")))
+            )
         )
     }
 }

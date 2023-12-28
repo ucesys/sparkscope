@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.data.DataTable
-import com.ucesys.sparkscope.common.{SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.io.metrics.{DriverExecutorMetrics, HadoopMetricReader, MetricReader, MetricReaderFactory}
 import com.ucesys.sparkscope.io.property.{PropertiesLoader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.timeline.{ExecutorTimeline, StageTimeline}
@@ -173,7 +173,7 @@ object TestHelpers extends FunSuite with MockFactory {
 
     def getAppId: String = s"app-${System.currentTimeMillis()}"
 
-    def mockAppContext(appName: String): SparkScopeContext = {
+    def mockAppContext(appName: String): AppContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
             "1" -> ExecutorTimeline("1", "1",1, 1695358645000L, Some(1695358700000L)),
             "2" -> ExecutorTimeline("2", "2",1, 1695358645000L, Some(1695358700000L)),
@@ -181,7 +181,7 @@ object TestHelpers extends FunSuite with MockFactory {
             "5" -> ExecutorTimeline("5", "5",1, 1695358687000L, Some(1695358700000L))
         )
 
-        SparkScopeContext(
+        AppContext(
             s"${getAppId}-${appName}",
             StartTime,
             Some(EndTime),
@@ -190,7 +190,7 @@ object TestHelpers extends FunSuite with MockFactory {
         )
     }
 
-    def mockAppContextExecutorsNotRemoved(appName: String): SparkScopeContext = {
+    def mockAppContextExecutorsNotRemoved(appName: String): AppContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
             "1" -> ExecutorTimeline("1", "1",1, 1695358645000L, None),
             "2" -> ExecutorTimeline("2", "2",1, 1695358645000L, None),
@@ -198,7 +198,7 @@ object TestHelpers extends FunSuite with MockFactory {
             "5" -> ExecutorTimeline("5", "5",1, 1695358687000L, None)
         )
 
-        SparkScopeContext(
+        AppContext(
             s"${getAppId}${appName}",
             StartTime,
             Some(EndTime),
@@ -207,7 +207,7 @@ object TestHelpers extends FunSuite with MockFactory {
         )
     }
 
-    def mockAppContextMissingExecutorMetrics(appName: String): SparkScopeContext = {
+    def mockAppContextMissingExecutorMetrics(appName: String): AppContext = {
         mockAppContext(appName).copy(
             executorMap = Map(
                 "1" -> ExecutorTimeline("1", "1", 1, 1695358645000L, Some(1695358700000L)),
@@ -219,7 +219,7 @@ object TestHelpers extends FunSuite with MockFactory {
         )
     }
 
-    def mockAppContextWithDownscaling(appName: String): SparkScopeContext = {
+    def mockAppContextWithDownscaling(appName: String): AppContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
             "1" -> ExecutorTimeline("1", "1", 1, 1695358645000L, Some(1695358700000L)),
             "2" -> ExecutorTimeline("2", "2", 1, 1695358645000L, Some(1695358700000L)),
@@ -228,7 +228,7 @@ object TestHelpers extends FunSuite with MockFactory {
             "7" -> ExecutorTimeline("7", "7", 1, 1695358687000L, Some(1695358715000L))
         )
 
-        SparkScopeContext(
+        AppContext(
             s"${getAppId}${appName}",
             StartTime,
             Some(EndTime),
@@ -237,7 +237,7 @@ object TestHelpers extends FunSuite with MockFactory {
         )
     }
 
-    def mockAppContextWithDownscalingMuticore(appName: String, appId: String = getAppId): SparkScopeContext = {
+    def mockAppContextWithDownscalingMuticore(appName: String, appId: String = getAppId): AppContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
             "1" -> ExecutorTimeline("1", "1", 2, 1695358645000L, Some(1695358700000L)),
             "2" -> ExecutorTimeline("2", "2", 2, 1695358645000L, Some(1695358700000L)),
@@ -246,7 +246,7 @@ object TestHelpers extends FunSuite with MockFactory {
             "7" -> ExecutorTimeline("7", "7", 2, 1695358687000L, Some(1695358715000L))
         )
 
-        SparkScopeContext(
+        AppContext(
             s"${appId}${appName}",
             StartTime,
             Some(EndTime),

@@ -17,24 +17,9 @@
 
 package com.ucesys.sparkscope.timeline
 
-import com.ucesys.sparkscope.listener.AggregateMetrics
-import org.apache.spark.executor.TaskMetrics
-import org.apache.spark.scheduler.{SparkListenerJobEnd, SparkListenerJobStart, TaskInfo}
+import org.apache.spark.scheduler.{SparkListenerJobEnd, SparkListenerJobStart}
 
-import scala.collection.mutable
-
-case class JobTimeline(jobID: Long, startTime: Long, endTime: Option[Long] = None) {
-    var jobMetrics = new AggregateMetrics()
-    var stageMap = new mutable.HashMap[Int, StageTimeline]()
-
-    def addStage(stage: StageTimeline): Unit = {
-        stageMap(stage.stageId) = stage
-    }
-
-    def updateAggregateTaskMetrics(taskMetrics: TaskMetrics, taskInfo: TaskInfo): Unit = {
-        jobMetrics.update(taskMetrics, taskInfo)
-    }
-
+case class JobTimeline(jobID: Long, startTime: Long, stages: Seq[Int], endTime: Option[Long] = None) {
     def duration: Option[Long] = endTime.map(end => end - startTime)
 
     def end(jobEnd: SparkListenerJobEnd): JobTimeline = {
@@ -46,7 +31,8 @@ object JobTimeline {
     def apply(jobStart: SparkListenerJobStart): JobTimeline = {
         new JobTimeline(
             jobStart.jobId,
-            jobStart.time
+            jobStart.time,
+            jobStart.stageInfos.map(_.stageId)
         )
     }
 }

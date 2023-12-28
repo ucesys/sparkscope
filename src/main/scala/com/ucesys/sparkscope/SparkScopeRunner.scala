@@ -17,7 +17,7 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{SparkScopeConf, AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.io.metrics.MetricsLoaderFactory
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
@@ -28,22 +28,21 @@ import org.apache.spark.SparkConf
 import java.io.FileNotFoundException
 import java.nio.file.NoSuchFileException
 
-class SparkScopeRunner(appContext: SparkScopeContext,
-                       sparkConf: SparkConf,
+class SparkScopeRunner(sparkConf: SparkConf,
                        sparkScopeConfLoader: SparkScopeConfLoader,
                        sparkScopeAnalyzer: SparkScopeAnalyzer,
                        propertiesLoaderFactory: PropertiesLoaderFactory,
                        metricsLoaderFactory: MetricsLoaderFactory,
                        reportGeneratorFactory: ReportGeneratorFactory)
                       (implicit logger: SparkScopeLogger) {
-    def run(): Unit = {
+    def run(appContext: AppContext): Unit = {
         logger.info(SparkScopeSign)
 
         val sparkScopeStart = System.currentTimeMillis()
 
         try {
             val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, propertiesLoaderFactory)
-            val sparkScopeResult = this.runAnalysis(sparkScopeConf)
+            val sparkScopeResult = this.runAnalysis(sparkScopeConf, appContext)
 
             logger.info(s"${sparkScopeResult.stats.executorStats}\n")
             logger.info(s"${sparkScopeResult.stats.driverStats}\n")
@@ -62,7 +61,7 @@ class SparkScopeRunner(appContext: SparkScopeContext,
         }
     }
 
-    def runAnalysis(sparkScopeConf: SparkScopeConf): SparkScopeResult = {
+    def runAnalysis(sparkScopeConf: SparkScopeConf, appContext: AppContext): SparkScopeResult = {
         val metricsLoader = metricsLoaderFactory.get(sparkScopeConf, appContext)
         val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
         sparkScopeAnalyzer.analyze(driverExecutorMetrics, appContext)

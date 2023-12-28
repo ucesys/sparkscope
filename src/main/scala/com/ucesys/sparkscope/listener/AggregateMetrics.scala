@@ -137,20 +137,23 @@ class AggregateMetrics() {
         updateMetric(AggregateMetrics.shuffleWriteTime, tm.shuffleWriteMetrics.writeTime) //Nano to Millis
         updateMetric(AggregateMetrics.shuffleWriteBytesWritten, tm.shuffleWriteMetrics.bytesWritten)
         updateMetric(AggregateMetrics.shuffleWriteRecordsWritten, tm.shuffleWriteMetrics.recordsWritten)
+
         updateMetric(AggregateMetrics.shuffleReadFetchWaitTime, tm.shuffleReadMetrics.fetchWaitTime) //Nano to Millis
         updateMetric(AggregateMetrics.shuffleReadBytesRead, tm.shuffleReadMetrics.totalBytesRead)
         updateMetric(AggregateMetrics.shuffleReadRecordsRead, tm.shuffleReadMetrics.recordsRead)
         updateMetric(AggregateMetrics.shuffleReadLocalBlocks, tm.shuffleReadMetrics.localBlocksFetched)
         updateMetric(AggregateMetrics.shuffleReadRemoteBlocks, tm.shuffleReadMetrics.remoteBlocksFetched)
-        updateMetric(AggregateMetrics.executorRuntime, tm.executorRunTime)
-        updateMetric(AggregateMetrics.jvmGCTime, tm.jvmGCTime)
-        //updateMetric(AggregateMetrics.executorCpuTime,          tm.executorCpuTime) //Nano to Millis
-        updateMetric(AggregateMetrics.resultSize, tm.resultSize)
+
         updateMetric(AggregateMetrics.inputBytesRead, tm.inputMetrics.bytesRead)
         updateMetric(AggregateMetrics.outputBytesWritten, tm.outputMetrics.bytesWritten)
+
+        updateMetric(AggregateMetrics.jvmGCTime, tm.jvmGCTime)
+        updateMetric(AggregateMetrics.executorRuntime, tm.executorRunTime)
+        updateMetric(AggregateMetrics.resultSize, tm.resultSize)
         updateMetric(AggregateMetrics.memoryBytesSpilled, tm.memoryBytesSpilled)
         updateMetric(AggregateMetrics.diskBytesSpilled, tm.diskBytesSpilled)
         updateMetric(AggregateMetrics.peakExecutionMemory, tm.peakExecutionMemory)
+
         updateMetric(AggregateMetrics.taskDuration, ti.duration)
         count += 1
     }

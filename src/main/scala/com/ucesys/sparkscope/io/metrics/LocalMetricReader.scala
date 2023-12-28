@@ -1,12 +1,12 @@
 package com.ucesys.sparkscope.io.metrics
 
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{SparkScopeConf, AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.file.LocalFileReader
 
 import java.nio.file.Paths
 
-class LocalMetricReader(sparkScopeConf: SparkScopeConf, fileReader: LocalFileReader, appContext: SparkScopeContext)
+class LocalMetricReader(sparkScopeConf: SparkScopeConf, fileReader: LocalFileReader, appContext: AppContext)
                        (implicit logger: SparkScopeLogger)extends MetricReader {
     def readDriver: DataTable = {
         readMetric("driver")

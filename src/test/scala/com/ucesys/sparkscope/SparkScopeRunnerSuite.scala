@@ -51,7 +51,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when(*, *).returns(sparkScopeConfHtmlReportPath)
         val sparkScopeRunner = new SparkScopeRunner(
-            ac,
             new SparkConf,
             sparkScopeConfLoader,
             new SparkScopeAnalyzer,
@@ -61,7 +60,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        sparkScopeRunner.run()
+        sparkScopeRunner.run(ac)
 
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
@@ -83,7 +82,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when(*, *).returns(sparkScopeConfHtmlReportPath)
         val sparkScopeRunner = new SparkScopeRunner(
-            ac,
             new SparkConf,
             sparkScopeConfLoader,
             new SparkScopeAnalyzer,
@@ -93,7 +91,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        sparkScopeRunner.run()
+        sparkScopeRunner.run(ac)
 
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
@@ -114,7 +112,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         val sparkScopeConfLoader = stub[SparkScopeConfLoader]
         (sparkScopeConfLoader.load _).when(*, *).returns(sparkScopeConfHtmlReportPath)
         val sparkScopeRunner = new SparkScopeRunner(
-            ac,
             new SparkConf,
             sparkScopeConfLoader,
             new SparkScopeAnalyzer,
@@ -124,7 +121,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        sparkScopeRunner.run()
+        sparkScopeRunner.run(ac)
 
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
@@ -142,7 +139,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         val sparkScopeRunner = new SparkScopeRunner(
-            ac,
             new SparkConf,
             stub[SparkScopeConfLoader],
             new SparkScopeAnalyzer,
@@ -152,7 +148,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.runAnalysis")
-        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath)
+        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac)
 
         Then("Report should be generated")
         assert(result.appContext.appId == ac.appId)
@@ -214,7 +210,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         val sparkScopeRunner = new SparkScopeRunner(
-            ac,
             new SparkConf,
             stub[SparkScopeConfLoader],
             new SparkScopeAnalyzer,
@@ -224,7 +219,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath)
+        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac)
 
         Then("Report should be generated")
         assert(result.appContext.appId == ac.appId)
@@ -286,7 +281,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         val sparkScopeRunner = new SparkScopeRunner(
-            ac,
             new SparkConf,
             stub[SparkScopeConfLoader],
             new SparkScopeAnalyzer,
@@ -296,7 +290,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath)
+        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac)
 
         Then("Report should be generated")
         assert(result.appContext.appId == ac.appId)

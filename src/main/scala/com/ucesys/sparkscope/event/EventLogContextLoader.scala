@@ -2,7 +2,7 @@ package com.ucesys.sparkscope.event
 
 import com.ucesys.sparkscope.SparkScopeArgs
 import com.ucesys.sparkscope.SparkScopeConfLoader._
-import com.ucesys.sparkscope.common.{SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.event.EventLogContextLoader._
 import com.ucesys.sparkscope.io.file.FileReaderFactory
 import com.ucesys.sparkscope.timeline.{ExecutorTimeline, StageTimeline}
@@ -69,7 +69,7 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         args.htmlPath.map(sparkConf.set(SparkScopePropertyHtmlPath, _))
 
         // App Context
-        val appContext = SparkScopeContext(
+        val appContext = AppContext(
             appId=appStartEvent.get.appId.get,
             appStartTime=appStartEvent.get.time,
             appEndTime=appEndEvent.map(_.time),

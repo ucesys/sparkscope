@@ -3,7 +3,7 @@ package com.ucesys.sparkscope.io.metrics
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.s3.model.{DeleteObjectsRequest, S3Object}
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{SparkScopeConf, AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.metrics.S3CleanupMetricReader.Delimeter
 
@@ -12,7 +12,7 @@ import scala.collection.JavaConverters
 import scala.io.{BufferedSource, Source}
 
 class S3CleanupMetricReader(sparkScopeConf: SparkScopeConf,
-                            appContext: SparkScopeContext,
+                            appContext: AppContext,
                             s3: AmazonS3,
                             driverS3Location: S3Location,
                             executorS3Location: S3Location)
@@ -97,7 +97,7 @@ class S3CleanupMetricReader(sparkScopeConf: SparkScopeConf,
 object S3CleanupMetricReader {
     val Delimeter = ","
 
-    def apply(sparkScopeConf: SparkScopeConf, appContext: SparkScopeContext)(implicit logger: SparkScopeLogger) : S3CleanupMetricReader = {
+    def apply(sparkScopeConf: SparkScopeConf, appContext: AppContext)(implicit logger: SparkScopeLogger) : S3CleanupMetricReader = {
         val region = sparkScopeConf.region
         val s3: AmazonS3 = AmazonS3ClientBuilder
           .standard

@@ -17,7 +17,7 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.common.{CpuTime, JvmHeapUsed, JvmNonHeapUsed, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{CpuTime, JvmHeapUsed, JvmNonHeapUsed, AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
@@ -30,7 +30,7 @@ import scala.concurrent.duration._
 
 class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
-    def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: SparkScopeContext): SparkScopeResult = {
+    def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: AppContext): SparkScopeResult = {
         logger.println(s"\nDisplaying merged metrics for driver:\n${driverExecutorMetrics.driverMetrics}")
 
         driverExecutorMetrics.executorMetricsMap.foreach { case (id, metrics) =>
@@ -79,7 +79,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         val executorTimelineRows: Seq[Seq[String]] = executorMapWithMetrics.map {
             case (id, executorTimeline) =>
                 val lastMetricTime = executorsMetricsCombinedMapWithExecId(id).select("t").max.toLong
-                val uptime = executorTimeline.upTime(lastMetricTime)
+                val uptime = executorTimeline.duration(lastMetricTime)
                 Seq(
                     id,
                     executorTimeline.startTime.toString,
@@ -159,7 +159,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
     private def interpolateExecutorMetrics(executorMap: Map[String, ExecutorTimeline],
                                            executorsMetricsMap: Map[String, DataTable],
-                                           appContext: SparkScopeContext): Map[String, DataTable] = {
+                                           appContext: AppContext): Map[String, DataTable] = {
         /*    Interpolating executor metrics to align their timestamps for aggregations. Also adds a "zero row" with start values for when executor was added.
 
                     RAW                      INTERPOLATED
