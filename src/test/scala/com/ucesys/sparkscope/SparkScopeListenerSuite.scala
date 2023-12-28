@@ -19,7 +19,7 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.common.AppContext
-import com.ucesys.sparkscope.listener.AggregateMetrics
+import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.timeline.{ExecutorTimeline, JobTimeline, StageTimeline}
 import org.apache.spark.SparkConf
 import org.apache.spark.executor.{ExecutorMetrics, InputMetrics, OutputMetrics, ShuffleReadMetrics, ShuffleWriteMetrics, TaskMetrics}
@@ -98,20 +98,20 @@ class SparkScopeListenerSuite extends FunSuite with GivenWhenThen with MockitoSu
         listener.onTaskEnd(SparkListenerTaskEnd(stageId, 999, "task type", null, taskInfo2, executorMetrics, taskMetrics2))
 
         Then("Metrics should be aggregated correctly")
-        assert(listener.appMetrics.map(AggregateMetrics.jvmGCTime).value == 3000L)
-        assert(listener.appMetrics.map(AggregateMetrics.jvmGCTime).max == 2000L)
-        assert(listener.appMetrics.map(AggregateMetrics.jvmGCTime).min == 1000L)
-        assert(listener.appMetrics.map(AggregateMetrics.jvmGCTime).mean == 1500L)
+        assert(listener.appMetrics.jvmGCTime.sum == 3000L)
+        assert(listener.appMetrics.jvmGCTime.max == 2000L)
+        assert(listener.appMetrics.jvmGCTime.min == 1000L)
+        assert(listener.appMetrics.jvmGCTime.mean == 1500L)
 
-        assert(listener.appMetrics.map(AggregateMetrics.diskBytesSpilled).value == 2500L)
-        assert(listener.appMetrics.map(AggregateMetrics.diskBytesSpilled).max == 1500L)
-        assert(listener.appMetrics.map(AggregateMetrics.diskBytesSpilled).min == 1000L)
-        assert(listener.appMetrics.map(AggregateMetrics.diskBytesSpilled).mean == 1250L)
+        assert(listener.appMetrics.diskBytesSpilled.sum == 2500L)
+        assert(listener.appMetrics.diskBytesSpilled.max == 1500L)
+        assert(listener.appMetrics.diskBytesSpilled.min == 1000L)
+        assert(listener.appMetrics.diskBytesSpilled.mean == 1250L)
 
-        assert(listener.appMetrics.map(AggregateMetrics.memoryBytesSpilled).value == 3000L)
-        assert(listener.appMetrics.map(AggregateMetrics.jvmGCTime).max == 2000L)
-        assert(listener.appMetrics.map(AggregateMetrics.jvmGCTime).min == 1000L)
-        assert(listener.appMetrics.map(AggregateMetrics.jvmGCTime).mean == 1500L)
+        assert(listener.appMetrics.memoryBytesSpilled.sum == 3000L)
+        assert(listener.appMetrics.jvmGCTime.max == 2000L)
+        assert(listener.appMetrics.jvmGCTime.min == 1000L)
+        assert(listener.appMetrics.jvmGCTime.mean == 1500L)
     }
 
     test("SparkScopeListener onExecutorAdded") {

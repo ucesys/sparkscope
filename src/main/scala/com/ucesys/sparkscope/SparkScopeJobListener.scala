@@ -17,7 +17,7 @@
 
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.listener.{AggregateMetrics, StageFailure}
+import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.common.{AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
@@ -31,14 +31,14 @@ import scala.collection.mutable.ListBuffer
 
 class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
 
-    implicit private val logger = new SparkScopeLogger
+    implicit private val logger: SparkScopeLogger = new SparkScopeLogger
 
     private[sparkscope] var applicationStartEvent: Option[SparkListenerApplicationStart] = None
     private[sparkscope] val executorMap = new mutable.HashMap[String, ExecutorTimeline]
     private[sparkscope] val jobMap = new mutable.HashMap[Long, JobTimeline]
     private[sparkscope] val stageMap = new mutable.HashMap[Int, StageTimeline]
-    private[sparkscope] val appMetrics = new AggregateMetrics()
-    private val failedStages = new ListBuffer[StageFailure]
+    private[sparkscope] val appMetrics = TaskAggMetrics()
+    private val failedStages = new ListBuffer[Int]
 
     private[sparkscope] val sparkScopeRunner = new SparkScopeRunner(
         sparkConf,
@@ -62,7 +62,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
     }
 
     override def onTaskEnd(end: SparkListenerTaskEnd): Unit = {
-        appMetrics.update(end.taskMetrics, end.taskInfo)
+        appMetrics.aggregate(end.taskMetrics, end.taskInfo)
     }
 
     override def onApplicationStart(applicationStart: SparkListenerApplicationStart): Unit = {
@@ -95,10 +95,9 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
         val stageTimelineCompleted = stageMap(stageCompleted.stageInfo.stageId).end(stageCompleted)
         stageMap(stageCompleted.stageInfo.stageId) = stageTimelineCompleted
 
-        if (stageCompleted.stageInfo.failureReason.nonEmpty) {
-            val stageInfo = stageCompleted.stageInfo
-            val jobId = jobMap.find{case (_, jobTimeline) => jobTimeline.stages.contains(stageInfo.stageId)}.map{case (jobId, _) => jobId}
-            failedStages += StageFailure(stageInfo.stageId, stageInfo.attemptNumber, jobId, stageInfo.numTasks)
+        stageCompleted.stageInfo.failureReason.foreach { reason =>
+            logger.warn(s"Stage ${stageCompleted.stageInfo.stageId} failed with reason: ${reason}")
+            failedStages += stageCompleted.stageInfo.stageId
         }
     }
 
