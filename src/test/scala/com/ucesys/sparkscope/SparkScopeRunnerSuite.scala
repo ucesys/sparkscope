@@ -34,7 +34,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
     override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
 
     val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
-    val SparkLensOutput = Seq("Executor Timeline", "StageSkewAnalyzer text...")
 
     test("SparkScopeRunner.run upscaling test") {
         Given("Metrics for application which was upscaled")

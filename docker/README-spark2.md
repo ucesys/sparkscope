@@ -85,12 +85,3 @@ coreHoursWasted=coreHoursAllocated(0.0042)*cpuUtilization(0.6835)
 
 28/09/2023 01:20:22 INFO [SparkScope] Wrote HTML report file to /tmp/app-20230928132004-0012.html
 ```
-# Sparklens testing #
-
-Download sparklens, spark-examples, http-mime jars(http-mime needed to test email generation feature) 
-```
-mkdir -p docker/lib
-curl https://repo1.maven.org/maven2/org/apache/spark/spark-examples_2.10/1.1.1/spark-examples_2.10-1.1.1.jar --output ./docker/lib/spark-examples_2.10-1.1.1.jar
-curl https://repos.spark-packages.org/qubole/sparklens/0.3.2-s_2.11/sparklens-0.3.2-s_2.11.jar --output ./docker/lib/sparklens-0.3.2-s_2.11.jar
-curl https://repo1.maven.org/maven2/org/apache/httpcomponents/httpmime/4.5.14/httpmime-4.5.14.jar --output ./docker/lib/httpmime-4.5.14.jar
-```

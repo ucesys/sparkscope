@@ -32,7 +32,6 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
     override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
 
     val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir)
-    val SparkLensOutput = Seq("Executor Timeline", "StageSkewAnalyzer text...")
 
     test("SparkScopeApp.runFromEventLog for finished application ") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
