@@ -1,12 +1,11 @@
-package com.ucesys.sparkscope.event
+package com.ucesys.sparkscope
 
+import com.ucesys.sparkscope.EventLogRunner._
 import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.event.EventLogRunner._
 import com.ucesys.sparkscope.io.file.FileReaderFactory
-import com.ucesys.sparkscope.{SparkScopeArgs, SparkScopeJobListener}
-import org.apache.spark.{SparkConf, SparkEventParser}
 import org.apache.spark.scheduler._
+import org.apache.spark.{SparkConf, SparkEventParser}
 import org.json4s._
 import org.json4s.jackson.JsonMethods
 

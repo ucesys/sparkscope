@@ -17,7 +17,6 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.event.{EventLogContextLoader, EventLogRunner}
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.file.FileReaderFactory
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}

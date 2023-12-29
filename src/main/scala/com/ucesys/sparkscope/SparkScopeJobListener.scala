@@ -26,13 +26,17 @@ import org.apache.spark.scheduler._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunner = SparkScopeRunner()) extends SparkListener {
+class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunner) extends SparkListener {
     private[sparkscope] var applicationStartEvent: Option[SparkListenerApplicationStart] = None
     private[sparkscope] val executorMap = new mutable.HashMap[String, ExecutorTimeline]
     private[sparkscope] val jobMap = new mutable.HashMap[Long, JobTimeline]
     private[sparkscope] val stageMap = new mutable.HashMap[Int, StageTimeline]
     private[sparkscope] val appMetrics = TaskAggMetrics()
     private val failedStages = new ListBuffer[Int]
+
+    def this(sparkConf: SparkConf) = {
+        this(sparkConf, SparkScopeRunner())
+    }
 
     private def getDriverTimePercentage(endTime: Option[Long]): Option[Double] = {
         getJobTimePercentage(endTime).map(jobTimePercentage => 1 - jobTimePercentage)
@@ -67,7 +71,9 @@ class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunn
     }
 
     override def onExecutorRemoved(executorRemoved: SparkListenerExecutorRemoved): Unit = {
-        executorMap(executorRemoved.executorId) =  executorMap(executorRemoved.executorId).end(executorRemoved)
+        executorMap.get(executorRemoved.executorId).foreach{ executorTimeline =>
+            executorMap(executorRemoved.executorId) = executorTimeline.end(executorRemoved)
+        }
     }
 
     override def onJobStart(jobStart: SparkListenerJobStart) {
@@ -85,8 +91,9 @@ class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunn
     }
 
     override def onStageCompleted(stageCompleted: SparkListenerStageCompleted): Unit = {
-        val stageTimelineCompleted = stageMap(stageCompleted.stageInfo.stageId).end(stageCompleted)
-        stageMap(stageCompleted.stageInfo.stageId) = stageTimelineCompleted
+        stageMap.get(stageCompleted.stageInfo.stageId).foreach { stageTimeline =>
+            stageMap(stageCompleted.stageInfo.stageId) = stageTimeline.end(stageCompleted)
+        }
 
         stageCompleted.stageInfo.failureReason.foreach { reason =>
             runner.logger.warn(s"Stage ${stageCompleted.stageInfo.stageId} failed with reason: ${reason}")

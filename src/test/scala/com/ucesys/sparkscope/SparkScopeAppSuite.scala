@@ -19,11 +19,9 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.event.EventLogContextLoader
-import com.ucesys.sparkscope.io._
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.file.FileReaderFactory
-import com.ucesys.sparkscope.io.metrics.{CsvMetricsLoader, HadoopMetricReader, MetricReaderFactory, MetricsLoaderFactory}
+import com.ucesys.sparkscope.io.metrics.{CsvMetricsLoader, HadoopMetricReader, MetricsLoaderFactory}
 import com.ucesys.sparkscope.view.ReportGeneratorFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}

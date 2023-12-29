@@ -85,7 +85,7 @@ spark-submit \
 --conf spark.executor.instances=1 \
 --conf spark.cores.max=4 \
 --class com.ucesys.sparkscope.WordCount \
-/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT-tests.jar /tmp/jars/long500mb.txt 10000
+/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT-tests.jar /tmp/jars/long500mb.txt 1000
 ```
 csv hdfs metrics executors(--files only)
 ```bash
