@@ -18,36 +18,21 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.agg.TaskAggMetrics
-import com.ucesys.sparkscope.common.{AppContext, SparkScopeLogger}
-import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
-import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
+import com.ucesys.sparkscope.common.AppContext
 import com.ucesys.sparkscope.timeline.{ExecutorTimeline, JobTimeline, StageTimeline}
-import com.ucesys.sparkscope.view.ReportGeneratorFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
-
-    implicit private val logger: SparkScopeLogger = new SparkScopeLogger
-
+class SparkScopeJobListener(sparkConf: SparkConf, val runner: SparkScopeRunner = SparkScopeRunner()) extends SparkListener {
     private[sparkscope] var applicationStartEvent: Option[SparkListenerApplicationStart] = None
     private[sparkscope] val executorMap = new mutable.HashMap[String, ExecutorTimeline]
     private[sparkscope] val jobMap = new mutable.HashMap[Long, JobTimeline]
     private[sparkscope] val stageMap = new mutable.HashMap[Int, StageTimeline]
     private[sparkscope] val appMetrics = TaskAggMetrics()
     private val failedStages = new ListBuffer[Int]
-
-    private[sparkscope] val sparkScopeRunner = new SparkScopeRunner(
-        sparkConf,
-        new SparkScopeConfLoader,
-        new SparkScopeAnalyzer,
-        new PropertiesLoaderFactory,
-        new MetricsLoaderFactory(new MetricReaderFactory(offline = false)),
-        new ReportGeneratorFactory
-    )
 
     private def getDriverTimePercentage(endTime: Option[Long]): Option[Double] = {
         getJobTimePercentage(endTime).map(jobTimePercentage => 1 - jobTimePercentage)
@@ -96,7 +81,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
         stageMap(stageCompleted.stageInfo.stageId) = stageTimelineCompleted
 
         stageCompleted.stageInfo.failureReason.foreach { reason =>
-            logger.warn(s"Stage ${stageCompleted.stageInfo.stageId} failed with reason: ${reason}")
+            runner.logger.warn(s"Stage ${stageCompleted.stageInfo.stageId} failed with reason: ${reason}")
             failedStages += stageCompleted.stageInfo.stageId
         }
     }
@@ -112,6 +97,6 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends SparkListener {
             stages = stageMap.values.toSeq
         )
 
-        sparkScopeRunner.run(appContext)
+        runner.run(appContext, sparkConf)
     }
 }

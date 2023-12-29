@@ -17,9 +17,9 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.common.{SparkScopeConf, AppContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{AppContext, SparkScopeConf, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
-import com.ucesys.sparkscope.io.metrics.MetricsLoaderFactory
+import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 import com.ucesys.sparkscope.view.ReportGeneratorFactory
@@ -28,14 +28,13 @@ import org.apache.spark.SparkConf
 import java.io.FileNotFoundException
 import java.nio.file.NoSuchFileException
 
-class SparkScopeRunner(sparkConf: SparkConf,
-                       sparkScopeConfLoader: SparkScopeConfLoader,
+class SparkScopeRunner(sparkScopeConfLoader: SparkScopeConfLoader,
                        sparkScopeAnalyzer: SparkScopeAnalyzer,
                        propertiesLoaderFactory: PropertiesLoaderFactory,
                        metricsLoaderFactory: MetricsLoaderFactory,
                        reportGeneratorFactory: ReportGeneratorFactory)
-                      (implicit logger: SparkScopeLogger) {
-    def run(appContext: AppContext): Unit = {
+                      (implicit val logger: SparkScopeLogger) {
+    def run(appContext: AppContext, sparkConf: SparkConf): Unit = {
         logger.info(SparkScopeSign)
 
         val sparkScopeStart = System.currentTimeMillis()
@@ -77,4 +76,15 @@ object SparkScopeRunner {
           |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
           |     /_/                             /_/    spark3-v0.1.7
           |""".stripMargin
+
+    def apply(): SparkScopeRunner = {
+        implicit val logger = new SparkScopeLogger
+        new SparkScopeRunner(
+            new SparkScopeConfLoader,
+            new SparkScopeAnalyzer,
+            new PropertiesLoaderFactory,
+            new MetricsLoaderFactory(new MetricReaderFactory(offline = false)),
+            new ReportGeneratorFactory
+        )
+    }
 }

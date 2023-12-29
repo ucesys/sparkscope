@@ -54,13 +54,12 @@ object SparkScopeApp {
         val eventLogCtx = eventLogContextLoader.load(fileReaderFactory, sparkScopeArgs)
 
         val sparkScopeRunner = new SparkScopeRunner(
-            eventLogCtx.sparkConf,
             sparkScopeConfLoader,
             sparkScopeAnalyzer,
             propertiesLoaderFactory,
             metricsLoaderFactory,
             reportGeneratorFactory
         )
-        sparkScopeRunner.run(eventLogCtx.appContext)
+        sparkScopeRunner.run(eventLogCtx.appContext, eventLogCtx.sparkConf)
     }
 }
