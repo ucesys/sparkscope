@@ -18,7 +18,7 @@ class EventLogRunner(listener: SparkScopeJobListener)(implicit logger: SparkScop
         val eventLogJsonSeqPreFiltered: Seq[String] = eventLogJsonStrSeq.filter(event => AllEvents.exists(event.contains))
         logger.info(s"Prefiltered ${eventLogJsonSeqPreFiltered.length} events")
 
-        val sparkEvents = eventLogJsonSeqPreFiltered.map(JsonMethods.parse(_)).flatMap(SparkEventParser.parse(_))
+        val sparkEvents = eventLogJsonSeqPreFiltered.flatMap(JsonMethods.parseOpt(_)).flatMap(SparkEventParser.parse(_))
         logger.info(s"Parsed ${sparkEvents.length} events")
 
         val envUpdateEventWithOverrides = {
@@ -47,7 +47,7 @@ class EventLogRunner(listener: SparkScopeJobListener)(implicit logger: SparkScop
             case e: SparkListenerApplicationEnd => listener.onApplicationEnd(e)
             case e: SparkListenerExecutorAdded => listener.onExecutorAdded(e)
             case e: SparkListenerExecutorRemoved => listener.onExecutorRemoved(e)
-            case e: SparkListenerJobStart=> listener.onJobStart(e)
+            case e: SparkListenerJobStart => listener.onJobStart(e)
             case e: SparkListenerJobEnd => listener.onJobEnd(e)
             case e: SparkListenerStageSubmitted => listener.onStageSubmitted(e)
             case e: SparkListenerStageCompleted => listener.onStageCompleted(e)
@@ -64,6 +64,8 @@ object EventLogRunner {
     val EventExecutorRemoved = "SparkListenerExecutorRemoved"
     val EventStageSubmitted = "SparkListenerStageSubmitted"
     val EventStageCompleted = "SparkListenerStageCompleted"
+    val EventJobStart = "SparkListenerJobStart"
+    val EventJobEnd = "SparkListenerJobEnd"
 
     val AllEvents = Seq(
         EventEnvUpdate,
@@ -72,6 +74,8 @@ object EventLogRunner {
         EventExecutorAdded,
         EventExecutorRemoved,
         EventStageSubmitted,
-        EventStageCompleted
+        EventStageCompleted,
+        EventJobStart,
+        EventJobEnd
     )
 }
