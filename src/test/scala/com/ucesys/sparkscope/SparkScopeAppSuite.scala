@@ -53,7 +53,6 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         SparkScopeApp.runFromEventLog(
             SparkScopeArgs(eventLogPath, None, None, None),
             new SparkScopeAnalyzer,
-            new EventLogContextLoader,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
@@ -82,7 +81,6 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         SparkScopeApp.runFromEventLog(
             SparkScopeArgs(eventLogPath, None, None, None),
             new SparkScopeAnalyzer,
-            new EventLogContextLoader,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
@@ -111,7 +109,6 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         SparkScopeApp.runFromEventLog(
             SparkScopeArgs(eventLogPath, None, None, None),
             new SparkScopeAnalyzer,
-            new EventLogContextLoader,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
@@ -140,7 +137,6 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         SparkScopeApp.runFromEventLog(
             SparkScopeArgs(eventLogPath, None, None, None),
             new SparkScopeAnalyzer,
-            new EventLogContextLoader,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
@@ -169,7 +165,6 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         SparkScopeApp.runFromEventLog(
             SparkScopeArgs(eventLogPath, None, None, None),
             new SparkScopeAnalyzer,
-            new EventLogContextLoader,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
@@ -198,7 +193,6 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         SparkScopeApp.runFromEventLog(
             SparkScopeArgs(eventLogPath, None, None, Some(".tests")),
             new SparkScopeAnalyzer,
-            new EventLogContextLoader,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,

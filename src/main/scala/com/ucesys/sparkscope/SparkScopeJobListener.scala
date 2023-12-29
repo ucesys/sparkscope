@@ -26,7 +26,7 @@ import org.apache.spark.scheduler._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-class SparkScopeJobListener(sparkConf: SparkConf, val runner: SparkScopeRunner = SparkScopeRunner()) extends SparkListener {
+class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunner = SparkScopeRunner()) extends SparkListener {
     private[sparkscope] var applicationStartEvent: Option[SparkListenerApplicationStart] = None
     private[sparkscope] val executorMap = new mutable.HashMap[String, ExecutorTimeline]
     private[sparkscope] val jobMap = new mutable.HashMap[Long, JobTimeline]
@@ -44,6 +44,14 @@ class SparkScopeJobListener(sparkConf: SparkConf, val runner: SparkScopeRunner =
             val appTime = endTime - applicationStartEvent.map(_.time).getOrElse(0L)
             val jobTime = jobMap.values.flatMap(_.duration).sum
             Some(jobTime / appTime)
+    }
+
+    override def onEnvironmentUpdate(environmentUpdate: SparkListenerEnvironmentUpdate): Unit = {
+        val sparkConfUpdated = new SparkConf(false)
+
+        environmentUpdate.environmentDetails.get("Spark Properties").foreach(_.foreach { case (key, value) => sparkConfUpdated.set(key, value) })
+
+        this.sparkConf = sparkConfUpdated
     }
 
     override def onTaskEnd(end: SparkListenerTaskEnd): Unit = {

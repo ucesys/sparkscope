@@ -8,9 +8,7 @@ import com.ucesys.sparkscope.io.file.FileReaderFactory
 import com.ucesys.sparkscope.timeline.{ExecutorTimeline, StageTimeline}
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkEventParser
-import org.apache.spark.scheduler.{SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerEnvironmentUpdate, SparkListenerExecutorAdded, SparkListenerExecutorRemoved, SparkListenerStageCompleted, SparkListenerStageSubmitted}
-import org.json4s.DefaultFormats
-
+import org.apache.spark.scheduler.{SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerEnvironmentUpdate, SparkListenerExecutorAdded, SparkListenerExecutorRemoved, SparkListenerJobEnd, SparkListenerJobStart, SparkListenerStageCompleted, SparkListenerStageSubmitted, SparkListenerTaskEnd}
 import org.json4s._
 import org.json4s.jackson.JsonMethods
 
@@ -23,7 +21,6 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         val eventLogJsonSeqPreFiltered: Seq[String] = eventLogJsonStrSeq.filter(event => AllEvents.exists(event.contains))
         logger.info(s"Prefiltered ${eventLogJsonSeqPreFiltered.length} events")
 
-        implicit val formats = DefaultFormats
         val sparkEvents = eventLogJsonSeqPreFiltered.map(JsonMethods.parse(_)).flatMap(SparkEventParser.parse(_))
         logger.info(s"Parsed ${sparkEvents.length} events")
 
@@ -99,8 +96,4 @@ object EventLogContextLoader {
         EventStageSubmitted,
         EventStageCompleted
     )
-
-    val ColEvent = "Event"
-    val ColTimeStamp = "Timestamp"
-    val ColExecutorId = "Executor ID"
 }

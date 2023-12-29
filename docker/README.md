@@ -67,9 +67,9 @@ local metrics(--jars and --files)
 ```bash
 spark-submit \
 --master spark://spark-master:7077 \
---jars /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---files /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=/tmp/spark-events \
@@ -85,7 +85,7 @@ spark-submit \
 --conf spark.executor.instances=1 \
 --conf spark.cores.max=4 \
 --class com.ucesys.sparkscope.WordCount \
-/tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT-tests.jar /tmp/jars/long500mb.txt 10000
+/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT-tests.jar /tmp/jars/long500mb.txt 10000
 ```
 csv hdfs metrics executors(--files only)
 ```bash
@@ -114,9 +114,9 @@ s3 metrics
 ```bash
 spark-submit \
 --master spark://spark-master:7077 \
---jars /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---files /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=/tmp/spark-events \
@@ -134,16 +134,16 @@ spark-submit \
 --conf spark.executor.instances=2 \
 --conf spark.cores.max=4 \
 --class com.ucesys.sparkscope.WordCount \
-/tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT-tests.jar /tmp/jars/test.txt 100
+/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT-tests.jar /tmp/jars/test.txt 100
 ```
 
 s3 metrics & eventlog s3
 ```bash
 spark-submit \
 --master spark://spark-master:7077 \
---jars /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---files /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=s3a://ucesys-sparkscope-metrics/spark-events \
@@ -166,9 +166,9 @@ s3 metrics & html report s3
 ```bash
 spark-submit \
 --master spark://spark-master:7077 \
---jars /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---files /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=/tmp/spark-events \
@@ -185,16 +185,16 @@ spark-submit \
 --conf spark.executor.instances=2 \
 --conf spark.cores.max=4 \
 --class com.ucesys.sparkscope.WordCount \
-/tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT-tests.jar /tmp/jars/long1gb.txt 10000
+/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT-tests.jar /tmp/jars/long1gb.txt 10000
 ```
 
 s3 metrics & eventlog & html report s3
 ```bash
 spark-submit \
 --master spark://spark-master:7077 \
---jars /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---files /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--files /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=s3a://ucesys-sparkscope-metrics/spark-events \
@@ -211,9 +211,9 @@ spark-submit \
 --conf spark.executor.instances=2 \
 --conf spark.cores.max=4 \
 --class com.ucesys.sparkscope.WordCount \
-/tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT-tests.jar ./long.txt 2000
+/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT-tests.jar ./long.txt 2000
 ```
 ### Running SparkScope as standalone app
 ```agsl
-java -cp /tmp/jars/sparkscope-spark3-0.1.7-SNAPSHOT.jar:./jars/* com.ucesys.sparkscope.SparkScopeApp --event-log /tmp/spark-events/app-20231129134104-0001
+java -cp /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar:./jars/* com.ucesys.sparkscope.SparkScopeApp --event-log /tmp/spark-events/app-20231129134104-0001
 ```
