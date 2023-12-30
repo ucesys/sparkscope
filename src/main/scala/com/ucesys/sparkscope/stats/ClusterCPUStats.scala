@@ -1,7 +1,8 @@
-package com.ucesys.sparkscope.metrics
+package com.ucesys.sparkscope.stats
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.common.CpuTime
+import com.ucesys.sparkscope.metrics.ClusterCPUMetrics
 
 case class ClusterCPUStats(cpuUtil: Double,
                            cpuNotUtil: Double,

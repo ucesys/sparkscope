@@ -338,9 +338,9 @@ class SparkScopeListenerSuite extends FunSuite with GivenWhenThen with MockitoSu
         assert(listener.appMetrics.diskBytesSpilled.mean == 1250L)
 
         assert(listener.appMetrics.memoryBytesSpilled.sum == 3000L)
-        assert(listener.appMetrics.jvmGCTime.max == 2000L)
-        assert(listener.appMetrics.jvmGCTime.min == 1000L)
-        assert(listener.appMetrics.jvmGCTime.mean == 1500L)
+        assert(listener.appMetrics.memoryBytesSpilled.max == 2000L)
+        assert(listener.appMetrics.memoryBytesSpilled.min == 1000L)
+        assert(listener.appMetrics.memoryBytesSpilled.mean == 1500L)
 
         Then("sparkScopeRunner.run should be called")
         verify(runnerMock, times(1)).run(any[AppContext], any[SparkConf])

@@ -51,6 +51,7 @@ class EventLogRunner(listener: SparkScopeJobListener)(implicit logger: SparkScop
             case e: SparkListenerJobEnd => listener.onJobEnd(e)
             case e: SparkListenerStageSubmitted => listener.onStageSubmitted(e)
             case e: SparkListenerStageCompleted => listener.onStageCompleted(e)
+            case e: SparkListenerTaskEnd => listener.onTaskEnd(e)
             case _ =>
         }
     }
@@ -66,6 +67,7 @@ object EventLogRunner {
     val EventStageCompleted = "SparkListenerStageCompleted"
     val EventJobStart = "SparkListenerJobStart"
     val EventJobEnd = "SparkListenerJobEnd"
+    val EventTaskEnd = "SparkListenerTaskEnd"
 
     val AllEvents = Seq(
         EventEnvUpdate,
@@ -76,6 +78,7 @@ object EventLogRunner {
         EventStageSubmitted,
         EventStageCompleted,
         EventJobStart,
-        EventJobEnd
+        EventJobEnd,
+        EventTaskEnd
     )
 }

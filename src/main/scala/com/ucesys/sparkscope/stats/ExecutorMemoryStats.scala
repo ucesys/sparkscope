@@ -1,6 +1,5 @@
-package com.ucesys.sparkscope.metrics
+package com.ucesys.sparkscope.stats
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.common.MemorySize.BytesInMB
 import com.ucesys.sparkscope.common.{JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed}
 import com.ucesys.sparkscope.data.DataTable

@@ -17,12 +17,13 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.common.{CpuTime, JvmHeapUsed, JvmNonHeapUsed, AppContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{AppContext, CpuTime, JvmHeapUsed, JvmNonHeapUsed, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.metrics.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
+import com.ucesys.sparkscope.stats.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats, SparkScopeStats}
 import com.ucesys.sparkscope.timeline.ExecutorTimeline
 import com.ucesys.sparkscope.warning.{CPUUtilWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
 

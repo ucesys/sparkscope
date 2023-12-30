@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.metrics
+package com.ucesys.sparkscope.stats
 
 case class SparkScopeStats(driverStats: DriverMemoryStats,
                            executorStats: ExecutorMemoryStats,
