@@ -5,7 +5,7 @@ import org.apache.spark.SparkConf
 case class SparkScopeConf(driverMetricsDir: String,
                           executorMetricsDir: String,
                           htmlReportPath: String,
-                          logPath: Option[String],
+                          logPath: String,
                           appName: Option[String],
                           region: Option[String],
                           driverMemOverhead: MemorySize,

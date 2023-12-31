@@ -1,12 +1,17 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.SparkScopeConfLoader._
-import com.ucesys.sparkscope.common.{MemorySize, SparkScopeConf, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{LogLevel, MemorySize, SparkScopeConf, SparkScopeLogger}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
 import org.apache.spark.SparkConf
 
 class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
     def load(sparkConf: SparkConf, propertiesLoaderFactory: PropertiesLoaderFactory): SparkScopeConf = {
+
+        val logLevel = sparkConf.getOption(SparkScopePropertyLogLevel).map(LogLevel.fromString).getOrElse(LogLevel.Info)
+        logger.level = logLevel
+        logger.info(s"Log level set to ${logLevel.toString.toUpperCase}")
+
         val driverMetricsDir: Option[String] = sparkConf match {
             case sparkConf if sparkConf.contains(SparkScopePropertyDriverMetricsDir) =>
                 logger.info(s"Setting driver metrics dir to ${SparkScopePropertyDriverMetricsDir}")
@@ -73,7 +78,7 @@ class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
             driverMetricsDir = driverMetricsDir.get,
             executorMetricsDir = executorMetricsDir.get,
             htmlReportPath = sparkConf.get(SparkScopePropertyHtmlPath, "/tmp/"),
-            logPath = sparkConf.getOption(SparkScopePropertyLogPath),
+            logPath = sparkConf.get(SparkScopePropertyLogPath, "/tmp/"),
             appName = sparkConf.getOption(SparkPropertyMetricsConfAppName),
             region = sparkConf.getOption(SparkPropertyMetricsConfS3Region),
             driverMemOverhead = driverMemOverhead,
@@ -129,6 +134,7 @@ object SparkScopeConfLoader {
     val SparkScopePropertyDriverMetricsDir = "spark.sparkscope.metrics.dir.driver"
     val SparkScopePropertyHtmlPath = "spark.sparkscope.html.path"
     val SparkScopePropertyLogPath = "spark.sparkscope.log.path"
+    val SparkScopePropertyLogLevel = "spark.sparkscope.log.level"
     val SparkScopePropertyDriverMem = "spark.driver.memory"
     val SparkScopePropertyDriverMemOverhead = "spark.driver.memoryOverhead"
     val SparkScopePropertyDriverMemOverheadFactor = "spark.driver.memoryOverheadFactor"
