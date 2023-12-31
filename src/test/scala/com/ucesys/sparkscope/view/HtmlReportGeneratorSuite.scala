@@ -34,9 +34,9 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
 
     test("SparkScope end2end no warnings") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        Given("HtmlReportGenerator ")
+        Given("HtmlReportGenerator with logging to file enabled")
         val htmlReportGenerator = new HtmlReportGenerator(
-            sparkScopeConf.copy(htmlReportPath = TestDir, appName = Some("MyApp")),
+            sparkScopeConf.copy(htmlReportPath = TestDir, logPath = Some(TestDir), appName = Some("MyApp")),
             fileWriter=fileWriter
         )
 
@@ -64,8 +64,10 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
 
     test("SparkScope end2end with warnings") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
-        Given("HtmlReportGenerator ")
-        val htmlReportGenerator = new HtmlReportGenerator(sparkScopeConf.copy(htmlReportPath = TestDir, appName = Some("MyApp")), fileWriter=fileWriter)
+        Given("HtmlReportGenerator with logging to file enabled")
+        val htmlReportGenerator = new HtmlReportGenerator(
+            sparkScopeConf.copy(htmlReportPath = TestDir, logPath = Some(TestDir), appName = Some("MyApp")), fileWriter=fileWriter
+        )
 
         And("SparkScopeResult")
         val ac = mockAppContextMissingExecutorMetrics("html-generator-with-warnings")
