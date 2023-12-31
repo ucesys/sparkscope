@@ -19,6 +19,7 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.common.{AppContext, SparkScopeConf, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
+import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
 import com.ucesys.sparkscope.metrics.SparkScopeResult
@@ -34,14 +35,14 @@ class SparkScopeRunner(sparkScopeConfLoader: SparkScopeConfLoader,
                        metricsLoaderFactory: MetricsLoaderFactory,
                        reportGeneratorFactory: ReportGeneratorFactory)
                       (implicit val logger: SparkScopeLogger) {
-    def run(appContext: AppContext, sparkConf: SparkConf): Unit = {
+    def run(appContext: AppContext, sparkConf: SparkConf, taskAggMetrics: TaskAggMetrics): Unit = {
         logger.info(SparkScopeSign, this.getClass)
 
         val sparkScopeStart = System.currentTimeMillis()
 
         try {
             val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, propertiesLoaderFactory)
-            val sparkScopeResult = this.runAnalysis(sparkScopeConf, appContext)
+            val sparkScopeResult = this.runAnalysis(sparkScopeConf, appContext, taskAggMetrics)
 
             logger.info(s"${sparkScopeResult.stats.executorStats}\n", this.getClass)
             logger.info(s"${sparkScopeResult.stats.driverStats}\n", this.getClass)
@@ -60,10 +61,10 @@ class SparkScopeRunner(sparkScopeConfLoader: SparkScopeConfLoader,
         }
     }
 
-    def runAnalysis(sparkScopeConf: SparkScopeConf, appContext: AppContext): SparkScopeResult = {
+    def runAnalysis(sparkScopeConf: SparkScopeConf, appContext: AppContext, taskAggMetrics: TaskAggMetrics): SparkScopeResult = {
         val metricsLoader = metricsLoaderFactory.get(sparkScopeConf, appContext)
         val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
-        sparkScopeAnalyzer.analyze(driverExecutorMetrics, appContext)
+        sparkScopeAnalyzer.analyze(driverExecutorMetrics, appContext, taskAggMetrics)
     }
 }
 

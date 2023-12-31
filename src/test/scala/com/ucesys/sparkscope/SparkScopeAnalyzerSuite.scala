@@ -19,6 +19,7 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
+import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
@@ -37,7 +38,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
         val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
         When("running SparkScopeAnalyzer.analyze")
-        val result = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac)
+        val result = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac, TaskAggMetrics())
 
         Then("SparkScopeResult should contain low CPU and low heap utilization warnings")
         assert(result.warnings.length == 2)
@@ -96,7 +97,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
         val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
         When("running SparkScopeAnalyzer.analyze")
-        val result = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac)
+        val result = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac, TaskAggMetrics())
 
         Then("SparkScopeResult should contain low heap utilization warnings")
         assert(result.warnings.length == 1)
@@ -157,7 +158,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
         val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
         When("running SparkScopeAnalyzer.analyze")
-        val result: SparkScopeResult = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac)
+        val result: SparkScopeResult = sparkScopeAnalyzer.analyze(DriverExecutorMetricsMock, ac, TaskAggMetrics())
 
         Then("Result should contain a warning regarding missing executor metrics")
         assert(result.warnings.length == 3)

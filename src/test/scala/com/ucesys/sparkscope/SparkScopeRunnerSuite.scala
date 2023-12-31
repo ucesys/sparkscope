@@ -19,6 +19,7 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
+import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.metrics.{CsvMetricsLoader, HadoopMetricReader, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
@@ -58,7 +59,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        sparkScopeRunner.run(ac, new SparkConf)
+        sparkScopeRunner.run(ac, new SparkConf, TaskAggMetrics())
 
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
@@ -88,7 +89,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        sparkScopeRunner.run(ac, new SparkConf)
+        sparkScopeRunner.run(ac, new SparkConf, TaskAggMetrics())
 
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
@@ -117,7 +118,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        sparkScopeRunner.run(ac, new SparkConf)
+        sparkScopeRunner.run(ac, new SparkConf, TaskAggMetrics())
 
         Then("Report should be generated")
         assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
@@ -143,7 +144,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.runAnalysis")
-        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac)
+        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac, TaskAggMetrics())
 
         Then("Report should be generated")
         assert(result.appContext.appId == ac.appId)
@@ -213,7 +214,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac)
+        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac, TaskAggMetrics())
 
         Then("Report should be generated")
         assert(result.appContext.appId == ac.appId)
@@ -283,7 +284,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         )
 
         When("SparkScopeRunner.run")
-        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac)
+        val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac, TaskAggMetrics())
 
         Then("Report should be generated")
         assert(result.appContext.appId == ac.appId)

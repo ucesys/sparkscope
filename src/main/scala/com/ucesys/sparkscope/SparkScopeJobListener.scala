@@ -31,7 +31,7 @@ class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunn
     private[sparkscope] val executorMap = new mutable.HashMap[String, ExecutorTimeline]
     private[sparkscope] val jobMap = new mutable.HashMap[Long, JobTimeline]
     private[sparkscope] val stageMap = new mutable.HashMap[Int, StageTimeline]
-    private[sparkscope] val appMetrics = TaskAggMetrics()
+    private[sparkscope] val taskAggMetrics = TaskAggMetrics()
     private val failedStages = new ListBuffer[Int]
 
     def this(sparkConf: SparkConf) = {
@@ -59,7 +59,7 @@ class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunn
     }
 
     override def onTaskEnd(end: SparkListenerTaskEnd): Unit = {
-        appMetrics.aggregate(end.taskMetrics, end.taskInfo)
+        taskAggMetrics.aggregate(end.taskMetrics, end.taskInfo)
     }
 
     override def onApplicationStart(applicationStart: SparkListenerApplicationStart): Unit = {
@@ -112,6 +112,6 @@ class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunn
             stages = stageMap.values.toSeq
         )
 
-        runner.run(appContext, sparkConf)
+        runner.run(appContext, sparkConf, taskAggMetrics)
     }
 }

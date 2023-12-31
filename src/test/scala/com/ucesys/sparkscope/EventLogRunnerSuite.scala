@@ -160,23 +160,23 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
         runner.run(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
 
         Then("task metrics should be aggregated")
-        assert(listener.appMetrics.jvmGCTime.count == 2)
-        assert(listener.appMetrics.jvmGCTime.sum == 11L)
-        assert(listener.appMetrics.jvmGCTime.max == 11L)
-        assert(listener.appMetrics.jvmGCTime.min == 0L)
-        assert(listener.appMetrics.jvmGCTime.mean == 5.5)
+        assert(listener.taskAggMetrics.jvmGCTime.count == 2)
+        assert(listener.taskAggMetrics.jvmGCTime.sum == 11L)
+        assert(listener.taskAggMetrics.jvmGCTime.max == 11L)
+        assert(listener.taskAggMetrics.jvmGCTime.min == 0L)
+        assert(listener.taskAggMetrics.jvmGCTime.mean == 5.5)
 
-        assert(listener.appMetrics.diskBytesSpilled.count == 2)
-        assert(listener.appMetrics.diskBytesSpilled.sum == 0L)
-        assert(listener.appMetrics.diskBytesSpilled.max == 0L)
-        assert(listener.appMetrics.diskBytesSpilled.min == 0L)
-        assert(listener.appMetrics.diskBytesSpilled.mean == 0)
+        assert(listener.taskAggMetrics.diskBytesSpilled.count == 2)
+        assert(listener.taskAggMetrics.diskBytesSpilled.sum == 0L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.max == 0L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.min == 0L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.mean == 0)
 
-        assert(listener.appMetrics.memoryBytesSpilled.count == 2)
-        assert(listener.appMetrics.memoryBytesSpilled.sum == 0L)
-        assert(listener.appMetrics.memoryBytesSpilled.max == 0L)
-        assert(listener.appMetrics.memoryBytesSpilled.min == 0L)
-        assert(listener.appMetrics.memoryBytesSpilled.mean == 0)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.count == 2)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.sum == 0L)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.max == 0L)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.min == 0L)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.mean == 0)
     }
 
     test("EventLogRunner parse args test") {

@@ -20,6 +20,7 @@ package com.ucesys.sparkscope.view
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
+import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.file.LocalFileWriter
 import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
@@ -45,7 +46,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
-        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac).copy(warnings = Seq.empty)
+        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac, TaskAggMetrics()).copy(warnings = Seq.empty)
 
         When("calling HtmlReportGenerator.generate")
         htmlReportGenerator.generate(result)
@@ -74,7 +75,7 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
-        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac)
+        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac, TaskAggMetrics())
 
         When("calling HtmlReportGenerator.generate")
         htmlReportGenerator.generate(result)

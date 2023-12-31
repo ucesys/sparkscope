@@ -19,19 +19,20 @@ package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.common.{AppContext, CpuTime, JvmHeapUsed, JvmNonHeapUsed, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
+import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.metrics.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.stats.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats, SparkScopeStats}
 import com.ucesys.sparkscope.timeline.ExecutorTimeline
-import com.ucesys.sparkscope.warning.{CPUUtilWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
+import com.ucesys.sparkscope.warning.{CPUUtilWarning, DiskSpillWarning, GCTimeWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
 
 import scala.concurrent.duration._
 
 class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
-    def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: AppContext): SparkScopeResult = {
+    def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: AppContext, taskAggMetrics: TaskAggMetrics): SparkScopeResult = {
         logger.debug(s"\nDisplaying merged metrics for driver:\n${driverExecutorMetrics.driverMetrics}", this.getClass)
 
         driverExecutorMetrics.executorMetricsMap.foreach { case (id, metrics) =>
@@ -130,14 +131,16 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
         val clusterCPUStats = ClusterCPUStats(clusterCPUMetrics, appContext.executorCores, executorTimeSecs)
 
         // Warnings
-        val warnings: Seq[Option[Warning]] = Seq(
+        val warnings: Seq[Warning] = Seq(
             MissingMetricsWarning(
                 allExecutors = appContext.executorMap.map { case (id, _) => id }.toSeq,
                 withMetrics = driverExecutorMetrics.executorMetricsMap.map { case (id, _) => id }.toSeq
             ),
             CPUUtilWarning(cpuUtil = clusterCPUStats.cpuUtil, coreHoursWasted = clusterCPUStats.coreHoursWasted, LowCPUUtilizationThreshold),
-            HeapUtilWarning(heapUtil = clusterMemoryStats.avgHeapPerc, heapGbHoursWasted = clusterMemoryStats.heapGbHoursWasted, LowHeapUtilizationThreshold)
-        )
+            HeapUtilWarning(heapUtil = clusterMemoryStats.avgHeapPerc, heapGbHoursWasted = clusterMemoryStats.heapGbHoursWasted, LowHeapUtilizationThreshold),
+            DiskSpillWarning(taskAggMetrics),
+            GCTimeWarning(taskAggMetrics),
+        ).flatten
 
         SparkScopeResult(
             appContext = appContext,
@@ -154,7 +157,7 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
                 clusterCpu= clusterCPUMetrics,
                 stage = StageMetrics(appContext.stages, allTimestamps)
             ),
-            warnings = warnings.flatten
+            warnings = warnings
         )
     }
 

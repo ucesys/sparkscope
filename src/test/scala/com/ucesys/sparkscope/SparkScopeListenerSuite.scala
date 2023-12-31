@@ -111,20 +111,20 @@ class SparkScopeListenerSuite extends FunSuite with GivenWhenThen with MockitoSu
         listener.onTaskEnd(taskEnd2)
 
         Then("Metrics should be aggregated correctly")
-        assert(listener.appMetrics.jvmGCTime.sum == 3000L)
-        assert(listener.appMetrics.jvmGCTime.max == 2000L)
-        assert(listener.appMetrics.jvmGCTime.min == 1000L)
-        assert(listener.appMetrics.jvmGCTime.mean == 1500L)
+        assert(listener.taskAggMetrics.jvmGCTime.sum == 3000L)
+        assert(listener.taskAggMetrics.jvmGCTime.max == 2000L)
+        assert(listener.taskAggMetrics.jvmGCTime.min == 1000L)
+        assert(listener.taskAggMetrics.jvmGCTime.mean == 1500L)
 
-        assert(listener.appMetrics.diskBytesSpilled.sum == 2500L)
-        assert(listener.appMetrics.diskBytesSpilled.max == 1500L)
-        assert(listener.appMetrics.diskBytesSpilled.min == 1000L)
-        assert(listener.appMetrics.diskBytesSpilled.mean == 1250L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.sum == 2500L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.max == 1500L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.min == 1000L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.mean == 1250L)
 
-        assert(listener.appMetrics.memoryBytesSpilled.sum == 3000L)
-        assert(listener.appMetrics.jvmGCTime.max == 2000L)
-        assert(listener.appMetrics.jvmGCTime.min == 1000L)
-        assert(listener.appMetrics.jvmGCTime.mean == 1500L)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.sum == 3000L)
+        assert(listener.taskAggMetrics.jvmGCTime.max == 2000L)
+        assert(listener.taskAggMetrics.jvmGCTime.min == 1000L)
+        assert(listener.taskAggMetrics.jvmGCTime.mean == 1500L)
     }
 
     test("SparkScopeListener onExecutorAdded") {
@@ -266,7 +266,7 @@ class SparkScopeListenerSuite extends FunSuite with GivenWhenThen with MockitoSu
         listenerMock.onApplicationEnd(mock[SparkListenerApplicationEnd])
 
         Then("sparkScopeRunner.run should be called")
-        verify(runnerMock, times(1)).run(any[AppContext], any[SparkConf])
+        verify(runnerMock, times(1)).run(any[AppContext], any[SparkConf], any[TaskAggMetrics])
     }
 
     test("SparkScopeListener onApplicationEnd exception") {
@@ -327,23 +327,23 @@ class SparkScopeListenerSuite extends FunSuite with GivenWhenThen with MockitoSu
         assert(listener.stageMap(stageId).startTime.get == stageSubmissionTime)
 
         And("And metrics should be aggregated correctly")
-        assert(listener.appMetrics.jvmGCTime.sum == 3000L)
-        assert(listener.appMetrics.jvmGCTime.max == 2000L)
-        assert(listener.appMetrics.jvmGCTime.min == 1000L)
-        assert(listener.appMetrics.jvmGCTime.mean == 1500L)
+        assert(listener.taskAggMetrics.jvmGCTime.sum == 3000L)
+        assert(listener.taskAggMetrics.jvmGCTime.max == 2000L)
+        assert(listener.taskAggMetrics.jvmGCTime.min == 1000L)
+        assert(listener.taskAggMetrics.jvmGCTime.mean == 1500L)
 
-        assert(listener.appMetrics.diskBytesSpilled.sum == 2500L)
-        assert(listener.appMetrics.diskBytesSpilled.max == 1500L)
-        assert(listener.appMetrics.diskBytesSpilled.min == 1000L)
-        assert(listener.appMetrics.diskBytesSpilled.mean == 1250L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.sum == 2500L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.max == 1500L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.min == 1000L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.mean == 1250L)
 
-        assert(listener.appMetrics.memoryBytesSpilled.sum == 3000L)
-        assert(listener.appMetrics.memoryBytesSpilled.max == 2000L)
-        assert(listener.appMetrics.memoryBytesSpilled.min == 1000L)
-        assert(listener.appMetrics.memoryBytesSpilled.mean == 1500L)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.sum == 3000L)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.max == 2000L)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.min == 1000L)
+        assert(listener.taskAggMetrics.memoryBytesSpilled.mean == 1500L)
 
         Then("sparkScopeRunner.run should be called")
-        verify(runnerMock, times(1)).run(any[AppContext], any[SparkConf])
+        verify(runnerMock, times(1)).run(any[AppContext], any[SparkConf], any[TaskAggMetrics])
     }
 }
 
