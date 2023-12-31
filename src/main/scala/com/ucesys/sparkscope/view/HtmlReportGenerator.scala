@@ -47,11 +47,11 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
 
         val outputPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appContext.appId}.html")
         fileWriter.write(outputPath.toString, renderedStats)
-        logger.info(s"Wrote HTML report file to ${outputPath}")
+        logger.info(s"Wrote HTML report file to ${outputPath}", this.getClass)
 
         val logPath = Paths.get(sparkScopeConf.logPath, s"${result.appContext.appId}.log")
         fileWriter.write(logPath.toString, logger.toString)
-        logger.info(s"Log saved to ${logPath}")
+        logger.info(s"Log saved to ${logPath}", this.getClass)
     }
 
     def renderCharts(template: String, metrics: SparkScopeMetrics): String = {

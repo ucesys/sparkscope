@@ -11,7 +11,7 @@ object SparkEventParser {
         try {
             Some(JsonProtocol.sparkEventFromJson(json))
         } catch {
-            case ex: Exception => logger.warn("Couldn't parse Spark Event. " + ex); None
+            case ex: Exception => logger.warn("Couldn't parse Spark Event. " + ex, this.getClass); None
         }
     }
 }

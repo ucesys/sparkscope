@@ -38,7 +38,7 @@ object MemorySize {
                 case _ => MemorySize.fromMegaBytes(sizeStr.toFloat.toLong)
             }
         } catch {
-            case ex: Exception => logger.warn(s"Could not parse ${sizeStr} into memory size. " + ex); MemorySize(0)
+            case ex: Exception => logger.warn(s"Could not parse ${sizeStr} into memory size. " + ex, this.getClass); MemorySize(0)
         }
     }
 }

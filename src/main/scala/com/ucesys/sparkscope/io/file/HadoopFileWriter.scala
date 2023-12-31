@@ -14,7 +14,7 @@ class HadoopFileWriter(conf: Configuration)(implicit logger: SparkScopeLogger) e
         FileSystem.get(conf)
     } catch {
         case e: IOException =>
-            logger.error(s"IOException while creating hadoop filesystem. ${e}", e)
+            logger.error(s"IOException while creating hadoop filesystem. ${e}", e, this.getClass)
             throw e
     }
     def write(pathStr: String, content: String): Unit = {
@@ -34,7 +34,7 @@ class HadoopFileWriter(conf: Configuration)(implicit logger: SparkScopeLogger) e
             writer.write(content)
         } catch {
             case e: IOException =>
-                logger.error(s"IOException while writing ${content} to ${pathStr}. ${e}")
+                logger.error(s"IOException while writing ${content} to ${pathStr}. ${e}", this.getClass)
                 throw e
         } finally {
             writer.close()

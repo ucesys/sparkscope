@@ -13,13 +13,13 @@ class EventLogRunner(listener: SparkScopeJobListener)(implicit logger: SparkScop
     def run(fileReaderFactory: FileReaderFactory, args: SparkScopeArgs): Unit = {
         val fileReader = fileReaderFactory.getFileReader(args.eventLog)
         val eventLogJsonStrSeq: Seq[String] = fileReader.read(args.eventLog).split("\n").toSeq
-        logger.info(s"Loaded ${eventLogJsonStrSeq.length} events")
+        logger.info(s"Loaded ${eventLogJsonStrSeq.length} events", this.getClass)
 
         val eventLogJsonSeqPreFiltered: Seq[String] = eventLogJsonStrSeq.filter(event => AllEvents.exists(event.contains))
-        logger.info(s"Prefiltered ${eventLogJsonSeqPreFiltered.length} events")
+        logger.info(s"Prefiltered ${eventLogJsonSeqPreFiltered.length} events", this.getClass)
 
         val sparkEvents = eventLogJsonSeqPreFiltered.flatMap(JsonMethods.parseOpt(_)).flatMap(SparkEventParser.parse(_))
-        logger.info(s"Parsed ${sparkEvents.length} events")
+        logger.info(s"Parsed ${sparkEvents.length} events", this.getClass)
 
         val envUpdateEventWithOverrides = {
            val sparkConf = new SparkConf(false)

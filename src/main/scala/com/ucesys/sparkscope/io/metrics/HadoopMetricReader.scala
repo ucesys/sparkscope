@@ -23,7 +23,7 @@ class HadoopMetricReader(sparkScopeConf: SparkScopeConf, fileReader: HadoopFileR
             appContext.appId,
             s"${instance}.csv"
         ).toString.replace("\\", "/")
-        logger.info(s"Reading instance=${instance} metric files from ${metricPath}")
+        logger.info(s"Reading instance=${instance} metric files from ${metricPath}", this.getClass)
 
         val metricStr = fileReader.read(metricPath)
         DataTable.fromCsv(instance, metricStr, ",").distinct("t").sortBy("t")

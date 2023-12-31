@@ -25,7 +25,7 @@ case class ExecutorTimeline(executorId: String, hostId: String, cores: Int, star
         val executorEndTime: Long = endTime match {
             case Some(time) => time
             case None =>
-                logger.info(s"Missing remove time for executorId=${executorId}, using last metric timestamp to calculate uptime")
+                logger.info(s"Missing remove time for executorId=${executorId}, using last metric timestamp to calculate uptime", this.getClass)
                 lastMetricTimeMs*1000
         }
         executorEndTime - startTime

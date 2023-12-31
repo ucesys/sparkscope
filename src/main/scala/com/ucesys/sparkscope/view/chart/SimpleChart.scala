@@ -17,7 +17,7 @@ object SimpleChart {
         } else if (tsCol.size <= MaxChartPoints) {
             SimpleChart(tsCol.values, valueCol.values)
         } else {
-            logger.info(s"Limiting chart points from ${tsCol.size} to ${MaxChartPoints}")
+            logger.info(s"Limiting chart points from ${tsCol.size} to ${MaxChartPoints}", this.getClass)
             val ratio: Float = tsCol.size.toFloat / MaxChartPoints.toFloat
             val newPoints: Seq[Int] = (0 until MaxChartPoints)
             val newChart: Seq[TimePoint] = newPoints.map{ id =>

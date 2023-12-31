@@ -35,7 +35,7 @@ class SparkScopeRunner(sparkScopeConfLoader: SparkScopeConfLoader,
                        reportGeneratorFactory: ReportGeneratorFactory)
                       (implicit val logger: SparkScopeLogger) {
     def run(appContext: AppContext, sparkConf: SparkConf): Unit = {
-        logger.info(SparkScopeSign)
+        logger.info(SparkScopeSign, this.getClass)
 
         val sparkScopeStart = System.currentTimeMillis()
 
@@ -43,20 +43,20 @@ class SparkScopeRunner(sparkScopeConfLoader: SparkScopeConfLoader,
             val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, propertiesLoaderFactory)
             val sparkScopeResult = this.runAnalysis(sparkScopeConf, appContext)
 
-            logger.info(s"${sparkScopeResult.stats.executorStats}\n")
-            logger.info(s"${sparkScopeResult.stats.driverStats}\n")
-            logger.info(s"${sparkScopeResult.stats.clusterMemoryStats}\n")
-            logger.info(s"${sparkScopeResult.stats.clusterCPUStats}\n")
+            logger.info(s"${sparkScopeResult.stats.executorStats}\n", this.getClass)
+            logger.info(s"${sparkScopeResult.stats.driverStats}\n", this.getClass)
+            logger.info(s"${sparkScopeResult.stats.clusterMemoryStats}\n", this.getClass)
+            logger.info(s"${sparkScopeResult.stats.clusterCPUStats}\n", this.getClass)
 
             reportGeneratorFactory.get(sparkScopeConf).generate(sparkScopeResult)
         } catch {
-            case ex: FileNotFoundException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
-            case ex: NoSuchFileException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
-            case ex: IllegalArgumentException => logger.error(s"SparkScope couldn't load metrics. SparkScope will now exit.", ex)
-            case ex: Exception => logger.error(s"Unexpected exception occurred, SparkScope will now exit.", ex)
+            case ex: FileNotFoundException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex, this.getClass)
+            case ex: NoSuchFileException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex, this.getClass)
+            case ex: IllegalArgumentException => logger.error(s"SparkScope couldn't load metrics. SparkScope will now exit.", ex, this.getClass)
+            case ex: Exception => logger.error(s"Unexpected exception occurred, SparkScope will now exit.", ex, this.getClass)
         } finally {
             val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
-            logger.info(s"SparkScope analysis took ${durationSparkScope}s")
+            logger.info(s"SparkScope analysis took ${durationSparkScope}s", this.getClass)
         }
     }
 

@@ -11,23 +11,25 @@ class SparkScopeLogger(var level: LogLevel = LogLevel.Info) {
 
     override def toString: String = this.log.toString
 
-    def error(str: Any, ex: Throwable): Unit = {
+    def error(str: Any, ex: Throwable, callerClass: Class[_]): Unit = {
         val sw = new StringWriter();
         ex.printStackTrace(new PrintWriter(sw));
-        log(s"${str}\n${sw.toString}", LogLevel.Error)
+        log(s"${str}\n${sw.toString}", LogLevel.Error, callerClass)
     }
 
-    def error(str: Any): Unit = log(str, LogLevel.Error)
-    def warn(str: Any): Unit = log(str, LogLevel.Warn)
-    def info(str: Any): Unit = log(str, LogLevel.Info)
-    def debug(str: Any): Unit = log(str, LogLevel.Debug)
+    def error(str: Any, callerClass: Class[_]): Unit = log(str, LogLevel.Error, callerClass)
+    def warn(str: Any, callerClass: Class[_]): Unit = log(str, LogLevel.Warn, callerClass)
+    def info(str: Any, callerClass: Class[_]): Unit = log(str, LogLevel.Info, callerClass)
+    def debug(str: Any, callerClass: Class[_]): Unit = log(str, LogLevel.Debug, callerClass)
 
-    def log(str: Any, level: LogLevel): Unit = {
+    def log(str: Any, level: LogLevel, callerClass: Class[_]): Unit = {
         if(level >= this.level) {
-            log.append(logStr(str, level)).append("\n")
-            Predef.println(logStr(str, level))
+            log.append(logStr(str, level, callerClass)).append("\n")
+            Predef.println(logStr(str, level, callerClass))
         }
     }
 
-    def logStr(str: Any, level: LogLevel): String = s"${timeFormat.format(Calendar.getInstance.getTime)} ${level} [SparkScope] ${str}"
+    def logStr(str: Any, level: LogLevel, callerClass: Class[_]): String = {
+        s"${timeFormat.format(Calendar.getInstance.getTime)} ${level} [${callerClass.getName}] ${str}"
+    }
 }

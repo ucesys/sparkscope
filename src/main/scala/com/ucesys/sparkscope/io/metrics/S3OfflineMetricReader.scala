@@ -24,7 +24,7 @@ class S3OfflineMetricReader(sparkScopeConf: SparkScopeConf,
     private def readMerged(s3Location: S3Location, instanceId: String): DataTable = {
         val appDir = Paths.get(s3Location.path, this.sparkScopeConf.appName.getOrElse("")).toString
         val mergedPath: String = Paths.get(appDir, appContext.appId, s"${instanceId}.csv").toString
-        logger.info(s"Reading merged ${instanceId} metric file from ${mergedPath}")
+        logger.info(s"Reading merged ${instanceId} metric file from ${mergedPath}", this.getClass)
 
         val csvStr = reader.read(S3Location(s3Location.bucketName, mergedPath).getUrl)
         DataTable.fromCsv(instanceId, csvStr, ",").distinct("t").sortBy("t")

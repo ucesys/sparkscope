@@ -96,7 +96,7 @@ class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunn
         }
 
         stageCompleted.stageInfo.failureReason.foreach { reason =>
-            runner.logger.warn(s"Stage ${stageCompleted.stageInfo.stageId} failed with reason: ${reason}")
+            runner.logger.warn(s"Stage ${stageCompleted.stageInfo.stageId} failed with reason: ${reason}", this.getClass)
             failedStages += stageCompleted.stageInfo.stageId
         }
     }

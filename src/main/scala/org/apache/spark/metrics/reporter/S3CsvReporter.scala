@@ -32,10 +32,10 @@ class S3CsvReporter(directory: String,
     val s3Location: S3Location = S3Location(directory)
     var isInit: Boolean = false;
 
-    logger.info("Using S3CsvReporter")
+    logger.info("Using S3CsvReporter", this.getClass)
 
     override protected[reporter] def report(appId: String, instance: String, metrics: DataTable, timestamp: Long): Unit = {
-        logger.debug("\n" + metrics.toString)
+        logger.debug("\n" + metrics.toString, this.getClass)
 
         val appPath: String = Paths.get(this.s3Location.path,".tmp", appId).toString
         val metricPath: String = Paths.get(appPath, instance, instance + "." + timestamp + ".csv").toString;
@@ -51,7 +51,7 @@ class S3CsvReporter(directory: String,
             this.isInit = true;
         }
 
-        logger.debug(s"Writing csv: ${instance} metrics to ${inProgressS3Location.getUrl}")
+        logger.debug(s"Writing csv: ${instance} metrics to ${inProgressS3Location.getUrl}", this.getClass)
         if (fileWriter.exists(inProgressS3Location.getUrl)) {
             fileWriter.write(metricS3Location.getUrl, metrics.toCsv(separator))
         }

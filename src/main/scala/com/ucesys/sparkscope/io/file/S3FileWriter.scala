@@ -11,7 +11,7 @@ class S3FileWriter(s3: AmazonS3)(implicit logger: SparkScopeLogger)  extends Tex
             s3.putObject(s3Location.bucketName, s3Location.path, content)
         } catch {
             case ex: Exception =>
-                logger.error(s"Error while writing file to ${url}", ex)
+                logger.error(s"Error while writing file to ${url}", ex, this.getClass)
                 throw ex
         }
     }
@@ -27,7 +27,7 @@ class S3FileWriter(s3: AmazonS3)(implicit logger: SparkScopeLogger)  extends Tex
 
 object S3FileWriter {
     def apply(region: String)(implicit logger: SparkScopeLogger) : S3FileWriter = {
-        logger.info(s"Creating s3 client for ${region} region")
+        logger.info(s"Creating s3 client for ${region} region", this.getClass)
         val s3: AmazonS3 = AmazonS3ClientBuilder
           .standard
           .withRegion(region)
