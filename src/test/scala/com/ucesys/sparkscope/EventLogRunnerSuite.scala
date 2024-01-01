@@ -54,7 +54,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
         verify(listener, times(1)).onStageCompleted(any[SparkListenerStageCompleted])
         verify(listener, times(1)).onJobEnd(any[SparkListenerJobEnd])
         verify(listener, times(0)).onExecutorRemoved(any[SparkListenerExecutorRemoved])
-        verify(listener, times(1)).onApplicationEnd(any[SparkListenerApplicationEnd])
+        verify(listener, times(1)).runSparkScopeAnalysis(any[Option[Long]])
     }
 
     test("EventLogRunner running") {
@@ -77,7 +77,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
         verify(listener, times(1)).onStageCompleted(any[SparkListenerStageCompleted])
         verify(listener, times(1)).onJobEnd(any[SparkListenerJobEnd])
         verify(listener, times(0)).onExecutorRemoved(any[SparkListenerExecutorRemoved])
-        verify(listener, times(0)).onApplicationEnd(any[SparkListenerApplicationEnd])
+        verify(listener, times(1)).runSparkScopeAnalysis(None)
     }
 
     test("EventLogRunner finished executors removed") {
@@ -100,7 +100,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
         verify(listener, times(1)).onStageCompleted(any[SparkListenerStageCompleted])
         verify(listener, times(1)).onJobEnd(any[SparkListenerJobEnd])
         verify(listener, times(2)).onExecutorRemoved(any[SparkListenerExecutorRemoved])
-        verify(listener, times(1)).onApplicationEnd(any[SparkListenerApplicationEnd])
+        verify(listener, times(1)).runSparkScopeAnalysis(any[Option[Long]])
     }
 
     test("EventLogRunner running executors removed") {

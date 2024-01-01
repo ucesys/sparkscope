@@ -102,12 +102,16 @@ class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunn
     }
 
     override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd): Unit = {
+        runSparkScopeAnalysis(Some(applicationEnd.time))
+    }
+
+    def runSparkScopeAnalysis(applicationEnd: Option[Long]) = {
         val appStartEvent = applicationStartEvent.getOrElse(throw new IllegalArgumentException("App start event is empty"))
 
         val appContext = AppContext(
             appId = appStartEvent.appId.getOrElse(throw new IllegalArgumentException("App Id is empty")),
             appStartTime = appStartEvent.time,
-            appEndTime = Option(applicationEnd.time),
+            appEndTime = applicationEnd,
             executorMap = executorMap.toMap,
             stages = stageMap.values.toSeq
         )

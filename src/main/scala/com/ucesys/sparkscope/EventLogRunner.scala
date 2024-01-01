@@ -46,7 +46,6 @@ class EventLogRunner(listener: SparkScopeJobListener)(implicit logger: SparkScop
 
         sparkEvents.foreach {
             case e: SparkListenerApplicationStart => listener.onApplicationStart(e)
-            case e: SparkListenerApplicationEnd => listener.onApplicationEnd(e)
             case e: SparkListenerExecutorAdded => listener.onExecutorAdded(e)
             case e: SparkListenerExecutorRemoved => listener.onExecutorRemoved(e)
             case e: SparkListenerJobStart => listener.onJobStart(e)
@@ -56,6 +55,10 @@ class EventLogRunner(listener: SparkScopeJobListener)(implicit logger: SparkScop
             case e: SparkListenerTaskEnd => listener.onTaskEnd(e)
             case _ =>
         }
+
+        val appEndEvent: Option[SparkListenerApplicationEnd] = sparkEvents.collectFirst { case event: SparkListenerApplicationEnd => event }
+
+        listener.runSparkScopeAnalysis(appEndEvent.map(_.time))
     }
 }
 

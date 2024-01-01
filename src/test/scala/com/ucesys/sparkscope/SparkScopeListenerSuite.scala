@@ -255,6 +255,7 @@ class SparkScopeListenerSuite extends FunSuite with GivenWhenThen with MockitoSu
         val listenerMock = mock[SparkScopeJobListener]
         val runnerMock = mock[SparkScopeRunner]
         doCallRealMethod.when(listenerMock).onApplicationEnd(any[SparkListenerApplicationEnd])
+        doCallRealMethod.when(listenerMock).runSparkScopeAnalysis(any[Option[Long]])
         doReturn(new mutable.HashMap[String, ExecutorTimeline]).when(listenerMock).executorMap
         doReturn(new mutable.HashMap[String, StageTimeline]).when(listenerMock).stageMap
         doReturn(runnerMock).when(listenerMock).runner
