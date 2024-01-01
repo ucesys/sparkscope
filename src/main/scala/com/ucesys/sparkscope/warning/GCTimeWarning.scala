@@ -1,13 +1,13 @@
 package com.ucesys.sparkscope.warning
 
 import com.ucesys.sparkscope.agg.TaskAggMetrics
+import com.ucesys.sparkscope.view.DurationExtensions.FiniteDurationExtensions
 
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.duration._
+import scala.concurrent.duration.{DurationLong, FiniteDuration}
 
-class GCTimeWarning private(taskDuration: FiniteDuration, jvmGCTime: FiniteDuration, gcTimeFraction: Double) extends Warning {
+case class GCTimeWarning(taskDuration: FiniteDuration, jvmGCTime: FiniteDuration, gcTimeFraction: Double) extends Warning {
     override def toString: String = {
-        f"Your application has spent ${gcTimeFraction}%% of total task duration in garbage collection(GC time in secs: ${jvmGCTime.toSeconds}, total task time in secs: ${taskDuration.toSeconds})"
+        f"${gcTimeFraction*100}%1.2f%% of total task duration was spent in garbage collection. GC time: ${jvmGCTime.durationStr}. Total task time: ${taskDuration.durationStr}."
     }
 }
 

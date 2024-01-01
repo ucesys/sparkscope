@@ -6,6 +6,7 @@ import com.ucesys.sparkscope.io.file.TextFileWriter
 import com.ucesys.sparkscope.common.MemorySize.BytesInMB
 import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
 import com.ucesys.sparkscope.metrics.{SparkScopeMetrics, SparkScopeResult}
+import com.ucesys.sparkscope.view.DurationExtensions.FiniteDurationExtensions
 import com.ucesys.sparkscope.view.chart.{ExecutorChart, LimitedChart, SimpleChart, StageChart}
 
 import java.io.InputStream
@@ -20,12 +21,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
         val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
         val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
         val duration: Option[FiniteDuration] = result.appContext.appEndTime.map(endTime => (endTime - result.appContext.appStartTime).milliseconds)
-        val durationStr: String = duration match {
-            case Some(duration) if duration < 1.minutes => s"${duration.toSeconds.toString}s"
-            case Some(duration) if duration < 1.hours => s"${duration.toMinutes % 60}min ${duration.toSeconds % 60}s"
-            case Some(duration) => s"${duration.toHours}h ${duration.toMinutes % 60}min ${duration.toSeconds % 60}s"
-            case None => "In progress"
-        }
+        val durationStr: String = duration.map(_.durationStr).getOrElse("In progress")
 
         val warningsStr: String = result.warnings match {
             case Seq() => ""

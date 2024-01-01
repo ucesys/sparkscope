@@ -69,6 +69,8 @@ spark-submit \
 --master spark://spark-master:7077 \
 --jars /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
 --files /tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
+--conf spark.sparkscope.html.path=./ \
+--conf spark.sparkscope.log.path=./ \
 --conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.8-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \

@@ -21,13 +21,15 @@ package com.ucesys.sparkscope.view
 import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.agg.TaskAggMetrics
-import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.common.{MemorySize, SparkScopeLogger}
 import com.ucesys.sparkscope.io.file.LocalFileWriter
 import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
+import com.ucesys.sparkscope.warning.{DiskSpillWarning, GCTimeWarning}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
 import java.nio.file.{Files, Paths}
+import scala.concurrent.duration.DurationInt
 
 class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndAfterAll with GivenWhenThen {
     override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
@@ -76,9 +78,13 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         mockcorrectMetrics(csvReaderMock, ac.appId)
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
         val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac, TaskAggMetrics())
+        val diskSpillWarning = DiskSpillWarning(MemorySize.fromMegaBytes(500), MemorySize.fromGigaBytes(5))
+        val gcTimeWarning = GCTimeWarning(2000.seconds, 600.seconds, 0.3)
+
+        val resultWithAllWarnings = result.copy(warnings = result.warnings ++ Seq(diskSpillWarning, gcTimeWarning))
 
         When("calling HtmlReportGenerator.generate")
-        htmlReportGenerator.generate(result)
+        htmlReportGenerator.generate(resultWithAllWarnings)
 
         Then("html report is created")
         val htmlPath = Paths.get(TestDir, result.appContext.appId + ".html")

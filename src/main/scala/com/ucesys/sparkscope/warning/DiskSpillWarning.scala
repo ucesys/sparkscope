@@ -3,9 +3,9 @@ package com.ucesys.sparkscope.warning
 import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.common.MemorySize
 
-class DiskSpillWarning private(diskBytesSpilled: MemorySize, memoryBytesSpilled: MemorySize) extends Warning {
+case class DiskSpillWarning(diskBytesSpilled: MemorySize, memoryBytesSpilled: MemorySize) extends Warning {
     override def toString: String = {
-        f"Tasks are spilling data from memory to disk. Total size spilled to disk: ${diskBytesSpilled.toMB}MB(in-memory size: ${memoryBytesSpilled.toMB}MB)"
+        f"Data spills from memory to disk occured. Total size spilled to disk: ${diskBytesSpilled.toMB}MB(in-memory size: ${memoryBytesSpilled.toMB}MB)"
     }
 }
 
