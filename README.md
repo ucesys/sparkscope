@@ -3,7 +3,6 @@
 SparkScope is a monitoring and profiling tool for Spark Applications. 
 It is implemented as SparkListener which means that it runs inside driver and listens for spark events.
 SparkScope utilizes csv metrics produced by custom SparkScopeCsvSink and supports multiple storage types.
-SparkScope was forked from Qubole profiling tool [Sparklens](https://github.com/qubole/sparklens).
 
 SparkScope html report contains the following features:
 - Charts:
@@ -237,6 +236,5 @@ SparkScope html report contains:
 - Aggregated application CPU/Memory statistics & charts
 - Driver and Executor CPU/Memory statistics & charts
 - Warnings concerning application resource usage
-- Sparklens report
 - SparkScope logs
 - Spark config

@@ -29,10 +29,10 @@ class HadoopCsvReporter(rootDir: String,
                         appName: Option[String])
                        (implicit logger: SparkScopeLogger)
   extends AbstractCsvReporter(registry, locale, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop) {
-    logger.info("Using HadoopCsvReporter")
+    logger.info("Using HadoopCsvReporter", this.getClass)
 
     override protected[reporter] def report(appId: String, instance: String, metrics: DataTable, timestamp: Long): Unit = {
-        logger.debug("\n" + metrics.toString)
+        logger.debug("\n" + metrics.toString, this.getClass)
         val row: String = metrics.toCsvNoHeader(separator)
 
         val appDir = Paths.get(rootDir, appName.getOrElse(""), appId).toString
@@ -40,16 +40,16 @@ class HadoopCsvReporter(rootDir: String,
 
 
         try {
-            logger.debug(s"Writing to ${csvFilePath}")
+            logger.debug(s"Writing to ${csvFilePath}", this.getClass)
             if (!fileWriter.exists(csvFilePath)) {
                 fileWriter.makeDir(appDir)
                 fileWriter.write(csvFilePath, metrics.header + "\n")
             }
 
-            logger.debug(s"Writing row: ${row}")
+            logger.debug(s"Writing row: ${row}", this.getClass)
             fileWriter.append(csvFilePath, row + "\n")
         } catch {
-            case e: IOException => logger.warn(s"IOException while writing ${instance} to ${csvFilePath}. ${e}")
+            case e: IOException => logger.warn(s"IOException while writing ${instance} to ${csvFilePath}. ${e}", this.getClass)
         }
     }
 }

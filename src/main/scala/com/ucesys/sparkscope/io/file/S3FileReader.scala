@@ -17,7 +17,7 @@ class S3FileReader(s3: AmazonS3)(implicit logger: SparkScopeLogger)  extends Fil
             eventLogSource.getLines().mkString("\n")
         } catch {
             case ex: Exception =>
-                logger.error(s"Error while reading file from ${url}")
+                logger.error(s"Error while reading file from ${url}", this.getClass)
                 throw ex
         }
     }
@@ -25,7 +25,7 @@ class S3FileReader(s3: AmazonS3)(implicit logger: SparkScopeLogger)  extends Fil
 
 object S3FileReader {
     def apply(region: String)(implicit logger: SparkScopeLogger) : S3FileReader = {
-        logger.info(s"Creating s3 client for ${region} region")
+        logger.info(s"Creating s3 client for ${region} region", this.getClass)
         val s3: AmazonS3 = AmazonS3ClientBuilder
           .standard
           .withRegion(region)

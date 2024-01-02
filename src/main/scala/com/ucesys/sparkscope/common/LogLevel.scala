@@ -10,4 +10,12 @@ object LogLevel {
     val Warn = LogLevel("WARN", 3)
     val Info = LogLevel("INFO", 2)
     val Debug = LogLevel("DEBUG", 1)
+
+    def fromString(levelStr: String): LogLevel = levelStr.toLowerCase match {
+        case "error" => Error
+        case "warn" => Warn
+        case "info" => Info
+        case "debug" => Debug
+        case _ => throw new IllegalArgumentException(s"Unknown log level: ${levelStr}")
+    }
 }

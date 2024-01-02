@@ -36,7 +36,7 @@ class BufferedS3CsvReporter(directory: String,
         this.instance = instance
         this.appId = appId
         val row: String = metrics.toCsvNoHeader(separator)
-        logger.info(s"Appending instance metric row(${row}) to buffer")
+        logger.info(s"Appending instance metric row(${row}) to buffer", this.getClass)
         metricsBuffer.append(row)
     }
 
@@ -44,7 +44,7 @@ class BufferedS3CsvReporter(directory: String,
         val metricPath: String = Paths.get(this.s3Location.path, this.appName.getOrElse(""), this.appId, s"${this.instance}.csv").toString;
         val metricS3Location: S3Location = this.s3Location.copy(path = metricPath)
 
-        logger.info(s"Writing buffered metric to ${metricS3Location.getUrl}")
+        logger.info(s"Writing buffered metric to ${metricS3Location.getUrl}", this.getClass)
         fileWriter.write(metricS3Location.getUrl, metricsBuffer.mkString("\n"))
         super.stop()
     }

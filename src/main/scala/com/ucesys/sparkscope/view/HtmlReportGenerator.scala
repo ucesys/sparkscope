@@ -6,6 +6,7 @@ import com.ucesys.sparkscope.io.file.TextFileWriter
 import com.ucesys.sparkscope.common.MemorySize.BytesInMB
 import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
 import com.ucesys.sparkscope.metrics.{SparkScopeMetrics, SparkScopeResult}
+import com.ucesys.sparkscope.view.DurationExtensions.FiniteDurationExtensions
 import com.ucesys.sparkscope.view.chart.{ExecutorChart, LimitedChart, SimpleChart, StageChart}
 
 import java.io.InputStream
@@ -14,18 +15,13 @@ import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
 
-class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWriter)
+class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, htmlFileWriter: TextFileWriter, logFileWriter: TextFileWriter)
                          (implicit logger: SparkScopeLogger) extends ReportGenerator {
-    override def generate(result: SparkScopeResult, sparklensResults: Seq[String]): Unit = {
+    override def generate(result: SparkScopeResult): Unit = {
         val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
         val template: String = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
         val duration: Option[FiniteDuration] = result.appContext.appEndTime.map(endTime => (endTime - result.appContext.appStartTime).milliseconds)
-        val durationStr: String = duration match {
-            case Some(duration) if duration < 1.minutes => s"${duration.toSeconds.toString}s"
-            case Some(duration) if duration < 1.hours => s"${duration.toMinutes % 60}min ${duration.toSeconds % 60}s"
-            case Some(duration) => s"${duration.toHours}h ${duration.toMinutes % 60}min ${duration.toSeconds % 60}s"
-            case None => "In progress"
-        }
+        val durationStr: String = duration.map(_.durationStr).getOrElse("In progress")
 
         val warningsStr: String = result.warnings match {
             case Seq() => ""
@@ -41,18 +37,17 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${appInfo.duration}", durationStr)
           .replace("${warnings}", warningsStr)
           .replace("${sparkConf}", sparkScopeConf.sparkConf.getAll.map { case (key, value) => s"${key}: ${value}" }.mkString("\n"))
-          .replace("${sparklens}", sparklensResults.mkString("\n"))
 
         val renderedCharts = renderCharts(rendered, result.metrics)
         val renderedStats = renderStats(renderedCharts, result)
 
         val outputPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appContext.appId}.html")
-        fileWriter.write(outputPath.toString, renderedStats)
-        logger.info(s"Wrote HTML report file to ${outputPath}")
+        htmlFileWriter.write(outputPath.toString, renderedStats)
+        logger.info(s"Wrote HTML report file to ${outputPath}", this.getClass)
 
-        val logPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appContext.appId}.log")
-        fileWriter.write(logPath.toString, logger.toString)
-        logger.info(s"Log saved to ${logPath}")
+        val logPath = Paths.get(sparkScopeConf.logPath, s"${result.appContext.appId}.log")
+        logFileWriter.write(logPath.toString, logger.toString)
+        logger.info(s"Log saved to ${logPath}", this.getClass)
     }
 
     def renderCharts(template: String, metrics: SparkScopeMetrics): String = {

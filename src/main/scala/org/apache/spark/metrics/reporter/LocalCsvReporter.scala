@@ -29,17 +29,17 @@ class LocalCsvReporter(rootDir: String,
                       (implicit logger: SparkScopeLogger)
   extends AbstractCsvReporter(registry, locale, separator, rateUnit, durationUnit, clock, filter, executor, shutdownExecutorOnStop) {
 
-    logger.info("Using LocalCsvReporter")
+    logger.info("Using LocalCsvReporter", this.getClass)
 
     override protected[reporter] def report(appId: String, instance: String, metrics: DataTable, timestamp: Long): Unit = {
-        logger.debug("\n" + metrics.toString)
+        logger.debug("\n" + metrics.toString, this.getClass)
         val row: String = metrics.toCsvNoHeader(separator)
 
         val appDir = Paths.get(rootDir, appName.getOrElse(""), appId).toString
         val csvFilePath = Paths.get(appDir, s"${instance}.csv").toString
 
         try {
-            logger.debug(s"Writing to ${csvFilePath}")
+            logger.debug(s"Writing to ${csvFilePath}", this.getClass)
             if (!fileWriter.exists(csvFilePath)) {
                 fileWriter.makeDir(appDir)
                 fileWriter.write(csvFilePath, metrics.header + "\n");
@@ -47,7 +47,7 @@ class LocalCsvReporter(rootDir: String,
 
             fileWriter.append(csvFilePath, row);
         } catch {
-            case e: IOException => logger.warn(s"Error writing ${metrics.name} to local dir ${csvFilePath}. ${e}")
+            case e: IOException => logger.warn(s"Error writing ${metrics.name} to local dir ${csvFilePath}. ${e}", this.getClass)
         }
     }
 

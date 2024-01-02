@@ -17,7 +17,7 @@ object LimitedChart {
         } else if (tsCol.size <= MaxChartPoints) {
             LimitedChart(tsCol.values, valueCol.values, limitCol.values)
         } else {
-            logger.info(s"Limiting chart points from ${tsCol.size} to ${MaxChartPoints}")
+            logger.info(s"Limiting chart points from ${tsCol.size} to ${MaxChartPoints}", this.getClass)
             val ratio: Float = tsCol.size.toFloat / MaxChartPoints.toFloat
             val newPoints: Seq[Int] = (0 until MaxChartPoints)
             val newChart: Seq[TimePoint] = newPoints.map{ id =>
