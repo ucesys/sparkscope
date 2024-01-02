@@ -14,6 +14,11 @@ SparkScope html report contains the following features:
   - cpu utilization and memory utlization stats
   - stats for driver, executors and aggregated stats for whole application
   - CPU and Heap Memory Waste stats
+- Warnings:
+  - Low CPU utilization warning
+  - Low Memory utilization warning
+  - Data Spills from memory to disk warning 
+  - Long time spent in Garbage Collection warning
 
 ## Compatibility matrix
 
@@ -38,17 +43,19 @@ SparkScope html report contains the following features:
 ## Spark application configuration
 
 | parameter                                    | type      |   sample values                                   | description                                                                                                                  |
-|----------------------------------------------|-----------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
-| spark.extraListeners                         | mandatory | com.ucesys.sparkscope.SparkScopeJobListener       | spark listener class                                                                                                         
-| spark.metrics.conf.driver.source.jvm.class   | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for driver                                                                                                
-| spark.metrics.conf.executor.source.jvm.class | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for executor                                                                                              
-| spark.metrics.conf.*.sink.csv.class          | mandatory | org.apache.spark.metrics.sink.SparkScopeCsvSink   | csv sink class                                                                                                               
-| spark.metrics.conf.*.sink.csv.period         | mandatory | 5                                                 | period of metrics spill                                                                                                      
-| spark.metrics.conf.*.sink.csv.unit           | mandatory | seconds                                           | unit of period of metrics spill                                                                                              |
-| spark.metrics.conf.*.sink.csv.directory      | mandatory | s3://my-bucket/path/to/metrics                    | path to metrics directory, can be s3,hdfs,maprfs,local                                                                       |
-| spark.metrics.conf.*.sink.csv.region         | optional  | us-east-1                                         | aws region, required for s3 storage                                                                                          |
-| spark.metrics.conf.*.sink.csv.appName        | optional  | MyApp                                             | application name, also used for grouping metrics                                                                 |
-| spark.sparkscope.html.path                   | optional  | s3://my-bucket/path/to/html/report/dir            | path to which SparkScope html report will be saved                                                                           |
+|----------------------------------------------|-----------|---------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| spark.extraListeners                         | mandatory | com.ucesys.sparkscope.SparkScopeJobListener       | spark listener class                                                                
+| spark.metrics.conf.driver.source.jvm.class   | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for driver                                                           
+| spark.metrics.conf.executor.source.jvm.class | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for executor                                                
+| spark.metrics.conf.*.sink.csv.class          | mandatory | org.apache.spark.metrics.sink.SparkScopeCsvSink   | csv sink class 
+| spark.metrics.conf.*.sink.csv.period         | mandatory | 5                                                 | period of metrics spill                                                      
+| spark.metrics.conf.*.sink.csv.unit           | mandatory | seconds                                           | unit of period of metrics spill                                                                               |
+| spark.metrics.conf.*.sink.csv.directory      | mandatory | s3://my-bucket/path/to/metrics                    | path to metrics directory, can be s3,hdfs,maprfs,local                                                        |
+| spark.metrics.conf.*.sink.csv.region         | optional  | us-east-1                                         | aws region, required for s3 storage                                                                           |
+| spark.metrics.conf.*.sink.csv.appName        | optional  | MyApp                                             | application name, also used for grouping metrics          |
+| spark.sparkscope.html.path                   | optional  | s3://my-bucket/path/to/html/report/dir            | path to which SparkScope html report will be saved                                                            |
+| spark.sparkscope.log.path                    | optional  | s3://my-bucket/path/to/log/dir                    | path to which SparkScope logs will be saved                                                            |
+| spark.sparkscope.log.level                   | optional  | INFO                                              | logging level for SparkScope logs                                                           |
 | spark.sparkscope.metrics.dir.driver          | optional  | s3://my-bucket/path/to/metrics                    | path to driver csv metrics relative to driver, defaults to "spark.metrics.conf.driver.sink.csv.directory" property value     |
 | spark.sparkscope.metrics.dir.executor        | optional  | s3://my-bucket/path/to/metrics                    | path to executor csv metrics relative to driver, defaults to "spark.metrics.conf.executor.sink.csv.directory" property value |
 
@@ -179,8 +186,8 @@ java \
 com.ucesys.sparkscope.SparkScopeApp \
 --event-log <path-to-event-log> \
 --html-path <path-to-html-report-dir> \
---driver-metrics <path-to-executor-metrics-dir>  \
---executor-metrics <path-to-driver-metrics-dir> \
+--log-path <path-to-log-dir> \
+--log-level <logging level> \
 --region <aws-region>
 ```
 
@@ -227,14 +234,3 @@ coreHoursWasted=coreHoursAllocated(0.0042)*cpuUtilization(0.6835)
 
 28/09/2023 01:20:22 INFO [SparkScope] Wrote HTML report file to /tmp/app-20230928132004-0012.html
 ```
-
-## SparkScope report
-Last line of the report shows where html report was saved:
-`28/09/2023 01:20:22 INFO [SparkScope] Wrote HTML report file to /tmp/app-20230928132004-0012.html`
-
-SparkScope html report contains:
-- Aggregated application CPU/Memory statistics & charts
-- Driver and Executor CPU/Memory statistics & charts
-- Warnings concerning application resource usage
-- SparkScope logs
-- Spark config
