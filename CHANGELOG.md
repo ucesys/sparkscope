@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.8] - 2024-01-02 New Warnings and Logging enhancements 
+- New warnings added:
+  - Data Spill from memory to disk warning
+  - Long time spent in Garbage Collection warning
+- Logging enhancements:
+  - Logging level can now be set to DEBUG/INFO/WARN/ERROR
+  - Log file can now be written to a different directory than html report
+  - Log file can now be written to a different filesystem than html report
+  - Full package and class name added to log format
+
 ## [0.1.7] - 2023-12-06 UI Enhancements
 - Replace stage chart with number of tasks vs CPU capacity chart
 - Remove SparkScope logs from HTML report
