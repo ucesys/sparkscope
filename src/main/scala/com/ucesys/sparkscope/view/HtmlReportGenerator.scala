@@ -15,7 +15,7 @@ import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
 
-class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWriter)
+class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, htmlFileWriter: TextFileWriter, logFileWriter: TextFileWriter)
                          (implicit logger: SparkScopeLogger) extends ReportGenerator {
     override def generate(result: SparkScopeResult): Unit = {
         val stream: InputStream = getClass.getResourceAsStream("/report-template.html")
@@ -42,11 +42,11 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
         val renderedStats = renderStats(renderedCharts, result)
 
         val outputPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appContext.appId}.html")
-        fileWriter.write(outputPath.toString, renderedStats)
+        htmlFileWriter.write(outputPath.toString, renderedStats)
         logger.info(s"Wrote HTML report file to ${outputPath}", this.getClass)
 
         val logPath = Paths.get(sparkScopeConf.logPath, s"${result.appContext.appId}.log")
-        fileWriter.write(logPath.toString, logger.toString)
+        logFileWriter.write(logPath.toString, logger.toString)
         logger.info(s"Log saved to ${logPath}", this.getClass)
     }
 

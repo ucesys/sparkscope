@@ -40,7 +40,8 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         Given("HtmlReportGenerator with logging to file enabled")
         val htmlReportGenerator = new HtmlReportGenerator(
             sparkScopeConf.copy(htmlReportPath = TestDir, logPath = TestDir, appName = Some("MyApp")),
-            fileWriter=fileWriter
+            htmlFileWriter=fileWriter,
+            logFileWriter=fileWriter
         )
 
         And("SparkScopeResult")
@@ -69,7 +70,9 @@ class HtmlReportGeneratorSuite extends FunSuite with MockFactory with BeforeAndA
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
         Given("HtmlReportGenerator with logging to file enabled")
         val htmlReportGenerator = new HtmlReportGenerator(
-            sparkScopeConf.copy(htmlReportPath = TestDir, logPath = TestDir, appName = Some("MyApp")), fileWriter=fileWriter
+            sparkScopeConf.copy(htmlReportPath = TestDir, logPath = TestDir, appName = Some("MyApp")),
+            htmlFileWriter=fileWriter,
+            logFileWriter=fileWriter
         )
 
         And("SparkScopeResult")
