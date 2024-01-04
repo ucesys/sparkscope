@@ -21,7 +21,7 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.TestHelpers.stageTimeline
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.io.file.FileReaderFactory
+import com.ucesys.sparkscope.io.reader.FileReaderFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler.{SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerEnvironmentUpdate, SparkListenerExecutorAdded, SparkListenerExecutorRemoved, SparkListenerJobEnd, SparkListenerJobStart, SparkListenerStageCompleted, SparkListenerStageSubmitted, SparkListenerTaskEnd}
 import org.mockito.ArgumentMatchers.any

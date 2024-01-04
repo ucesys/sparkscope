@@ -26,7 +26,7 @@ import com.ucesys.sparkscope.io.metrics.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.stats.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats, SparkScopeStats}
 import com.ucesys.sparkscope.timeline.ExecutorTimeline
-import com.ucesys.sparkscope.warning.{CPUUtilWarning, DiskSpillWarning, GCTimeWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
+import com.ucesys.sparkscope.view.warning.{CPUUtilWarning, DiskSpillWarning, GCTimeWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
 
 import scala.concurrent.duration._
 

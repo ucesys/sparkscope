@@ -23,7 +23,7 @@ import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
 import com.ucesys.sparkscope.metrics.SparkScopeResult
-import com.ucesys.sparkscope.view.ReportGeneratorFactory
+import com.ucesys.sparkscope.report.{Reporter, ReporterFactory}
 import org.apache.spark.SparkConf
 
 import java.io.FileNotFoundException
@@ -33,7 +33,7 @@ class SparkScopeRunner(sparkScopeConfLoader: SparkScopeConfLoader,
                        sparkScopeAnalyzer: SparkScopeAnalyzer,
                        propertiesLoaderFactory: PropertiesLoaderFactory,
                        metricsLoaderFactory: MetricsLoaderFactory,
-                       reportGeneratorFactory: ReportGeneratorFactory)
+                       reporterFactory: ReporterFactory)
                       (implicit val logger: SparkScopeLogger) {
     def run(appContext: AppContext, sparkConf: SparkConf, taskAggMetrics: TaskAggMetrics): Unit = {
         logger.info(SparkScopeSign, this.getClass)
@@ -49,7 +49,8 @@ class SparkScopeRunner(sparkScopeConfLoader: SparkScopeConfLoader,
             logger.info(s"${sparkScopeResult.stats.clusterMemoryStats}\n", this.getClass)
             logger.info(s"${sparkScopeResult.stats.clusterCPUStats}\n", this.getClass)
 
-            reportGeneratorFactory.get(sparkScopeConf).generate(sparkScopeResult)
+            val reporters: Seq[Reporter] = reporterFactory.get(sparkScopeConf)
+            reporters.foreach(_.report(sparkScopeResult))
         } catch {
             case ex: FileNotFoundException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex, this.getClass)
             case ex: NoSuchFileException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex, this.getClass)
@@ -75,7 +76,7 @@ object SparkScopeRunner {
           |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
           |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
           |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
-          |     /_/                             /_/    spark3-v0.1.8
+          |     /_/                             /_/    spark3-v0.1.9
           |""".stripMargin
 
     def apply(): SparkScopeRunner = {
@@ -85,7 +86,7 @@ object SparkScopeRunner {
             new SparkScopeAnalyzer,
             new PropertiesLoaderFactory,
             new MetricsLoaderFactory(new MetricReaderFactory(offline = false)),
-            new ReportGeneratorFactory
+            new ReporterFactory
         )
     }
 }

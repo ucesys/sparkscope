@@ -5,7 +5,7 @@ import com.ucesys.sparkscope.common.{AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.io.metrics.{DriverExecutorMetrics, HadoopMetricReader, MetricReader, MetricReaderFactory}
 import com.ucesys.sparkscope.io.property.{PropertiesLoader, PropertiesLoaderFactory}
 import com.ucesys.sparkscope.timeline.{ExecutorTimeline, StageTimeline}
-import com.ucesys.sparkscope.warning.MissingMetricsWarning
+import com.ucesys.sparkscope.view.warning.MissingMetricsWarning
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite

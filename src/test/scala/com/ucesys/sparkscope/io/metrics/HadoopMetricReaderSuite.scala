@@ -20,7 +20,7 @@ package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.common.{JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed, SparkScopeLogger}
-import com.ucesys.sparkscope.io.file.HadoopFileReader
+import com.ucesys.sparkscope.io.reader.HadoopFileReader
 import org.apache.commons.lang.SystemUtils
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}

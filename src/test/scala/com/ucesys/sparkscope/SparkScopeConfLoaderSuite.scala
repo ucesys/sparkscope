@@ -42,6 +42,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         And("with spark.metrics.conf set")
         And("with region set")
         And("with spark.metrics.conf.*.sink.csv.appName set")
+        And("with spark.sparkscope.diagnostics.enabled=false set")
         val sparkConfWithMetrics = new SparkConf()
           .set(SparkScopePropertyDriverMetricsDir, "/sparkscope/path/to/driver/metrics")
           .set(SparkScopePropertyExecutorMetricsDir, "/sparkscope/path/to/executor/metrics")
@@ -51,6 +52,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
           .set("spark.metrics.conf.executor.sink.csv.directory ", "/spark/metrics/path/to/executor/metrics")
           .set("spark.metrics.conf.*.sink.csv.region", "us-east-1")
           .set("spark.metrics.conf.*.sink.csv.appName", "my-sample-app")
+          .set("spark.sparkscope.diagnostics.enabled", "false")
 
         val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
@@ -72,6 +74,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("SparkScopeConf.region should be parsed")
         assert(sparkScopeConf.region.get == "us-east-1")
+
+        And("SparkScopeConf.sendDiagnostics should be false(disabled)")
+        assert(!sparkScopeConf.sendDiagnostics)
     }
 
     test("extracting driver & executor metrics path from spark.metrics.conf.[driver|executor]") {
@@ -84,6 +89,8 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         And("without spark.sparkscope.metrics.dir.driver set")
         And("without spark.sparkscope.metrics.dir.executor set")
         And("without spark.metrics.conf.*.sink.csv.director set")
+        And("without spark.sparkscope.diagnostics.enabled=false set")
+
         val sparkConfWithMetrics = new SparkConf()
           .set("spark.metrics.conf", MetricsPropertiesPath)
           .set("spark.metrics.conf.driver.sink.csv.directory", "/spark/metrics/path/to/driver/metrics")
@@ -111,12 +118,16 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("SparkScopeConf.region should be parsed")
         assert(sparkScopeConf.region.get == "us-east-1")
+
+        And("SparkScopeConf.sendDiagnostics should be true(enabled)")
+        assert(sparkScopeConf.sendDiagnostics)
     }
 
     test("extracting driver & executor metrics path from spark.metrics.conf.*") {
         Given("SparkConf")
         And("with spark.metrics.conf.*.sink.csv.director set")
         And("with spark.metrics.conf set")
+        And("with spark.sparkscope.diagnostics.enabled=true set")
         And("without spark.sparkscope.metrics.dir.driver set")
         And("without spark.sparkscope.metrics.dir.executor set")
         And("without spark.metrics.conf.driver.sink.csv.director set")
@@ -124,6 +135,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         val sparkConfWithMetrics = new SparkConf()
           .set("spark.metrics.conf", MetricsPropertiesPath)
           .set("spark.metrics.conf.*.sink.csv.directory", "/spark/metrics/path/to/all/metrics")
+          .set("spark.sparkscope.diagnostics.enabled", "true")
 
         val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
@@ -145,6 +157,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("SparkScopeConf.region should be empty")
         assert(sparkScopeConf.region.isEmpty)
+
+        And("SparkScopeConf.sendDiagnostics should be true(enabled)")
+        assert(sparkScopeConf.sendDiagnostics)
     }
 
     test("extracting driver & executor metrics path from metrics.properties file") {

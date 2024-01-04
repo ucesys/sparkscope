@@ -81,6 +81,7 @@ class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
             logPath = sparkConf.get(SparkScopePropertyLogPath, "/tmp/"),
             appName = sparkConf.getOption(SparkPropertyMetricsConfAppName),
             region = sparkConf.getOption(SparkPropertyMetricsConfS3Region),
+            sendDiagnostics = sparkConf.getOption(SparkScopePropertyDiagnosticsEnabled).forall(!_.toLowerCase.equals("false")),
             driverMemOverhead = driverMemOverhead,
             executorMemOverhead = executorMemOverhead,
             sparkConf = sparkConf
@@ -135,6 +136,8 @@ object SparkScopeConfLoader {
     val SparkScopePropertyHtmlPath = "spark.sparkscope.html.path"
     val SparkScopePropertyLogPath = "spark.sparkscope.log.path"
     val SparkScopePropertyLogLevel = "spark.sparkscope.log.level"
+    val SparkScopePropertyDiagnosticsEnabled = "spark.sparkscope.diagnostics.enabled"
+
     val SparkScopePropertyDriverMem = "spark.driver.memory"
     val SparkScopePropertyDriverMemOverhead = "spark.driver.memoryOverhead"
     val SparkScopePropertyDriverMemOverheadFactor = "spark.driver.memoryOverheadFactor"

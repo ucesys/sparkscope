@@ -23,8 +23,8 @@ import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.metrics.{CsvMetricsLoader, HadoopMetricReader, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
+import com.ucesys.sparkscope.report.ReporterFactory
 import com.ucesys.sparkscope.stats.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats}
-import com.ucesys.sparkscope.view.ReportGeneratorFactory
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
@@ -55,7 +55,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             new PropertiesLoaderFactory,
             metricsLoaderFactory,
-            new ReportGeneratorFactory
+            new ReporterFactory
         )
 
         When("SparkScopeRunner.run")
@@ -85,7 +85,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             new PropertiesLoaderFactory,
             metricsLoaderFactory,
-            new ReportGeneratorFactory
+            new ReporterFactory
         )
 
         When("SparkScopeRunner.run")
@@ -114,7 +114,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
-            new ReportGeneratorFactory
+            new ReporterFactory
         )
 
         When("SparkScopeRunner.run")
@@ -140,7 +140,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
-            new ReportGeneratorFactory
+            new ReporterFactory
         )
 
         When("SparkScopeRunner.runAnalysis")
@@ -210,7 +210,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
-            new ReportGeneratorFactory
+            new ReporterFactory
         )
 
         When("SparkScopeRunner.run")
@@ -280,7 +280,7 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
             new SparkScopeAnalyzer,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
-            new ReportGeneratorFactory
+            new ReporterFactory
         )
 
         When("SparkScopeRunner.run")

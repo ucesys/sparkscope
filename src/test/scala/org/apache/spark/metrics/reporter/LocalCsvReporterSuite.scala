@@ -21,7 +21,7 @@ package org.apache.spark.metrics.reporter
 import com.codahale.metrics.{MetricFilter, MetricRegistry}
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.data.DataTable
-import com.ucesys.sparkscope.io.file.LocalFileWriter
+import com.ucesys.sparkscope.io.writer.LocalFileWriter
 import org.apache.commons.lang.SystemUtils
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar

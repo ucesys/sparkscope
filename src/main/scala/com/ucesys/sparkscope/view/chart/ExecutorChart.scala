@@ -2,7 +2,7 @@ package com.ucesys.sparkscope.view.chart
 
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.data.DataColumn
-import com.ucesys.sparkscope.view.HtmlReportGenerator.MaxExecutorChartPoints
+import com.ucesys.sparkscope.report.HtmlFileReporter.MaxExecutorChartPoints
 import com.ucesys.sparkscope.view.SeriesColor
 import com.ucesys.sparkscope.view.SeriesColor._
 import com.ucesys.sparkscope.view.chart.ChartUtils.decreaseDataPoints

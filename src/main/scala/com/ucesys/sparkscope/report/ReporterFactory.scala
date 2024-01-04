@@ -1,0 +1,18 @@
+package com.ucesys.sparkscope.report
+
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
+import com.ucesys.sparkscope.io.http.JsonHttpClient
+import com.ucesys.sparkscope.io.writer.FileWriterFactory
+
+class ReporterFactory {
+    def get(sparkScopeConfig: SparkScopeConf)(implicit logger: SparkScopeLogger): Seq[Reporter] = {
+        Seq(
+        new HtmlFileReporter(
+            sparkScopeConfig,
+            (new FileWriterFactory(sparkScopeConfig.region)).get(sparkScopeConfig.htmlReportPath),
+            (new FileWriterFactory(sparkScopeConfig.region)).get(sparkScopeConfig.logPath)
+        ),
+        new JsonHttpDiagnosticsReporter(sparkScopeConfig, new JsonHttpClient)
+        )
+    }
+}

@@ -24,7 +24,7 @@ import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
 import com.ucesys.sparkscope.stats.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats}
-import com.ucesys.sparkscope.warning.MissingMetricsWarning
+import com.ucesys.sparkscope.view.warning.MissingMetricsWarning
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 import org.scalatest.MustMatchers.{a, convertToAnyMustWrapper}

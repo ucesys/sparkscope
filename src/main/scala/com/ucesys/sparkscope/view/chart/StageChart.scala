@@ -3,7 +3,7 @@ package com.ucesys.sparkscope.view.chart
 import com.ucesys.sparkscope.common.MetricUtils.ColTs
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
-import com.ucesys.sparkscope.view.HtmlReportGenerator.MaxStageChartPoints
+import com.ucesys.sparkscope.report.HtmlFileReporter.MaxStageChartPoints
 import com.ucesys.sparkscope.view.SeriesColor
 import com.ucesys.sparkscope.view.SeriesColor._
 import com.ucesys.sparkscope.view.chart.ChartUtils.decreaseDataPoints

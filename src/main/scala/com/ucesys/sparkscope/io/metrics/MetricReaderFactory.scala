@@ -1,8 +1,8 @@
 package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.common.{SparkScopeConf, AppContext, SparkScopeLogger}
-import com.ucesys.sparkscope.io.file.FSPrefixes.HadoopFSPrefixes
-import com.ucesys.sparkscope.io.file.{HadoopFileReader, LocalFileReader}
+import com.ucesys.sparkscope.io.FSPrefixes.HadoopFSPrefixes
+import com.ucesys.sparkscope.io.reader.{HadoopFileReader, LocalFileReader}
 
 class MetricReaderFactory(offline: Boolean) {
 
