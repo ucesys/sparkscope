@@ -189,4 +189,38 @@ class JsonHttpDiagnosticsReporterSuite extends FunSuite with MockitoSugar with B
                |}""".stripMargin.replaceAll("[\n\r]", "").replace(" ", "")
         )
     }
+
+    test("JsonHttpDiagnosticsReporter post request") {
+        Given("SparkConf without driver host set")
+        And("Without spark.app.name")
+        val sparkConf = new SparkConf
+
+        And("SparkScopeResult of running application")
+        val sparkScopeResult = SparkScopeResult(appContextRunning, Seq.empty, sparkScopeStats, mock[SparkScopeMetrics])
+
+        And("JsonHttpDiagnosticsReporter")
+        val jsonHttpClientMock = new JsonHttpClient
+        val jsonHttpDiagnosticsReporter = new JsonHttpDiagnosticsReporter(
+            sparkScopeConf.copy(appName = Some("MyApp"), sparkConf = sparkConf),
+            jsonHttpClientMock,
+            "http://localhost:80"
+        )
+
+        When("calling HtmlReportGenerator.generate")
+        jsonHttpDiagnosticsReporter.report(sparkScopeResult)
+
+        Then("Post request with diagnostics json is sent")
+        And("Json does not contain end timestamp, nor duration, nor  driverHost")
+        And("Json contains stats")
+        verify(jsonHttpClientMock, times(1)).post(
+            DiagnosticsEndpoint,
+            s"""{
+               | "appInfo":{
+               |     "appId":"app-123",
+               |     "sparkScopeAppName":"MyApp",
+               |     "startTs":1695358644000
+               | },"stats": ${expectedStatsJson}
+               |}""".stripMargin.replaceAll("[\n\r]", "").replace(" ", "")
+        )
+    }
 }

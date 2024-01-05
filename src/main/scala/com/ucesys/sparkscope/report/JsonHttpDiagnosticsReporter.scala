@@ -18,7 +18,9 @@ case class AppInfo(appId: String,
 
 case class DiagnosticsInfo(appInfo: AppInfo, stats: SparkScopeStats)
 
-class JsonHttpDiagnosticsReporter(sparkScopeConf: SparkScopeConf, jsonHttpPublisher: JsonHttpClient)
+class JsonHttpDiagnosticsReporter(sparkScopeConf: SparkScopeConf,
+                                  jsonHttpPublisher: JsonHttpClient,
+                                  endpoint: String = DiagnosticsEndpoint)
                                  (implicit logger: SparkScopeLogger) extends Reporter {
 
     implicit val formats = DefaultFormats
@@ -39,10 +41,11 @@ class JsonHttpDiagnosticsReporter(sparkScopeConf: SparkScopeConf, jsonHttpPublis
 
         val diagnosticsInfoJsonStr = Serialization.write(diagnosticsInfo)
 
-        jsonHttpPublisher.post(DiagnosticsEndpoint, diagnosticsInfoJsonStr)
+        jsonHttpPublisher.post(endpoint, diagnosticsInfoJsonStr)
     }
 }
 
 object JsonHttpDiagnosticsReporter {
-    val DiagnosticsEndpoint: String = "sparkscope.ucesys.com/diagnostics"
+    val DiagnosticsEndpoint: String = "https://sparkscope.ucesys.com/diagnostics"
+//val DiagnosticsEndpoint: String = "http://localhost"
 }
