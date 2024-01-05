@@ -34,6 +34,7 @@ class JsonHttpDiagnosticsReporter(sparkScopeConf: SparkScopeConf,
 
         try {
             val diagnosticsInfoJsonStr = Serialization.write(diagnosticsInfo)
+            logger.info(s"Sending diagnostics data to ${endpoint}", this.getClass, stdout = false)
             jsonHttpPublisher.post(endpoint, diagnosticsInfoJsonStr)
         } catch {
             case ex: HttpHostConnectException => logger.warn(ex.toString, this.getClass, stdout = false)
