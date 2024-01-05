@@ -21,7 +21,6 @@ package com.ucesys.sparkscope.io.report
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.common.{AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.io.http.JsonHttpClient
-import com.ucesys.sparkscope.io.report.JsonHttpDiagnosticsReporter
 import com.ucesys.sparkscope.metrics.{SparkScopeMetrics, SparkScopeResult}
 import com.ucesys.sparkscope.io.report.JsonHttpDiagnosticsReporter.DiagnosticsEndpoint
 import com.ucesys.sparkscope.stats.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats, SparkScopeStats}

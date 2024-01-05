@@ -37,6 +37,7 @@ class EventLogRunner(listener: SparkScopeJobListener)(implicit logger: SparkScop
             args.htmlPath.map(sparkConf.set(SparkScopePropertyHtmlPath, _))
             args.logPath.map(sparkConf.set(SparkScopePropertyLogPath, _))
             args.logLevel.map(sparkConf.set(SparkScopePropertyLogLevel, _))
+            args.diagnostics.map(sparkConf.set(SparkScopePropertyDiagnosticsEnabled, _))
 
             val environmentDetails: Map[String, Seq[(String, String)]] = Map("Spark Properties" -> sparkConf.getAll.toSeq)
             SparkListenerEnvironmentUpdate(environmentDetails)

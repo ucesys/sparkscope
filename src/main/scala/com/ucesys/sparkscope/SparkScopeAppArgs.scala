@@ -25,6 +25,7 @@ case class SparkScopeArgs(eventLog: String,
                           htmlPath: Option[String] = None,
                           logPath: Option[String] = None,
                           logLevel: Option[String] = None,
+                          diagnostics: Option[String] = None,
                           region: Option[String] = None)
 
 object SparkScopeArgs {
@@ -34,6 +35,7 @@ object SparkScopeArgs {
     val OptionHtmlPath = "--html-path"
     val OptionLogPath = "--log-path"
     val OptionLogLevel = "--log-level"
+    val OptionDiagnostics = "--diagnostics"
     val OptionRegion = "--region"
     def Usage: String =
         s"""
@@ -43,7 +45,8 @@ object SparkScopeArgs {
           |--executor-metrics Path to directory with executor metrics
           |--html-path        Path to directory where html report will be stored
           |--log-path         Path to directory where logs will be stored
-          |--log-level        Log level: [DEBUG, INFO, WARN, ERROR]
+          |--log-level        Log level: [DEBUG|INFO|WARN|ERROR]
+          |--diagnostics      Whether to send diagnostics data: [true|false]
           |--region           required if reading eventLog from s3
           |""".stripMargin
 
@@ -56,6 +59,7 @@ object SparkScopeArgs {
             case Array (OptionHtmlPath, htmlPath) => (OptionHtmlPath, htmlPath)
             case Array (OptionLogPath, logPath) => (OptionLogPath, logPath)
             case Array (OptionLogLevel, logLevel) => (OptionLogLevel, logLevel)
+            case Array (OptionDiagnostics, diagnostics) => (OptionDiagnostics, diagnostics)
             case Array (OptionRegion, region) => (OptionRegion, region)
         }.toMap
 
@@ -74,6 +78,7 @@ object SparkScopeArgs {
             htmlPath=argsMap.get(OptionHtmlPath),
             logPath=argsMap.get(OptionLogPath),
             logLevel=argsMap.get(OptionLogLevel),
+            diagnostics=argsMap.get(OptionDiagnostics),
             region=argsMap.get(OptionRegion)
         )
     }

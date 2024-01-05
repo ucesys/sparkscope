@@ -6,13 +6,17 @@ import com.ucesys.sparkscope.io.writer.FileWriterFactory
 
 class ReporterFactory {
     def get(sparkScopeConfig: SparkScopeConf)(implicit logger: SparkScopeLogger): Seq[Reporter] = {
-        Seq(
-            new JsonHttpDiagnosticsReporter(sparkScopeConfig, new JsonHttpClient),
+        val htmlReporter =
             new HtmlFileReporter(
                 sparkScopeConfig,
                 (new FileWriterFactory(sparkScopeConfig.region)).get(sparkScopeConfig.htmlReportPath),
                 (new FileWriterFactory(sparkScopeConfig.region)).get(sparkScopeConfig.logPath)
             )
-        )
+
+        if (sparkScopeConfig.sendDiagnostics) {
+            Seq(new JsonHttpDiagnosticsReporter(sparkScopeConfig, new JsonHttpClient), htmlReporter)
+        } else {
+            Seq(htmlReporter)
+        }
     }
 }
