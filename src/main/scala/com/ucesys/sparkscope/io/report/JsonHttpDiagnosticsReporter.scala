@@ -1,22 +1,14 @@
-package com.ucesys.sparkscope.report
+package com.ucesys.sparkscope.io.report
 
 import com.ucesys.sparkscope.common._
 import com.ucesys.sparkscope.io.http.JsonHttpClient
 import com.ucesys.sparkscope.metrics.SparkScopeResult
-import com.ucesys.sparkscope.report.JsonHttpDiagnosticsReporter.DiagnosticsEndpoint
-import com.ucesys.sparkscope.stats.SparkScopeStats
+import JsonHttpDiagnosticsReporter.DiagnosticsEndpoint
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
+import org.apache.http.conn.HttpHostConnectException
 
-case class AppInfo(appId: String,
-                   sparkAppName: Option[String],
-                   sparkScopeAppName: Option[String],
-                   startTs: Long,
-                   endTs: Option[Long],
-                   duration: Option[Long],
-                   driverHost: Option[String])
-
-case class DiagnosticsInfo(appInfo: AppInfo, stats: SparkScopeStats)
+import java.net.{SocketTimeoutException, UnknownHostException}
 
 class JsonHttpDiagnosticsReporter(sparkScopeConf: SparkScopeConf,
                                   jsonHttpPublisher: JsonHttpClient,
@@ -39,13 +31,18 @@ class JsonHttpDiagnosticsReporter(sparkScopeConf: SparkScopeConf,
             stats = result.stats
         )
 
-        val diagnosticsInfoJsonStr = Serialization.write(diagnosticsInfo)
-
-        jsonHttpPublisher.post(endpoint, diagnosticsInfoJsonStr)
+        try {
+            val diagnosticsInfoJsonStr = Serialization.write(diagnosticsInfo)
+            jsonHttpPublisher.post(endpoint, diagnosticsInfoJsonStr)
+        } catch {
+            case ex: HttpHostConnectException => logger.warn(s"HttpHostConnectException while trying to send diagnostics: ${ex}", this.getClass)
+            case ex: UnknownHostException => logger.warn(s"UnknownHostException while trying to send diagnostics: ${ex}", this.getClass)
+            case ex: SocketTimeoutException => logger.warn(s"SocketTimeoutException while trying to send diagnostics: ${ex}", this.getClass)
+            case ex: Exception => logger.warn(s"Unexpected exception while trying to send diagnostics: ${ex}", this.getClass)
+        }
     }
 }
 
 object JsonHttpDiagnosticsReporter {
-    val DiagnosticsEndpoint: String = "https://sparkscope.ucesys.com/diagnostics"
-//val DiagnosticsEndpoint: String = "http://localhost"
+    val DiagnosticsEndpoint: String = "http://sparkscope.ai/diagnostics"
 }

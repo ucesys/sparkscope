@@ -16,18 +16,22 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.report
+package com.ucesys.sparkscope.io.report
 
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.common.{AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.io.http.JsonHttpClient
+import com.ucesys.sparkscope.io.report.JsonHttpDiagnosticsReporter
 import com.ucesys.sparkscope.metrics.{SparkScopeMetrics, SparkScopeResult}
-import com.ucesys.sparkscope.report.JsonHttpDiagnosticsReporter.DiagnosticsEndpoint
+import com.ucesys.sparkscope.io.report.JsonHttpDiagnosticsReporter.DiagnosticsEndpoint
 import com.ucesys.sparkscope.stats.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats, SparkScopeStats}
+import org.apache.http.conn.HttpHostConnectException
 import org.apache.spark.SparkConf
+import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
+import java.net.{SocketTimeoutException, UnknownHostException}
 import java.nio.file.{Files, Paths}
 
 class JsonHttpDiagnosticsReporterSuite extends FunSuite with MockitoSugar with BeforeAndAfterAll with GivenWhenThen {
@@ -146,7 +150,7 @@ class JsonHttpDiagnosticsReporterSuite extends FunSuite with MockitoSugar with B
             s"""{
               | "appInfo":{
               |     "appId":"app-123",
-              |     "sparkAppName":"MyApp",
+              |     "sparkAppName":"MySparkApp",
               |     "sparkScopeAppName":"MyApp",
               |     "startTs":1695358644000,
               |     "endTs":1695358700000,
@@ -172,7 +176,7 @@ class JsonHttpDiagnosticsReporterSuite extends FunSuite with MockitoSugar with B
             jsonHttpClientMock
         )
 
-        When("calling HtmlReportGenerator.generate")
+        When("calling jsonHttpDiagnosticsReporter.report")
         jsonHttpDiagnosticsReporter.report(sparkScopeResult)
 
         Then("Post request with diagnostics json is sent")
@@ -190,37 +194,93 @@ class JsonHttpDiagnosticsReporterSuite extends FunSuite with MockitoSugar with B
         )
     }
 
-    test("JsonHttpDiagnosticsReporter post request") {
-        Given("SparkConf without driver host set")
-        And("Without spark.app.name")
-        val sparkConf = new SparkConf
-
-        And("SparkScopeResult of running application")
+    test("JsonHttpDiagnosticsReporter UnknownHostException") {
+        Given("SparkScopeResult of running application")
         val sparkScopeResult = SparkScopeResult(appContextRunning, Seq.empty, sparkScopeStats, mock[SparkScopeMetrics])
 
-        And("JsonHttpDiagnosticsReporter")
-        val jsonHttpClientMock = new JsonHttpClient
-        val jsonHttpDiagnosticsReporter = new JsonHttpDiagnosticsReporter(
-            sparkScopeConf.copy(appName = Some("MyApp"), sparkConf = sparkConf),
-            jsonHttpClientMock,
-            "http://localhost:80"
-        )
+        And("JsonHttpClient throwing UnknownHostException")
+        val jsonHttpClientMock = mock[JsonHttpClient]
+        doAnswer(() => throw new UnknownHostException("java.net.UnknownHostException: myhost: Temporary failure in name resolution"))
+          .when(jsonHttpClientMock)
+          .post(any[String], any[String],  any[Int])
+        val loggerMock = mock[SparkScopeLogger]
 
-        When("calling HtmlReportGenerator.generate")
+        val jsonHttpDiagnosticsReporter = new JsonHttpDiagnosticsReporter(
+            sparkScopeConf.copy(appName = Some("MyApp")),
+            jsonHttpClientMock,
+            "http://sparkscope.ai/diagnostics"
+        )(loggerMock)
+
+        When("calling jsonHttpDiagnosticsReporter.report")
         jsonHttpDiagnosticsReporter.report(sparkScopeResult)
 
-        Then("Post request with diagnostics json is sent")
-        And("Json does not contain end timestamp, nor duration, nor  driverHost")
-        And("Json contains stats")
-        verify(jsonHttpClientMock, times(1)).post(
-            DiagnosticsEndpoint,
-            s"""{
-               | "appInfo":{
-               |     "appId":"app-123",
-               |     "sparkScopeAppName":"MyApp",
-               |     "startTs":1695358644000
-               | },"stats": ${expectedStatsJson}
-               |}""".stripMargin.replaceAll("[\n\r]", "").replace(" ", "")
+        Then("Exception is caught")
+        And("Warning is logged")
+        verify(loggerMock, times(1)).warn(
+            "UnknownHostException while trying to send diagnostics: java.net.UnknownHostException: java.net.UnknownHostException: myhost: Temporary failure in name resolution",
+            jsonHttpDiagnosticsReporter.getClass
+        )
+    }
+
+    test("JsonHttpDiagnosticsReporter Connection refused") {
+        Given("SparkScopeResult of running application")
+        val sparkScopeResult = SparkScopeResult(appContextRunning, Seq.empty, sparkScopeStats, mock[SparkScopeMetrics])
+
+        And("JsonHttpClient throwing HttpHostConnectException")
+        val jsonHttpClientMock = mock[JsonHttpClient]
+        val exceptionMock = mock[HttpHostConnectException]
+        doReturn("org.apache.http.conn.HttpHostConnectException: Connect to localhost:80 [localhost/127.0.0.1] failed: Connection refused (Connection refused)")
+          .when(exceptionMock)
+          .toString
+
+        doAnswer(() => throw exceptionMock)
+          .when(jsonHttpClientMock)
+          .post(any[String], any[String], any[Int])
+        val loggerMock = mock[SparkScopeLogger]
+
+        val jsonHttpDiagnosticsReporter = new JsonHttpDiagnosticsReporter(
+            sparkScopeConf.copy(appName = Some("MyApp")),
+            jsonHttpClientMock,
+            "http://sparkscope.ai/diagnostics"
+        )(loggerMock)
+
+        When("calling jsonHttpDiagnosticsReporter.report")
+        jsonHttpDiagnosticsReporter.report(sparkScopeResult)
+
+        Then("Exception is caught")
+        And("Warning is logged")
+        verify(loggerMock, times(1)).warn(
+            "HttpHostConnectException while trying to send diagnostics: org.apache.http.conn.HttpHostConnectException: Connect to localhost:80 [localhost/127.0.0.1] failed: Connection refused (Connection refused)",
+            jsonHttpDiagnosticsReporter.getClass
+        )
+    }
+
+    test("JsonHttpDiagnosticsReporter Timeout") {
+        Given("SparkScopeResult of running application")
+        val sparkScopeResult = SparkScopeResult(appContextRunning, Seq.empty, sparkScopeStats, mock[SparkScopeMetrics])
+
+        And("JsonHttpClient throwing SocketTimeoutException")
+        val jsonHttpClientMock = mock[JsonHttpClient]
+
+        doAnswer(() => throw new SocketTimeoutException("Read timed out"))
+          .when(jsonHttpClientMock)
+          .post(any[String], any[String], any[Int])
+        val loggerMock = mock[SparkScopeLogger]
+
+        val jsonHttpDiagnosticsReporter = new JsonHttpDiagnosticsReporter(
+            sparkScopeConf.copy(appName = Some("MyApp")),
+            jsonHttpClientMock,
+            "http://sparkscope.ai/diagnostics"
+        )(loggerMock)
+
+        When("calling jsonHttpDiagnosticsReporter.report")
+        jsonHttpDiagnosticsReporter.report(sparkScopeResult)
+
+        Then("Exception is caught")
+        And("Warning is logged")
+        verify(loggerMock, times(1)).warn(
+            "SocketTimeoutException while trying to send diagnostics: java.net.SocketTimeoutException: Read timed out",
+            jsonHttpDiagnosticsReporter.getClass
         )
     }
 }

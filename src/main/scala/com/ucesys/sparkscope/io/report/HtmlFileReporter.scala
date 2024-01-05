@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.report
+package com.ucesys.sparkscope.io.report
 
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
 import com.ucesys.sparkscope.common.MemorySize.BytesInMB

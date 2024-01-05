@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.report
+package com.ucesys.sparkscope.io.report
 
 import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
 import com.ucesys.sparkscope.io.http.JsonHttpClient

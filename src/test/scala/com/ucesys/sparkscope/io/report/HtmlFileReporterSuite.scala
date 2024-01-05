@@ -16,13 +16,14 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.report
+package com.ucesys.sparkscope.io.report
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.common.{MemorySize, SparkScopeLogger}
 import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
+import com.ucesys.sparkscope.io.report.HtmlFileReporter
 import com.ucesys.sparkscope.io.writer.LocalFileWriter
 import com.ucesys.sparkscope.view.warning.{DiskSpillWarning, GCTimeWarning}
 import org.scalamock.scalatest.MockFactory
