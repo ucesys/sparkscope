@@ -42,22 +42,23 @@ SparkScope html report contains the following features:
 
 ## Spark application configuration
 
-| parameter                                    | type      |   sample values                                   | description                                                                                                                  |
-|----------------------------------------------|-----------|---------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| spark.extraListeners                         | mandatory | com.ucesys.sparkscope.SparkScopeJobListener       | spark listener class                                                                
-| spark.metrics.conf.driver.source.jvm.class   | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for driver                                                           
-| spark.metrics.conf.executor.source.jvm.class | mandatory | org.apache.spark.metrics.source.JvmSource         | jvm metrics source for executor                                                
-| spark.metrics.conf.*.sink.csv.class          | mandatory | org.apache.spark.metrics.sink.SparkScopeCsvSink   | csv sink class 
-| spark.metrics.conf.*.sink.csv.period         | mandatory | 5                                                 | period of metrics spill                                                      
-| spark.metrics.conf.*.sink.csv.unit           | mandatory | seconds                                           | unit of period of metrics spill                                                                               |
-| spark.metrics.conf.*.sink.csv.directory      | mandatory | s3://my-bucket/path/to/metrics                    | path to metrics directory, can be s3,hdfs,maprfs,local                                                        |
-| spark.metrics.conf.*.sink.csv.region         | optional  | us-east-1                                         | aws region, required for s3 storage                                                                           |
-| spark.metrics.conf.*.sink.csv.appName        | optional  | MyApp                                             | application name, also used for grouping metrics          |
-| spark.sparkscope.html.path                   | optional  | s3://my-bucket/path/to/html/report/dir            | path to which SparkScope html report will be saved                                                            |
-| spark.sparkscope.log.path                    | optional  | s3://my-bucket/path/to/log/dir                    | path to which SparkScope logs will be saved                                                            |
-| spark.sparkscope.log.level                   | optional  | INFO                                              | logging level for SparkScope logs                                                           |
-| spark.sparkscope.metrics.dir.driver          | optional  | s3://my-bucket/path/to/metrics                    | path to driver csv metrics relative to driver, defaults to "spark.metrics.conf.driver.sink.csv.directory" property value     |
-| spark.sparkscope.metrics.dir.executor        | optional  | s3://my-bucket/path/to/metrics                    | path to executor csv metrics relative to driver, defaults to "spark.metrics.conf.executor.sink.csv.directory" property value |
+| parameter                                    | type      | sample values                                   | description                                                                                                                  |
+|----------------------------------------------|-----------|-------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| spark.extraListeners                         | mandatory | com.ucesys.sparkscope.SparkScopeJobListener     | spark listener class                                                                                                         
+| spark.metrics.conf.driver.source.jvm.class   | mandatory | org.apache.spark.metrics.source.JvmSource       | jvm metrics source for driver                                                                                                
+| spark.metrics.conf.executor.source.jvm.class | mandatory | org.apache.spark.metrics.source.JvmSource       | jvm metrics source for executor                                                                                              
+| spark.metrics.conf.*.sink.csv.class          | mandatory | org.apache.spark.metrics.sink.SparkScopeCsvSink | csv sink class                                                                                                               
+| spark.metrics.conf.*.sink.csv.period         | mandatory | 5                                               | period of metrics spill                                                                                                      
+| spark.metrics.conf.*.sink.csv.unit           | mandatory | seconds                                         | unit of period of metrics spill                                                                                              |
+| spark.metrics.conf.*.sink.csv.directory      | mandatory | s3://my-bucket/path/to/metrics                  | path to metrics directory, can be s3,hdfs,maprfs,local                                                                       |
+| spark.metrics.conf.*.sink.csv.region         | optional  | us-east-1                                       | aws region, required for s3 storage                                                                                          |
+| spark.metrics.conf.*.sink.csv.appName        | optional  | MyApp                                           | application name, also used for grouping metrics                                                                             |
+| spark.sparkscope.html.path                   | optional  | s3://my-bucket/path/to/html/report/dir          | path to which SparkScope html report will be saved                                                                           |
+| spark.sparkscope.log.path                    | optional  | s3://my-bucket/path/to/log/dir                  | path to which SparkScope logs will be saved                                                                                  |
+| spark.sparkscope.log.level                   | optional  | DEBUG, INFO, WARN, ERROR                        | logging level for SparkScope logs                                                                                            |
+| spark.sparkscope.diagnostics.enabled         | optional  | true/false                                      | set to false in order to disable sending diagnostics. Default=true.                                                          |
+| spark.sparkscope.metrics.dir.driver          | optional  | s3://my-bucket/path/to/metrics                  | path to driver csv metrics relative to driver, defaults to "spark.metrics.conf.driver.sink.csv.directory" property value     |
+| spark.sparkscope.metrics.dir.executor        | optional  | s3://my-bucket/path/to/metrics                  | path to executor csv metrics relative to driver, defaults to "spark.metrics.conf.executor.sink.csv.directory" property value |
 
 
 
@@ -188,6 +189,7 @@ com.ucesys.sparkscope.SparkScopeApp \
 --html-path <path-to-html-report-dir> \
 --log-path <path-to-log-dir> \
 --log-level <logging level> \
+--diagnostics <true/false> \
 --region <aws-region>
 ```
 
