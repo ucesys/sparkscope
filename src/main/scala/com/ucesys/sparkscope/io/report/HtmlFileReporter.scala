@@ -148,11 +148,14 @@ class HtmlFileReporter(sparkScopeConf: SparkScopeConf, htmlFileWriter: TextFileW
 
     def renderStats(template: String, result: SparkScopeResult): String = {
         template
+          .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterCPUStats.cpuUtil * 100}%1.2f")
           .replace("${stats.cluster.heap.avg.perc}", f"${result.stats.clusterMemoryStats.avgHeapPerc * 100}%1.2f")
           .replace("${stats.cluster.heap.max.perc}", f"${result.stats.clusterMemoryStats.maxHeapPerc * 100}%1.2f")
-          .replace("${stats.cluster.cpu.util}", f"${result.stats.clusterCPUStats.cpuUtil * 100}%1.2f")
-          .replace("${resource.waste.heap}", f"${result.stats.clusterMemoryStats.heapGbHoursWasted}%1.4f")
+
+          .replace("${resource.alloc.cpu}", f"${result.stats.clusterCPUStats.coreHoursAllocated}%1.4f")
+          .replace("${resource.alloc.heap}", f"${result.stats.clusterMemoryStats.heapGbHoursAllocated}%1.4f")
           .replace("${resource.waste.cpu}", f"${result.stats.clusterCPUStats.coreHoursWasted}%1.4f")
+          .replace("${resource.waste.heap}", f"${result.stats.clusterMemoryStats.heapGbHoursWasted}%1.4f")
 
           .replace("${stats.executor.heap.max}", result.stats.executorStats.maxHeap.toString)
           .replace("${stats.executor.heap.max.perc}", f"${result.stats.executorStats.maxHeapPerc * 100}%1.2f")
