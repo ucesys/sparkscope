@@ -18,13 +18,9 @@
 
 package com.ucesys.sparkscope.view.warning
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.agg.{AggValue, TaskAggMetrics}
-import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
 import com.ucesys.sparkscope.io.writer.LocalFileWriter
-import com.ucesys.sparkscope.view.warning.GCTimeWarning
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 

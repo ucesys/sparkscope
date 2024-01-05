@@ -4,6 +4,7 @@ import com.ucesys.sparkscope.common._
 import com.ucesys.sparkscope.io.http.JsonHttpClient
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 import JsonHttpDiagnosticsReporter.DiagnosticsEndpoint
+import org.apache.http.client.HttpResponseException
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 import org.apache.http.conn.HttpHostConnectException
@@ -35,10 +36,11 @@ class JsonHttpDiagnosticsReporter(sparkScopeConf: SparkScopeConf,
             val diagnosticsInfoJsonStr = Serialization.write(diagnosticsInfo)
             jsonHttpPublisher.post(endpoint, diagnosticsInfoJsonStr)
         } catch {
-            case ex: HttpHostConnectException => logger.warn(s"HttpHostConnectException while trying to send diagnostics: ${ex}", this.getClass)
-            case ex: UnknownHostException => logger.warn(s"UnknownHostException while trying to send diagnostics: ${ex}", this.getClass)
-            case ex: SocketTimeoutException => logger.warn(s"SocketTimeoutException while trying to send diagnostics: ${ex}", this.getClass)
-            case ex: Exception => logger.warn(s"Unexpected exception while trying to send diagnostics: ${ex}", this.getClass)
+            case ex: HttpHostConnectException => logger.warn(ex.toString, this.getClass, stdout = false)
+            case ex: UnknownHostException => logger.warn(ex.toString, this.getClass, stdout = false)
+            case ex: SocketTimeoutException => logger.warn(ex.toString, this.getClass, stdout = false)
+            case ex: HttpResponseException => logger.warn(ex.toString, this.getClass, stdout = false)
+            case ex: Exception => logger.warn(s"Unexpected exception while trying to send diagnostics: ${ex}", this.getClass, stdout = false)
         }
     }
 }

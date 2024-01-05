@@ -22,7 +22,6 @@ import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.agg.{AggValue, TaskAggMetrics}
 import com.ucesys.sparkscope.common.MemorySize
 import com.ucesys.sparkscope.io.writer.LocalFileWriter
-import com.ucesys.sparkscope.view.warning.DiskSpillWarning
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 

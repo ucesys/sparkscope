@@ -2,6 +2,7 @@ package com.ucesys.sparkscope.io.http
 
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.http.JsonHttpClient.DefaultTimeoutMillis
+import org.apache.http.client.HttpResponseException
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.{HttpHeaders, HttpStatus}
 import org.apache.http.client.methods.HttpPost
@@ -29,9 +30,9 @@ class JsonHttpClient(implicit logger: SparkScopeLogger) {
         post.addHeader(HttpHeaders.CONTENT_TYPE, "application/json")
         post.setEntity(new StringEntity(jsonStr))
 
-        val response = client.execute(post)
-        if (response.getStatusLine.getStatusCode != HttpStatus.SC_OK) {
-            logger.warn(s"Response had ${response.getStatusLine.getStatusCode} status code and ${EntityUtils.toString(response.getEntity, "UTF-8")}", this.getClass)
+        val statusLine = client.execute(post).getStatusLine
+        if (statusLine.getStatusCode != HttpStatus.SC_OK) {
+            throw new HttpResponseException(statusLine.getStatusCode, statusLine.getReasonPhrase)
         }
     }
 }
