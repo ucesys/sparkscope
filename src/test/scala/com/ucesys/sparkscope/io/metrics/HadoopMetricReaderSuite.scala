@@ -33,9 +33,11 @@ class HadoopMetricReaderSuite extends FunSuite with MockFactory with GivenWhenTh
         executorMetricsDir = s"hdfs:/tmp/csv-metrics"
     )
 
+    val SamleAppId = "app-123"
+
     test("HadoopMetricReader driver metrics test") {
         Given("HadoopMetricReader with HadoopFileReader")
-        val appContext = mockAppContext("hadoop-metrics-reader-driver")
+        val appContext = mockAppContext(SampleAppId, "hadoop-metrics-reader-driver")
         val fileReaderMock = mock[HadoopFileReader]
         val metricsReader = new HadoopMetricReader(sparkScopeConfHdfs, fileReaderMock, appContext)
 
@@ -50,7 +52,7 @@ class HadoopMetricReaderSuite extends FunSuite with MockFactory with GivenWhenTh
 
     test("HadoopMetricReader executor metrics test") {
         Given("HadoopMetricReader with HadoopFileReader")
-        val appContext = mockAppContext("hadoop-metrics-reader-executor")
+        val appContext = mockAppContext(SampleAppId, "hadoop-metrics-reader-executor")
         val fileReaderMock = mock[HadoopFileReader]
         val metricsReader = new HadoopMetricReader(sparkScopeConfHdfs, fileReaderMock, appContext)
 

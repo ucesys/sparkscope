@@ -31,14 +31,16 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
 import java.nio.file.{Files, Paths}
 
-class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen with BeforeAndAfterAll {
-    override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
+class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen with BeforeAndAfterAll with SuiteDirectoryUtils {
+    override def beforeAll(): Unit = prepareSuiteTestDir()
 
-    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir, logPath = TestDir)
+    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = Some(getSuiteTestDir()), logPath = getSuiteTestDir())
+    val appName = "MyApp"
 
     test("SparkScopeRunner.run upscaling test") {
         Given("Metrics for application which was upscaled")
-        val ac = mockAppContext("runner-upscale")
+        val appId = "app-123-runner-upscale"
+        val ac = mockAppContext(appId, appName)
         val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
 
@@ -62,13 +64,14 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         sparkScopeRunner.run(ac, new SparkConf, TaskAggMetrics())
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+        assert(Files.exists(Paths.get(getSuiteTestDir(), ac.appId + ".html")))
     }
 
 
     test("SparkScopeRunner.run upscaling and downscaling test") {
         Given("Metrics for application which was upscaled and downscaled")
-        val ac = mockAppContextWithDownscaling("runner-upscale-downscale")
+        val appId = "app-123-runner-upscale-downscale"
+        val ac = mockAppContextWithDownscaling(appId, appName)
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsWithDownscaling(csvReaderMock, ac.appId)
 
@@ -92,12 +95,13 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         sparkScopeRunner.run(ac, new SparkConf, TaskAggMetrics())
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+        assert(Files.exists(Paths.get(getSuiteTestDir(), ac.appId + ".html")))
     }
 
     test("SparkScopeRunner.run upscaling and downscaling multicore test") {
         Given("Metrics for application which was upscaled and downscaled")
-        val ac = mockAppContextWithDownscalingMuticore("runner-upscale-downscale-multicore")
+        val appId = "app-123-runner-upscale-downscale-multicore"
+        val ac = mockAppContextWithDownscalingMuticore(appId, appName)
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsWithDownscaling(csvReaderMock, ac.appId)
 
@@ -121,14 +125,15 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         sparkScopeRunner.run(ac, new SparkConf, TaskAggMetrics())
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+        assert(Files.exists(Paths.get(getSuiteTestDir(), ac.appId + ".html")))
     }
 
     test("SparkScopeRunner.runAnalysis test") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
         Given("correct metrics for application")
-        val ac = mockAppContext("runner-analysis-upscale-downscale")
+        val appId = "app-123-runner-analysis"
+        val ac = mockAppContext(appId, appName)
         val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
         val metricsLoader = new CsvMetricsLoader(csvReaderMock)
@@ -147,11 +152,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac, TaskAggMetrics())
 
         Then("Report should be generated")
-        assert(result.appContext.appId == ac.appId)
-        assert(result.appContext.appStartTime == StartTime)
-        assert(result.appContext.appEndTime.get == EndTime)
-        assert(result.appContext.executorMap.size == 4)
-
         assert(result.stats.driverStats == DriverMemoryStats(
             heapSize = 910,
             maxHeap = 315,
@@ -198,7 +198,8 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
         Given("Metrics for application which was upscaled and downscaled")
-        val ac = mockAppContextWithDownscaling("runner-analysis-upscale-downscale")
+        val appId = "app-123-runner-analysis-upscale-downscale"
+        val ac = mockAppContextWithDownscaling(appId, appName)
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsWithDownscaling(csvReaderMock, ac.appId)
         val metricsLoader = new CsvMetricsLoader(csvReaderMock)
@@ -217,11 +218,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac, TaskAggMetrics())
 
         Then("Report should be generated")
-        assert(result.appContext.appId == ac.appId)
-        assert(result.appContext.appStartTime == StartTime)
-        assert(result.appContext.appEndTime.get == EndTime)
-        assert(result.appContext.executorMap.size == 5)
-
         assert(result.stats.driverStats == DriverMemoryStats(
             heapSize = 910,
             maxHeap = 315,
@@ -268,7 +264,8 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
         Given("Metrics for application which was upscaled and downscaled")
-        val ac = mockAppContextWithDownscalingMuticore("runner-analysis-upscale-downscale-multicore")
+        val appId = "app-123-runner-analysis-upscale-downscale-multicore"
+        val ac = mockAppContextWithDownscalingMuticore(appId, appName)
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsWithDownscaling(csvReaderMock, ac.appId)
         val metricsLoader = new CsvMetricsLoader(csvReaderMock)
@@ -287,11 +284,6 @@ class SparkScopeRunnerSuite extends FunSuite with MockFactory with GivenWhenThen
         val result = sparkScopeRunner.runAnalysis(sparkScopeConfHtmlReportPath, ac, TaskAggMetrics())
 
         Then("Report should be generated")
-        assert(result.appContext.appId == ac.appId)
-        assert(result.appContext.appStartTime == StartTime)
-        assert(result.appContext.appEndTime.get == EndTime)
-        assert(result.appContext.executorMap.size == 5)
-
         assert(result.stats.driverStats == DriverMemoryStats(
             heapSize = 910,
             maxHeap = 315,

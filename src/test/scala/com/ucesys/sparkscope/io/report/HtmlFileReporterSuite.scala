@@ -18,12 +18,11 @@
 
 package com.ucesys.sparkscope.io.report
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer
-import com.ucesys.sparkscope.TestHelpers._
+import com.ucesys.sparkscope.{SparkScopeAnalyzer, SuiteDirectoryUtils}
+import com.ucesys.sparkscope.TestHelpers.{sparkScopeConf, _}
 import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.common.{MemorySize, SparkScopeLogger}
 import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
-import com.ucesys.sparkscope.io.report.HtmlFileReporter
 import com.ucesys.sparkscope.io.writer.LocalFileWriter
 import com.ucesys.sparkscope.view.warning.{DiskSpillWarning, GCTimeWarning}
 import org.scalamock.scalatest.MockFactory
@@ -32,56 +31,53 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 import java.nio.file.{Files, Paths}
 import scala.concurrent.duration.DurationInt
 
-class HtmlFileReporterSuite extends FunSuite with MockFactory with BeforeAndAfterAll with GivenWhenThen {
-    override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
+class HtmlFileReporterSuite extends FunSuite with MockFactory with BeforeAndAfterAll with GivenWhenThen with SuiteDirectoryUtils {
+    override def beforeAll(): Unit = prepareSuiteTestDir()
     val fileWriter = new LocalFileWriter
 
-    test("SparkScope end2end no warnings") {
+    test("HtmlFileReporter end2end no warnings") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
         Given("HtmlReportGenerator with logging to file enabled")
-        val htmlReportGenerator = new HtmlFileReporter(
-            sparkScopeConf.copy(htmlReportPath = TestDir, logPath = TestDir, appName = Some("MyApp")),
-            htmlFileWriter=fileWriter,
-            logFileWriter=fileWriter
-        )
+        val appId = s"${SampleAppId}-html-generator-no-warnings"
+        val ac = mockAppContext(appId, SampleAppName)
+        val sparkScopeConfHtml = sparkScopeConf.copy(htmlReportPath = Some(getSuiteTestDir()), logPath = getSuiteTestDir(), appName = Some("MyApp"))
+
+        val htmlReportGenerator = new HtmlFileReporter(ac, sparkScopeConfHtml, htmlFileWriter=fileWriter)
 
         And("SparkScopeResult")
-        val ac = mockAppContext("html-generator-no-warnings")
         val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
-        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac, TaskAggMetrics()).copy(warnings = Seq.empty)
+        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac, sparkScopeConfHtml, TaskAggMetrics()).copy(warnings = Seq.empty)
 
         When("calling HtmlReportGenerator.generate")
         htmlReportGenerator.report(result)
 
         Then("html report is created")
-        val htmlPath = Paths.get(TestDir, result.appContext.appId + ".html")
+        val htmlPath = Paths.get(getSuiteTestDir(), ac.appId + ".html")
         assert(Files.exists(htmlPath))
-
-        And("log file is created")
-        val logPath = Paths.get(TestDir, result.appContext.appId + ".log")
-        assert(Files.exists(logPath))
 
         And("all templated files(${}) were properly ingested")
         assert(!new String(Files.readAllBytes(htmlPath)).contains("${"))
+
+        And("html contents are correct")
+        assert(new String(Files.readAllBytes(htmlPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/html/app-123-html-generator-no-warnings.html"))))
     }
 
-    test("SparkScope end2end with warnings") {
+    test("HtmlFileReporter end2end with warnings") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
         Given("HtmlReportGenerator with logging to file enabled")
-        val htmlReportGenerator = new HtmlFileReporter(
-            sparkScopeConf.copy(htmlReportPath = TestDir, logPath = TestDir, appName = Some("MyApp")),
-            htmlFileWriter=fileWriter,
-            logFileWriter=fileWriter
-        )
+        val appId = s"${SampleAppId}-html-generator-with-warnings"
+        val ac = mockAppContext(appId, SampleAppName)
+        val sparkScopeConfHtml = sparkScopeConf.copy(htmlReportPath = Some(getSuiteTestDir()), logPath = getSuiteTestDir(), appName = Some("MyApp"))
+
+        val htmlReportGenerator = new HtmlFileReporter(ac, sparkScopeConfHtml, htmlFileWriter=fileWriter)
 
         And("SparkScopeResult")
-        val ac = mockAppContextMissingExecutorMetrics("html-generator-with-warnings")
         val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
         val executorMetricsAnalyzer = new SparkScopeAnalyzer
-        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac, TaskAggMetrics())
+        val result = executorMetricsAnalyzer.analyze(DriverExecutorMetricsMock, ac, sparkScopeConfHtml, TaskAggMetrics())
         val diskSpillWarning = DiskSpillWarning(MemorySize.fromMegaBytes(500), MemorySize.fromGigaBytes(5))
         val gcTimeWarning = GCTimeWarning(2000.seconds, 600.seconds, 0.3)
 
@@ -91,14 +87,13 @@ class HtmlFileReporterSuite extends FunSuite with MockFactory with BeforeAndAfte
         htmlReportGenerator.report(resultWithAllWarnings)
 
         Then("html report is created")
-        val htmlPath = Paths.get(TestDir, result.appContext.appId + ".html")
+        val htmlPath = Paths.get(getSuiteTestDir(), ac.appId + ".html")
         assert(Files.exists(htmlPath))
-
-        And("log file is created")
-        val logPath = Paths.get(TestDir, result.appContext.appId + ".log")
-        assert(Files.exists(logPath))
 
         And("all templated files(${}) were properly ingested")
         assert(!new String(Files.readAllBytes(htmlPath)).contains("${"))
+
+        And("html contents are correct")
+        assert(new String(Files.readAllBytes(htmlPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/html/app-123-html-generator-with-warnings.html"))))
     }
 }

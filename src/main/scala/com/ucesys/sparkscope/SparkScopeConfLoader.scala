@@ -74,14 +74,23 @@ class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
             SparkScopePropertyExecMemOverheadFactor
         )
 
+        val diagnosticsUrl: Option[String] = sparkConf.getOption(SparkScopePropertyDiagnosticsEnabled).map(_.toLowerCase) match {
+            case Some("false") => None
+            case Some("true") => Some(DiagnosticsEndpoint)
+            case None => Some(DiagnosticsEndpoint)
+        }
+
+
         SparkScopeConf(
             driverMetricsDir = driverMetricsDir.get,
             executorMetricsDir = executorMetricsDir.get,
-            htmlReportPath = sparkConf.get(SparkScopePropertyHtmlPath, "/tmp/"),
+            htmlReportPath = sparkConf.getOption(SparkScopePropertyHtmlPath),
+            jsonReportPath = sparkConf.getOption(SparkScopePropertyJsonPath),
+            jsonReportServer = sparkConf.getOption(SparkScopePropertyJsonServer),
             logPath = sparkConf.get(SparkScopePropertyLogPath, "/tmp/"),
             appName = sparkConf.getOption(SparkPropertyMetricsConfAppName),
             region = sparkConf.getOption(SparkPropertyMetricsConfS3Region),
-            sendDiagnostics = sparkConf.getOption(SparkScopePropertyDiagnosticsEnabled).forall(!_.toLowerCase.equals("false")),
+            diagnosticsUrl = diagnosticsUrl,
             driverMemOverhead = driverMemOverhead,
             executorMemOverhead = executorMemOverhead,
             sparkConf = sparkConf
@@ -133,7 +142,9 @@ object SparkScopeConfLoader {
     // Properties used by sparkscope
     val SparkScopePropertyExecutorMetricsDir = "spark.sparkscope.metrics.dir.executor"
     val SparkScopePropertyDriverMetricsDir = "spark.sparkscope.metrics.dir.driver"
-    val SparkScopePropertyHtmlPath = "spark.sparkscope.html.path"
+    val SparkScopePropertyHtmlPath = "spark.sparkscope.report.html.path"
+    val SparkScopePropertyJsonPath = "spark.sparkscope.report.json.path"
+    val SparkScopePropertyJsonServer = "spark.sparkscope.report.json.server"
     val SparkScopePropertyLogPath = "spark.sparkscope.log.path"
     val SparkScopePropertyLogLevel = "spark.sparkscope.log.level"
     val SparkScopePropertyDiagnosticsEnabled = "spark.sparkscope.diagnostics.enabled"
@@ -144,4 +155,6 @@ object SparkScopeConfLoader {
     val SparkScopePropertyExecMem = "spark.executor.memory"
     val SparkScopePropertyExecMemOverhead = "spark.executor.memoryOverhead"
     val SparkScopePropertyExecMemOverheadFactor = "spark.executor.memoryOverheadFactor"
+
+    val DiagnosticsEndpoint: String = "http://sparkscope.ai/diagnostics"
 }

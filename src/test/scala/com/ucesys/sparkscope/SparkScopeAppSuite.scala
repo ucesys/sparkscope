@@ -23,22 +23,25 @@ import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.reader.FileReaderFactory
 import com.ucesys.sparkscope.io.metrics.{CsvMetricsLoader, HadoopMetricReader, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.report.ReporterFactory
+import org.apache.commons.io.FileUtils
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
-import java.nio.file.{Files, Paths}
+import java.io.File
+import java.nio.file.{Files, Path, Paths}
 
-class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen with BeforeAndAfterAll {
-    override def beforeAll(): Unit = Files.createDirectories(Paths.get(TestDir))
+class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen with BeforeAndAfterAll with SuiteDirectoryUtils {
 
-    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = TestDir, logPath = TestDir)
+    override def beforeAll(): Unit = prepareSuiteTestDir()
+
+    val sparkScopeConfHtmlReportPath = sparkScopeConf.copy(htmlReportPath = Some(getSuiteTestDir()), logPath = getSuiteTestDir())
 
     test("SparkScopeApp.runFromEventLog for finished application ") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
         Given("Path to eventLog for finished application")
         val appId = "app-20231025121456-0004-eventLog-finished"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val ac = mockAppContextWithDownscalingMuticore("", appId)
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
+        val ac = mockAppContextWithDownscalingMuticore(appId, appName = "myApp")
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
@@ -48,7 +51,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLogPath, None, None, None),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
@@ -58,15 +61,16 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+        val htmlPath = Paths.get(getSuiteTestDir(), ac.appId + ".html")
+        assert(Files.exists(htmlPath))
     }
 
     test("SparkScopeApp.runFromEventLog for running application") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
         Given("Path to eventLog for running application")
         val appId = "app-20231025121456-0004-eventLog-running"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val ac = mockAppContextWithDownscalingMuticore("", appId)
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
+        val ac = mockAppContextWithDownscalingMuticore(appId, appName = "myApp")
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
@@ -76,7 +80,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLogPath, None, None, None),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
@@ -86,15 +90,15 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+        assert(Files.exists(Paths.get(getSuiteTestDir(), ac.appId + ".html")))
     }
 
     test("SparkScopeApp.runFromEventLog for finished application with removed executors") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
         Given("Path to eventLog for finished application with removed executors")
         val appId = "app-20231025121456-0004-eventLog-finished-exec-removed"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val ac = mockAppContextWithDownscalingMuticore("", appId)
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
+        val ac = mockAppContextWithDownscalingMuticore(appId, appName = "myApp")
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
@@ -104,7 +108,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLogPath, None, None, None),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
@@ -114,15 +118,15 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+        assert(Files.exists(Paths.get(getSuiteTestDir(), ac.appId + ".html")))
     }
 
     test("SparkScopeApp.runFromEventLog for running application with removed executors") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
         Given("Path to eventLog for running application with removed executors")
         val appId = "app-20231025121456-0004-eventLog-running-exec-removed"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val ac = mockAppContextWithDownscalingMuticore("", appId)
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
+        val ac = mockAppContextWithDownscalingMuticore(appId, appName = "myApp")
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
@@ -132,7 +136,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLogPath, None, None, None),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
@@ -142,15 +146,15 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+        assert(Files.exists(Paths.get(getSuiteTestDir(), ac.appId + ".html")))
     }
 
     test("SparkScopeApp.runFromEventLog for running application with incomplete eventlog") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
         Given("Path to eventLog for running application which is incomplete(last json is half-written)")
         val appId = "app-20231025121456-0004-eventLog-running-incomplete"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val ac = mockAppContextWithDownscalingMuticore("", appId)
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
+        val ac = mockAppContextWithDownscalingMuticore(appId, appName = "myApp")
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
@@ -160,7 +164,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLogPath, None, None, None),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
@@ -170,15 +174,15 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+        assert(Files.exists(Paths.get(getSuiteTestDir(), ac.appId + ".html")))
     }
 
     test("SparkScopeApp.runFromEventLog for finished application with stage events") {
         implicit val logger: SparkScopeLogger = new SparkScopeLogger
         Given("Path to eventLog for running application with removed executors")
         val appId = "app-20231122115433-0000-eventLog-finished-stages"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val ac = mockAppContextWithDownscalingMuticore("", appId)
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
+        val ac = mockAppContextWithDownscalingMuticore(appId, appName = "myApp")
         val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLogStages(csvReaderMock, ac.appId)
 
@@ -188,7 +192,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLogPath, None, None, Some(".tests")),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir()), logPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
@@ -198,7 +202,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         )
 
         Then("Report should be generated")
-        assert(Files.exists(Paths.get(TestDir, ac.appId + ".html")))
+        assert(Files.exists(Paths.get(getSuiteTestDir(), ac.appId + ".html")))
     }
 }
 

@@ -107,11 +107,12 @@ class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunn
 
     def runSparkScopeAnalysis(applicationEnd: Option[Long]) = {
         val appStartEvent = applicationStartEvent.getOrElse(throw new IllegalArgumentException("App start event is empty"))
-
         val appContext = AppContext(
             appId = appStartEvent.appId.getOrElse(throw new IllegalArgumentException("App Id is empty")),
+            appName = appStartEvent.appName,
             appStartTime = appStartEvent.time,
             appEndTime = applicationEnd,
+            driverHost = sparkConf.getOption("spark.driver.host"),
             executorMap = executorMap.toMap,
             stages = stageMap.values.toSeq
         )
