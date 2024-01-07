@@ -23,7 +23,7 @@ trait JsonHttpMethods {
             case ex: UnknownHostException => logger.warn(ex.toString, this.getClass, stdout)
             case ex: SocketTimeoutException => logger.warn(ex.toString, this.getClass, stdout)
             case ex: HttpResponseException => logger.warn(ex.toString, this.getClass, stdout)
-            case ex: Exception => logger.warn(s"Unexpected exception while trying to send diagnostics: ${ex}", this.getClass)
+            case ex: Exception => logger.warn(s"Unexpected exception while trying to send json via post: ${ex}", this.getClass)
         }
     }
 }

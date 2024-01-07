@@ -69,7 +69,9 @@ spark-submit \
 --master spark://spark-master:7077 \
 --jars /tmp/jars/sparkscope-spark3-0.1.9-SNAPSHOT.jar \
 --files /tmp/jars/sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---conf spark.sparkscope.html.path=./ \
+--conf spark.sparkscope.report.html.path=./ \
+--conf spark.sparkscope.report.json.path=./ \
+--conf spark.sparkscope.report.json.server=http://mypp.com \
 --conf spark.sparkscope.log.path=./ \
 --conf spark.executor.extraClassPath=/tmp/jars/sparkscope-spark3-0.1.9-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
@@ -87,7 +89,7 @@ spark-submit \
 --conf spark.executor.instances=1 \
 --conf spark.cores.max=4 \
 --class com.ucesys.sparkscope.WordCount \
-/tmp/jars/sparkscope-spark3-0.1.9-SNAPSHOT-tests.jar /tmp/jars/long500mb.txt 1000
+/tmp/jars/sparkscope-spark3-0.1.9-SNAPSHOT-tests.jar /tmp/jars/test.txt 1000
 ```
 csv hdfs metrics executors(--files only)
 ```bash
@@ -127,7 +129,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=s3://ucesys-sparkscope-metrics/metrics/ \
 --conf spark.metrics.conf.*.sink.csv.region=us-east-1 \
---conf spark.sparkscope.html.path=s3://ucesys-sparkscope-metrics/report/ \
+--conf spark.sparkscope.report.html.path=s3://ucesys-sparkscope-metrics/report/ \
 --conf spark.metrics.conf.*.sink.csv.appName=WordCount \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -181,7 +183,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.region=us-east-1 \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
---conf spark.sparkscope.html.path=s3://ucesys-sparkscope-metrics/report \
+--conf spark.sparkscope.report.html.path=s3://ucesys-sparkscope-metrics/report \
 --conf spark.executor.cores=2 \
 --conf spark.executor.memory=1800m \
 --conf spark.executor.instances=2 \
@@ -207,7 +209,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.region=us-east-1 \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
---conf spark.sparkscope.html.path=s3://ucesys-sparkscope-metrics/report \
+--conf spark.sparkscope.report.html.path=s3://ucesys-sparkscope-metrics/report \
 --conf spark.executor.cores=2 \
 --conf spark.executor.memory=1800m \
 --conf spark.executor.instances=2 \

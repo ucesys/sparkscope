@@ -13,7 +13,13 @@ class JsonHttpReporter(appContext: AppContext,
     override def report(result: SparkScopeResult): Unit = {
         logger.info(s"Sending JSON report to ${endpoint}", this.getClass)
 
-        val report = CompleteReport(appContext = appContext, conf = sparkScopeConf, result = result)
+        val report = CompleteReport(
+            appContext = appContext,
+            conf = sparkScopeConf,
+            stats = result.stats,
+            charts = result.charts,
+            warnings = result.warnings.map(_.toString)
+        )
 
         postReport(jsonHttpPublisher, endpoint, report)
     }

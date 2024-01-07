@@ -1,6 +1,11 @@
 package com.ucesys.sparkscope.io.report
 
 import com.ucesys.sparkscope.common.{AppContext, SparkScopeConf}
-import com.ucesys.sparkscope.metrics.SparkScopeResult
+import com.ucesys.sparkscope.stats.SparkScopeStats
+import com.ucesys.sparkscope.view.chart.SparkScopeCharts
 
-case class CompleteReport(appContext: AppContext, conf: SparkScopeConf, result: SparkScopeResult)
+case class CompleteReport(appContext: AppContext,
+                          conf: SparkScopeConf,
+                          stats: SparkScopeStats,
+                          charts: SparkScopeCharts,
+                          warnings: Seq[String])
