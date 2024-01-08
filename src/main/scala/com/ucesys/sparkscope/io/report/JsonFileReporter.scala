@@ -14,13 +14,7 @@ class JsonFileReporter(appContext: AppContext, sparkScopeConf: SparkScopeConf, j
     implicit val formats = DefaultFormats
 
     override def report(result: SparkScopeResult): Unit = {
-        val report = SparkScopeReport(
-            appContext = appContext,
-            conf = sparkScopeConf,
-            stats = result.stats,
-            charts = result.charts,
-            warnings = result.warnings.map(_.toString)
-        )
+        val report = SparkScopeReport(appContext = appContext, conf = sparkScopeConf, result = result)
 
         try {
             val jsonReport = Serialization.writePretty(report)

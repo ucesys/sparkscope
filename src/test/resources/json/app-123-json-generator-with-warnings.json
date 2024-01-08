@@ -276,20 +276,9 @@
       "endTime" : 1695357200000
     } ]
   },
-  "conf" : {
-    "driverMetricsDir" : "/tmp/csv-metrics",
-    "executorMetricsDir" : "/tmp/csv-metrics",
-    "jsonReportPath" : ".tests/JsonFileReporterSuite",
-    "diagnosticsUrl" : "http://sparkscope.ai/diagnostics",
-    "logPath" : ".tests/JsonFileReporterSuite",
-    "appName" : "MyApp",
-    "driverMemOverhead" : {
-      "sizeInBytes" : 402653184
-    },
-    "executorMemOverhead" : {
-      "sizeInBytes" : 402653184
-    },
-    "sparkConf" : { }
+  "sparkConf" : {
+    "spark.app.name" : "MyApp",
+    "spark.metrics.conf" : "path/to/metrics.properties"
   },
   "stats" : {
     "driverStats" : {
