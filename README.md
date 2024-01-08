@@ -4,16 +4,20 @@ SparkScope is a monitoring and profiling tool for Spark Applications.
 It is implemented as SparkListener which means that it runs inside driver and listens for spark events.
 SparkScope utilizes csv metrics produced by custom SparkScopeCsvSink and supports multiple storage types.
 
-SparkScope html report contains the following features:
-- Charts:
+SparkScope produces reports in the following formats
+- html
+- json
+
+SparkScope reports contains the following features:
+- Charts for driver and executors:
   - heap & non-heap usage charts
   - cpu utilization charts
-  - charts for driver, executors and aggregated charts for whole application
-- Stats:
-  - heap & non-heap usage stats
-  - cpu utilization and memory utlization stats
-  - stats for driver, executors and aggregated stats for whole application
-  - CPU and Heap Memory Waste stats
+  - number of tasks vs CPU capacity
+  - number of executors
+- Stats for driver and executors:
+  - heap & non-heap utilization
+  - CPU utilization
+  - Resouce allocation and waste
 - Warnings:
   - Low CPU utilization warning
   - Low Memory utilization warning
@@ -53,7 +57,8 @@ SparkScope html report contains the following features:
 | spark.metrics.conf.*.sink.csv.directory      | mandatory | s3://my-bucket/path/to/metrics                  | path to metrics directory, can be s3,hdfs,maprfs,local                                                                       |
 | spark.metrics.conf.*.sink.csv.region         | optional  | us-east-1                                       | aws region, required for s3 storage                                                                                          |
 | spark.metrics.conf.*.sink.csv.appName        | optional  | MyApp                                           | application name, also used for grouping metrics                                                                             |
-| spark.sparkscope.html.path                   | optional  | s3://my-bucket/path/to/html/report/dir          | path to which SparkScope html report will be saved                                                                           |
+| spark.sparkscope.report.html.path            | optional  | s3://my-bucket/path/to/html/report/dir          | path to which SparkScope html report will be saved                                                                           |
+| spark.sparkscope.report.json.path            | optional  | s3://my-bucket/path/to/json/report/dir          | path to which SparkScope json report will be saved                                                                           |
 | spark.sparkscope.log.path                    | optional  | s3://my-bucket/path/to/log/dir                  | path to which SparkScope logs will be saved                                                                                  |
 | spark.sparkscope.log.level                   | optional  | DEBUG, INFO, WARN, ERROR                        | logging level for SparkScope logs                                                                                            |
 | spark.sparkscope.diagnostics.enabled         | optional  | true/false                                      | set to false in order to disable sending diagnostics. Default=true.                                                          |
@@ -84,7 +89,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.directory=s3://<bucket-name>/<path-to-metrics-dir> \
 --conf spark.metrics.conf.*.sink.csv.region=<region> \
 --conf spark.metrics.conf.*.sink.csv.appName=My-App \
---conf spark.sparkscope.html.path=s3://<bucket-name>/<path-to-html-report-dir> \
+--conf spark.sparkscope.report.html.path=s3://<bucket-name>/<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
@@ -104,7 +109,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=hdfs://<path-to-metrics-dir> \
 --conf spark.metrics.conf.*.sink.csv.appName=My-App \
---conf spark.sparkscope.html.path=hdfs://<path-to-html-report-dir> \
+--conf spark.sparkscope.report.html.path=hdfs://<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
@@ -124,7 +129,7 @@ spark-submit \
 --conf spark.metrics.conf.*.sink.csv.unit=seconds \
 --conf spark.metrics.conf.*.sink.csv.directory=<path-to-metrics-dir> \
 --conf spark.metrics.conf.*.sink.csv.appName=My-App \
---conf spark.sparkscope.html.path=<path-to-html-report-dir> \
+--conf spark.sparkscope.report.html.path=<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
@@ -157,7 +162,7 @@ spark-submit \
 --conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf=./metrics.properties \
---conf spark.sparkscope.html.path=hdfs://<path-to-html-report-dir> \
+--conf spark.sparkscope.report.html.path=hdfs://<path-to-html-report-dir> \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
 ```
@@ -187,6 +192,7 @@ java \
 com.ucesys.sparkscope.SparkScopeApp \
 --event-log <path-to-event-log> \
 --html-path <path-to-html-report-dir> \
+--json-path <path-to-json-report-dir> \
 --log-path <path-to-log-dir> \
 --log-level <logging level> \
 --diagnostics <true/false> \

@@ -14,7 +14,7 @@ class JsonFileReporter(appContext: AppContext, sparkScopeConf: SparkScopeConf, j
     implicit val formats = DefaultFormats
 
     override def report(result: SparkScopeResult): Unit = {
-        val report = CompleteReport(
+        val report = SparkScopeReport(
             appContext = appContext,
             conf = sparkScopeConf,
             stats = result.stats,

@@ -80,7 +80,6 @@ class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
             case None => Some(DiagnosticsEndpoint)
         }
 
-
         SparkScopeConf(
             driverMetricsDir = driverMetricsDir.get,
             executorMetricsDir = executorMetricsDir.get,
