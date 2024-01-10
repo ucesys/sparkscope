@@ -2,13 +2,15 @@ package com.ucesys.sparkscope.view.chart
 
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.data.DataColumn
-import com.ucesys.sparkscope.view.HtmlReportGenerator.MaxExecutorChartPoints
+import com.ucesys.sparkscope.io.report.HtmlFileReporter.MaxExecutorChartPoints
 import com.ucesys.sparkscope.view.SeriesColor
 import com.ucesys.sparkscope.view.SeriesColor._
 import com.ucesys.sparkscope.view.chart.ChartUtils.decreaseDataPoints
+import com.ucesys.sparkscope.view.chart.ExecutorChart.generateChart
 
-case class ExecutorChart(timestamps: Seq[String], limits: Seq[String], datasets: String) extends Chart {
+case class ExecutorChart(timestamps: Seq[String], limits: Seq[String], executorData: Map[Int, Seq[String]]) extends Chart {
     def labels: Seq[String] = timestamps.map(tsToDt)
+    def datasets: String = executorData.map{case(executorId, data) => generateChart(executorId, data)}.mkString(",")
 }
 
 object ExecutorChart {
@@ -19,27 +21,31 @@ object ExecutorChart {
             throw new IllegalArgumentException(s"Executor series sizes are different: ${Seq(tsCol.size) ++ executorCols.map(_.size)}")
         } else if (executorCols.map(_.size).sum <= MaxExecutorChartPoints) {
             logger.info(s"Number of total executor data points is less than maximum. Rendering all data points. ${executorCols.map(_.size).sum} < ${MaxExecutorChartPoints}", this.getClass)
-            ExecutorChart(tsCol.values, limitsCol.values, executorCols.map(generateChart).mkString(","))
+            ExecutorChart(tsCol.values, limitsCol.values, executorCols.map(col => (col.name.toInt, col.values)).toMap)
         } else {
             logger.info(s"Decreasing total number of rendered data points for all executor charts from ${executorCols.map(_.size).sum} to ${MaxExecutorChartPoints}", this.getClass)
             val desiredSingleChartPoints: Int = MaxExecutorChartPoints / executorCols.length
             logger.info(s"Decreasing number of rendered data points per executor chart from ${executorCols.headOption.map(_.size).getOrElse(0)} to ${desiredSingleChartPoints}", this.getClass)
 
             decreaseDataPoints(tsCol, executorCols, desiredSingleChartPoints) match {
-                case (newTsCol, newCols) => ExecutorChart(newTsCol.values, limitsCol.values, newCols.map(generateChart).mkString(","))
+                case (newTsCol, newCols) => ExecutorChart(
+                    newTsCol.values,
+                    limitsCol.values,
+                    newCols.map(col => (col.name.toInt, col.values)).toMap
+                )
             }
         }
     }
 
-    def generateChart(col: DataColumn): String = {
-        val color = SeriesColor.randomColorModulo(col.name.toInt, Seq(Green, Red, Yellow, Purple, Orange))
+    def generateChart(executorId: Int, data: Seq[String]): String = {
+        val color = SeriesColor.randomColorModulo(executorId, Seq(Green, Red, Yellow, Purple, Orange))
         s"""{
-           |             data: [${col.values.mkString(",")}],
+           |             data: [${data.mkString(",")}],
            |             borderColor: "${color.borderColor}",
            |             backgroundColor: "${color.backgroundColor}",
            |             pointRadius: 1,
            |             pointHoverRadius: 8,
-           |             label: "executorId=${col.name}",
+           |             label: "executorId=${executorId}",
            |             fill: false,
            |}""".stripMargin
     }

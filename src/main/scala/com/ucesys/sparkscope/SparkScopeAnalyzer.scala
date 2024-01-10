@@ -17,7 +17,7 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.common.{AppContext, CpuTime, JvmHeapUsed, JvmNonHeapUsed, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{AppContext, CpuTime, JvmHeapUsed, JvmNonHeapUsed, SparkScopeConf, SparkScopeLogger}
 import com.ucesys.sparkscope.SparkScopeAnalyzer._
 import com.ucesys.sparkscope.agg.TaskAggMetrics
 import com.ucesys.sparkscope.common.MetricUtils.{ColCpuUsage, ColTs}
@@ -26,13 +26,17 @@ import com.ucesys.sparkscope.io.metrics.DriverExecutorMetrics
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.stats.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats, SparkScopeStats}
 import com.ucesys.sparkscope.timeline.ExecutorTimeline
-import com.ucesys.sparkscope.warning.{CPUUtilWarning, DiskSpillWarning, GCTimeWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
+import com.ucesys.sparkscope.view.chart.SparkScopeCharts
+import com.ucesys.sparkscope.view.warning.{CPUUtilWarning, DiskSpillWarning, GCTimeWarning, HeapUtilWarning, MissingMetricsWarning, Warning}
 
 import scala.concurrent.duration._
 
 class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
 
-    def analyze(driverExecutorMetrics: DriverExecutorMetrics, appContext: AppContext, taskAggMetrics: TaskAggMetrics): SparkScopeResult = {
+    def analyze(driverExecutorMetrics: DriverExecutorMetrics,
+                appContext: AppContext,
+                sparkScopeConf: SparkScopeConf,
+                taskAggMetrics: TaskAggMetrics): SparkScopeResult = {
         logger.debug(s"\nDisplaying merged metrics for driver:\n${driverExecutorMetrics.driverMetrics}", this.getClass)
 
         driverExecutorMetrics.executorMetricsMap.foreach { case (id, metrics) =>
@@ -142,21 +146,22 @@ class SparkScopeAnalyzer(implicit logger: SparkScopeLogger) {
             GCTimeWarning(taskAggMetrics),
         ).flatten
 
+        val metrics = SparkScopeMetrics(
+            driver = driverExecutorMetrics.driverMetrics,
+            executor = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned),
+            clusterMemory = clusterMemoryMetrics,
+            clusterCpu = clusterCPUMetrics,
+            stage = StageMetrics(appContext.stages, allTimestamps)
+        )
+
         SparkScopeResult(
-            appContext = appContext,
             stats = SparkScopeStats(
                 driverStats = DriverMemoryStats(driverExecutorMetrics.driverMetrics),
                 executorStats = executorStats,
                 clusterMemoryStats = clusterMemoryStats,
                 clusterCPUStats = clusterCPUStats
             ),
-            metrics = SparkScopeMetrics(
-                driver = driverExecutorMetrics.driverMetrics,
-                executor = ExecutorMemoryMetrics(allExecutorsMetrics, executorMetricsAligned),
-                clusterMemory = clusterMemoryMetrics,
-                clusterCpu= clusterCPUMetrics,
-                stage = StageMetrics(appContext.stages, allTimestamps)
-            ),
+            charts = SparkScopeCharts.fromMetrics(sparkScopeConf, metrics),
             warnings = warnings
         )
     }

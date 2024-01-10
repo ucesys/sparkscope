@@ -22,7 +22,7 @@ import com.codahale.metrics.MetricFilter
 import com.codahale.metrics.MetricRegistry
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.data.DataTable
-import com.ucesys.sparkscope.io.file.S3FileWriter
+import com.ucesys.sparkscope.io.writer.S3FileWriter
 import org.apache.commons.lang.SystemUtils
 import org.mockito.MockitoSugar
 import org.scalatest.{FunSuite, GivenWhenThen}

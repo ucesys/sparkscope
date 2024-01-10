@@ -3,7 +3,7 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.EventLogRunner._
 import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.io.file.FileReaderFactory
+import com.ucesys.sparkscope.io.reader.FileReaderFactory
 import org.apache.spark.scheduler._
 import org.apache.spark.{SparkConf, SparkEventParser}
 import org.json4s._
@@ -37,6 +37,7 @@ class EventLogRunner(listener: SparkScopeJobListener)(implicit logger: SparkScop
             args.htmlPath.map(sparkConf.set(SparkScopePropertyHtmlPath, _))
             args.logPath.map(sparkConf.set(SparkScopePropertyLogPath, _))
             args.logLevel.map(sparkConf.set(SparkScopePropertyLogLevel, _))
+            args.diagnostics.map(sparkConf.set(SparkScopePropertyDiagnosticsEnabled, _))
 
             val environmentDetails: Map[String, Seq[(String, String)]] = Map("Spark Properties" -> sparkConf.getAll.toSeq)
             SparkListenerEnvironmentUpdate(environmentDetails)

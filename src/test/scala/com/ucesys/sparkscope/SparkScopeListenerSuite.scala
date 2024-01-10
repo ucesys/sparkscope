@@ -258,6 +258,7 @@ class SparkScopeListenerSuite extends FunSuite with GivenWhenThen with MockitoSu
         doCallRealMethod.when(listenerMock).runSparkScopeAnalysis(any[Option[Long]])
         doReturn(new mutable.HashMap[String, ExecutorTimeline]).when(listenerMock).executorMap
         doReturn(new mutable.HashMap[String, StageTimeline]).when(listenerMock).stageMap
+        doReturn(new SparkConf).when(listenerMock).sparkConf
         doReturn(runnerMock).when(listenerMock).runner
 
         And("applicationStartEvent is set")

@@ -44,8 +44,8 @@
 
     .styled-table {
         border-collapse: collapse;
-        margin-left: 1%;
-        margin-right: 1%;
+        margin-left: 0.5%;
+        margin-right: 0.5%;
         float: left;
         width: 19%;
         font-size: 0.7em;
@@ -143,9 +143,9 @@
 </head>
 <body>
 <div class="box">
-<pre>
-${sparkScopeSign}
-</pre>
+    <pre>
+    ${sparkScopeSign}
+    </pre>
 </div>
 
 <br>
@@ -154,7 +154,7 @@ ${sparkScopeSign}
 </div>
 <br>
 <div>
-    <table class="styled-table" style="float: left;margin-left:7%">
+    <table class="styled-table" style="float: left;margin-left:0.5%">
         <thead>
         <tr>
             <th>Application Info</th>
@@ -178,10 +178,6 @@ ${sparkScopeSign}
             <td>Application End</td>
             <td>${appInfo.end}</td>
         </tr>
-        <tr>
-            <td>Application Duration</td>
-            <td>${appInfo.duration}</td>
-        </tr>
         <!-- and so on... -->
         </tbody>
     </table>
@@ -194,26 +190,50 @@ ${sparkScopeSign}
         </tr>
         </thead>
         <tbody>
+            <tr>
+                <td>Application Duration</td>
+                <td>${appInfo.duration}</td>
+            </tr>
+            <tr>
+                <td>Application total CPU utilization</td>
+                <td>${stats.cluster.cpu.util}%</td>
+            </tr>
+            <tr>
+                <td>Application total heap utilization</td>
+                <td>${stats.cluster.heap.avg.perc}%</td>
+            </tr>
+            <tr>
+                <td>Application peak heap utilization</td>
+                <td>${stats.cluster.heap.max.perc}%</td>
+            </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <table class="styled-table" style="float: left">
+        <thead>
         <tr>
-            <td>Total CPU utilization of application</td>
-            <td>${stats.cluster.cpu.util}%</td>
+            <th>Resource Stats</th>
+            <th></th>
         </tr>
-        <tr>
-            <td>Total heap utilization of application</td>
-            <td>${stats.cluster.heap.avg.perc}%</td>
-        </tr>
-        <tr>
-            <td>Peak heap utilization of application</td>
-            <td>${stats.cluster.heap.max.perc}%</td>
-        </tr>
-        <tr>
-            <td>Total GB-hours of wasted heap memory</td>
-            <td>${resource.waste.heap} GB-hours</td>
-        </tr>
-        <tr>
-            <td>Total core-hours of wasted CPU time</td>
-            <td>${resource.waste.cpu} Core-hours</td>
-        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Total core-hours of allocated CPU time</td>
+                <td>${resource.alloc.cpu} Core-hours</td>
+            </tr>
+            <tr>
+                <td>Total core-hours of wasted CPU time</td>
+                <td>${resource.waste.cpu} Core-hours</td>
+            </tr>
+            <tr>
+                <td>Total GB-hours of allocated heap memory</td>
+                <td>${resource.alloc.heap} GB-hours</td>
+            </tr>
+            <tr>
+                <td>Total GB-hours of wasted heap memory</td>
+                <td>${resource.waste.heap} GB-hours</td>
+            </tr>
         <!-- and so on... -->
         </tbody>
     </table>
@@ -274,9 +294,11 @@ ${sparkScopeSign}
         </tbody>
     </table>
 </div>
-<br>
 
 <div style="clear: both;"> </div>
+
+<br><br>
+
 <div  class="row" style="width:100%">
     <div style="width:45%"><canvas id="cpuUtilization"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application CPU Utilization</b> is sum of used CPUs across all executors divided by sum of allocated CPUs of all executors </span></div>
