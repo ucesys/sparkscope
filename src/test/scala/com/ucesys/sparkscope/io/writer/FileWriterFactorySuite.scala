@@ -26,7 +26,6 @@ import org.scalatest.{FunSuite, GivenWhenThen}
 class FileWriterFactorySuite extends FunSuite with MockFactory with GivenWhenThen {
 
     val fileWriterFactory = new FileWriterFactory
-    val fileWriterFactoryWithRegion = new FileWriterFactory(Some("us-east-1"))
     implicit val logger: SparkScopeLogger = new SparkScopeLogger
 
     test("maprfs://path") {
@@ -79,7 +78,7 @@ class FileWriterFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileWriterFactoryWithRegion.get(path)
+                val fileReader = fileWriterFactory.get(path, Some("us-east-1"))
                 fileReader mustBe a[S3FileWriter]
             }
         }
@@ -93,7 +92,7 @@ class FileWriterFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileWriterFactoryWithRegion.get(path)
+                val fileReader = fileWriterFactory.get(path, Some("us-east-1"))
                 fileReader mustBe a[S3FileWriter]
             }
         }
@@ -107,7 +106,7 @@ class FileWriterFactorySuite extends FunSuite with MockFactory with GivenWhenThe
         Then("HadoopFileReader should be returned")
         paths.foreach {
             path => {
-                val fileReader = fileWriterFactoryWithRegion.get(path)
+                val fileReader = fileWriterFactory.get(path, Some("us-east-1"))
                 fileReader mustBe a[S3FileWriter]
             }
         }

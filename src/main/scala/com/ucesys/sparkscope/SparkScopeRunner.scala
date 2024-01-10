@@ -34,6 +34,7 @@ class SparkScopeRunner(sparkScopeConfLoader: SparkScopeConfLoader,
                        sparkScopeAnalyzer: SparkScopeAnalyzer,
                        propertiesLoaderFactory: PropertiesLoaderFactory,
                        metricsLoaderFactory: MetricsLoaderFactory,
+                       fileWriterFactory: FileWriterFactory,
                        reporterFactory: ReporterFactory)
                       (implicit val logger: SparkScopeLogger) {
     def run(appContext: AppContext, sparkConf: SparkConf, taskAggMetrics: TaskAggMetrics): Unit = {
@@ -62,7 +63,7 @@ class SparkScopeRunner(sparkScopeConfLoader: SparkScopeConfLoader,
             val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
             logger.info(s"SparkScope analysis took ${durationSparkScope}s", this.getClass)
 
-            val logFileWriter = new FileWriterFactory(sparkScopeConf.region).get(sparkScopeConf.logPath)
+            val logFileWriter = fileWriterFactory.get(sparkScopeConf.logPath, sparkScopeConf.region)
             val logPath = Paths.get(sparkScopeConf.logPath, s"${appContext.appId}.log")
             logFileWriter.write(logPath.toString, logger.toString)
             logger.info(s"Log saved to ${logPath}", this.getClass)
@@ -93,6 +94,7 @@ object SparkScopeRunner {
             new SparkScopeAnalyzer,
             new PropertiesLoaderFactory,
             new MetricsLoaderFactory(new MetricReaderFactory(offline = false)),
+            new FileWriterFactory,
             new ReporterFactory
         )
     }

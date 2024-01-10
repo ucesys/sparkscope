@@ -23,6 +23,7 @@ import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.reader.FileReaderFactory
 import com.ucesys.sparkscope.io.metrics.{CsvMetricsLoader, HadoopMetricReader, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.report.ReporterFactory
+import com.ucesys.sparkscope.io.writer.FileWriterFactory
 import org.apache.commons.io.FileUtils
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
@@ -51,12 +52,13 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir()), logPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
+            new FileWriterFactory,
             new ReporterFactory
         )
 
@@ -80,12 +82,13 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir()), logPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
+            new FileWriterFactory,
             new ReporterFactory
         )
 
@@ -108,12 +111,13 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir()), logPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
+            new FileWriterFactory,
             new ReporterFactory
         )
 
@@ -136,12 +140,13 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir()), logPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
+            new FileWriterFactory,
             new ReporterFactory
         )
 
@@ -164,12 +169,13 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
-            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir())),
+            SparkScopeArgs(eventLog = eventLogPath, driverMetrics = None, htmlPath = Some(getSuiteTestDir()), logPath = Some(getSuiteTestDir())),
             new SparkScopeAnalyzer,
             new SparkScopeConfLoader,
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
+            new FileWriterFactory,
             new ReporterFactory
         )
 
@@ -198,6 +204,7 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
             new FileReaderFactory,
             getPropertiesLoaderFactoryMock,
             metricsLoaderFactory,
+            new FileWriterFactory,
             new ReporterFactory
         )
 

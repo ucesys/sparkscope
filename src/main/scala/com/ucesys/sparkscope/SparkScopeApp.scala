@@ -22,6 +22,7 @@ import com.ucesys.sparkscope.io.reader.FileReaderFactory
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
 import com.ucesys.sparkscope.io.report.ReporterFactory
+import com.ucesys.sparkscope.io.writer.FileWriterFactory
 import org.apache.spark.SparkConf
 
 object SparkScopeApp {
@@ -37,6 +38,7 @@ object SparkScopeApp {
             fileReaderFactory = new FileReaderFactory(parsedArgs.region),
             propertiesLoaderFactory = new PropertiesLoaderFactory,
             metricsLoaderFactory = new MetricsLoaderFactory(new MetricReaderFactory(offline = true)),
+            fileWriterFactory = new FileWriterFactory,
             reportGeneratorFactory = new ReporterFactory,
         )
     }
@@ -47,6 +49,7 @@ object SparkScopeApp {
                         fileReaderFactory: FileReaderFactory,
                         propertiesLoaderFactory: PropertiesLoaderFactory,
                         metricsLoaderFactory: MetricsLoaderFactory,
+                        fileWriterFactory: FileWriterFactory,
                         reportGeneratorFactory: ReporterFactory)
                        (implicit logger: SparkScopeLogger): Unit = {
         val sparkScopeRunner = new SparkScopeRunner(
@@ -54,6 +57,7 @@ object SparkScopeApp {
             sparkScopeAnalyzer,
             propertiesLoaderFactory,
             metricsLoaderFactory,
+            fileWriterFactory,
             reportGeneratorFactory
         )
 

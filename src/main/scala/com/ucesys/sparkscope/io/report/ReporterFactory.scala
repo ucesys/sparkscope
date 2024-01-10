@@ -13,7 +13,7 @@ class ReporterFactory {
             new HtmlFileReporter(
                 appContext,
                 sparkScopeConfig,
-                (new FileWriterFactory(sparkScopeConfig.region)).get(path)
+                (new FileWriterFactory).get(path, sparkScopeConfig.region)
             )
         }
 
@@ -21,7 +21,7 @@ class ReporterFactory {
             new JsonFileReporter(
                 appContext,
                 sparkScopeConfig,
-                (new FileWriterFactory(sparkScopeConfig.region)).get(path)
+                (new FileWriterFactory).get(path, sparkScopeConfig.region)
             )
         }
 
