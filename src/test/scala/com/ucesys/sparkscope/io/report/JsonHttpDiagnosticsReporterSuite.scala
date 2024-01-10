@@ -259,7 +259,7 @@ class JsonHttpDiagnosticsReporterSuite extends FunSuite with MockitoSugar with B
         Then("Exception is caught")
         And("Warning is logged")
         verify(loggerMock, times(1)).warn(
-            "org.apache.http.client.HttpResponseException: 307 Temporary Redirect",
+            "org.apache.http.client.HttpResponseException: status code: 307, reason phrase: 307 Temporary Redirect",
             jsonHttpDiagnosticsReporter.getClass,
             false
         )
