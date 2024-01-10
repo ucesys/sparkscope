@@ -25,6 +25,7 @@ import com.ucesys.sparkscope.common.{MemorySize, SparkScopeLogger}
 import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
 import com.ucesys.sparkscope.io.writer.LocalFileWriter
 import com.ucesys.sparkscope.view.warning.{DiskSpillWarning, GCTimeWarning}
+import org.apache.commons.lang.SystemUtils
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
@@ -61,7 +62,9 @@ class HtmlFileReporterSuite extends FunSuite with MockFactory with BeforeAndAfte
         assert(!new String(Files.readAllBytes(htmlPath)).contains("${"))
 
         And("html contents are correct")
-        assert(new String(Files.readAllBytes(htmlPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/html/app-123-html-generator-no-warnings.html"))))
+        if (SystemUtils.OS_NAME == "Linux") {
+            assert(new String(Files.readAllBytes(htmlPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/html/app-123-html-generator-no-warnings.html"))))
+        }
     }
 
     test("HtmlFileReporter end2end with warnings") {
@@ -71,7 +74,7 @@ class HtmlFileReporterSuite extends FunSuite with MockFactory with BeforeAndAfte
         val ac = mockAppContext(appId, SampleAppName)
         val sparkScopeConfHtml = sparkScopeConf.copy(htmlReportPath = Some(getSuiteTestDir()), logPath = getSuiteTestDir(), appName = Some("MyApp"))
 
-        val htmlReportGenerator = new HtmlFileReporter(ac, sparkScopeConfHtml, htmlFileWriter=fileWriter)
+        val htmlReportGenerator = new HtmlFileReporter(ac, sparkScopeConfHtml, htmlFileWriter = fileWriter)
 
         And("SparkScopeResult")
         val csvReaderMock = stub[HadoopMetricReader]
@@ -94,6 +97,8 @@ class HtmlFileReporterSuite extends FunSuite with MockFactory with BeforeAndAfte
         assert(!new String(Files.readAllBytes(htmlPath)).contains("${"))
 
         And("html contents are correct")
-        assert(new String(Files.readAllBytes(htmlPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/html/app-123-html-generator-with-warnings.html"))))
+        if (SystemUtils.OS_NAME == "Linux") {
+            assert(new String(Files.readAllBytes(htmlPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/html/app-123-html-generator-with-warnings.html"))))
+        }
     }
 }

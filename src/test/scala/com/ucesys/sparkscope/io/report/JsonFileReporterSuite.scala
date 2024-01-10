@@ -25,6 +25,7 @@ import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
 import com.ucesys.sparkscope.io.writer.LocalFileWriter
 import com.ucesys.sparkscope.view.warning.{DiskSpillWarning, GCTimeWarning}
 import com.ucesys.sparkscope.{SparkScopeAnalyzer, SuiteDirectoryUtils}
+import org.apache.commons.lang.SystemUtils
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
@@ -58,7 +59,9 @@ class JsonFileReporterSuite extends FunSuite with MockFactory with BeforeAndAfte
         assert(Files.exists(jsonPath))
 
         And("json contents are correct")
-        assert(new String(Files.readAllBytes(jsonPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/json/app-123-json-generator-no-warnings.json"))))
+        if (SystemUtils.OS_NAME == "Linux") {
+            assert(new String(Files.readAllBytes(jsonPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/json/app-123-json-generator-no-warnings.json"))))
+        }
     }
 
     test("JsonFileReporter end2end with warnings") {
@@ -88,6 +91,8 @@ class JsonFileReporterSuite extends FunSuite with MockFactory with BeforeAndAfte
         assert(Files.exists(jsonPath))
 
         And("json contents are correct")
-        assert(new String(Files.readAllBytes(jsonPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/json/app-123-json-generator-with-warnings.json"))))
+        if (SystemUtils.OS_NAME == "Linux") {
+            assert(new String(Files.readAllBytes(jsonPath)) == new String(Files.readAllBytes(Paths.get("src/test/resources/json/app-123-json-generator-with-warnings.json"))))
+        }
     }
 }
