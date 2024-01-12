@@ -127,6 +127,61 @@ class SparkScopeListenerSuite extends FunSuite with GivenWhenThen with MockitoSu
         assert(listener.taskAggMetrics.jvmGCTime.mean == 1500L)
     }
 
+    test("SparkScopeListener onTaskEnd taskMetrics=null") {
+        Given("SparkScopeListener")
+        val listener = new SparkScopeJobListener(new SparkConf)
+
+        When("SparkScopeListener.onTaskEnd with null taskMetrics")
+        listener.onTaskEnd(taskEnd1.copy(taskMetrics = null))
+
+        Then("Metrics should be aggregated correctly")
+        assert(listener.taskAggMetrics.jvmGCTime.sum == 0L)
+        assert(listener.taskAggMetrics.jvmGCTime.max == 0L)
+        assert(listener.taskAggMetrics.jvmGCTime.min == 0L)
+        assert(listener.taskAggMetrics.jvmGCTime.mean == 0L)
+
+        assert(listener.taskAggMetrics.diskBytesSpilled.sum == 0L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.max == 0L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.min == 0L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.mean == 0L)
+
+        assert(listener.taskAggMetrics.memoryBytesSpilled.sum == 0L)
+        assert(listener.taskAggMetrics.jvmGCTime.max == 0L)
+        assert(listener.taskAggMetrics.jvmGCTime.min == 0L)
+        assert(listener.taskAggMetrics.jvmGCTime.mean == 0L)
+
+        And("Task duration should be non-zero")
+        assert(listener.taskAggMetrics.taskDuration.sum == 10000L)
+    }
+
+    test("SparkScopeListener onTaskEnd taskInfo=null") {
+        Given("SparkScopeListener")
+        val listener = new SparkScopeJobListener(new SparkConf)
+
+        When("SparkScopeListener.onTaskEnd with null taskInfo")
+        listener.onTaskEnd(taskEnd1.copy(taskInfo = null))
+        listener.onTaskEnd(taskEnd2.copy(taskInfo = null))
+
+        Then("Task duration should be zero")
+        assert(listener.taskAggMetrics.taskDuration.sum == 0L)
+
+        And("Metrics should be aggregated correctly")
+        assert(listener.taskAggMetrics.jvmGCTime.sum == 3000L)
+        assert(listener.taskAggMetrics.jvmGCTime.max == 2000L)
+        assert(listener.taskAggMetrics.jvmGCTime.min == 1000L)
+        assert(listener.taskAggMetrics.jvmGCTime.mean == 1500L)
+
+        assert(listener.taskAggMetrics.diskBytesSpilled.sum == 2500L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.max == 1500L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.min == 1000L)
+        assert(listener.taskAggMetrics.diskBytesSpilled.mean == 1250L)
+
+        assert(listener.taskAggMetrics.memoryBytesSpilled.sum == 3000L)
+        assert(listener.taskAggMetrics.jvmGCTime.max == 2000L)
+        assert(listener.taskAggMetrics.jvmGCTime.min == 1000L)
+        assert(listener.taskAggMetrics.jvmGCTime.mean == 1500L)
+    }
+
     test("SparkScopeListener onExecutorAdded") {
         Given("SparkScopeListener")
         val listener = new SparkScopeJobListener(new SparkConf)

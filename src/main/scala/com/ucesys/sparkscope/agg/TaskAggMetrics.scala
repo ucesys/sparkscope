@@ -38,27 +38,31 @@ case class TaskAggMetrics(shuffleWriteTime: AggValue = AggValue.empty,
                           peakExecutionMemory: AggValue = AggValue.empty,
                           taskDuration: AggValue = AggValue.empty) {
 
-    def aggregate(tm: TaskMetrics, ti: TaskInfo): Unit = {
-        this.shuffleWriteTime.aggregate(tm.shuffleWriteMetrics.writeTime)
-        this.shuffleWriteBytesWritten.aggregate(tm.shuffleWriteMetrics.bytesWritten)
-        this.shuffleWriteRecordsWritten.aggregate(tm.shuffleWriteMetrics.recordsWritten)
+    def aggregate(tmOpt: Option[TaskMetrics], tiOpt: Option[TaskInfo]): Unit = {
+        tmOpt.foreach{tm =>
+            this.shuffleWriteTime.aggregate(tm.shuffleWriteMetrics.writeTime)
+            this.shuffleWriteBytesWritten.aggregate(tm.shuffleWriteMetrics.bytesWritten)
+            this.shuffleWriteRecordsWritten.aggregate(tm.shuffleWriteMetrics.recordsWritten)
 
-        this.shuffleReadFetchWaitTime.aggregate(tm.shuffleReadMetrics.fetchWaitTime)
-        this.shuffleReadBytesRead.aggregate(tm.shuffleReadMetrics.totalBytesRead)
-        this.shuffleReadRecordsRead.aggregate(tm.shuffleReadMetrics.recordsRead)
-        this.shuffleReadLocalBlocks.aggregate(tm.shuffleReadMetrics.localBlocksFetched)
-        this.shuffleReadRemoteBlocks.aggregate(tm.shuffleReadMetrics.remoteBlocksFetched)
+            this.shuffleReadFetchWaitTime.aggregate(tm.shuffleReadMetrics.fetchWaitTime)
+            this.shuffleReadBytesRead.aggregate(tm.shuffleReadMetrics.totalBytesRead)
+            this.shuffleReadRecordsRead.aggregate(tm.shuffleReadMetrics.recordsRead)
+            this.shuffleReadLocalBlocks.aggregate(tm.shuffleReadMetrics.localBlocksFetched)
+            this.shuffleReadRemoteBlocks.aggregate(tm.shuffleReadMetrics.remoteBlocksFetched)
 
-        this.inputBytesRead.aggregate(tm.inputMetrics.bytesRead)
-        this.outputBytesWritten.aggregate(tm.outputMetrics.bytesWritten)
+            this.inputBytesRead.aggregate(tm.inputMetrics.bytesRead)
+            this.outputBytesWritten.aggregate(tm.outputMetrics.bytesWritten)
 
-        this.jvmGCTime.aggregate(tm.jvmGCTime)
-        this.executorRuntime.aggregate(tm.executorRunTime)
-        this.resultSize.aggregate(tm.resultSize)
-        this.memoryBytesSpilled.aggregate(tm.memoryBytesSpilled)
-        this.diskBytesSpilled.aggregate(tm.diskBytesSpilled)
-        this.peakExecutionMemory.aggregate(tm.peakExecutionMemory)
+            this.jvmGCTime.aggregate(tm.jvmGCTime)
+            this.executorRuntime.aggregate(tm.executorRunTime)
+            this.resultSize.aggregate(tm.resultSize)
+            this.memoryBytesSpilled.aggregate(tm.memoryBytesSpilled)
+            this.diskBytesSpilled.aggregate(tm.diskBytesSpilled)
+            this.peakExecutionMemory.aggregate(tm.peakExecutionMemory)
+        }
 
-        this.taskDuration.aggregate(ti.duration)
+        tiOpt.foreach { ti =>
+            this.taskDuration.aggregate(ti.duration)
+        }
     }
 }
