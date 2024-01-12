@@ -59,7 +59,7 @@ class SparkScopeJobListener(var sparkConf: SparkConf, val runner: SparkScopeRunn
     }
 
     override def onTaskEnd(end: SparkListenerTaskEnd): Unit = {
-        taskAggMetrics.aggregate(end.taskMetrics, end.taskInfo)
+        taskAggMetrics.aggregate(Option(end.taskMetrics), Option(end.taskInfo))
     }
 
     override def onApplicationStart(applicationStart: SparkListenerApplicationStart): Unit = {
