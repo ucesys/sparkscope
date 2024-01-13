@@ -1,52 +1,57 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.SparkScopeConfLoader._
-import com.ucesys.sparkscope.common.{MemorySize, SparkScopeConf, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{LogLevel, MemorySize, SparkScopeConf, SparkScopeLogger}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
 import org.apache.spark.SparkConf
 
 class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
     def load(sparkConf: SparkConf, propertiesLoaderFactory: PropertiesLoaderFactory): SparkScopeConf = {
+
+        val logLevel = sparkConf.getOption(SparkScopePropertyLogLevel).map(LogLevel.fromString).getOrElse(LogLevel.Info)
+        logger.level = logLevel
+        logger.info(s"Log level set to ${logLevel.toString.toUpperCase}", this.getClass)
+
         val driverMetricsDir: Option[String] = sparkConf match {
             case sparkConf if sparkConf.contains(SparkScopePropertyDriverMetricsDir) =>
-                logger.info(s"Setting driver metrics dir to ${SparkScopePropertyDriverMetricsDir}")
+                logger.info(s"Setting driver metrics dir to ${SparkScopePropertyDriverMetricsDir}", this.getClass)
                 sparkConf.getOption(SparkScopePropertyDriverMetricsDir)
             case sparkConf if sparkConf.contains(SparkPropertyMetricsConfDriverDir) =>
-                logger.info(s"Setting driver metrics dir to ${SparkPropertyMetricsConfDriverDir}")
+                logger.info(s"Setting driver metrics dir to ${SparkPropertyMetricsConfDriverDir}", this.getClass)
                 sparkConf.getOption(SparkPropertyMetricsConfDriverDir)
             case sparkConf if sparkConf.contains(SparkPropertyMetricsConfAllDir) =>
-                logger.info(s"Setting driver metrics dir to ${SparkPropertyMetricsConfAllDir}")
+                logger.info(s"Setting driver metrics dir to ${SparkPropertyMetricsConfAllDir}", this.getClass)
                 sparkConf.getOption(SparkPropertyMetricsConfAllDir)
             case _ =>
                 try {
-                    logger.info(s"Extracting driver metrics dir from ${SparkPropertyMetricsConf} file")
+                    logger.info(s"Extracting driver metrics dir from ${SparkPropertyMetricsConf} file", this.getClass)
                     val props = propertiesLoaderFactory.getPropertiesLoader(sparkConf.get(SparkPropertyMetricsConf)).load()
                     Option(props.getProperty(MetricsPropDriverDir, props.getProperty(MetricsPropAllDir)))
                 } catch {
                     case ex: Exception =>
-                        logger.error(s"Loading metrics.properties from ${SparkPropertyMetricsConf} failed. " + ex, ex)
+                        logger.error(s"Loading metrics.properties from ${SparkPropertyMetricsConf} failed. " + ex, ex, this.getClass)
                         None
                 }
         }
 
         val executorMetricsDir: Option[String] = sparkConf match {
             case sparkConf if sparkConf.contains(SparkScopePropertyExecutorMetricsDir) =>
-                logger.info(s"Setting executor metrics dir to ${SparkScopePropertyExecutorMetricsDir}")
+                logger.info(s"Setting executor metrics dir to ${SparkScopePropertyExecutorMetricsDir}", this.getClass)
                 sparkConf.getOption(SparkScopePropertyExecutorMetricsDir)
             case sparkConf if sparkConf.contains(SparkPropertyMetricsConfExecutorDir) =>
-                logger.info(s"Setting executor metrics dir to ${SparkPropertyMetricsConfExecutorDir}")
+                logger.info(s"Setting executor metrics dir to ${SparkPropertyMetricsConfExecutorDir}", this.getClass)
                 sparkConf.getOption(SparkPropertyMetricsConfExecutorDir)
             case sparkConf if sparkConf.contains(SparkPropertyMetricsConfAllDir) =>
-                logger.info(s"Setting executor metrics dir to ${SparkPropertyMetricsConfAllDir}")
+                logger.info(s"Setting executor metrics dir to ${SparkPropertyMetricsConfAllDir}", this.getClass)
                 sparkConf.getOption(SparkPropertyMetricsConfAllDir)
             case _ =>
                 try {
-                    logger.info(s"Extracting executor metrics dir from ${SparkPropertyMetricsConf} file")
+                    logger.info(s"Extracting executor metrics dir from ${SparkPropertyMetricsConf} file", this.getClass)
                     val props = propertiesLoaderFactory.getPropertiesLoader(sparkConf.get(SparkPropertyMetricsConf)).load()
                     Option(props.getProperty(MetricsPropExecutorDir, props.getProperty(MetricsPropAllDir)))
                 } catch {
                     case ex: Exception =>
-                        logger.error(s"Loading metrics.properties from ${SparkPropertyMetricsConf} failed. " + ex, ex)
+                        logger.error(s"Loading metrics.properties from ${SparkPropertyMetricsConf} failed. " + ex, ex, this.getClass)
                         None
                 }
         }
@@ -73,6 +78,7 @@ class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
             driverMetricsDir = driverMetricsDir.get,
             executorMetricsDir = executorMetricsDir.get,
             htmlReportPath = sparkConf.get(SparkScopePropertyHtmlPath, "/tmp/"),
+            logPath = sparkConf.get(SparkScopePropertyLogPath, "/tmp/"),
             appName = sparkConf.getOption(SparkPropertyMetricsConfAppName),
             region = sparkConf.getOption(SparkPropertyMetricsConfS3Region),
             driverMemOverhead = driverMemOverhead,
@@ -93,7 +99,7 @@ class SparkScopeConfLoader(implicit logger: SparkScopeLogger) {
             sparkConf.getOption(memoryOverheadFactorPropName).map(_.toFloat).getOrElse(0.1f)
         } catch {
             case ex: Exception =>
-                logger.warn(s"Could not parse ${memoryOverheadFactorPropName}. " + ex)
+                logger.warn(s"Could not parse ${memoryOverheadFactorPropName}. " + ex, this.getClass)
                 0.1f
         }
         val minimumOverheadInMb: MemorySize = MemorySize.fromMegaBytes(384)
@@ -127,6 +133,8 @@ object SparkScopeConfLoader {
     val SparkScopePropertyExecutorMetricsDir = "spark.sparkscope.metrics.dir.executor"
     val SparkScopePropertyDriverMetricsDir = "spark.sparkscope.metrics.dir.driver"
     val SparkScopePropertyHtmlPath = "spark.sparkscope.html.path"
+    val SparkScopePropertyLogPath = "spark.sparkscope.log.path"
+    val SparkScopePropertyLogLevel = "spark.sparkscope.log.level"
     val SparkScopePropertyDriverMem = "spark.driver.memory"
     val SparkScopePropertyDriverMemOverhead = "spark.driver.memoryOverhead"
     val SparkScopePropertyDriverMemOverheadFactor = "spark.driver.memoryOverheadFactor"

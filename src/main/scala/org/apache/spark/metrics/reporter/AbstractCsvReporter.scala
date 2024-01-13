@@ -57,10 +57,10 @@ abstract class AbstractCsvReporter(registry: MetricRegistry,
         val formats: String = (Seq("%s") ++ allMetrics.map(_.format)).mkString(separator)
         val formatStr: String = s"%s".formatLocal(locale, formats)
         val row: String = formatStr.formatLocal(locale, values: _*)
-        logger.debug(s"header: ${header}, values: ${values}, formats: ${formats}, formatStr: ${formatStr}, row: ${row}")
+        logger.debug(s"header: ${header}, values: ${values}, formats: ${formats}, formatStr: ${formatStr}, row: ${row}", this.getClass)
 
         val metricsTable = DataTable.fromCsvWithoutHeader(s"${appId}.${instance}", row, separator, columns)
-        logger.debug("\n" + metricsTable.toString)
+        logger.debug("\n" + metricsTable.toString, this.getClass)
 
         report(gaugeMetrics.head.appId, gaugeMetrics.head.instance, metricsTable, timestamp)
     }

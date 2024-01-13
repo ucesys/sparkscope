@@ -22,12 +22,12 @@ object StageChart {
         if(stageCols.exists(_.size != tsCol.size)) {
             throw new IllegalArgumentException(s"Stage series sizes are different: ${Seq(tsCol.size) ++ stageCols.map(_.size)}")
         } else if (stageCols.map(_.size).sum <= MaxStageChartPoints) {
-            logger.info(s"Number of total stage data points is less than maximum. Rendering all data points. ${stageCols.map(_.size).sum} < ${MaxStageChartPoints}")
+            logger.info(s"Number of total stage data points is less than maximum. Rendering all data points. ${stageCols.map(_.size).sum} < ${MaxStageChartPoints}", this.getClass)
             StageChart(tsCol.values, stageCols.map(generateChart).mkString("[", ",", "]"))
         } else {
-            logger.info(s"Decreasing total number of rendered data points for all stage charts from ${stageCols.map(_.size).sum} to ${MaxStageChartPoints}")
+            logger.info(s"Decreasing total number of rendered data points for all stage charts from ${stageCols.map(_.size).sum} to ${MaxStageChartPoints}", this.getClass)
             val desiredSingleChartPoints: Int = MaxStageChartPoints / stageCols.length
-            logger.info(s"Decreasing number of rendered data points per stage chart from ${stageCols.headOption.map(_.size).getOrElse(0)} to ${desiredSingleChartPoints}")
+            logger.info(s"Decreasing number of rendered data points per stage chart from ${stageCols.headOption.map(_.size).getOrElse(0)} to ${desiredSingleChartPoints}", this.getClass)
 
             decreaseDataPoints(tsCol, stageCols, desiredSingleChartPoints) match {
                 case (newTsCol, newStageCols) => StageChart(newTsCol.values, newStageCols.map(generateChart).mkString("[", ",", "]"))

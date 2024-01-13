@@ -17,12 +17,12 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparkscope.event.EventLogContextLoader
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.file.FileReaderFactory
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
 import com.ucesys.sparkscope.view.ReportGeneratorFactory
+import org.apache.spark.SparkConf
 
 object SparkScopeApp {
     def main(args: Array[String]): Unit = {
@@ -33,7 +33,6 @@ object SparkScopeApp {
         runFromEventLog(
             sparkScopeArgs = parsedArgs,
             sparkScopeAnalyzer = new SparkScopeAnalyzer,
-            eventLogContextLoader = new EventLogContextLoader,
             sparkScopeConfLoader = new SparkScopeConfLoader,
             fileReaderFactory = new FileReaderFactory(parsedArgs.region),
             propertiesLoaderFactory = new PropertiesLoaderFactory,
@@ -44,25 +43,23 @@ object SparkScopeApp {
 
     def runFromEventLog(sparkScopeArgs: SparkScopeArgs,
                         sparkScopeAnalyzer: SparkScopeAnalyzer,
-                        eventLogContextLoader: EventLogContextLoader,
                         sparkScopeConfLoader: SparkScopeConfLoader,
                         fileReaderFactory: FileReaderFactory,
                         propertiesLoaderFactory: PropertiesLoaderFactory,
                         metricsLoaderFactory: MetricsLoaderFactory,
                         reportGeneratorFactory: ReportGeneratorFactory)
                        (implicit logger: SparkScopeLogger): Unit = {
-        val eventLogCtx = eventLogContextLoader.load(fileReaderFactory, sparkScopeArgs)
-
         val sparkScopeRunner = new SparkScopeRunner(
-            eventLogCtx.appContext,
-            eventLogCtx.sparkConf,
             sparkScopeConfLoader,
             sparkScopeAnalyzer,
             propertiesLoaderFactory,
             metricsLoaderFactory,
-            reportGeneratorFactory,
-            Seq.empty
+            reportGeneratorFactory
         )
-        sparkScopeRunner.run()
+
+        val listener = new SparkScopeJobListener(new SparkConf, sparkScopeRunner)
+        val eventLogRunner = new EventLogRunner(listener)
+
+        eventLogRunner.run(fileReaderFactory, sparkScopeArgs)
     }
 }

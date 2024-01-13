@@ -1,7 +1,7 @@
 package com.ucesys.sparkscope.io.metrics
 
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext}
+import com.ucesys.sparkscope.common.{SparkScopeConf, AppContext}
 
 trait MetricsLoader {
-    def load(ac: SparkScopeContext, sparkScopeConf: SparkScopeConf): DriverExecutorMetrics
+    def load(ac: AppContext, sparkScopeConf: SparkScopeConf): DriverExecutorMetrics
 }
