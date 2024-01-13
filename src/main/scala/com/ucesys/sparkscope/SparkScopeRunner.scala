@@ -17,55 +17,64 @@
 */
 package com.ucesys.sparkscope
 
-import com.ucesys.sparklens.common.AppContext
-import com.ucesys.sparkscope.SparkScopeRunner.sparkScopeSign
-import com.ucesys.sparkscope.io.{DriverExecutorMetrics, HtmlReportGenerator, MetricsLoader}
-import com.ucesys.sparkscope.utils.Logger
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
+import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
+import com.ucesys.sparkscope.metrics.SparkScopeResult
+import org.apache.spark.SparkConf
 
 import java.io.FileNotFoundException
 import java.nio.file.NoSuchFileException
 
-class SparkScopeRunner(appContext: AppContext, sparkScopeConf: SparkScopeConfig, metricsLoader: MetricsLoader, sparklensResults: Seq[String]) {
+class SparkScopeRunner(appContext: SparkScopeContext,
+                       sparkConf: SparkConf,
+                       sparkScopeConfLoader: SparkScopeConfLoader,
+                       sparkScopeAnalyzer: SparkScopeAnalyzer,
+                       propertiesLoaderFactory: PropertiesLoaderFactory,
+                       metricsLoaderFactory: MetricsLoaderFactory,
+                       reportGeneratorFactory: ReportGeneratorFactory,
+                       sparklensResults: Seq[String])
+                      (implicit logger: SparkScopeLogger) {
+    def run(): Unit = {
+        logger.info(SparkScopeSign)
 
-  val log = new Logger
+        val sparkScopeStart = System.currentTimeMillis()
 
-  def run(): Unit = {
-    try {
-      val driverExecutorMetrics = metricsLoader.load()
-      analyze(sparkScopeConf, driverExecutorMetrics)
-    } catch {
-      case ex: FileNotFoundException => log.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
-      case ex: NoSuchFileException => log.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
-      case ex: IllegalArgumentException => log.error(s"SparkScope couldn't load metrics. SparkScope will now exit.", ex)
-      case ex: Exception =>  log.error(s"Unexpected exception occurred, SparkScope will now exit.", ex)
+        try {
+            val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, propertiesLoaderFactory)
+            val sparkScopeResult = this.runAnalysis(sparkScopeConf)
+
+            logger.info(s"${sparkScopeResult.stats.executorStats}\n")
+            logger.info(s"${sparkScopeResult.stats.driverStats}\n")
+            logger.info(s"${sparkScopeResult.stats.clusterMemoryStats}\n")
+            logger.info(s"${sparkScopeResult.stats.clusterCPUStats}\n")
+
+            reportGeneratorFactory.get(sparkScopeConf).generate(sparkScopeResult, sparklensResults)
+        } catch {
+            case ex: FileNotFoundException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
+            case ex: NoSuchFileException => logger.error(s"SparkScope couldn't open a file. SparkScope will now exit.", ex)
+            case ex: IllegalArgumentException => logger.error(s"SparkScope couldn't load metrics. SparkScope will now exit.", ex)
+            case ex: Exception => logger.error(s"Unexpected exception occurred, SparkScope will now exit.", ex)
+        } finally {
+            val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
+            logger.info(s"SparkScope analysis took ${durationSparkScope}s")
+        }
     }
-  }
 
-  def analyze(sparkScopeConf: SparkScopeConfig, driverExecutorMetrics: DriverExecutorMetrics): Unit = {
-    val executorMetricsAnalyzer = new SparkScopeAnalyzer
-    val sparkScopeStart = System.currentTimeMillis()
-    val sparkScopeResult = executorMetricsAnalyzer.analyze(driverExecutorMetrics, appContext)
-    val durationSparkScope = (System.currentTimeMillis() - sparkScopeStart) * 1f / 1000f
-
-    log.info(s"SparkScope analysis took ${durationSparkScope}s")
-    log.info(sparkScopeSign)
-
-    log.info(sparkScopeResult.stats.executorStats + "\n")
-    log.info(sparkScopeResult.stats.driverStats + "\n")
-    log.info(sparkScopeResult.stats.clusterMemoryStats + "\n")
-    log.info(sparkScopeResult.stats.clusterCPUStats + "\n")
-
-    HtmlReportGenerator.generateHtml(sparkScopeResult, sparkScopeConf.htmlReportPath, sparklensResults, sparkScopeConf.sparkConf)
-  }
+    def runAnalysis(sparkScopeConf: SparkScopeConf): SparkScopeResult = {
+        val metricsLoader = metricsLoaderFactory.get(sparkScopeConf)
+        val driverExecutorMetrics = metricsLoader.load(appContext, sparkScopeConf)
+        sparkScopeAnalyzer.analyze(driverExecutorMetrics, appContext)
+    }
 }
 
 object SparkScopeRunner {
-  val sparkScopeSign =
-    """
-      |     ____              __    ____
-      |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
-      |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
-      |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
-      |     /_/                             /_/    spark3-v0.1.0
-      |""".stripMargin
+    val SparkScopeSign =
+        """
+          |     ____              __    ____
+          |    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+          |   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+          |  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+          |     /_/                             /_/    spark3-v0.1.1
+          |""".stripMargin
 }

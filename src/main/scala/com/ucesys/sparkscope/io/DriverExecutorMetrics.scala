@@ -1,6 +1,6 @@
 package com.ucesys.sparkscope.io
 
-import com.ucesys.sparkscope.data.DataFrame
+import com.ucesys.sparkscope.data.DataTable
 
-case class DriverExecutorMetrics(driverMetrics: Seq[DataFrame],
-                                 executorMetricsMap: Map[String, Seq[DataFrame]])
+case class DriverExecutorMetrics(driverMetrics: Seq[DataTable],
+                                 executorMetricsMap: Map[String, Seq[DataTable]])

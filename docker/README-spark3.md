@@ -25,14 +25,14 @@ docker-compose -f docker/spark-3.4.1-docker-compose.yml up
 docker-compose -f docker/spark-3.5.0-docker-compose.yml up
 ```
 
-### Spark submit
+### Attaching SparkScope as Spark Listener via Spark submit
 ```bash
 docker exec -it spark-worker bash
 ```
 
 ```bash
 spark-submit \
---jars /tmp/jars/sparkscope-spark3-0.1.0-SNAPSHOT.jar \
+--jars /tmp/jars/sparkscope-spark3-0.1.1-SNAPSHOT.jar \
 --master spark://spark-master:7077 \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.eventLog.enabled=true \
@@ -44,4 +44,9 @@ spark-submit \
 --conf spark.cores.max=4 \
 --class org.apache.spark.examples.SparkPi \
 /tmp/jars/spark-examples_2.10-1.1.1.jar 2000
+```
+
+### Running SparkScope as standalone app
+```agsl
+java -cp /tmp/jars/sparkscope-spark3-0.1.1-SNAPSHOT.jar:./jars/* com.ucesys.sparkscope.SparkScopeApp /tmp/spark-events/app-20231025121456-0004
 ```
