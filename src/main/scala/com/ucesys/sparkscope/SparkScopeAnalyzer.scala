@@ -255,6 +255,6 @@ object SparkScopeAnalyzer {
     val CpuTime = "executor.cpuTime" // CPU time computing tasks in nanoseconds
     val CpuUsage = "cpuUsage"
 
-    val ExecutorCsvMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, CpuTime)
-    val DriverCsvMetrics = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed)
+    val ExecutorCsvMetrics: Seq[String] = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed, CpuTime)
+    val DriverCsvMetrics: Seq[String] = Seq(JvmHeapUsed, JvmHeapUsage, JvmHeapMax, JvmNonHeapUsed)
 }
