@@ -39,7 +39,6 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${appInfo.start}", ofEpochSecond(result.appContext.appStartTime / 1000, 0, UTC).toString)
           .replace("${appInfo.end}", result.appContext.appEndTime.map(endTime => ofEpochSecond(endTime/ 1000, 0, UTC).toString).getOrElse("In progress"))
           .replace("${appInfo.duration}", durationStr)
-          .replace("${logs}", logger.toString)
           .replace("${warnings}", warningsStr)
           .replace("${sparkConf}", sparkScopeConf.sparkConf.getAll.map { case (key, value) => s"${key}: ${value}" }.mkString("\n"))
           .replace("${sparklens}", sparklensResults.mkString("\n"))
@@ -50,6 +49,10 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
         val outputPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appContext.appId}.html")
         fileWriter.write(outputPath.toString, renderedStats)
         logger.info(s"Wrote HTML report file to ${outputPath}")
+
+        val logPath = Paths.get(sparkScopeConf.htmlReportPath, s"${result.appContext.appId}.log")
+        fileWriter.write(logPath.toString, logger.toString)
+        logger.info(s"Log saved to ${logPath}")
     }
 
     def renderCharts(template: String, metrics: SparkScopeMetrics): String = {
@@ -91,8 +94,6 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
             metrics.driver.addConstColumn("memoryOverhead", sparkScopeConf.driverMemOverhead.toMB.toString).select("memoryOverhead")
         )
 
-        val stageChart = StageChart(metrics.stage.stageTimeline)
-
         val executorHeapChart = ExecutorChart(
             metrics.executor.heapUsedMax.select(ColTs),
             metrics.executor.heapAllocation.select(JvmHeapMax.name).div(BytesInMB),
@@ -103,6 +104,12 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
             metrics.executor.nonHeapUsedMax.select(ColTs),
             metrics.executor.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead"),
             metrics.executor.executorMetricsMap.map { case (id, metrics) => metrics.select(JvmNonHeapUsed.name).div(BytesInMB).rename(id) }.toSeq
+        )
+
+        val tasksChart = LimitedChart(
+            metrics.clusterCpu.clusterCapacity.select(ColTs),
+            metrics.stage.numberOfTasks,
+            metrics.clusterCpu.clusterCapacity.select("totalCores")
         )
 
         template
@@ -131,8 +138,9 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
           .replace("${chart.jvm.driver.non-heap.used}", driverNonHeapUtilChart.values.mkString(","))
           .replace("${chart.driver.memoryOverhead}", driverNonHeapUtilChart.limits.mkString(","))
 
-          .replace("${chart.stages.timestamps}", stageChart.labels.mkString(","))
-          .replace("${chart.stages}", stageChart.datasets)
+          .replace("${chart.tasks.timestamps}", tasksChart.labels.mkString(","))
+          .replace("${chart.tasks}", tasksChart.values.mkString(","))
+          .replace("${chart.tasks.capacity}", tasksChart.limits.mkString(","))
 
           .replace("${chart.jvm.executor.heap.timestamps}", executorHeapChart.labels.mkString(","))
           .replace("${chart.jvm.executor.heap}", executorHeapChart.datasets)

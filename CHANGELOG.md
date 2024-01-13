@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.7] - 2023-12-06 UI Enhancements
+- Replace stage chart with number of tasks vs CPU capacity chart
+- Remove SparkScope logs from HTML report
+- SparkScope logs are now contained in separate .log file
+
 ## [0.1.6] - 2023-12-04 UI responsiveness optimization
 - Charts data points limitation:
   - All charts have maximum number of rendered datapoints
