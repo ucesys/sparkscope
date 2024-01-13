@@ -41,7 +41,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         And("with spark.metrics.conf.executor.sink.csv.director set")
         And("with spark.metrics.conf set")
         And("with region set")
-        And("with spark.sparkscope.appName set")
+        And("with spark.metrics.conf.*.sink.csv.appName set")
         val sparkConfWithMetrics = new SparkConf()
           .set(SparkScopePropertyDriverMetricsDir, "/sparkscope/path/to/driver/metrics")
           .set(SparkScopePropertyExecutorMetricsDir, "/sparkscope/path/to/executor/metrics")
@@ -50,7 +50,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
           .set("spark.metrics.conf.driver.sink.csv.directory ", "/spark/metrics/path/to/driver/metrics")
           .set("spark.metrics.conf.executor.sink.csv.directory ", "/spark/metrics/path/to/executor/metrics")
           .set("spark.metrics.conf.*.sink.csv.region", "us-east-1")
-          .set("spark.sparkscope.app.name", "my-sample-app")
+          .set("spark.metrics.conf.*.sink.csv.appName", "my-sample-app")
 
         val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
@@ -79,7 +79,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         And("with spark.metrics.conf.driver.sink.csv.director set")
         And("with spark.metrics.conf.executor.sink.csv.director set")
         And("with spark.metrics.conf set")
-        And("with spark.app.name set")
+        And("with spark.metrics.conf.*.sink.csv.appName set")
         And("with region set")
         And("without spark.sparkscope.metrics.dir.driver set")
         And("without spark.sparkscope.metrics.dir.executor set")
@@ -89,9 +89,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
           .set("spark.metrics.conf.driver.sink.csv.directory", "/spark/metrics/path/to/driver/metrics")
           .set("spark.metrics.conf.executor.sink.csv.directory", "/spark/metrics/path/to/executor/metrics")
           .set("spark.metrics.conf.*.sink.csv.region", "us-east-1")
-          .set("spark.app.name", "my-sample-app")
-
-
+          .set("spark.metrics.conf.*.sink.csv.appName", "my-sample-app")
 
         val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 

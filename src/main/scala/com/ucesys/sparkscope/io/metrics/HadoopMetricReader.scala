@@ -1,32 +1,31 @@
 package com.ucesys.sparkscope.io.metrics
 
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext}
+import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.io.file.HadoopFileReader
-import com.ucesys.sparkscope.io.MetricType
 
 import java.nio.file.Paths
 
-class HadoopMetricReader(sparkScopeConf: SparkScopeConf, fileReader: HadoopFileReader, appContext: SparkScopeContext) extends MetricReader {
-    def readDriver(metricType: MetricType): DataTable = {
-        val metricPath: String = Paths.get(
-              sparkScopeConf.driverMetricsDir,
-              s"${appContext.appId}.driver.${metricType.name}.csv"
-          ).toString.replace("\\", "/")
-        readMetric(metricType, metricPath)
+class HadoopMetricReader(sparkScopeConf: SparkScopeConf, fileReader: HadoopFileReader, appContext: SparkScopeContext)
+                        (implicit logger: SparkScopeLogger) extends MetricReader {
+    def readDriver: DataTable = {
+        readMetric("driver")
     }
 
-    def readExecutor(metricType: MetricType, executorId: String): DataTable = {
+    def readExecutor(executorId: String): DataTable = {
+        readMetric(executorId)
+    }
+
+    def readMetric(instance: String): DataTable = {
         val metricPath: String = Paths.get(
-            sparkScopeConf.executorMetricsDir,
-            s"${appContext.appId}.${executorId}.${metricType.name}.csv"
+            sparkScopeConf.driverMetricsDir,
+            sparkScopeConf.appName.getOrElse(""),
+            appContext.appId,
+            s"${instance}.csv"
         ).toString.replace("\\", "/")
-        readMetric(metricType, metricPath)
-    }
+        logger.info(s"Reading instance=${instance} metric files from ${metricPath}")
 
-    def readMetric(metricType: MetricType, path: String): DataTable = {
-        val metricStr = fileReader.read(path)
-        val csvFileStr = metricStr.replace("value", metricType.name).replace("count", metricType.name)
-        DataTable.fromCsv(metricType.name, csvFileStr, ",").distinct("t").sortBy("t")
+        val metricStr = fileReader.read(metricPath)
+        DataTable.fromCsv(instance, metricStr, ",").distinct("t").sortBy("t")
     }
 }

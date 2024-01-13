@@ -1,6 +1,7 @@
 package com.ucesys.sparkscope.metrics
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer.{CpuTime, CpuUsage}
+import com.ucesys.sparkscope.common.CpuTime
+import com.ucesys.sparkscope.common.MetricUtils.ColCpuUsage
 import com.ucesys.sparkscope.data.DataTable
 
 case class ClusterCPUMetrics(clusterCpuTime: DataTable,
@@ -24,19 +25,19 @@ case class ClusterCPUMetrics(clusterCpuTime: DataTable,
 
 object ClusterCPUMetrics {
     def apply(allExecutorsMetrics: DataTable, executorCores: Int): ClusterCPUMetrics = {
-        val clusterCpuTimeDf = allExecutorsMetrics.groupBy("t", CpuTime).sum.sortBy("t")
+        val clusterCpuTimeDf = allExecutorsMetrics.groupBy("t", CpuTime.name).sum.sortBy("t")
         val groupedTimeCol = clusterCpuTimeDf.select("t")
 
         val clusterCpuUsageCol = allExecutorsMetrics
-          .groupBy("t", CpuUsage)
+          .groupBy("t", ColCpuUsage)
           .avg
           .sortBy("t")
-          .select(CpuUsage)
+          .select(ColCpuUsage)
           .lt(1.0d)
-          .rename(CpuUsage)
+          .rename(ColCpuUsage)
         val clusterCpuUsageDf = DataTable(name = "clusterCpuUsage", columns = Seq(groupedTimeCol, clusterCpuUsageCol))
 
-        val numExecutors = allExecutorsMetrics.groupBy("t", CpuUsage).count.sortBy("t").select(Seq("t", "cnt"))
+        val numExecutors = allExecutorsMetrics.groupBy("t", ColCpuUsage).count.sortBy("t").select(Seq("t", "cnt"))
         val clusterCapacityCol = numExecutors.select("cnt").mul(executorCores)
         val clusterCapacityDf = DataTable(name = "clusterCapacity", columns = Seq(groupedTimeCol, clusterCapacityCol.rename("totalCores")))
 
@@ -53,7 +54,7 @@ object ClusterCPUMetrics {
             clusterCpuUsage = clusterCpuUsageDf,
             clusterCpuUsageSum = clusterCpuUsageSumDf,
             clusterCapacity = clusterCapacityDf,
-            cpuTimePerExecutor = allExecutorsMetrics.groupBy("executorId", CpuTime).max,
+            cpuTimePerExecutor = allExecutorsMetrics.groupBy("executorId", CpuTime.name).max,
             numExecutors = numExecutors
         )
     }

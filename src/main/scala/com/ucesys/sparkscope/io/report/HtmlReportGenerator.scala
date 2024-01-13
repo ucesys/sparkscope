@@ -1,16 +1,15 @@
 package com.ucesys.sparkscope.io.report
 
-import com.ucesys.sparkscope.SparkScopeAnalyzer.{BytesInMB, JvmHeapUsed, JvmNonHeapUsed}
+import com.ucesys.sparkscope.SparkScopeAnalyzer.BytesInMB
 import com.ucesys.sparkscope.SparkScopeRunner.SparkScopeSign
-import com.ucesys.sparkscope.common.{SparkScopeConf, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{JvmHeapUsed, JvmNonHeapUsed, SparkScopeConf, SparkScopeLogger}
 import com.ucesys.sparkscope.data.{DataColumn, DataTable}
 import com.ucesys.sparkscope.io.file.TextFileWriter
 import com.ucesys.sparkscope.io.report.SeriesColor.{Green, Orange, Purple, Red, Yellow}
 import com.ucesys.sparkscope.metrics.SparkScopeResult
 
-import java.io.{FileWriter, InputStream}
+import java.io.InputStream
 import java.nio.file.Paths
-import java.time.{Instant, LocalDateTime}
 import java.time.LocalDateTime.ofEpochSecond
 import java.time.ZoneOffset.UTC
 import scala.concurrent.duration._
@@ -35,7 +34,7 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
 
         val rendered = template
           .replace("${sparkScopeSign}", SparkScopeSign)
-          .replace("${appInfo.appName}", sparkScopeConf.appName.getOrElse("None"))
+          .replace("${appInfo.appName}", sparkScopeConf.appName.getOrElse(sparkScopeConf.sparkConf.getOption("spark.app.name").getOrElse("None")))
           .replace("${appInfo.applicationId}", result.appContext.appId)
           .replace("${appInfo.start}", ofEpochSecond(result.appContext.appStartTime / 1000, 0, UTC).toString)
           .replace("${appInfo.end}", result.appContext.appEndTime.map(endTime => ofEpochSecond(endTime/ 1000, 0, UTC).toString).getOrElse("In progress"))
@@ -82,13 +81,13 @@ class HtmlReportGenerator(sparkScopeConf: SparkScopeConf, fileWriter: TextFileWr
               "${chart.jvm.executor.heap.timestamps}",
               result.metrics.executorMemoryMetrics.heapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
-          .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmHeapUsed))
+          .replace("${chart.jvm.executor.heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmHeapUsed.name))
           .replace("${chart.jvm.executor.heap.allocation}", result.metrics.executorMemoryMetrics.heapAllocation.select("jvm.heap.max").div(BytesInMB).toDouble.mkString(","))
           .replace(
               "${chart.jvm.executor.non-heap.timestamps}",
               result.metrics.executorMemoryMetrics.nonHeapUsedMax.select("t").values.map(ts => s"'${ofEpochSecond(ts.toLong, 0, UTC)}'").mkString(",")
           )
-          .replace("${chart.jvm.executor.non-heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmNonHeapUsed))
+          .replace("${chart.jvm.executor.non-heap}", generateExecutorHeapCharts(result.metrics.executorMemoryMetrics.executorMetricsMap, JvmNonHeapUsed.name))
           .replace("${chart.executor.memoryOverhead}", result.metrics.executorMemoryMetrics.nonHeapUsedMax.addConstColumn("memoryOverhead", sparkScopeConf.executorMemOverhead.toMB.toString).select("memoryOverhead").toDouble.mkString(","))
           .replace(
               "${chart.jvm.driver.heap.timestamps}",
