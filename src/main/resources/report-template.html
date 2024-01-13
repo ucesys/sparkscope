@@ -163,6 +163,10 @@ ${sparkScopeSign}
         </thead>
         <tbody>
         <tr>
+            <td>Application Name</td>
+            <td>${appInfo.appName}</td>
+        </tr>
+        <tr>
             <td>Application Id</td>
             <td>${appInfo.applicationId}</td>
         </tr>
@@ -191,20 +195,16 @@ ${sparkScopeSign}
         </thead>
         <tbody>
         <tr>
+            <td>Total CPU utilization of application</td>
+            <td>${stats.cluster.cpu.util}%</td>
+        </tr>
+        <tr>
             <td>Total heap utilization of application</td>
             <td>${stats.cluster.heap.avg.perc}%</td>
         </tr>
         <tr>
             <td>Peak heap utilization of application</td>
             <td>${stats.cluster.heap.max.perc}%</td>
-        </tr>
-        <tr>
-            <td>Total heap waste of application</td>
-            <td>${stats.cluster.heap.waste.perc}%</td>
-        </tr>
-        <tr>
-            <td>Total CPU utilization of application</td>
-            <td>${stats.cluster.cpu.util}%</td>
         </tr>
         <tr>
             <td>Total GB-hours of wasted heap memory</td>
@@ -227,19 +227,19 @@ ${sparkScopeSign}
         </thead>
         <tbody>
         <tr>
-            <td>Avg heap usage among executors</td>
+            <td>Avg heap utilization among executors</td>
             <td>${stats.executor.heap.avg}MB(${stats.executor.heap.avg.perc}%)</td>
         </tr>
         <tr>
-            <td>Peak heap usage among executors</td>
+            <td>Peak heap utilization among executors</td>
             <td>${stats.executor.heap.max}MB(${stats.executor.heap.max.perc}%)</td>
         </tr>
         <tr>
-            <td>Avg non-heap usage among executors</td>
+            <td>Avg non-heap utilization among executors</td>
             <td>${stats.executor.non-heap.avg}MB</td>
         </tr>
         <tr>
-            <td>Peak non-heap usage among executors</td>
+            <td>Peak non-heap utilization among executors</td>
             <td>${stats.executor.non-heap.max}MB</td>
         </tr>
         <!-- and so on... -->
@@ -255,19 +255,19 @@ ${sparkScopeSign}
         </thead>
         <tbody>
         <tr>
-            <td>Avg driver heap usage</td>
+            <td>Avg driver heap utilization</td>
             <td>${stats.driver.heap.avg}MB(${stats.driver.heap.avg.perc}%)</td>
         </tr>
         <tr>
-            <td>Peak driver heap usage</td>
+            <td>Peak driver heap utilization</td>
             <td>${stats.driver.heap.max}MB(${stats.driver.heap.max.perc}%)</td>
         </tr>
         <tr>
-            <td>Avg driver non-heap usage</td>
+            <td>Avg driver non-heap utilization</td>
             <td>${stats.driver.non-heap.avg}MB</td>
         </tr>
         <tr>
-            <td>Peak driver non-heap usage</td>
+            <td>Peak driver non-heap utilization</td>
             <td>${stats.driver.non-heap.max}MB</td>
         </tr>
         <!-- and so on... -->
@@ -276,38 +276,12 @@ ${sparkScopeSign}
 </div>
 <br>
 
-<!--<div class="box" style="clear: both;">-->
-<!--<pre>-->
-<!--${summary}-->
-<!--</pre>-->
-<!--</div>-->
 <div style="clear: both;"> </div>
 <div  class="row" style="width:100%">
-    <div style="margin-left: 15px;width:45%"><canvas id="cpuUtilization"></canvas></div>
+    <div style="width:45%"><canvas id="cpuUtilization"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application CPU Utilization</b> is sum of used CPUs across all executors divided by sum of allocated CPUs of all executors </span></div>
     <div style="width:45%"><canvas id="clusterHeapUsagePerc"></canvas></div>
     <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Utilization</b> is sum of used heap across all executors divided by sum of heap sizes of all executors </span></div>
-
-</div>
-<div  class="row">
-    <div style="width:45%"><canvas id="clusterCPUUsage" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Total cores available</b> is sum of available cores across all executors </br> </br> <b>Total cores used</b> is sum of used cores across all executors</span></div>
-    <div style="width:45%"><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Size</b> is sum of heap sizes of all executors </br> </br> <b>Application Heap Usage</b> is sum of used heap across all executors</span></div>
-</div>
-
-<div  class="row" >
-    <div style="margin-left: 15px;width:45%"><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average heap usage across all executors</span></div>
-    <div style="margin-left: 15px;width:45%"><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average non-heap usage across all executors</span></div>
-</div>
-
-<div  class="row" >
-    <div style="width:45%"><canvas id="driverHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver heap usage vs heap size</span></div>
-    <div style="width:45%"><canvas id="driverNonHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
-    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver non-heap usage</span></div>
 </div>
 
 <script>
@@ -323,13 +297,15 @@ ${sparkScopeSign}
              backgroundColor: "#7bb6dd",
              fill: true,
              responsive: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
       options: {
         title: {
           display: true,
-          text: "Application CPU Utilization",
+          text: "CPU Utilization as percentage of allocated CPU across all Executors",
           fontSize: 16
         },
         scales: {
@@ -342,165 +318,6 @@ ${sparkScopeSign}
                         max: 100
                     }
                 }]
-        },
-      }
-     });
-</script>
-
-<script>
-    var ctx = document.getElementById('clusterCPUUsage').getContext('2d');
-   var myChart = new Chart(ctx, {
-       type: 'line',
-       data: {
-         labels: [${chart.cluster.cpu.usage.timestamps}],
-         datasets: [
-           {
-             data: [${chart.cluster.cpu.capacity}],
-             label: "Total Cores available",
-             borderColor: "#3e95cd",
-             backgroundColor: "#7bb6dd",
-             fill: false,
-             responsive: true,
-           },
-            {
-             data: [${chart.cluster.cpu.usage}],
-             label: "Total Cores used",
-             borderColor: "#71d1bd",
-             backgroundColor: "#71d1bd",
-             fill: true,
-             responsive: true,
-           }
-         ]
-       },
-      options: {
-        title: {
-          display: true,
-          text: "Application CPU Usage",
-          fontSize: 16
-        },
-      }
-     });
-</script>
-
-<script>
-    var ctx = document.getElementById('executorHeap').getContext('2d');
-   var myChart = new Chart(ctx, {
-       type: 'line',
-       data: {
-         labels: [${chart.jvm.executor.heap.timestamps}],
-         datasets: [{
-             data: [${chart.jvm.executor.heap.allocation}],
-             label: "heap size[MB]",
-             borderColor: "#3e95cd",
-             backgroundColor: "#7bb6dd",
-             fill: false,
-           }, {
-             data: [${chart.jvm.executor.heap.max}],
-             label: "max usage[MB]",
-             borderColor: "#3cba9f",
-             backgroundColor: "#71d1bd",
-             fill: false,
-           }, {
-             data: [${chart.jvm.executor.heap.avg}],
-             label: "avg usage[MB]",
-             borderColor: "#ffa500",
-             backgroundColor:"#ffc04d",
-             fill: false,
-           }
-         ]
-       },
-      options: {
-        title: {
-          display: true,
-          text: "Executor Heap Usage",
-          fontSize: 16
-        },
-      }
-     });
-</script>
-
-<script>
-    var ctx = document.getElementById('driverHeapUsage').getContext('2d');
-   var myChart = new Chart(ctx, {
-       type: 'line',
-       data: {
-         labels: [${chart.jvm.driver.heap.timestamps}],
-         datasets: [{
-             data: [${chart.jvm.driver.heap.size}],
-             label: "heap size[MB]",
-             borderColor: "#3e95cd",
-             backgroundColor: "#7bb6dd",
-             fill: false,
-           }, {
-             data: [${chart.jvm.driver.heap.used}],
-             label: "heap usage[MB]",
-             borderColor: "#3cba9f",
-             backgroundColor: "#71d1bd",
-             fill: true,
-           }
-         ]
-       },
-      options: {
-        title: {
-          display: true,
-          text: "Driver Heap Usage",
-          fontSize: 16
-        },
-      }
-     });
-</script>
-
-<script>
-    var ctx = document.getElementById('driverNonHeapUsage').getContext('2d');
-   var myChart = new Chart(ctx, {
-       type: 'line',
-       data: {
-         labels: [${chart.jvm.driver.non-heap.timestamps}],
-         datasets: [{
-             data: [${chart.jvm.driver.non-heap.used}],
-             label: "non-heap usage[MB]",
-             borderColor: "#3cba9f",
-             backgroundColor: "#71d1bd",
-             fill: true,
-           }
-         ]
-       },
-      options: {
-        title: {
-          display: true,
-          text: "Driver Non-Heap Usage",
-          fontSize: 16
-        },
-      }
-     });
-</script>
-
-<script>
-    var ctx = document.getElementById('executorNonHeap').getContext('2d');
-   var myChart = new Chart(ctx, {
-       type: 'line',
-       data: {
-         labels: [${chart.jvm.executor.non-heap.timestamps}],
-         datasets: [{
-             data: [${chart.jvm.executor.non-heap.max}],
-             label: "max usage[MB]",
-             borderColor: "#3cba9f",
-             backgroundColor: "#71d1bd",
-             fill: false,
-           }, {
-             data: [${chart.jvm.executor.non-heap.avg}],
-             label: "avg usage[MB]",
-             borderColor: "#ffa500",
-             backgroundColor:"#ffc04d",
-             fill: false,
-           }
-         ]
-       },
-      options: {
-        title: {
-          display: true,
-          text: "Executor Non-Heap Usage",
-          fontSize: 16
         },
       }
      });
@@ -518,13 +335,15 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
       options: {
         title: {
           display: true,
-          text: "Application Heap Utilization",
+          text: "Heap Utilization as percentage of allocated Heap across all Executors",
           fontSize: 16
         },
         scales: {
@@ -541,6 +360,54 @@ ${sparkScopeSign}
       }
      });
 </script>
+
+<div  class="row">
+    <div style="width:45%"><canvas id="clusterCPUUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Total cores available</b> is sum of available cores across all executors </br> </br> <b>Total cores used</b> is sum of used cores across all executors</span></div>
+    <div style="width:45%"><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Size</b> is sum of heap sizes of all executors </br> </br> <b>Application Heap Utilization</b> is sum of used heap across all executors</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('clusterCPUUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.cluster.cpu.usage.timestamps}],
+         datasets: [
+           {
+             data: [${chart.cluster.cpu.capacity}],
+             label: "Total Cores available",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             responsive: true,
+             lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+            {
+             data: [${chart.cluster.cpu.usage}],
+             label: "Total Cores used",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             responsive: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "CPU Allocation and Utilization aggregated across all Executors",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
 <script>
     var ctx = document.getElementById('clusterHeapUsage').getContext('2d');
    var myChart = new Chart(ctx, {
@@ -553,29 +420,256 @@ ${sparkScopeSign}
              borderColor: "#3e95cd",
              backgroundColor: "#7bb6dd",
              fill: false,
+             lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }, {
              data: [${chart.jvm.cluster.heap.used}],
-             label: "Application Heap usage[MB]",
+             label: "Application Heap Utilization[MB]",
              borderColor: "#3cba9f",
              backgroundColor: "#71d1bd",
              fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
            }
          ]
        },
       options: {
         title: {
           display: true,
-          text: "Application Heap Usage",
+          text: "Heap Allocation and Utilization aggregated across all Executors",
           fontSize: 16
         },
       }
      });
 </script>
+
+<div  class="row">
+    <div style="width:45%"><canvas id="stages" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Stages</span></div>
+    <div style="width:45%"><canvas id="numberOfExecutors" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Number of executors</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('stages').getContext('2d');
+    var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.stages.timestamps}],
+         datasets: ${chart.stages}
+       },
+        options: {
+            title: {
+                display: true,
+                text: "Number of Tasks per Stage",
+                fontSize: 16
+            },
+            scales: {
+                yAxes: [{
+                    display: true,
+                    stacked: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    }
+     );
+</script>
+
+<script>
+    var ctx = document.getElementById('numberOfExecutors').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.cluster.numExecutors.timestamps}],
+         datasets: [{
+             data: [${chart.cluster.numExecutors}],
+             label: "Number of Executors",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+             lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+        options: {
+            title: {
+                display: true,
+                text: "Number of Executors",
+                fontSize: 16
+            },
+            scales: {
+                yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+     });
+</script>
+
+<div  class="row" >
+    <div style="width:45%"><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average heap utilization across all executors</span></div>
+    <div style="width:45%"><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average non-heap utilization across all executors</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('executorHeap').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.executor.heap.timestamps}],
+         datasets: [{
+             data: [${chart.jvm.executor.heap.allocation}],
+             label: "heap size[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+           ${chart.jvm.executor.heap}
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Executor Heap Memory Utilization",
+          fontSize: 16
+        },
+        scales: {
+            yAxes: [{
+                display: true,
+                ticks: {
+                    min: 0
+                }
+            }]
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('executorNonHeap').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.executor.non-heap.timestamps}],
+         datasets: [{
+             data: [${chart.executor.memoryOverhead}],
+             label: "memory overhead[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+           ${chart.jvm.executor.non-heap}
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Executor Non-Heap Memory Utilization",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<div  class="row" >
+    <div style="width:45%"><canvas id="driverHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver heap utilization vs heap size</span></div>
+    <div style="width:45%"><canvas id="driverNonHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver non-heap utilization</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('driverHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.driver.heap.timestamps}],
+         datasets: [{
+             data: [${chart.jvm.driver.heap.size}],
+             label: "heap size[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }, {
+             data: [${chart.jvm.driver.heap.used}],
+             label: "heap utilization[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Driver Heap Utilization",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('driverNonHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: [${chart.jvm.driver.non-heap.timestamps}],
+         datasets: [
+           {
+             data: [${chart.jvm.driver.non-heap.used}],
+             label: "non-heap utilization[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+           {
+             data: [${chart.driver.memoryOverhead}],
+             label: "memory overhead[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Driver Non-Heap Utilization",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
 <br><br>
-<button type="button" class="collapsible">View Sparklens Report</button>
+<button type="button" class="collapsible">View Spark Config  </button>
 <div class="content">
 <pre>
-${sparklens}
+${sparkConf}
 </pre>
 </div>
 
@@ -590,10 +684,10 @@ ${logs}
 
 <br><br>
 
-<button type="button" class="collapsible">View Spark Config  </button>
+<button type="button" class="collapsible" hidden>View Sparklens Report</button>
 <div class="content">
 <pre>
-${sparkConf}
+${sparklens}
 </pre>
 </div>
 

@@ -2,7 +2,7 @@ package com.ucesys.sparkscope.event
 
 import com.ucesys.sparkscope.SparkScopeArgs
 import com.ucesys.sparkscope.SparkScopeConfLoader._
-import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger}
+import com.ucesys.sparkscope.common.{ExecutorContext, SparkScopeContext, SparkScopeLogger, StageContext}
 import com.ucesys.sparkscope.event.EventLogContextLoader._
 import com.ucesys.sparkscope.io.file.FileReaderFactory
 import org.apache.spark.SparkConf
@@ -24,8 +24,18 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
         val appStartEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventAppStart).map(ApplicationStartEvent(_))
         val appEndEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventAppEnd).map(ApplicationEndEvent(_))
         val envUpdateEvent = eventLogJsonSeqFiltered.find(_(ColEvent) == EventEnvUpdate).map(EnvUpdateEvent(_))
-        val execAddedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorAdded).map(ExecutorAddedEvent(_))
-        val execRemovedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorRemoved).map(ExecutorRemovedEvent(_))
+        val execAddedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorAdded).flatMap(ExecutorAddedEvent(_))
+        val execRemovedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventExecutorRemoved).flatMap(ExecutorRemovedEvent(_))
+        val stageSubmittedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventStageSubmitted).flatMap(StageSubmittedEvent(_))
+        val stageCompletedEvents = eventLogJsonSeqFiltered.filter(_(ColEvent) == EventStageCompleted).flatMap(StageCompletedEvent(_))
+
+        val stages: Seq[StageContext] = stageSubmittedEvents.flatMap { stageSubmission =>
+            val stageCompletion = stageCompletedEvents.find(_.stageId == stageSubmission.stageId)
+            stageCompletion match {
+                case Some(stageCompletion) => Some(StageContext(stageSubmission, stageCompletion))
+                case None => None
+            }
+        }
 
         val executorMap: Map[String, ExecutorContext] = execAddedEvents.map { execAddedEvent =>
             (
@@ -71,7 +81,8 @@ class EventLogContextLoader(implicit logger: SparkScopeLogger) {
             appId=appStartEvent.get.appId.get,
             appStartTime=appStartEvent.get.ts.get,
             appEndTime=appEndEvent.flatMap(_.ts),
-            executorMap
+            executorMap,
+            stages = stages
         )
 
         EventLogContext(sparkConf, appContext)
@@ -84,15 +95,20 @@ object EventLogContextLoader {
     val EventEnvUpdate = "SparkListenerEnvironmentUpdate"
     val EventExecutorAdded = "SparkListenerExecutorAdded"
     val EventExecutorRemoved = "SparkListenerExecutorRemoved"
+    val EventStageSubmitted = "SparkListenerStageSubmitted"
+    val EventStageCompleted = "SparkListenerStageCompleted"
 
-    val AllEvents = Seq(EventEnvUpdate, EventAppStart, EventAppEnd,  EventExecutorAdded, EventExecutorRemoved)
+    val AllEvents = Seq(
+        EventEnvUpdate,
+        EventAppStart,
+        EventAppEnd,
+        EventExecutorAdded,
+        EventExecutorRemoved,
+        EventStageSubmitted,
+        EventStageCompleted
+    )
 
     val ColEvent = "Event"
-    val ColAppId = "App ID"
     val ColTimeStamp = "Timestamp"
-    val ColSparkProps = "Spark Properties"
     val ColExecutorId = "Executor ID"
-    val ColExecutorInfo = "Executor Info"
-    val ColExecutorCores = "Total Cores"
-    val ColExecutorInfoCores = s"${ColExecutorInfo}.${ColExecutorCores}"
 }
