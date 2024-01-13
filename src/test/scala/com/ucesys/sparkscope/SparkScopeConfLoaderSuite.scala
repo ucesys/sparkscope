@@ -42,6 +42,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         And("with spark.metrics.conf set")
         And("with region set")
         And("with spark.metrics.conf.*.sink.csv.appName set")
+        And("with spark.sparkscope.diagnostics.enabled=false set")
         val sparkConfWithMetrics = new SparkConf()
           .set(SparkScopePropertyDriverMetricsDir, "/sparkscope/path/to/driver/metrics")
           .set(SparkScopePropertyExecutorMetricsDir, "/sparkscope/path/to/executor/metrics")
@@ -51,6 +52,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
           .set("spark.metrics.conf.executor.sink.csv.directory ", "/spark/metrics/path/to/executor/metrics")
           .set("spark.metrics.conf.*.sink.csv.region", "us-east-1")
           .set("spark.metrics.conf.*.sink.csv.appName", "my-sample-app")
+          .set("spark.sparkscope.diagnostics.enabled", "false")
 
         val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
@@ -72,6 +74,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("SparkScopeConf.region should be parsed")
         assert(sparkScopeConf.region.get == "us-east-1")
+
+        And("SparkScopeConf.sendDiagnostics should be false(disabled)")
+        assert(sparkScopeConf.diagnosticsUrl.isEmpty)
     }
 
     test("extracting driver & executor metrics path from spark.metrics.conf.[driver|executor]") {
@@ -84,6 +89,8 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         And("without spark.sparkscope.metrics.dir.driver set")
         And("without spark.sparkscope.metrics.dir.executor set")
         And("without spark.metrics.conf.*.sink.csv.director set")
+        And("without spark.sparkscope.diagnostics.enabled=false set")
+
         val sparkConfWithMetrics = new SparkConf()
           .set("spark.metrics.conf", MetricsPropertiesPath)
           .set("spark.metrics.conf.driver.sink.csv.directory", "/spark/metrics/path/to/driver/metrics")
@@ -111,12 +118,16 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("SparkScopeConf.region should be parsed")
         assert(sparkScopeConf.region.get == "us-east-1")
+
+        And("SparkScopeConf.sendDiagnostics should be true(enabled)")
+        assert(sparkScopeConf.diagnosticsUrl.get == DiagnosticsEndpoint)
     }
 
     test("extracting driver & executor metrics path from spark.metrics.conf.*") {
         Given("SparkConf")
         And("with spark.metrics.conf.*.sink.csv.director set")
         And("with spark.metrics.conf set")
+        And("with spark.sparkscope.diagnostics.enabled=true set")
         And("without spark.sparkscope.metrics.dir.driver set")
         And("without spark.sparkscope.metrics.dir.executor set")
         And("without spark.metrics.conf.driver.sink.csv.director set")
@@ -124,6 +135,7 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
         val sparkConfWithMetrics = new SparkConf()
           .set("spark.metrics.conf", MetricsPropertiesPath)
           .set("spark.metrics.conf.*.sink.csv.directory", "/spark/metrics/path/to/all/metrics")
+          .set("spark.sparkscope.diagnostics.enabled", "true")
 
         val propertiesLoaderFactoryMock = mock[PropertiesLoaderFactory]
 
@@ -145,6 +157,9 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
 
         And("SparkScopeConf.region should be empty")
         assert(sparkScopeConf.region.isEmpty)
+
+        And("SparkScopeConf.sendDiagnostics should be true(enabled)")
+        assert(sparkScopeConf.diagnosticsUrl.get == DiagnosticsEndpoint)
     }
 
     test("extracting driver & executor metrics path from metrics.properties file") {
@@ -392,19 +407,45 @@ class SparkScopeConfLoaderSuite extends FunSuite with MockFactory with GivenWhen
     }
 
     test("extract load html dir from SparkConf") {
-        Given("Incorrectly configured metrics properties path")
+        Given("SparkConf with html path set")
+        val sparkConf = new SparkConf()
+          .set("spark.metrics.conf", MetricsPropertiesPath)
+          .set("spark.sparkscope.report.html.path", "/path/to/html/report")
+
         When("loading SparkScope config")
         val sparkScopeConfLoader = new SparkScopeConfLoader
         val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, getPropertiesLoaderFactoryMock)
 
         Then("SparkScopeConf should contain executorMetricsDir")
-        assert(sparkScopeConf.htmlReportPath == "/path/to/html/report")
+        assert(sparkScopeConf.htmlReportPath.get == "/path/to/html/report")
+    }
 
-        And("SparkScopeConf.appName should be empty")
-        assert(sparkScopeConf.appName.isEmpty)
+    test("extract load json dir from SparkConf") {
+        Given("SparkConf with json path set")
+        val sparkConf = new SparkConf()
+          .set("spark.metrics.conf", MetricsPropertiesPath)
+          .set("spark.sparkscope.report.json.path", "/path/to/json/report")
 
-        And("SparkScopeConf.region should be empty")
-        assert(sparkScopeConf.region.isEmpty)
+        When("loading SparkScope config")
+        val sparkScopeConfLoader = new SparkScopeConfLoader
+        val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, getPropertiesLoaderFactoryMock)
+
+        Then("SparkScopeConf should contain executorMetricsDir")
+        assert(sparkScopeConf.jsonReportPath.get == "/path/to/json/report")
+    }
+
+    test("extract load json server from SparkConf") {
+        Given("SparkConf with json path set")
+        val sparkConf = new SparkConf()
+          .set("spark.metrics.conf", MetricsPropertiesPath)
+          .set("spark.sparkscope.report.json.server", "http://sparkscope.ai/diagnostics")
+
+        When("loading SparkScope config")
+        val sparkScopeConfLoader = new SparkScopeConfLoader
+        val sparkScopeConf = sparkScopeConfLoader.load(sparkConf, getPropertiesLoaderFactoryMock)
+
+        Then("SparkScopeConf should contain executorMetricsDir")
+        assert(sparkScopeConf.jsonReportServer.get == "http://sparkscope.ai/diagnostics")
     }
 
     test("extract driver and executor memoryOverhead from SparkConf") {

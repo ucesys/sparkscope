@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.9] - 2024-01-10 Resource allocation and Json reporter
+- Added Core-hours and Heap-hourse allocation info to report 
+- Added new JSON report format that can be used apart from HTML
+- Added sending diagnostics data
+
 ## [0.1.8] - 2024-01-02 New Warnings and Logging enhancements 
 - New warnings added:
   - Data Spill from memory to disk warning

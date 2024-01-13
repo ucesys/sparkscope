@@ -23,8 +23,11 @@ case class SparkScopeArgs(eventLog: String,
                           driverMetrics: Option[String],
                           executorMetrics: Option[String] = None,
                           htmlPath: Option[String] = None,
+                          jsonPath: Option[String] = None,
+                          jsonServer: Option[String] = None,
                           logPath: Option[String] = None,
                           logLevel: Option[String] = None,
+                          diagnostics: Option[String] = None,
                           region: Option[String] = None)
 
 object SparkScopeArgs {
@@ -32,8 +35,11 @@ object SparkScopeArgs {
     val OptionDriverMetrics = "--driver-metrics"
     val OptionExecutorMetrics = "--executor-metrics"
     val OptionHtmlPath = "--html-path"
+    val OptionJsonPath = "--json-path"
+    val OptionJsonServer = "--json-server"
     val OptionLogPath = "--log-path"
     val OptionLogLevel = "--log-level"
+    val OptionDiagnostics = "--diagnostics"
     val OptionRegion = "--region"
     def Usage: String =
         s"""
@@ -42,8 +48,11 @@ object SparkScopeArgs {
           |--driver-metrics   Path to directory with driver metrics
           |--executor-metrics Path to directory with executor metrics
           |--html-path        Path to directory where html report will be stored
+          |--json-path        Path to directory where json report will be stored
+          |--json-server      Url of Server to receive json report
           |--log-path         Path to directory where logs will be stored
-          |--log-level        Log level: [DEBUG, INFO, WARN, ERROR]
+          |--log-level        Log level: [DEBUG|INFO|WARN|ERROR]
+          |--diagnostics      Whether to send diagnostics data: [true|false]
           |--region           required if reading eventLog from s3
           |""".stripMargin
 
@@ -54,8 +63,11 @@ object SparkScopeArgs {
             case Array (OptionDriverMetrics, driverMetrics) => (OptionDriverMetrics, driverMetrics)
             case Array (OptionExecutorMetrics, executorMetrics) => (OptionExecutorMetrics, executorMetrics)
             case Array (OptionHtmlPath, htmlPath) => (OptionHtmlPath, htmlPath)
+            case Array (OptionJsonPath, jsonPath) => (OptionJsonPath, jsonPath)
+            case Array (OptionJsonServer, jsonServer) => (OptionJsonServer, jsonServer)
             case Array (OptionLogPath, logPath) => (OptionLogPath, logPath)
             case Array (OptionLogLevel, logLevel) => (OptionLogLevel, logLevel)
+            case Array (OptionDiagnostics, diagnostics) => (OptionDiagnostics, diagnostics)
             case Array (OptionRegion, region) => (OptionRegion, region)
         }.toMap
 
@@ -72,8 +84,11 @@ object SparkScopeArgs {
             driverMetrics=argsMap.get(OptionDriverMetrics),
             executorMetrics=argsMap.get(OptionExecutorMetrics),
             htmlPath=argsMap.get(OptionHtmlPath),
+            jsonPath=argsMap.get(OptionJsonPath),
+            jsonServer=argsMap.get(OptionJsonServer),
             logPath=argsMap.get(OptionLogPath),
             logLevel=argsMap.get(OptionLogLevel),
+            diagnostics=argsMap.get(OptionDiagnostics),
             region=argsMap.get(OptionRegion)
         )
     }

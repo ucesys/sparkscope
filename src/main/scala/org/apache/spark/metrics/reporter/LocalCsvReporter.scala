@@ -3,7 +3,7 @@ package org.apache.spark.metrics.reporter
 import com.codahale.metrics._
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.data.DataTable
-import com.ucesys.sparkscope.io.file.LocalFileWriter
+import com.ucesys.sparkscope.io.writer.LocalFileWriter
 
 import java.io.IOException
 import java.util.Locale

@@ -4,8 +4,9 @@ import com.ucesys.sparkscope.data.DataTable
 import com.ucesys.sparkscope.common.{AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.io.metrics.{DriverExecutorMetrics, HadoopMetricReader, MetricReader, MetricReaderFactory}
 import com.ucesys.sparkscope.io.property.{PropertiesLoader, PropertiesLoaderFactory}
+import com.ucesys.sparkscope.stats.{ClusterCPUStats, ClusterMemoryStats, DriverMemoryStats, ExecutorMemoryStats, SparkScopeStats}
 import com.ucesys.sparkscope.timeline.{ExecutorTimeline, StageTimeline}
-import com.ucesys.sparkscope.warning.MissingMetricsWarning
+import com.ucesys.sparkscope.view.warning.MissingMetricsWarning
 import org.apache.spark.SparkConf
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
@@ -15,14 +16,14 @@ import java.util.Properties
 
 object TestHelpers extends FunSuite with MockFactory {
     val TestDir = ".tests"
-    val appId = "app-20230101010819-test"
+    val SampleAppId = "app-123"
+    val SampleAppName = "myApp"
     val StartTime: Long = 1695358644000L
     val EndTime: Long = 1695358700000L
     val MetricsPropertiesPath = "path/to/metrics.properties"
     val csvMetricsPath = "/tmp/csv-metrics"
     val sparkConf = new SparkConf()
       .set("spark.metrics.conf", MetricsPropertiesPath)
-      .set("spark.sparkscope.html.path", "/path/to/html/report")
       .set("spark.app.name", "MyApp")
 
     val sparkScopeConf = new SparkScopeConfLoader()(stub[SparkScopeLogger]).load(sparkConf, getPropertiesLoaderFactoryMock)
@@ -167,13 +168,48 @@ object TestHelpers extends FunSuite with MockFactory {
         stageTimeline(40, 1695358675000L, 1695357200000L, 100)
     )
 
+    val sparkScopeStats: SparkScopeStats = SparkScopeStats(
+        driverStats = DriverMemoryStats(
+            heapSize = 910,
+            maxHeap = 315,
+            maxHeapPerc = 0.3465,
+            avgHeap = 261,
+            avgHeapPerc = 0.28736,
+            avgNonHeap = 66,
+            maxNonHeap = 69
+        ), executorStats = ExecutorMemoryStats(
+            heapSize = 800,
+            maxHeap = 352,
+            maxHeapPerc = 0.44029,
+            avgHeap = 215,
+            avgHeapPerc = 0.26972,
+            avgNonHeap = 44,
+            maxNonHeap = 48
+        ), clusterMemoryStats = ClusterMemoryStats(
+            maxHeap = 840,
+            avgHeap = 614,
+            maxHeapPerc = 0.4165,
+            avgHeapPerc = 0.26972,
+            avgHeapWastedPerc = 0.73028,
+            executorTimeSecs = 152,
+            heapGbHoursAllocated = 0.03299,
+            heapGbHoursWasted = 0.02409,
+            executorHeapSizeInGb = 0.78125
+        ), clusterCPUStats = ClusterCPUStats(
+            cpuUtil = 0.55483,
+            cpuNotUtil = 0.44517,
+            coreHoursAllocated = 0.04222,
+            coreHoursWasted = 0.0188,
+            executorTimeSecs = 152,
+            executorCores = 1
+        )
+    )
+
     def stageTimeline(stageId: Int, start: Long, end: Long, numTasks: Long, parentsStages: Seq[Int] = Seq.empty): StageTimeline = {
         new StageTimeline(stageId, Some(start), numTasks, parentsStages, Some(end))
     }
 
-    def getAppId: String = s"app-${System.currentTimeMillis()}"
-
-    def mockAppContext(appName: String): AppContext = {
+    def mockAppContext(appId: String, appName: String): AppContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
             "1" -> ExecutorTimeline("1", "1",1, 1695358645000L, Some(1695358700000L)),
             "2" -> ExecutorTimeline("2", "2",1, 1695358645000L, Some(1695358700000L)),
@@ -182,15 +218,17 @@ object TestHelpers extends FunSuite with MockFactory {
         )
 
         AppContext(
-            s"${getAppId}-${appName}",
+            appId,
+            appName,
             StartTime,
             Some(EndTime),
+            None,
             executorMap,
             Stages
         )
     }
 
-    def mockAppContextExecutorsNotRemoved(appName: String): AppContext = {
+    def mockAppContextExecutorsNotRemoved(appId: String, appName: String): AppContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
             "1" -> ExecutorTimeline("1", "1",1, 1695358645000L, None),
             "2" -> ExecutorTimeline("2", "2",1, 1695358645000L, None),
@@ -199,16 +237,18 @@ object TestHelpers extends FunSuite with MockFactory {
         )
 
         AppContext(
-            s"${getAppId}${appName}",
+            appId,
+            appName,
             StartTime,
             Some(EndTime),
+            None,
             executorMap,
             Stages
         )
     }
 
-    def mockAppContextMissingExecutorMetrics(appName: String): AppContext = {
-        mockAppContext(appName).copy(
+    def mockAppContextMissingExecutorMetrics(appId: String, appName: String): AppContext = {
+        mockAppContext(appId, appName).copy(
             executorMap = Map(
                 "1" -> ExecutorTimeline("1", "1", 1, 1695358645000L, Some(1695358700000L)),
                 "2" -> ExecutorTimeline("2", "2", 1, 1695358645000L, Some(1695358700000L)),
@@ -219,7 +259,7 @@ object TestHelpers extends FunSuite with MockFactory {
         )
     }
 
-    def mockAppContextWithDownscaling(appName: String): AppContext = {
+    def mockAppContextWithDownscaling(appId: String, appName: String): AppContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
             "1" -> ExecutorTimeline("1", "1", 1, 1695358645000L, Some(1695358700000L)),
             "2" -> ExecutorTimeline("2", "2", 1, 1695358645000L, Some(1695358700000L)),
@@ -229,15 +269,17 @@ object TestHelpers extends FunSuite with MockFactory {
         )
 
         AppContext(
-            s"${getAppId}${appName}",
+            appId,
+            appName,
             StartTime,
             Some(EndTime),
+            None,
             executorMap,
             Stages
         )
     }
 
-    def mockAppContextWithDownscalingMuticore(appName: String, appId: String = getAppId): AppContext = {
+    def mockAppContextWithDownscalingMuticore(appId: String, appName: String): AppContext = {
         val executorMap: Map[String, ExecutorTimeline] = Map(
             "1" -> ExecutorTimeline("1", "1", 2, 1695358645000L, Some(1695358700000L)),
             "2" -> ExecutorTimeline("2", "2", 2, 1695358645000L, Some(1695358700000L)),
@@ -247,9 +289,11 @@ object TestHelpers extends FunSuite with MockFactory {
         )
 
         AppContext(
-            s"${appId}${appName}",
+            s"${appId}",
+            appName,
             StartTime,
             Some(EndTime),
+            None,
             executorMap,
             Seq.empty
         )

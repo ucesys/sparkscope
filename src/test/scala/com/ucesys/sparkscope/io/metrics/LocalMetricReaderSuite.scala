@@ -20,7 +20,7 @@ package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.common.{JvmHeapMax, JvmHeapUsage, JvmHeapUsed, JvmNonHeapUsed, SparkScopeLogger}
-import com.ucesys.sparkscope.io.file.LocalFileReader
+import com.ucesys.sparkscope.io.reader.LocalFileReader
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
 
@@ -34,7 +34,7 @@ class LocalMetricReaderSuite extends FunSuite with MockFactory with GivenWhenThe
 
     test("LocalMetricReader driver metrics test") {
         Given("LocalMetricReader with LocalFileReader")
-        val appContext = mockAppContext("local-metrics-reader-driver")
+        val appContext = mockAppContext(SampleAppId, "local-metrics-reader-driver")
         val fileReaderMock = mock[LocalFileReader]
         val metricsReader = new LocalMetricReader(sparkScopeConfHdfs, fileReaderMock, appContext)
 
@@ -47,7 +47,7 @@ class LocalMetricReaderSuite extends FunSuite with MockFactory with GivenWhenThe
 
     test("LocalMetricReader executor metrics test") {
         Given("LocalMetricReader with LocalFileReader")
-        val appContext = mockAppContext("local-metrics-reader-executor")
+        val appContext = mockAppContext(SampleAppId, "local-metrics-reader-executor")
         val fileReaderMock = mock[LocalFileReader]
         val metricsReader = new LocalMetricReader(sparkScopeConfHdfs, fileReaderMock, appContext)
 
