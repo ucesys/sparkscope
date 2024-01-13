@@ -22,6 +22,9 @@ import com.ucesys.sparkscope.TestHelpers._
 import com.ucesys.sparkscope.event.EventLogContextLoader
 import com.ucesys.sparkscope.io._
 import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.io.file.FileReaderFactory
+import com.ucesys.sparkscope.io.metrics.{CsvMetricsLoader, HadoopMetricReader, MetricReaderFactory, MetricsLoaderFactory}
+import com.ucesys.sparkscope.io.report.ReportGeneratorFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 
@@ -39,13 +42,12 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         val appId = "app-20231025121456-0004-eventLog-finished"
         val eventLogPath = s"src/test/resources/${appId}"
         val ac = mockAppContextWithDownscalingMuticore("", appId)
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
-        val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
-        val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
@@ -69,13 +71,12 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         val appId = "app-20231025121456-0004-eventLog-running"
         val eventLogPath = s"src/test/resources/${appId}"
         val ac = mockAppContextWithDownscalingMuticore("", appId)
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
-        val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
-        val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
@@ -99,13 +100,12 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         val appId = "app-20231025121456-0004-eventLog-finished-exec-removed"
         val eventLogPath = s"src/test/resources/${appId}"
         val ac = mockAppContextWithDownscalingMuticore("", appId)
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
-        val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
-        val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
@@ -129,13 +129,12 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         val appId = "app-20231025121456-0004-eventLog-running-exec-removed"
         val eventLogPath = s"src/test/resources/${appId}"
         val ac = mockAppContextWithDownscalingMuticore("", appId)
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
-        val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
-        val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(
@@ -159,13 +158,12 @@ class SparkScopeAppSuite extends FunSuite with MockFactory with GivenWhenThen wi
         val appId = "app-20231025121456-0004-eventLog-running-incomplete"
         val eventLogPath = s"src/test/resources/${appId}"
         val ac = mockAppContextWithDownscalingMuticore("", appId)
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockMetricsEventLog(csvReaderMock, ac.appId)
 
-        val fileReaderFactoryMock = getFileReaderFactoryMock(csvReaderMock)
-        val metricsLoader = new CsvHadoopMetricsLoader(fileReaderFactoryMock)
+        val metricsLoader = new CsvMetricsLoader(csvReaderMock)
         val metricsLoaderFactory = stub[MetricsLoaderFactory]
-        (metricsLoaderFactory.get _).when(*).returns(metricsLoader)
+        (metricsLoaderFactory.get _).when(*, *).returns(metricsLoader)
 
         When("SparkScopeApp.runFromEventLog")
         SparkScopeApp.runFromEventLog(

@@ -21,8 +21,10 @@ import com.ucesys.sparklens.QuboleJobListener
 import com.ucesys.sparklens.analyzer.AppAnalyzer
 import com.ucesys.sparklens.common.AppContext
 import com.ucesys.sparkscope.common.SparkScopeContext
-import com.ucesys.sparkscope.io.{MetricsLoaderFactory, PropertiesLoaderFactory, ReportGeneratorFactory}
 import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
+import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
+import com.ucesys.sparkscope.io.report.ReportGeneratorFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 
@@ -73,7 +75,7 @@ class SparkScopeJobListener(sparkConf: SparkConf) extends QuboleJobListener(spar
             new SparkScopeConfLoader,
             new SparkScopeAnalyzer,
             new PropertiesLoaderFactory,
-            new MetricsLoaderFactory,
+            new MetricsLoaderFactory(new MetricReaderFactory(offline = false)),
             new ReportGeneratorFactory,
             sparklensResults
         )

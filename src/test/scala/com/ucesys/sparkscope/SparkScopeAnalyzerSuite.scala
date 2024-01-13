@@ -19,9 +19,9 @@
 package com.ucesys.sparkscope
 
 import com.ucesys.sparkscope.TestHelpers._
-import com.ucesys.sparkscope.io.HadoopFileReader
 import com.ucesys.sparkscope.metrics._
 import com.ucesys.sparkscope.common.SparkScopeLogger
+import com.ucesys.sparkscope.io.metrics.HadoopMetricReader
 import com.ucesys.sparkscope.warning.MissingMetricsWarning
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, GivenWhenThen}
@@ -151,7 +151,7 @@ class SparkScopeAnalyzerSuite extends FunSuite with MockFactory with GivenWhenTh
     test("SparkScopeAnalyzer missing metrics") {
         Given("SparkScopeAnalyzer and missing csv metrics for one executor")
         val ac = mockAppContextMissingExecutorMetrics("analyzer-missing-metrics")
-        val csvReaderMock = stub[HadoopFileReader]
+        val csvReaderMock = stub[HadoopMetricReader]
         mockcorrectMetrics(csvReaderMock, ac.appId)
         val sparkScopeAnalyzer = new SparkScopeAnalyzer
 
