@@ -22,7 +22,7 @@ import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.file.FileReaderFactory
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
-import com.ucesys.sparkscope.io.report.ReportGeneratorFactory
+import com.ucesys.sparkscope.view.ReportGeneratorFactory
 
 object SparkScopeApp {
     def main(args: Array[String]): Unit = {

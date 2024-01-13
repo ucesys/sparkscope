@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6] - 2023-12-04 UI responsiveness optimization
+- Charts data points limitation:
+  - All charts have maximum number of rendered datapoints
+  - When number of datapoints exceeds the limit, chart values are interpolated 
+- EventLog prefiltering:
+  - EventLog context loader prefilters events before parsing them to json and applying filtering
+
 ## [0.1.5] - 2023-11-29 Metrics spilling optimization
 - Metrics spill refactor
   - we are now spilling single merged csv file per instance containing all metrics instead of 5 separate files(heap used, heap used in %, heap size, non-heap used, cpuTime)

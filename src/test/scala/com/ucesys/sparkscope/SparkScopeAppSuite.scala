@@ -24,7 +24,7 @@ import com.ucesys.sparkscope.io._
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.file.FileReaderFactory
 import com.ucesys.sparkscope.io.metrics.{CsvMetricsLoader, HadoopMetricReader, MetricReaderFactory, MetricsLoaderFactory}
-import com.ucesys.sparkscope.io.report.ReportGeneratorFactory
+import com.ucesys.sparkscope.view.ReportGeneratorFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, GivenWhenThen}
 

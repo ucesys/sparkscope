@@ -24,7 +24,7 @@ import com.ucesys.sparkscope.common.SparkScopeContext
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.io.metrics.{MetricReaderFactory, MetricsLoaderFactory}
 import com.ucesys.sparkscope.io.property.PropertiesLoaderFactory
-import com.ucesys.sparkscope.io.report.ReportGeneratorFactory
+import com.ucesys.sparkscope.view.ReportGeneratorFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler._
 

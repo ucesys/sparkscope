@@ -1,4 +1,4 @@
-package com.ucesys.sparkscope.io.report
+package com.ucesys.sparkscope.view
 
 case class SeriesColor(borderColor: String, backgroundColor: String)
 

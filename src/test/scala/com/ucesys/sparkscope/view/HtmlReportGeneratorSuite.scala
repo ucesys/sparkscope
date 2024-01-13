@@ -16,7 +16,7 @@
 * limitations under the License.
 */
 
-package com.ucesys.sparkscope.io.report
+package com.ucesys.sparkscope.view
 
 import com.ucesys.sparkscope.SparkScopeAnalyzer
 import com.ucesys.sparkscope.TestHelpers._
