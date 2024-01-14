@@ -1,5 +1,3 @@
-[![Gitter](https://badges.gitter.im/qubole-sparklens/community.svg)](https://gitter.im/qubole-sparklens/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
 # Sparkscope testing
 ### Build sparkscope  
 With sbt
@@ -62,7 +60,7 @@ Sparkscope report summary should be printed out to the console:
     / __/__  ___ _____/ /__ / __/_ ___  ___  ___
    _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
   /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
-     /_/                             /_/      v0.1.0
+     /_/                             /_/      v0.1.1
 
 28/09/2023 01:20:22 INFO [SparkScope] Executor stats:
 Executor heap size: 800MB

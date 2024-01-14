@@ -1,5 +1,5 @@
 name := "sparkscope"
-organization := "com.qubole"
+organization := "com.ucesys"
 
 scalaVersion := "2.11.8"
 
