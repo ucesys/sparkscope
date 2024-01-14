@@ -277,7 +277,7 @@ object TestHelpers extends FunSuite with MockFactory {
       |1695358685,8767561125
       |1695358690,11460149659
       |1695358695,15116281483
-      |1695358697,16963354541""".stripMargin
+      |1695358697,18263354541""".stripMargin
 
   // ---------- EXEC 3 ----------
   val jvmHeapExec5Csv: String =
@@ -309,7 +309,7 @@ object TestHelpers extends FunSuite with MockFactory {
     """t,count
       |1695358691,1877412152
       |1695358696,5451002249
-      |1695358697,6129593128""".stripMargin
+      |1695358697,6629593128""".stripMargin
 
   val jvmHeapExec7Csv: String =
     """t,value
@@ -349,7 +349,7 @@ object TestHelpers extends FunSuite with MockFactory {
       |1695358696,5451002249
       |1695358701,8129593128
       |1695358706,11129593128
-      |1695358711,14963300828""".stripMargin
+      |1695358711,16963300828""".stripMargin
 
   val driverMetrics = Seq(
     DataFrame.fromCsv("driver-heap-used", jvmHeapDriverCsv, ",", Seq("t", JvmHeapUsed)),
@@ -359,28 +359,28 @@ object TestHelpers extends FunSuite with MockFactory {
   )
 
   val executorMetricsMap = Map(
-    1 -> Seq(
+    "1" -> Seq(
       DataFrame.fromCsv("exec1-heap-used", jvmHeapExec1Csv, ",", Seq("t", JvmHeapUsed)),
       DataFrame.fromCsv("exec1-heap-max", jvmHeapMaxExec1Csv, ",", Seq("t", JvmHeapMax)),
       DataFrame.fromCsv("exec1-heap-usage", jvmHeapUsageExec1Csv, ",", Seq("t", JvmHeapUsage)),
       DataFrame.fromCsv("exec1-non-heap", jvmNonHeapExec1Csv, ",", Seq("t", JvmNonHeapUsed)),
       DataFrame.fromCsv("exec1-cpu-time", cpuTime1Csv, ",", Seq("t", CpuTime))
     ),
-    2 -> Seq(
+    "2" -> Seq(
       DataFrame.fromCsv("exec2-heap-used", jvmHeapExec2Csv, ",", Seq("t", JvmHeapUsed)),
       DataFrame.fromCsv("exec2-heap-max", jvmHeapMaxExec2Csv, ",", Seq("t", JvmHeapMax)),
       DataFrame.fromCsv("exec2-heap-usage", jvmHeapUsageExec2Csv, ",", Seq("t", JvmHeapUsage)),
       DataFrame.fromCsv("exec2-non-heap", jvmNonHeapExec2Csv, ",", Seq("t", JvmNonHeapUsed)),
       DataFrame.fromCsv("exec2-cpu-time", cpuTime2Csv, ",", Seq("t", CpuTime))
     ),
-    3 -> Seq(
+    "3" -> Seq(
       DataFrame.fromCsv("exec3-heap-used", jvmHeapExec3Csv, ",", Seq("t", JvmHeapUsed)),
       DataFrame.fromCsv("exec3-heap-max", jvmHeapMaxExec3Csv, ",", Seq("t", JvmHeapMax)),
       DataFrame.fromCsv("exec3-heap-usage", jvmHeapUsageExec3Csv, ",", Seq("t", JvmHeapUsage)),
       DataFrame.fromCsv("exec3-non-heap", jvmNonHeapExec3Csv, ",", Seq("t", JvmNonHeapUsed)),
       DataFrame.fromCsv("exec3-cpu-time", cpuTime3Csv, ",", Seq("t", CpuTime))
     ),
-    5 -> Seq(
+    "5" -> Seq(
       DataFrame.fromCsv("exec5-heap-used", jvmHeapExec5Csv, ",", Seq("t", JvmHeapUsed)),
       DataFrame.fromCsv("exec5-heap-max", jvmHeapMaxExec5Csv, ",", Seq("t", JvmHeapMax)),
       DataFrame.fromCsv("exec5-heap-usage", jvmHeapUsageExec5Csv, ",", Seq("t", JvmHeapUsage)),
@@ -394,7 +394,7 @@ object TestHelpers extends FunSuite with MockFactory {
     executorMetricsMap = executorMetricsMap
   )
 
-  val missingMetricsWarning = MissingMetricsWarning(Seq(1,2,3,4,5), Seq(1,2,3,5))
+  val missingMetricsWarning = MissingMetricsWarning(Seq("1","2","3","4","5"), Seq("1","2","3","5"))
   def mockAppContext(): AppContext = {
     val executorMap: mutable.HashMap[String, ExecutorTimeSpan] = mutable.HashMap(
       "1" -> ExecutorTimeSpan("1", "0", 1, 1695358645000L, 1695358700000L),

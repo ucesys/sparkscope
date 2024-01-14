@@ -7,9 +7,9 @@ name: Scala SBT CI
 
 on:
   push:
-    branches: [ "master", "main", "develop" ]
+    branches: [ "master", "main", "spark3" ]
   pull_request:
-    branches: [ "master", "main", "develop" ]
+    branches: [ "master", "main", "spark3" ]
 
 permissions:
   contents: read

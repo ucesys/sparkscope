@@ -11,17 +11,32 @@ case class ClusterCPUMetrics(clusterCpuTime: DataFrame,
 object ClusterCPUMetrics {
     def apply(allExecutorsMetrics: DataFrame, executorCores: Int): ClusterCPUMetrics = {
         val clusterCpuTimeDf = allExecutorsMetrics.groupBy("t", CpuTime).sum.sortBy("t")
-        val clusterCpuUsage = allExecutorsMetrics.groupBy("t", CpuUsage).avg.sortBy("t")
-        val clusterCpuUsageSum = allExecutorsMetrics.groupBy("t", "cpuUsageAllCores").sum.sortBy("t")
+        val groupedTimeCol = clusterCpuTimeDf.select("t")
+
+        val clusterCpuUsageCol = allExecutorsMetrics
+            .groupBy("t", CpuUsage)
+            .avg
+            .sortBy("t")
+            .select(CpuUsage)
+            .lt(1.0d)
+            .rename(CpuUsage)
+        val clusterCpuUsageDf=DataFrame(name = "clusterCpuUsage", columns = Seq(groupedTimeCol, clusterCpuUsageCol))
+
         val clusterCapacityCol = allExecutorsMetrics.groupBy("t", CpuUsage).count.sortBy("t").select("cnt").mul(executorCores)
-        val clusterCapacityDf = DataFrame(
-            name = "clusterCapacity",
-            columns = Seq(allExecutorsMetrics.select("t"), clusterCapacityCol.rename("totalCores"))
-        )
+        val clusterCapacityDf = DataFrame( name = "clusterCapacity", columns = Seq(groupedTimeCol, clusterCapacityCol.rename("totalCores")))
+
+        val clusterCpuUsageSumCol = allExecutorsMetrics.groupBy("t", "cpuUsageAllCores")
+            .sum
+            .sortBy("t")
+            .select("cpuUsageAllCores")
+            .min(clusterCapacityCol)
+            .rename("cpuUsageAllCores")
+        val clusterCpuUsageSumDf = DataFrame(name = "cpuUsageAllCores", columns = Seq(groupedTimeCol, clusterCpuUsageSumCol))
+
         ClusterCPUMetrics(
             clusterCpuTime=clusterCpuTimeDf,
-            clusterCpuUsage=clusterCpuUsage,
-            clusterCpuUsageSum=clusterCpuUsageSum,
+            clusterCpuUsage=clusterCpuUsageDf,
+            clusterCpuUsageSum=clusterCpuUsageSumDf,
             clusterCapacity=clusterCapacityDf
         )
     }
