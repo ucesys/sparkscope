@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ucesys</groupId>
   <artifactId>sparkscope-spark2</artifactId>
-  <version>0.1.2-SNAPSHOT</version>
+  <version>0.1.3-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <description>Spark profiling and diagnostic tool</description>
 <!--  <licenses>-->
@@ -29,6 +29,13 @@
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-parser-combinators_2.11</artifactId>
+      <version>1.0.7</version>
+    </dependency>
+
 
     <dependency>
       <groupId>org.apache.spark</groupId>

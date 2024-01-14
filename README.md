@@ -18,7 +18,7 @@ SparkScope html report contains the following features:
 
 ## Compatibiltiy matrix
 
-|                           | spark 2 (sparkscope/main) | spark 3 (sparkscope/spark3) |
+|                           | spark 2 (sparkscope/spark2) | spark 3 (sparkscope/main) |
 |---------------------------|---------------------------|-----------------------------|
 | scala version             | 2.11.12                   | 2.12.18                     |
 | compatible JDK versions   | 7, 8                      | 8, 11, 17                   |
@@ -100,6 +100,17 @@ spark-submit \
 --conf spark.sparkscope.html.path=./ \
 --class org.apache.spark.examples.SparkPi \
 ./spark-examples_2.10-1.1.1.jar 5000
+```
+
+### Running SparkScope as standalone app
+```agsl
+java \
+-cp /tmp/jars/sparkscope-spark3-0.1.1-SNAPSHOT.jar:$(hadoop classpath) \
+com.ucesys.sparkscope.SparkScopeApp \
+--event-log /path/to/event/log \
+--driver-metrics /path/to/driver/metrics \
+--executor-metrics /path/to/executor/metrics \
+--html-path /path/to/html/report/directory
 ```
 
 ## SparkScope summary:

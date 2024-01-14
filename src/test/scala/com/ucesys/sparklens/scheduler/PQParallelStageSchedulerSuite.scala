@@ -19,7 +19,6 @@ package com.ucesys.sparklens.scheduler
 
 import com.ucesys.sparklens.common.{AggregateMetrics, AppContext, ApplicationInfo}
 import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
-import com.ucesys.sparklens.timespan.{ExecutorTimeSpan, HostTimeSpan, JobTimeSpan, StageTimeSpan}
 import org.scalatest.FunSuite
 
 import scala.collection.mutable
@@ -107,12 +106,12 @@ class PQParallelStageSchedulerSuite extends FunSuite {
     }
 
     /**
-      *  final stage -- dependent on all the other stages which can run in parallel
-      */
+     * final stage -- dependent on all the other stages which can run in parallel
+     */
     def makeNIndependentStages(n: Int): List[(Int, Int, Long, Long, Seq[Int])] = {
         val listBuffer = ListBuffer.empty[(Int, Int, Long, Long, Seq[Int])]
         val parentList = ListBuffer.empty[Int]
-        for (i <- 0 to n-1) {
+        for (i <- 0 to n - 1) {
             val each = (i, 1, i.toLong, (i + 1).toLong, Nil)
             listBuffer.append(each)
             parentList.append(i)
@@ -125,7 +124,7 @@ class PQParallelStageSchedulerSuite extends FunSuite {
     test("ParallelTaskSchedulerTest: 1+10 stages in parallel. 1 Core") {
         //each stage runs one after the other, just 1 core
         val jobTimeSpan = createJobTimeSpan(0, makeNIndependentStages(10))
-        info (s" $jobTimeSpan")
+        info(s" $jobTimeSpan")
         val time = CompletionEstimator.estimateJobWallClockTime(jobTimeSpan, 1, 1)
         info(s"Estimated time $time")
         assert(time === 11, s"Test failed")
