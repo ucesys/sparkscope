@@ -3,7 +3,7 @@ package org.apache.spark.metrics.reporter
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.codahale.metrics._
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.io.file.{HadoopFileWriter, LocalFileWriter, S3FileWriter}
+import com.ucesys.sparkscope.io.writer.{HadoopFileWriter, LocalFileWriter, S3FileWriter}
 import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.metrics.reporter.CsvReporterBuilder.{DEFAULT_SEPARATOR, SPARK_SCOPE_METRICS_FILTER}
 

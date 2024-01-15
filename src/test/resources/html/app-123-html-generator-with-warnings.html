@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SparkScope report: <APP-ID> </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <style>
+        canvas{
+            border:10px solid white;
+        }
+        .row{
+            display: flex;
+            width: 100%
+        }
+        /* Style the button that is used to open and close the collapsible content */
+        .collapsible {
+          background-color: #999;
+          color: black;
+          cursor: pointer;
+          padding: 0px;
+          width: 14%;
+          border: solid 1px;
+          text-align: left;
+          outline: none;
+          font-size: 22px;
+<!--          font-family: georgia,garamond,serif;-->
+          border-radius: 20px;
+          font-weight: bold;
+          text-align: center;
+        }
+
+        /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+        .active, .collapsible:hover {
+          text-decoration: underline;
+        }
+
+        /* Style the collapsible content. Note: hidden by default */
+        .content {
+          padding: 0 18px;
+          display: none;
+          overflow: hidden;
+          background-color: #f1f1f1;
+        }
+
+    .styled-table {
+        border-collapse: collapse;
+        margin-left: 0.5%;
+        margin-right: 0.5%;
+        float: left;
+        width: 19%;
+        font-size: 0.7em;
+        font-family: sans-serif;
+        min-width: 200px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        border-right: 2px solid #444;
+        border-left: 2px solid #444;
+    }
+     .styled-table thead tr {
+        background-color: #444;
+        color: #ffffff;
+        text-align: left;
+    }
+    .styled-table th, .styled-table td {
+        padding: 12px 10px;
+    }
+    .styled-table tbody tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    .styled-table tbody tr:nth-of-type(even) {
+        background-color: #f3f3f3;
+    }
+
+    .styled-table tbody tr:last-of-type {
+        border-bottom: 2px solid #444;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Create a two-column layout */
+    .column {
+      float: left;
+      width: 50%;
+      padding: 5px;
+    }
+
+    /* Clearfix (clear floats) */
+    .row::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+
+    /* Tooltip container */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+<!--      border-bottom: 1px dotted black; /* If you want dots under the hoverable text */-->
+    }
+
+    /* Tooltip text */
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      padding: 5px 0;
+      border-radius: 6px;
+
+      /* Position the tooltip text */
+      position: absolute;
+      z-index: 1;
+      bottom: 100%;
+      left: 50%;
+      margin-left: -180px;
+
+      /* Fade in tooltip */
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    /* Tooltip arrow */
+    .tooltip .tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 90%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #555 transparent transparent transparent;
+    }
+
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    </style>
+</head>
+<body>
+<div class="box">
+    <pre>
+    
+     ____              __    ____
+    / __/__  ___ _____/ /__ / __/_ ___  ___  ___
+   _\ \/ _ \/ _ `/ __/  '_/_\ \/_ / _ \/ _ \/__/
+  /___/ .__/\_,_/_/ /_/\_\/___/\__\_,_/ .__/\___/
+     /_/                             /_/    spark3-v0.1.9
+
+    </pre>
+</div>
+
+<br>
+<div>
+    <pre style="color:red">WARNINGS FOUND:
+- CPU utlization is LOW(55.48%)
+- Heap utlization is LOW(26.97%)
+- Data spills from memory to disk occured. Total size spilled to disk: 500MB(in-memory size: 5120MB)
+- 30.00% of total task duration was spent in garbage collection. GC time: 10min 0s. Total task time: 33min 20s.</pre>
+</div>
+<br>
+<div>
+    <table class="styled-table" style="float: left;margin-left:0.5%">
+        <thead>
+        <tr>
+            <th>Application Info</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Application Name</td>
+            <td>MyApp</td>
+        </tr>
+        <tr>
+            <td>Application Id</td>
+            <td>app-123-html-generator-with-warnings</td>
+        </tr>
+        <tr>
+            <td>Application Start</td>
+            <td>2023-09-22T04:57:24</td>
+        </tr>
+        <tr>
+            <td>Application End</td>
+            <td>2023-09-22T04:58:20</td>
+        </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <table class="styled-table" style="float: left">
+        <thead>
+        <tr>
+            <th>Application Stats</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Application Duration</td>
+                <td>56s</td>
+            </tr>
+            <tr>
+                <td>Application total CPU utilization</td>
+                <td>55.48%</td>
+            </tr>
+            <tr>
+                <td>Application total heap utilization</td>
+                <td>26.97%</td>
+            </tr>
+            <tr>
+                <td>Application peak heap utilization</td>
+                <td>41.65%</td>
+            </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <table class="styled-table" style="float: left">
+        <thead>
+        <tr>
+            <th>Resource Stats</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Total core-hours of allocated CPU time</td>
+                <td>0.0422 Core-hours</td>
+            </tr>
+            <tr>
+                <td>Total core-hours of wasted CPU time</td>
+                <td>0.0188 Core-hours</td>
+            </tr>
+            <tr>
+                <td>Total GB-hours of allocated heap memory</td>
+                <td>0.0330 GB-hours</td>
+            </tr>
+            <tr>
+                <td>Total GB-hours of wasted heap memory</td>
+                <td>0.0241 GB-hours</td>
+            </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <table class="styled-table" style="float: left;">
+        <thead>
+        <tr>
+            <th>Executor Stats</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Avg heap utilization among executors</td>
+            <td>215MB(26.97%)</td>
+        </tr>
+        <tr>
+            <td>Peak heap utilization among executors</td>
+            <td>352MB(44.03%)</td>
+        </tr>
+        <tr>
+            <td>Avg non-heap utilization among executors</td>
+            <td>44MB</td>
+        </tr>
+        <tr>
+            <td>Peak non-heap utilization among executors</td>
+            <td>48MB</td>
+        </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+
+    <table class="styled-table" style="float: left;">
+        <thead>
+        <tr>
+            <th>Driver Stats</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Avg driver heap utilization</td>
+            <td>261MB(28.74%)</td>
+        </tr>
+        <tr>
+            <td>Peak driver heap utilization</td>
+            <td>315MB(34.65%)</td>
+        </tr>
+        <tr>
+            <td>Avg driver non-heap utilization</td>
+            <td>66MB</td>
+        </tr>
+        <tr>
+            <td>Peak driver non-heap utilization</td>
+            <td>69MB</td>
+        </tr>
+        <!-- and so on... -->
+        </tbody>
+    </table>
+</div>
+
+<div style="clear: both;"> </div>
+
+<br><br>
+
+<div  class="row" style="width:100%">
+    <div style="width:45%"><canvas id="cpuUtilization"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application CPU Utilization</b> is sum of used CPUs across all executors divided by sum of allocated CPUs of all executors </span></div>
+    <div style="width:45%"><canvas id="clusterHeapUsagePerc"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Utilization</b> is sum of used heap across all executors divided by sum of heap sizes of all executors </span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('cpuUtilization').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:29','2023-09-22T04:57:30','2023-09-22T04:57:32','2023-09-22T04:57:34','2023-09-22T04:57:36','2023-09-22T04:57:38','2023-09-22T04:57:39','2023-09-22T04:57:41','2023-09-22T04:57:44','2023-09-22T04:57:45','2023-09-22T04:57:49','2023-09-22T04:57:50','2023-09-22T04:57:51','2023-09-22T04:57:52','2023-09-22T04:57:53','2023-09-22T04:57:54','2023-09-22T04:57:55','2023-09-22T04:57:56','2023-09-22T04:57:57','2023-09-22T04:57:59','2023-09-22T04:58','2023-09-22T04:58:01','2023-09-22T04:58:04','2023-09-22T04:58:05','2023-09-22T04:58:07','2023-09-22T04:58:09','2023-09-22T04:58:10','2023-09-22T04:58:11','2023-09-22T04:58:14','2023-09-22T04:58:15','2023-09-22T04:58:16','2023-09-22T04:58:17'],
+         datasets: [{
+             data: [0.0,10.91,35.260000000000005,35.260000000000005,35.260000000000005,54.54,54.54,54.54,59.17,59.17,64.05999999999999,64.05999999999999,57.95,38.64,56.02,56.02,56.02,65.58,71.07,71.07,71.07,67.49000000000001,66.29,66.29,60.370000000000005,42.49,54.22,61.339999999999996,66.16,72.28999999999999,73.76,94.82000000000001,100.0],
+             label: "CPU Utilization[%]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+             responsive: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "CPU Utilization as percentage of allocated CPU across all Executors",
+          fontSize: 16
+        },
+        scales: {
+            yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true,
+                        steps: 10,
+                        stepValue: 5,
+                        max: 100
+                    }
+                }]
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('clusterHeapUsagePerc').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:29','2023-09-22T04:57:30','2023-09-22T04:57:32','2023-09-22T04:57:34','2023-09-22T04:57:36','2023-09-22T04:57:38','2023-09-22T04:57:39','2023-09-22T04:57:41','2023-09-22T04:57:44','2023-09-22T04:57:45','2023-09-22T04:57:49','2023-09-22T04:57:50','2023-09-22T04:57:51','2023-09-22T04:57:52','2023-09-22T04:57:53','2023-09-22T04:57:54','2023-09-22T04:57:55','2023-09-22T04:57:56','2023-09-22T04:57:57','2023-09-22T04:57:59','2023-09-22T04:58','2023-09-22T04:58:01','2023-09-22T04:58:04','2023-09-22T04:58:05','2023-09-22T04:58:07','2023-09-22T04:58:09','2023-09-22T04:58:10','2023-09-22T04:58:11','2023-09-22T04:58:14','2023-09-22T04:58:15','2023-09-22T04:58:16','2023-09-22T04:58:17'],
+         datasets: [{
+             data: [0.0,25.790000000000003,25.779999999999998,25.759999999999998,25.740000000000002,29.29,32.83,34.61,37.43,41.65,39.11,28.95,30.12,20.86,24.67,28.48,32.300000000000004,34.06,32.46,30.85,27.63,28.07,28.110000000000003,28.22,27.48,20.31,22.99,22.91,23.56,21.93,24.5,25.45,26.279999999999998],
+             label: "Heap Utilization[%]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Heap Utilization as percentage of allocated Heap across all Executors",
+          fontSize: 16
+        },
+        scales: {
+            yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true,
+                        steps: 10,
+                        stepValue: 5,
+                        max: 100
+                    }
+                }]
+        },
+      }
+     });
+</script>
+
+<div  class="row">
+    <div style="width:45%"><canvas id="clusterCPUUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Total cores available</b> is sum of available cores across all executors </br> </br> <b>Total cores used</b> is sum of used cores across all executors</span></div>
+    <div style="width:45%"><canvas id="clusterHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext"><b>Application Heap Size</b> is sum of heap sizes of all executors </br> </br> <b>Application Heap Utilization</b> is sum of used heap across all executors</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('clusterCPUUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:29','2023-09-22T04:57:30','2023-09-22T04:57:32','2023-09-22T04:57:34','2023-09-22T04:57:36','2023-09-22T04:57:38','2023-09-22T04:57:39','2023-09-22T04:57:41','2023-09-22T04:57:44','2023-09-22T04:57:45','2023-09-22T04:57:49','2023-09-22T04:57:50','2023-09-22T04:57:51','2023-09-22T04:57:52','2023-09-22T04:57:53','2023-09-22T04:57:54','2023-09-22T04:57:55','2023-09-22T04:57:56','2023-09-22T04:57:57','2023-09-22T04:57:59','2023-09-22T04:58','2023-09-22T04:58:01','2023-09-22T04:58:04','2023-09-22T04:58:05','2023-09-22T04:58:07','2023-09-22T04:58:09','2023-09-22T04:58:10','2023-09-22T04:58:11','2023-09-22T04:58:14','2023-09-22T04:58:15','2023-09-22T04:58:16','2023-09-22T04:58:17'],
+         datasets: [
+           {
+             data: [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0],
+             label: "Total Cores available",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             responsive: true,
+             lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+            {
+             data: [0.0,0.2182,0.7051,0.7051,0.7051,1.0909,1.0909,1.0909,1.1834,1.1834,1.2811,1.2811,1.1591,1.1591,1.6805,1.6805,1.6805,1.9674,2.1322,2.1322,2.1322,2.0247,1.9887,1.9887,1.8112,1.6995,2.1689,2.4537,2.6464,2.8918,2.9505,3.7928,4.0],
+             label: "Total Cores used",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             responsive: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "CPU Allocation and Utilization aggregated across all Executors",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('clusterHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:29','2023-09-22T04:57:30','2023-09-22T04:57:32','2023-09-22T04:57:34','2023-09-22T04:57:36','2023-09-22T04:57:38','2023-09-22T04:57:39','2023-09-22T04:57:41','2023-09-22T04:57:44','2023-09-22T04:57:45','2023-09-22T04:57:49','2023-09-22T04:57:50','2023-09-22T04:57:51','2023-09-22T04:57:52','2023-09-22T04:57:53','2023-09-22T04:57:54','2023-09-22T04:57:55','2023-09-22T04:57:56','2023-09-22T04:57:57','2023-09-22T04:57:59','2023-09-22T04:58','2023-09-22T04:58:01','2023-09-22T04:58:04','2023-09-22T04:58:05','2023-09-22T04:58:07','2023-09-22T04:58:09','2023-09-22T04:58:10','2023-09-22T04:58:11','2023-09-22T04:58:14','2023-09-22T04:58:15','2023-09-22T04:58:16','2023-09-22T04:58:17'],
+         datasets: [{
+             data: [1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,1600.0,2400.0,2400.0,2400.0,2400.0,2400.0,2400.0,2400.0,2400.0,2400.0,2400.0,2400.0,2400.0,3200.0,3200.0,3200.0,3200.0,3200.0,3200.0,3200.0,3200.0],
+             label: "Application Heap Size[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }, {
+             data: [0.0,413.3106918334961,413.0156188964844,412.42547302246095,411.8353271484375,468.5878173828125,525.3403076171875,553.716552734375,598.8141876220703,666.4606399536133,625.8073944091797,463.1944122314453,481.88915252685547,500.5838928222656,592.100212097168,683.6165313720703,775.1328506469727,817.5157943725586,778.9275848388672,740.3393753051757,663.162956237793,673.6669067382812,674.6458084106446,677.5825134277344,659.9465087890625,650.2742462158203,735.7372718811035,733.2603313446045,753.9053298950196,701.766130065918,783.9907282511712,814.3935597737312,840.8690872192383],
+             label: "Application Heap Utilization[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Heap Allocation and Utilization aggregated across all Executors",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<div  class="row">
+    <div style="width:45%"><canvas id="stages" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Stages</span></div>
+    <div style="width:45%"><canvas id="numberOfExecutors" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Number of executors</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('stages').getContext('2d');
+    var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:29','2023-09-22T04:57:30','2023-09-22T04:57:32','2023-09-22T04:57:34','2023-09-22T04:57:36','2023-09-22T04:57:38','2023-09-22T04:57:39','2023-09-22T04:57:41','2023-09-22T04:57:44','2023-09-22T04:57:45','2023-09-22T04:57:49','2023-09-22T04:57:50','2023-09-22T04:57:51','2023-09-22T04:57:52','2023-09-22T04:57:53','2023-09-22T04:57:54','2023-09-22T04:57:55','2023-09-22T04:57:56','2023-09-22T04:57:57','2023-09-22T04:57:59','2023-09-22T04:58','2023-09-22T04:58:01','2023-09-22T04:58:04','2023-09-22T04:58:05','2023-09-22T04:58:07','2023-09-22T04:58:09','2023-09-22T04:58:10','2023-09-22T04:58:11','2023-09-22T04:58:14','2023-09-22T04:58:15','2023-09-22T04:58:16','2023-09-22T04:58:17'],
+          datasets: [
+           {
+             data: [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0],
+             label: "Total Cores available",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             responsive: true,
+             lineTension: 0.0,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+            {
+             data: [2200,2200,2200,2200,3800,3800,3150,3650,3650,3600,3600,4200,4700,4700,5200,4000,6200,4900,4900,4300,4300,4300,4300,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500],
+             label: "Number of tasks",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             responsive: true,
+             lineTension: 0.0,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+        options: {
+            title: {
+                display: true,
+                text: "Number of Tasks vs CPU Capacity",
+                fontSize: 16
+            },
+            scales: {
+                yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    }
+     );
+</script>
+
+<script>
+    var ctx = document.getElementById('numberOfExecutors').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:29','2023-09-22T04:57:30','2023-09-22T04:57:32','2023-09-22T04:57:34','2023-09-22T04:57:36','2023-09-22T04:57:38','2023-09-22T04:57:39','2023-09-22T04:57:41','2023-09-22T04:57:44','2023-09-22T04:57:45','2023-09-22T04:57:49','2023-09-22T04:57:50','2023-09-22T04:57:51','2023-09-22T04:57:52','2023-09-22T04:57:53','2023-09-22T04:57:54','2023-09-22T04:57:55','2023-09-22T04:57:56','2023-09-22T04:57:57','2023-09-22T04:57:59','2023-09-22T04:58','2023-09-22T04:58:01','2023-09-22T04:58:04','2023-09-22T04:58:05','2023-09-22T04:58:07','2023-09-22T04:58:09','2023-09-22T04:58:10','2023-09-22T04:58:11','2023-09-22T04:58:14','2023-09-22T04:58:15','2023-09-22T04:58:16','2023-09-22T04:58:17'],
+         datasets: [{
+             data: [2.0000,2.0000,2.0000,2.0000,2.0000,2.0000,2.0000,2.0000,2.0000,2.0000,2.0000,2.0000,2.0000,3.0000,3.0000,3.0000,3.0000,3.0000,3.0000,3.0000,3.0000,3.0000,3.0000,3.0000,3.0000,4.0000,4.0000,4.0000,4.0000,4.0000,4.0000,4.0000,4.0000],
+             label: "Number of Executors",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: true,
+             lineTension: 0.2,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+        options: {
+            title: {
+                display: true,
+                text: "Number of Executors",
+                fontSize: 16
+            },
+            scales: {
+                yAxes: [{
+                    display: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+     });
+</script>
+
+<div  class="row" >
+    <div style="width:45%"><canvas id="executorHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average heap utilization across all executors</span></div>
+    <div style="width:45%"><canvas id="executorNonHeap" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Maximum and Average non-heap utilization across all executors</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('executorHeap').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:29','2023-09-22T04:57:30','2023-09-22T04:57:32','2023-09-22T04:57:34','2023-09-22T04:57:36','2023-09-22T04:57:38','2023-09-22T04:57:39','2023-09-22T04:57:41','2023-09-22T04:57:44','2023-09-22T04:57:45','2023-09-22T04:57:49','2023-09-22T04:57:50','2023-09-22T04:57:51','2023-09-22T04:57:52','2023-09-22T04:57:53','2023-09-22T04:57:54','2023-09-22T04:57:55','2023-09-22T04:57:56','2023-09-22T04:57:57','2023-09-22T04:57:59','2023-09-22T04:58','2023-09-22T04:58:01','2023-09-22T04:58:04','2023-09-22T04:58:05','2023-09-22T04:58:07','2023-09-22T04:58:09','2023-09-22T04:58:10','2023-09-22T04:58:11','2023-09-22T04:58:14','2023-09-22T04:58:15','2023-09-22T04:58:16','2023-09-22T04:58:17'],
+         datasets: [{
+             data: [800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0,800.0],
+             label: "heap size[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+           {
+             data: [0.0,226.59970092773438,199.52139739990236,145.3647903442383,91.20818328857422,174.53341522216797,257.85864715576173,299.5212631225586,320.60542449951174,352.2316665649414,333.0154296875,256.1504821777344,270.883317565918,285.61615295410155,300.34898834228517,315.0818237304687,329.81465911865234,286.14597473144534,242.47729034423827,198.80860595703126,111.47123718261719,153.31754302978516,195.16384887695312,320.70276641845703,324.360173034668,331.6749862670898,338.9897994995117,292.83811340332034,246.6864273071289,108.23136901855469,129.6775868733724,151.1238047281901,172.5700225830078],
+             borderColor: "#CD5C5C",
+             backgroundColor: "#F08080",
+             pointRadius: 1,
+             pointHoverRadius: 8,
+             label: "executorId=1",
+             fill: false,
+},{
+             data: [0.0,186.71099090576172,213.49422149658204,267.06068267822263,320.6271438598633,294.05440216064454,267.4816604614258,254.1952896118164,278.2087631225586,314.2289733886719,292.7919647216797,207.04393005371094,211.0058349609375,214.96773986816407,218.9296447753906,222.89154968261718,226.85345458984375,240.08350372314453,253.3135528564453,266.5436019897461,293.00370025634766,269.8109191894531,246.6181381225586,177.039794921875,173.42100677490234,166.18343048095704,158.94585418701172,159.92770538330078,160.90955657958983,163.85511016845703,196.84338887532553,229.831667582194,262.8199462890625],
+             borderColor: "#f1bd3e",
+             backgroundColor: "#f4cd6e",
+             pointRadius: 1,
+             pointHoverRadius: 8,
+             label: "executorId=2",
+             fill: false,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,0.0,72.82157897949219,145.64315795898438,218.46473693847656,291.28631591796875,283.1367416381836,274.98716735839844,258.6880187988281,250.53844451904297,232.86382141113282,179.83995208740234,162.1653289794922,152.41582946777345,142.66632995605468,137.7915802001953,156.03876953125,210.78033752441405,229.02752685546875,195.45294952392578,161.8783721923828],
+             borderColor: "#4B0082",
+             backgroundColor: "#9370DB",
+             pointRadius: 1,
+             pointHoverRadius: 8,
+             label: "executorId=3",
+             fill: false,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.0,95.13528823852539,142.7029323577881,190.27057647705078,218.8993133544922,228.44222564697264,237.98513793945312,243.60074615478516],
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             pointRadius: 1,
+             pointHoverRadius: 8,
+             label: "executorId=5",
+             fill: false,
+}
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Executor Heap Memory Utilization",
+          fontSize: 16
+        },
+        legend: {
+            display: false
+        },
+        scales: {
+            yAxes: [{
+                display: true,
+                ticks: {
+                    min: 0
+                }
+            }]
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('executorNonHeap').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:29','2023-09-22T04:57:30','2023-09-22T04:57:32','2023-09-22T04:57:34','2023-09-22T04:57:36','2023-09-22T04:57:38','2023-09-22T04:57:39','2023-09-22T04:57:41','2023-09-22T04:57:44','2023-09-22T04:57:45','2023-09-22T04:57:49','2023-09-22T04:57:50','2023-09-22T04:57:51','2023-09-22T04:57:52','2023-09-22T04:57:53','2023-09-22T04:57:54','2023-09-22T04:57:55','2023-09-22T04:57:56','2023-09-22T04:57:57','2023-09-22T04:57:59','2023-09-22T04:58','2023-09-22T04:58:01','2023-09-22T04:58:04','2023-09-22T04:58:05','2023-09-22T04:58:07','2023-09-22T04:58:09','2023-09-22T04:58:10','2023-09-22T04:58:11','2023-09-22T04:58:14','2023-09-22T04:58:15','2023-09-22T04:58:16','2023-09-22T04:58:17'],
+         datasets: [{
+             data: [384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384,384],
+             label: "memory overhead[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+           {
+             data: [0.0,40.38502502441406,41.15022583007813,42.68062744140625,44.211029052734375,45.32401123046875,46.43699340820312,46.99348449707031,47.37208251953125,47.939979553222656,47.935235595703126,47.916259765625,47.93459777832031,47.952935791015626,47.971273803710936,47.98961181640625,48.00794982910156,48.061546325683594,48.115142822265625,48.168739318847656,48.27593231201172,48.21742248535156,48.158912658691406,47.98338317871094,48.08503112792969,48.288327026367185,48.49162292480469,48.52938995361328,48.56715698242188,48.680458068847656,48.7043711344401,48.728284200032554,48.752197265625],
+             borderColor: "#CD5C5C",
+             backgroundColor: "#F08080",
+             pointRadius: 1,
+             pointHoverRadius: 8,
+             label: "executorId=1",
+             fill: false,
+},{
+             data: [0.0,40.82862854003906,41.57044372558594,43.054074096679685,44.53770446777344,45.71981506347656,46.90192565917969,47.49298095703125,47.716558837890624,48.05192565917969,48.168637084960935,48.63548278808594,48.662287902832034,48.689093017578124,48.71589813232422,48.74270324707031,48.769508361816406,48.812582397460936,48.855656433105466,48.89873046875,48.98487854003906,48.86977996826172,48.75468139648437,48.409385681152344,48.4248779296875,48.45586242675781,48.486846923828125,48.51157073974609,48.536294555664064,48.61046600341797,48.504638671875,48.39881134033203,48.29298400878906],
+             borderColor: "#f1bd3e",
+             backgroundColor: "#f4cd6e",
+             pointRadius: 1,
+             pointHoverRadius: 8,
+             label: "executorId=2",
+             fill: false,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,0.0,11.321693420410156,22.643386840820312,33.96508026123047,45.286773681640625,45.81124725341797,46.33572082519531,47.38466796875,47.909141540527344,47.76172790527344,47.31948699951172,47.17207336425781,47.6197021484375,48.06733093261719,48.29114532470703,48.36121826171875,48.57143707275391,48.641510009765625,48.71493148803711,48.788352966308594],
+             borderColor: "#4B0082",
+             backgroundColor: "#9370DB",
+             pointRadius: 1,
+             pointHoverRadius: 8,
+             label: "executorId=3",
+             fill: false,
+},{
+             data: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.0,22.505123138427734,33.7576847076416,45.01024627685547,46.742103576660156,47.31938934326172,47.89667510986328,47.33372497558594],
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             pointRadius: 1,
+             pointHoverRadius: 8,
+             label: "executorId=5",
+             fill: false,
+}
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Executor Non-Heap Memory Utilization",
+          fontSize: 16
+        },
+        legend: {
+            display: false
+        }
+      }
+     });
+</script>
+
+<div  class="row" >
+    <div style="width:45%"><canvas id="driverHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver heap utilization vs heap size</span></div>
+    <div style="width:45%"><canvas id="driverNonHeapUsage" style="width:230%;max-width:1000px"></canvas></div>
+    <div class="tooltip" style="margin-top: 50px;">&#9432 <span class="tooltiptext">Driver non-heap utilization</span></div>
+</div>
+
+<script>
+    var ctx = document.getElementById('driverHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:30','2023-09-22T04:57:35','2023-09-22T04:57:40','2023-09-22T04:57:45','2023-09-22T04:57:50','2023-09-22T04:57:55','2023-09-22T04:58','2023-09-22T04:58:05','2023-09-22T04:58:10','2023-09-22T04:58:15','2023-09-22T04:58:17','2023-09-22T04:58:20'],
+         datasets: [{
+             data: [910.5,910.5,910.5,910.5,910.5,910.5,910.5,910.5,910.5,910.5,910.5,910.5,910.5],
+             label: "heap size[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }, {
+             data: [270.4989471435547,210.13390350341797,301.58712005615234,309.18746185302734,268.00174713134766,315.490234375,253.96258544921875,203.2244110107422,251.22847747802734,255.39205932617188,265.0810546875,208.8481216430664,288.9818344116211],
+             label: "heap utilization[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Driver Heap Utilization",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<script>
+    var ctx = document.getElementById('driverNonHeapUsage').getContext('2d');
+   var myChart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['2023-09-22T04:57:25','2023-09-22T04:57:30','2023-09-22T04:57:35','2023-09-22T04:57:40','2023-09-22T04:57:45','2023-09-22T04:57:50','2023-09-22T04:57:55','2023-09-22T04:58','2023-09-22T04:58:05','2023-09-22T04:58:10','2023-09-22T04:58:15','2023-09-22T04:58:17','2023-09-22T04:58:20'],
+         datasets: [
+           {
+             data: [54.20774841308594,58.25224304199219,63.88947296142578,66.7002944946289,67.80040740966797,68.91081237792969,69.22964477539062,69.56818389892578,68.97677612304688,69.52845001220703,68.5986099243164,67.29322814941406,67.69309997558594],
+             label: "non-heap utilization[MB]",
+             borderColor: "#3cba9f",
+             backgroundColor: "#71d1bd",
+             fill: true,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           },
+           {
+             data: [384,384,384,384,384,384,384,384,384,384,384,384,384],
+             label: "memory overhead[MB]",
+             borderColor: "#3e95cd",
+             backgroundColor: "#7bb6dd",
+             fill: false,
+             pointRadius: 1,
+             pointHoverRadius: 8,
+           }
+         ]
+       },
+      options: {
+        title: {
+          display: true,
+          text: "Driver Non-Heap Utilization",
+          fontSize: 16
+        },
+      }
+     });
+</script>
+
+<br><br>
+<button type="button" class="collapsible">View Spark Config  </button>
+<div class="content">
+<pre>
+spark.app.name: MyApp
+spark.metrics.conf: path/to/metrics.properties
+</pre>
+</div>
+
+<script>
+    var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -30,7 +30,7 @@ class MetricReaderFactorySuite extends FunSuite with MockFactory with GivenWhenT
     val metricsReaderFactory = new MetricReaderFactory(false)
     val metricsReaderFactoryOffline = new MetricReaderFactory(true)
 
-    val appContext = mockAppContext("MetricReaderFactorySuite")
+    val appContext = mockAppContext(SampleAppId, "MetricReaderFactorySuite")
 
 
     test("HDFS MetricReaderFactory test") {

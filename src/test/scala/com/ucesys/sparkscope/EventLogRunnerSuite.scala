@@ -21,7 +21,7 @@ package com.ucesys.sparkscope
 import com.ucesys.sparkscope.SparkScopeConfLoader._
 import com.ucesys.sparkscope.TestHelpers.stageTimeline
 import com.ucesys.sparkscope.common.SparkScopeLogger
-import com.ucesys.sparkscope.io.file.FileReaderFactory
+import com.ucesys.sparkscope.io.reader.FileReaderFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler.{SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerEnvironmentUpdate, SparkListenerExecutorAdded, SparkListenerExecutorRemoved, SparkListenerJobEnd, SparkListenerJobStart, SparkListenerStageCompleted, SparkListenerStageSubmitted, SparkListenerTaskEnd}
 import org.mockito.ArgumentMatchers.any
@@ -37,7 +37,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner finished") {
         Given("Path to eventLog with finished application and no removed executors")
         val appId = "app-20231025121456-0004-eventLog-finished"
-        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
         val listener = mock[SparkScopeJobListener]
         val runner = new EventLogRunner(listener)
 
@@ -60,7 +60,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner running") {
         Given("Path to eventLog with running application and no removed executors")
         val appId = "app-20231025121456-0004-eventLog-running"
-        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
         val listener = mock[SparkScopeJobListener]
         val runner = new EventLogRunner(listener)
 
@@ -83,7 +83,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner finished executors removed") {
         Given("Path to eventLog with finished application and removed executors")
         val appId = "app-20231025121456-0004-eventLog-finished-exec-removed"
-        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
         val listener = mock[SparkScopeJobListener]
         val runner = new EventLogRunner(listener)
 
@@ -106,7 +106,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner running executors removed") {
         Given("Path to eventLog with running application and removed executors")
         val appId = "app-20231025121456-0004-eventLog-running-exec-removed"
-        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
         val listener = mock[SparkScopeJobListener]
         val runner = new EventLogRunner(listener)
 
@@ -129,7 +129,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner running incomplete eventlog") {
         Given("Path to eventLog with running application and removed executors")
         val appId = "app-20231025121456-0004-eventLog-running-incomplete"
-        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
         val listener = mock[SparkScopeJobListener]
         val runner = new EventLogRunner(listener)
 
@@ -152,12 +152,16 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner task metrics test") {
         Given("Overriden driverMetrics, executorMetrics and htmlPath args")
         val appId = "app-20231025121456-0004-eventLog-finished-exec-removed"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val listener = new SparkScopeJobListener(new SparkConf)
+        val args = SparkScopeArgs(
+            eventLog = s"src/test/resources/eventlog/${appId}",
+            driverMetrics = Some("overrriden/path/to/driver/metrics"),
+            executorMetrics = Some("overrriden/path/to/executor/metrics")
+        )
+        val listener = new SparkScopeJobListener(new SparkConf, mock[SparkScopeRunner])
         val runner = new EventLogRunner(listener)
 
         When("EventLogRunner.load")
-        runner.run(new FileReaderFactory, SparkScopeArgs(eventLogPath, None, None, None))
+        runner.run(new FileReaderFactory, args)
 
         Then("task metrics should be aggregated")
         assert(listener.taskAggMetrics.jvmGCTime.count == 2)
@@ -183,12 +187,12 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
         Given("Overriden driverMetrics, executorMetrics and htmlPath args")
         val appId = "app-20231025121456-0004-eventLog-finished-exec-removed"
         val args = SparkScopeArgs(
-            eventLog = s"src/test/resources/${appId}",
+            eventLog = s"src/test/resources/eventlog/${appId}",
             driverMetrics = Some("overrriden/path/to/driver/metrics"),
             executorMetrics = Some("overrriden/path/to/executor/metrics"),
             htmlPath = Some("overrriden/path/to/html/report"),
         )
-        val listener = new SparkScopeJobListener(new SparkConf)
+        val listener = new SparkScopeJobListener(new SparkConf, mock[SparkScopeRunner])
         val runner = new EventLogRunner(listener)
 
         When("EventLogRunner.load")
@@ -206,8 +210,8 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner finished stages test") {
         Given("Path to eventLog with finished application with stage events")
         val appId = "app-20231122115433-0000-eventLog-finished-stages"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val listener = new SparkScopeJobListener(new SparkConf)
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
+        val listener = new SparkScopeJobListener(new SparkConf, mock[SparkScopeRunner])
         val runner = new EventLogRunner(listener)
 
         When("EventLogRunner.load")
@@ -230,8 +234,8 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner running stages not completed test") {
         Given("Path to eventLog with running application with incomplete stage events")
         val appId = "app-20231122115433-0000-eventLog-running-stages"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val listener = new SparkScopeJobListener(new SparkConf)
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
+        val listener = new SparkScopeJobListener(new SparkConf, mock[SparkScopeRunner])
         val runner = new EventLogRunner(listener)
 
         When("EventLogRunner.load")
@@ -256,8 +260,8 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner corrupted events test") {
         Given("Path to eventLog with corrupted executor added/removed and stage submitted/completed events")
         val appId = "app-20231122115433-0000-eventLog-corrupted-events"
-        val eventLogPath = s"src/test/resources/${appId}"
-        val listener = new SparkScopeJobListener(new SparkConf)
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
+        val listener = new SparkScopeJobListener(new SparkConf, mock[SparkScopeRunner])
         val runner = new EventLogRunner(listener)
 
         When("EventLogRunner.load")
@@ -298,7 +302,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner bad eventLog, no app start event") {
         Given("Path to bad eventLog, no app start event")
         val appId = "app-20231025121456-0004-eventLog-error-no-app-start"
-        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
         val listener = new SparkScopeJobListener(new SparkConf)
         val runner = new EventLogRunner(listener)
 
@@ -312,7 +316,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner bad eventLog, no env update event") {
         Given("Path to bad eventLog, no env update event")
         val appId = "app-20231025121456-0004-eventLog-error-no-env-update"
-        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
         val runner = new EventLogRunner(mock[SparkScopeJobListener])
 
         When("EventLogRunner.load")
@@ -325,7 +329,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner bad eventLog, bad app start event") {
         Given("Path to bad eventLog, no app start event")
         val appId = "app-20231025121456-0004-eventLog-error-bad-app-start"
-        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
         val listener = new SparkScopeJobListener(new SparkConf)
         val runner = new EventLogRunner(listener)
 
@@ -339,7 +343,7 @@ class EventLogRunnerSuite extends FunSuite with GivenWhenThen with MockitoSugar 
     test("EventLogRunner bad eventLog, bad update event") {
         Given("Path to bad eventLog, no env update event")
         val appId = "app-20231025121456-0004-eventLog-error-bad-env-update"
-        val eventLogPath = s"src/test/resources/${appId}"
+        val eventLogPath = s"src/test/resources/eventlog/${appId}"
         val runner = new EventLogRunner(mock[SparkScopeJobListener])
 
         When("EventLogRunner.load")

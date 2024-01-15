@@ -2,7 +2,7 @@ package com.ucesys.sparkscope.io.metrics
 
 import com.ucesys.sparkscope.common.{SparkScopeConf, AppContext, SparkScopeLogger}
 import com.ucesys.sparkscope.data.DataTable
-import com.ucesys.sparkscope.io.file.HadoopFileReader
+import com.ucesys.sparkscope.io.reader.HadoopFileReader
 
 import java.nio.file.Paths
 

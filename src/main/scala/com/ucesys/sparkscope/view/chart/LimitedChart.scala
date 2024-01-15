@@ -2,7 +2,7 @@ package com.ucesys.sparkscope.view.chart
 
 import com.ucesys.sparkscope.common.SparkScopeLogger
 import com.ucesys.sparkscope.data.DataColumn
-import com.ucesys.sparkscope.view.HtmlReportGenerator.MaxChartPoints
+import com.ucesys.sparkscope.io.report.HtmlFileReporter.MaxChartPoints
 
 case class LimitedChart(timestamps: Seq[String], values: Seq[String], limits: Seq[String]) extends Chart {
     def labels: Seq[String] = timestamps.map(tsToDt)

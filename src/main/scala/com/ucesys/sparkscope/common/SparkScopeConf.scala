@@ -4,7 +4,10 @@ import org.apache.spark.SparkConf
 
 case class SparkScopeConf(driverMetricsDir: String,
                           executorMetricsDir: String,
-                          htmlReportPath: String,
+                          htmlReportPath: Option[String],
+                          jsonReportPath: Option[String],
+                          jsonReportServer: Option[String],
+                          diagnosticsUrl: Option[String],
                           logPath: String,
                           appName: Option[String],
                           region: Option[String],
