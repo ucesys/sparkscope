@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+  spark-master:
+    container_name: spark-master
+    image: sparkscope-spark-3.2.4
+    env_file: spark-master.env
+    ports:
+      - '8080:8080'
+  spark-worker:
+    container_name: spark-worker
+    image: sparkscope-spark-3.2.4
+    env_file: spark-worker.env
+    ports:
+      - '18080:18080'
+      - '8090:8090'
+    volumes:
+      - ./lib/:/tmp/jars
+      - ./metrics.properties/:/tmp/metrics.properties
