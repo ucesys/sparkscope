@@ -2,9 +2,6 @@ name := "sparkscope-spark2"
 organization := "com.ucesys"
 
 scalaVersion := "2.11.12"
-
-spName := "ucesys/sparkscope-spark2"
-
 sparkVersion := "2.4.0"
 
 spAppendScalaVersion := true
@@ -15,7 +12,7 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % 
 libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "2.6.5" % "provided"
 libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.13" % "provided"
 libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.5.13" % "provided"
-libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.12.582" % "provided"
+libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.11.1034" % "provided"
 
 libraryDependencies += "org.scalamock" %% "scalamock" % "5.2.0" % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.2" % Test
