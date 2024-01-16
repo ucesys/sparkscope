@@ -2,9 +2,6 @@ name := "sparkscope-spark3"
 organization := "com.ucesys"
 
 scalaVersion := "2.12.18"
-
-spName := "ucesys/sparkscope-spark3"
-
 sparkVersion := "3.2.0"
 
 spAppendScalaVersion := true
