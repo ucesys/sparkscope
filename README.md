@@ -1,7 +1,11 @@
 # SparkScope #
 
-SparkScope is a monitoring and profiling tool for Spark Applications. 
-It is implemented as SparkListener which means that it runs inside driver and listens for spark events.
+SparkScope is a monitoring and profiling tool for Spark Applications. It allows to review resource allocation, utiization, and demand timeline as it took place during Spark application execution. SparkScope presents information using visual charts which allow to
+- find bottlenecks in application execution,
+- reconcile resource demand and supply,
+- fine tune Spark application for desired objectives.
+
+It is implemented as SparkListener which means that it runs inside driver and listens for Spark events.
 SparkScope utilizes csv metrics produced by custom SparkScopeCsvSink and supports multiple storage types.
 
 SparkScope produces reports in the following formats
@@ -21,16 +25,16 @@ SparkScope reports contains the following features:
 - Warnings:
   - Low CPU utilization warning
   - Low Memory utilization warning
-  - Data Spills from memory to disk warning 
+  - Data Spills from memory to disk warning
   - Long time spent in Garbage Collection warning
 
 ## Compatibility matrix
 
-|                           | spark 2 (sparkscope/spark2) | spark 3 (sparkscope/main) |
-|---------------------------|---------------------------|-----------------------------|
-| scala version             | 2.11.12                   | 2.12.18                     |
-| compatible JDK versions   | 7, 8                      | 8, 11, 17                   |
-| compatible Spark versions | 2.3, 2.4                  | 3.2, 3.3, 3.4, 3.5          |
+|                           | Spark 2 (spark2 branch) | Spark 3 (main branch) |
+|---------------------------|-------------------------|-----------------------|
+| Scala version             | 2.11.12                 | 2.12.18               |
+| compatible JDK versions   | 7, 8                    | 8, 11, 17             |
+| compatible Spark versions | 2.3, 2.4                | 3.2, 3.3, 3.4, 3.5    |
 
 ## Compatible storage types:
 - S3
@@ -40,7 +44,7 @@ SparkScope reports contains the following features:
 
 ## Tested environments:
 - Hadoop Yarn(Client and Cluster deploy modes)
-- Spark Standalone cluster 
+- Spark Standalone cluster
 
 
 
@@ -48,7 +52,7 @@ SparkScope reports contains the following features:
 
 | parameter                                    | type      | sample values                                   | description                                                                                                                  |
 |----------------------------------------------|-----------|-------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
-| spark.extraListeners                         | mandatory | com.ucesys.sparkscope.SparkScopeJobListener     | spark listener class                                                                                                         
+| spark.extraListeners                         | mandatory | com.ucesys.sparkscope.SparkScopeJobListener     | Spark listener class                                                                                                         
 | spark.metrics.conf.driver.source.jvm.class   | mandatory | org.apache.spark.metrics.source.JvmSource       | jvm metrics source for driver                                                                                                
 | spark.metrics.conf.executor.source.jvm.class | mandatory | org.apache.spark.metrics.source.JvmSource       | jvm metrics source for executor                                                                                              
 | spark.metrics.conf.*.sink.csv.class          | mandatory | org.apache.spark.metrics.sink.SparkScopeCsvSink | csv sink class                                                                                                               
@@ -61,17 +65,17 @@ SparkScope reports contains the following features:
 | spark.sparkscope.report.json.path            | optional  | s3://my-bucket/path/to/json/report/dir          | path to which SparkScope json report will be saved                                                                           |
 | spark.sparkscope.log.path                    | optional  | s3://my-bucket/path/to/log/dir                  | path to which SparkScope logs will be saved                                                                                  |
 | spark.sparkscope.log.level                   | optional  | DEBUG, INFO, WARN, ERROR                        | logging level for SparkScope logs                                                                                            |
-| spark.sparkscope.diagnostics.enabled         | optional  | true/false                                      | set to false in order to disable sending diagnostics. Default=true.                                                          |
+| spark.sparkscope.diagnostics.enabled         | optional  | true/false                                      | set to false to disable submitting diagnostics, default=true.                                                          |
 | spark.sparkscope.metrics.dir.driver          | optional  | s3://my-bucket/path/to/metrics                  | path to driver csv metrics relative to driver, defaults to "spark.metrics.conf.driver.sink.csv.directory" property value     |
 | spark.sparkscope.metrics.dir.executor        | optional  | s3://my-bucket/path/to/metrics                  | path to executor csv metrics relative to driver, defaults to "spark.metrics.conf.executor.sink.csv.directory" property value |
 
 
 
 ## Attaching SparkScope to Spark applications(without metrics.properties file)
-Note: 
-- Using custom sink(SparkScopeCsvSink) requires adding jar to driver & executors and extending their classpaths. 
-- --files(spark.files) option should be used 
-- --jars(spark.jars) option will only make the Sink available for the driver   
+Note:
+- Using custom sink(SparkScopeCsvSink) requires adding jar to driver & executors and extending their classpaths.
+- --files(spark.files) option should be used
+- --jars(spark.jars) option will only make the Sink available for the driver
 
 #### Storing metrics to S3
 ```bash
