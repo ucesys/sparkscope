@@ -13,21 +13,36 @@ SparkScope produces reports in the following formats
 - html
 - json
 
-SparkScope reports contains the following features:
-- Charts for driver and executors:
-  - heap & non-heap usage charts
-  - cpu utilization charts
-  - number of tasks vs CPU capacity
-  - number of executors
-- Stats for driver and executors:
-  - heap & non-heap utilization
-  - CPU utilization
-  - Resouce allocation and waste
+SparkScope HTML reports contains the following features:
+- Stats:
+  - Application Info
+  - Application Stats
+  - Resource Stats
+  - Executor Stats
+  - Driver Stats
+<img src="https://github.com/ucesys/sparkscope/blob/main/assets/stats.png" width="3800"></img>  
+
+- Charts:
+  - total % of utilized cpu/heap charts
+<img src="https://github.com/ucesys/sparkscope/blob/main/assets/chart-util1.png" width="3800"></img>
+
+  - total utilization vs allocation cpu/heap charts
+<img src="https://github.com/ucesys/sparkscope/blob/main/assets/chart-util2.png" width="3800"></img>
+
+  - number of tasks vs CPU capacity and number of executors
+<img src="https://github.com/ucesys/sparkscope/blob/main/assets/chart-tasks.png" width="3800"></img>
+
+  - heap and non-heap charts for executors
+<img src="https://github.com/ucesys/sparkscope/blob/main/assets/chart-executors.png" width="3800"></img>
+
+  - heap and non-heap charts for driver
+<img src="https://github.com/ucesys/sparkscope/blob/main/assets/chart-driver.png" width="3800"></img>  
 - Warnings:
   - Low CPU utilization warning
   - Low Memory utilization warning
   - Data Spills from memory to disk warning
   - Long time spent in Garbage Collection warning
+<img src="https://github.com/ucesys/sparkscope/blob/main/assets/warnings.png" width="3800"></img>  
 
 ## Compatibility matrix
 
