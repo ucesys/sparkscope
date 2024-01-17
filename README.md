@@ -8,6 +8,7 @@ SparkScope is a monitoring and profiling tool for Spark Applications. It allows 
 It is implemented as SparkListener which means that it runs inside driver and listens for Spark events.
 SparkScope utilizes csv metrics produced by custom SparkScopeCsvSink and supports multiple storage types.
 
+## SparkScope Report
 SparkScope produces reports in the following formats
 - html
 - json
@@ -71,8 +72,9 @@ SparkScope reports contains the following features:
 
 
 
-## Attaching SparkScope to Spark applications(without metrics.properties file)
-Note:
+## Attaching SparkScope to Spark applications
+Notes:
+- One can choose to put all spark.metrics.conf properties is a metrics.properties file
 - Using custom sink(SparkScopeCsvSink) requires adding jar to driver & executors and extending their classpaths.
 - --files(spark.files) option should be used
 - --jars(spark.jars) option will only make the Sink available for the driver
@@ -81,9 +83,9 @@ Note:
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -102,9 +104,9 @@ spark-submit \
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -122,9 +124,9 @@ spark-submit \
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -161,9 +163,9 @@ And specifying path to metrics.properties file in spark-submit command:
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar,./metrics.properties \
---driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar,./metrics.properties \
+--driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf=./metrics.properties \
 --conf spark.sparkscope.report.html.path=hdfs://<path-to-html-report-dir> \
@@ -176,9 +178,9 @@ Your application needs to have eventLog and metrics configured(but not the liste
 ```agsl
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.5-SNAPSHOT.jar \
+--files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink \
@@ -192,7 +194,7 @@ spark-submit \
 Running sparkscope as java-app
 ```agsl
 java \
--cp ./sparkscope-spark3-0.1.5-SNAPSHOT.jar:$(hadoop classpath) \
+-cp ./sparkscope-spark3-0.1.9-SNAPSHOT.jar:$(hadoop classpath) \
 com.ucesys.sparkscope.SparkScopeApp \
 --event-log <path-to-event-log> \
 --html-path <path-to-html-report-dir> \
