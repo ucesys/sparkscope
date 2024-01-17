@@ -98,9 +98,9 @@ Notes:
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--files ./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -119,9 +119,9 @@ spark-submit \
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--files ./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -139,9 +139,9 @@ spark-submit \
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--files ./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
@@ -178,9 +178,9 @@ And specifying path to metrics.properties file in spark-submit command:
 ```bash
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar,./metrics.properties \
---driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--files ./sparkscope-spark2-0.1.9-SNAPSHOT.jar,./metrics.properties \
+--driver-class-path ./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
 --conf spark.extraListeners=com.ucesys.sparkscope.SparkScopeJobListener \
 --conf spark.metrics.conf=./metrics.properties \
 --conf spark.sparkscope.report.html.path=hdfs://<path-to-html-report-dir> \
@@ -193,9 +193,9 @@ Your application needs to have eventLog and metrics configured(but not the liste
 ```agsl
 spark-submit \
 --master yarn \
---files ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---driver-class-path ./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
---conf spark.executor.extraClassPath=./sparkscope-spark3-0.1.9-SNAPSHOT.jar \
+--files ./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
+--driver-class-path ./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
+--conf spark.executor.extraClassPath=./sparkscope-spark2-0.1.9-SNAPSHOT.jar \
 --conf spark.metrics.conf.driver.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.executor.source.jvm.class=org.apache.spark.metrics.source.JvmSource \
 --conf spark.metrics.conf.*.sink.csv.class=org.apache.spark.metrics.sink.SparkScopeCsvSink \
@@ -209,7 +209,7 @@ spark-submit \
 Running sparkscope as java-app
 ```agsl
 java \
--cp ./sparkscope-spark3-0.1.9-SNAPSHOT.jar:$(hadoop classpath) \
+-cp ./sparkscope-spark2-0.1.9-SNAPSHOT.jar:$(hadoop classpath) \
 com.ucesys.sparkscope.SparkScopeApp \
 --event-log <path-to-event-log> \
 --html-path <path-to-html-report-dir> \
